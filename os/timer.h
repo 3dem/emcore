@@ -1,0 +1,32 @@
+//
+// Created by josem on 12/26/16.
+//
+
+#ifndef EM_CORE_TIMER_H
+#define EM_CORE_TIMER_H
+
+class TimerImpl;
+
+namespace em
+{
+    /** This class will encapsulate the logic to time printing.
+     * Useful for debugging.
+     */
+
+    class Timer
+    {
+    public:
+        Timer();
+        size_t now();
+        size_t tic();
+        size_t toc(const char * msg=NULL, bool inSecs=true);
+        size_t elapsed();
+
+    private:
+        TimerImpl *pimpl;
+    };
+
+}
+
+
+#endif //EM_CORE_TIMER_H
