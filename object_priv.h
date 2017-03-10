@@ -21,6 +21,8 @@ Object& Object::operator=(const T& valueIn)
     T *ptr = static_cast<T*>(valuePtr);
     // Extract the value
     *ptr = valueIn;
+
+    return *this;
 }
 
 template <class T>
