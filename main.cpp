@@ -4,10 +4,12 @@
 
 #include "type.h"
 #include "object.h"
+#include "array.h"
 #include "os/timer.h"
 
 
-int main() {
+int main()
+{
     std::cout << "Hello, World!" << std::endl;
 
     em::Timer t;
@@ -74,6 +76,20 @@ int main() {
     }
 
     t.toc(">>> Loop 2: ");
+
+    std::cout << "Creating an Array: " << std::endl;
+
+    em::ArrayDim adim(10, 10);
+    em::Array<int> A(adim);
+    A.assign(11);
+    A(3, 3) = 20;
+    A(5, 5) = 20;
+    int * ptr = A.getDataPointer<int>();
+    ptr[10] = 15;
+
+    std::cout << A.toString() << std::endl;
+
+    em::Array<float> A2(adim);
 
     return 0;
 
