@@ -6,8 +6,8 @@
 #include <sstream>
 #include <cassert>
 
-#include "type.h"
-#include "array.h"
+#include "em/base/type.h"
+#include "em/base/array.h"
 
 using namespace em;
 

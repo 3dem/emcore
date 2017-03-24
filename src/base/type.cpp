@@ -2,7 +2,7 @@
 // Created by josem on 12/2/16.
 //
 
-#include "type.h"
+#include "em/base/type.h"
 
 using namespace em;
 

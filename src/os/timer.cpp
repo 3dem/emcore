@@ -7,7 +7,7 @@
 #include <time.h>
 #include <iostream>
 
-#include "timer.h"
+#include "em/os/timer.h"
 
 using namespace em;
 

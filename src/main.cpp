@@ -2,10 +2,10 @@
 #include <complex>
 #include <cassert>
 
-#include "type.h"
-#include "object.h"
-#include "array.h"
-#include "os/timer.h"
+#include "em/base/type.h"
+#include "em/base/object.h"
+#include "em/base/array.h"
+#include "em/os/timer.h"
 
 
 int main()
@@ -83,6 +83,7 @@ int main()
     em::Array<int> A(adim);
     A.assign(11);
     A(3, 3) = 20;
+    A(4, 4) = 20;
     A(5, 5) = 20;
     int * ptr = A.getDataPointer<int>();
     ptr[10] = 15;
