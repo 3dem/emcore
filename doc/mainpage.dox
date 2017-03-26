@@ -1,0 +1,47 @@
+
+ /**
+ * @defgroup base base Module
+ * @defgroup os os Module
+ * @defgroup math math Module
+ * @defgroup image image Module
+ * @defgroup proc proc Module
+ */
+
+/** @mainpage em-core Documentation
+ *
+ * <strong>em-core</strong> is a modular C++ library for scientific image processing in Electron Microscopy.
+ * Its main purpose is to provide a well-defined API for developers to access basic image operations.
+ * By using the library, developers can focus in high-level details of new algorithms development
+ * and rely on the provided functions for low-level operations.
+ *
+ * <br/>
+ * The library is composed by the following functional modules:
+ * - @ref base "base" The <strong>base</strong> module contains elements...
+ * - @ref os  "os" Functions and classes which implementation is OS-dependent.
+ * - @ref math "math" Implementation of some mathematical operations
+ * - @ref image "image" Contains the basic functionality for dealing with images
+ * - @ref proc "proc" Implementation of basic processing operations.
+ *
+ */
+
+ * Currently two types of shapes can be drawn:
+ * - @subpage drawingRectanglePage "How to draw rectangle?"
+ *
+ * - @subpage drawingCirclePage "How to draw circle?"
+ *
+ */
+
+/** @page basePage Description of the <strong>base</strong> module.
+ *
+ * Lorem ipsum dolor sit amet
+ *
+ */
+
+/** @page drawingCirclePage How to draw circle?
+ *
+ * This page is about how to draw a circle.
+ * Following sections describe circle:
+ * - @ref base "Really my base module"
+ * - @ref groupCircleClass "Circle Class"
+ */
+

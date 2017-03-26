@@ -1,14 +1,22 @@
 cmake_minimum_required(VERSION 3.6)
 project(em_core)
 
-# Options. Turn on with 'cmake -DTEST=ON'.
-option(TEST "Build all tests." OFF) # Makes boolean 'test' available.
+# Add option to build tests, turn on with 'cmake -DBUILD_TESTS=ON'
+option(BUILD_TESTS "Build all tests." OFF)
+# Add option to build the doxygen documentation, turn on with 'cmake -DBUILD_DOCS=ON'
+option(BUILD_DOCS "Build the doxygen documentation" OFF)
+
 
 set(CMAKE_CXX_STANDARD 11)
+
+set(${CMAKE_PROJECT_NAME}_VERSION_MAJOR        0)
+set(${CMAKE_PROJECT_NAME}_VERSION_MINOR        0)
+set(${CMAKE_PROJECT_NAME}_VERSION_PATCH        0)
 
 set(PROJECT_PATH  "${CMAKE_CURRENT_SOURCE_DIR}")
 set(INCLUDE_PATH  "${PROJECT_PATH}/include")
 set(SRC_PATH      "${PROJECT_PATH}/src")
+set(DOC_PATH      "${PROJECT_PATH}/doc")
 set(TEST_SRC_PATH "${PROJECT_PATH}/test")
 
 include_directories(AFTER "${INCLUDE_PATH}")
@@ -23,7 +31,7 @@ add_library(em-core  ${SOURCE_FILES} ${HEADER_FILES})
 ################################
 # Testing
 ################################
-if (TEST)
+if (BUILD_TESTS)
     # This adds another subdirectory, which has 'project(gtest)'.
     add_subdirectory(libs/googletest/googletest)
 
@@ -49,3 +57,24 @@ if (TEST)
     add_test(main-test em-test)
 
 endif()
+
+################################
+# Documentation
+################################
+if(BUILD_DOCS)
+    find_package(Doxygen)
+
+    if(NOT DOXYGEN_FOUND)
+        message(FATAL_ERROR
+                "Doxygen is needed to build the documentation. Please make sure it is installed.")
+    endif(NOT DOXYGEN_FOUND)
+
+    #configure_file(${PROJECT_PATH}/Doxyfile.in
+    #        ${PROJECT_BINARY_DIR}/Doxyfile @ONLY IMMEDIATE)
+
+    # Add a custom target to run Doxygen whenever the project is built.
+    # If you do NOT want the documentation to be generated EVERY time you build the project
+    # then leave out the 'ALL' keyword from the command below.
+    add_custom_target(docs COMMAND ${DOXYGEN_EXECUTABLE}
+            ${DOC_PATH}/Doxyfile.in)
+endif(BUILD_DOCS)

@@ -9,7 +9,8 @@ class TimerImpl;
 
 namespace em
 {
-    /** This class will encapsulate the logic to time printing.
+    /** @ingroup os
+     * This class will encapsulate the logic for time printing.
      * Useful for debugging.
      */
 

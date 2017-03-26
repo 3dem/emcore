@@ -15,7 +15,7 @@ namespace em
 {
     class Type;
 
-    /**
+    /** @ingroup base
      * Simple class to hold the Array dimensions.
      */
     class ArrayDim

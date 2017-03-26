@@ -1,6 +1,3 @@
-//
-// Created by josem on 12/2/16.
-//
 
 #ifndef EM_CORE_TYPE_H
 #define EM_CORE_TYPE_H
@@ -14,13 +11,27 @@ namespace em
     template <class T> class TypeInfoT;
     class TypeImpl;
 
+    /**
+     *  \ingroup base
+     *  The Type class provides extended information about system types.
+     *
+     *  This class can not be instantiated and only singleton instances
+     *
+     */
     class Type
     {
     public:
+        /** Return the name of the type */
         std::string name() const;
+        /** Return the size in bytes of this type */
         std::size_t size() const;
+        /** Return True if this type is a plain old type (POD) */
         bool isPod() const;
 
+        /** Get instances of given types.
+         *
+         * @return Returns a pointer to the singleton Type instance.
+         */
         template <class T> static Type * get()
         {
             static TypeInfoT<T> ti;
