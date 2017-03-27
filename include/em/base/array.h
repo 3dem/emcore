@@ -31,6 +31,12 @@ namespace em
     }; // class ArrayDim
 
 
+    /** @ingroup base
+     * Base class of the templated Array class.
+     *
+     * This class can be used to hold pointer to different type
+     * of arrays.
+     */
     class ArrayBase
     {
     public:
@@ -58,6 +64,11 @@ namespace em
     }; // class ArrayBase
 
 
+    /** @ingroup base
+     *
+     * Templated Array class to allocated memory and operated with...
+     *
+     */
     template <class T>
     class Array: public ArrayBase
     {

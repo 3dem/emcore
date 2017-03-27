@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.6)
-project(em_core)
+project(em-core)
 
 # Add option to build tests, turn on with 'cmake -DBUILD_TESTS=ON'
 option(BUILD_TESTS "Build all tests." OFF)
@@ -11,13 +11,14 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(${CMAKE_PROJECT_NAME}_VERSION_MAJOR        0)
 set(${CMAKE_PROJECT_NAME}_VERSION_MINOR        0)
-set(${CMAKE_PROJECT_NAME}_VERSION_PATCH        0)
+set(${CMAKE_PROJECT_NAME}_VERSION_PATCH        1)
 
 set(PROJECT_PATH  "${CMAKE_CURRENT_SOURCE_DIR}")
 set(INCLUDE_PATH  "${PROJECT_PATH}/include")
 set(SRC_PATH      "${PROJECT_PATH}/src")
 set(DOC_PATH      "${PROJECT_PATH}/doc")
 set(TEST_SRC_PATH "${PROJECT_PATH}/test")
+set(BUILD_PATH      "${PROJECT_PATH}/build")
 
 include_directories(AFTER "${INCLUDE_PATH}")
 
@@ -69,12 +70,13 @@ if(BUILD_DOCS)
                 "Doxygen is needed to build the documentation. Please make sure it is installed.")
     endif(NOT DOXYGEN_FOUND)
 
+    configure_file(${DOC_PATH}/Doxyfile.in
+            ${BUILD_PATH}/Doxyfile @ONLY)
     #configure_file(${PROJECT_PATH}/Doxyfile.in
     #        ${PROJECT_BINARY_DIR}/Doxyfile @ONLY IMMEDIATE)
 
     # Add a custom target to run Doxygen whenever the project is built.
     # If you do NOT want the documentation to be generated EVERY time you build the project
     # then leave out the 'ALL' keyword from the command below.
-    add_custom_target(docs COMMAND ${DOXYGEN_EXECUTABLE}
-            ${DOC_PATH}/Doxyfile.in)
+    add_custom_target(docs COMMAND ${DOXYGEN_EXECUTABLE} ${BUILD_PATH}/Doxyfile)
 endif(BUILD_DOCS)
