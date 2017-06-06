@@ -51,7 +51,7 @@ namespace em
 
     private:
         void * valuePtr = nullptr;
-        Type * typePtr = nullptr;
+        ConstTypePtr typePtr = nullptr;
     };
 
 #include "object_priv.h"

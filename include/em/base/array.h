@@ -14,6 +14,7 @@ class ArrayImpl;
 namespace em
 {
     class Type;
+    template <class T> class ArrayView;
 
     /** @ingroup base
      * Simple class to hold the Array dimensions.
@@ -30,64 +31,68 @@ namespace em
         size_t size() const;
     }; // class ArrayDim
 
-
     /** @ingroup base
-     * Base class of the templated Array class.
-     *
-     * This class can be used to hold pointer to different type
-     * of arrays.
+     * Four dimensional array class to manage internal memory and data type.
      */
-    class ArrayBase
-    {
-    public:
-        virtual ~ArrayBase();
-
-        //FIXME: Properly set this method as abstract;
-        virtual std::string toString() const { return ""; };
-
-        // Dimensions
-        virtual void resize(const ArrayDim &adim);
-        ArrayDim getDimensions() const;
-
-        // Operators
-        template <class T>
-        ArrayBase& operator=(const T);
-        // Return a raw pointer to data but doing some type checking
-        template <class T>
-        T * getDataPointer() const;
-
-    protected:
-        // Forbid to instantiate objects from ArrayBase class
-        ArrayBase();
-        // Pointer to implementation class, PIMPL idiom
-        ArrayImpl * implPtr;
-    }; // class ArrayBase
-
-
-    /** @ingroup base
-     *
-     * Templated Array class to allocated memory and operated with...
-     *
-     */
-    template <class T>
-    class Array: public ArrayBase
+    class Array
     {
     public:
         // Ctor and Dtor
-        Array(const ArrayDim &adim);
+        Array(const ArrayDim &adim, ConstTypePtr  type= nullptr);
         virtual ~Array();
 
-        // Overridden functions from ArrayBase
-        virtual std::string toString() const override;
+        virtual std::string toString() const;
 
-        // Operators
-        //template <class T2>
+        // Dimensions
+        virtual void resize(const ArrayDim &adim, ConstTypePtr type=nullptr);
+        ArrayDim getDimensions() const;
+
+//        // Operators
+//        template <class T>
+//        Array& operator=(const T);
+//
+//        template <class T>
+//        T& operator()(const int x, const int y=0, const int z=0, const size_t n=1);
+//
+        template <class T>
+        ArrayView<T> getView();
+
+        // Assign a constant value to all the array
+        template <class T>
         void assign(const T &value);
-        T& operator()(const int x, const int y=0, const int z=0, const size_t n=1);
 
+    protected:
+        // Pointer to implementation class, PIMPL idiom
+        ArrayImpl * implPtr;
 
     }; // class Array
-}
+
+    /** @ingroup base
+     *  View of an Array that is parametrized.
+     */
+    template <class T>
+    class ArrayView
+    {
+    public:
+        ArrayView() = default;
+        ArrayView(const ArrayView &aview) = default;
+
+        std::string toString() const;
+        T& operator()(const int x, const int y=0, const int z=0, const size_t n=1);
+        void assign(const T &value);
+        T * getDataPointer();
+
+    private:
+        // Only friend class Array can create ArrayView objects
+        ArrayView(const ArrayDim &adim, void * rawMemory);
+
+        T * data = nullptr;
+        ArrayDim adim;
+
+    friend class Array;
+    }; // class ArrayView<T>
+
+} // namespace em
 
 
 #endif //EM_CORE_ARRAY_H

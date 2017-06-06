@@ -44,12 +44,12 @@ TEST(IndependentMethod, ResetsToZero) {
 
     std::cout << "T0: " << *em::Type::get<em::Object>() << std::endl;
 
-    em::Type * type1 = em::Type::get<double>();
+    em:ConstTypePtr type1 = em::Type::get<double>();
     o2 = 1.1; // o2 should be float
     assert(o2.type() == type1);
     std::cout << "T1: " << *type1 << std::endl;
 
-    em::Type * type2 = em::Type::get<float>();
+    em::ConstTypePtr  type2 = em::Type::get<float>();
     std::cout << "T2: " << *type2 << std::endl;
 
     t.toc("Nothing");
@@ -83,18 +83,22 @@ TEST(IndependentMethod, ResetsToZero) {
 
     std::cout << "Creating an Array: " << std::endl;
 
-    em::ArrayDim adim(10, 10);
-    em::Array<int> A(adim);
-    A.assign(11);
-    A(3, 3) = 20;
-    A(4, 4) = 20;
-    A(5, 5) = 20;
-    int * ptr = A.getDataPointer<int>();
+    ArrayDim adim(10, 10);
+    Array A(adim, em::TypeInt);
+    ArrayView<int> Av = A.getView<int>();
+    ArrayView<int> Av2;
+    Av = Av;
+
+    Av.assign(11);
+    Av(3, 3) = 20;
+    Av(4, 4) = 20;
+    Av(5, 5) = 20;
+    int * ptr = Av.getDataPointer();
     ptr[10] = 15;
 
-    std::cout << A.toString() << std::endl;
+    std::cout << Av.toString() << std::endl;
 
-    em::Array<float> A2(adim);
+    em::Array A2(adim, em::TypeFloat);
 
 }
 

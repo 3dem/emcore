@@ -28,7 +28,7 @@ Object& Object::operator=(const T& valueIn)
 template <class T>
 Object::operator T() const
 {
-    Type *valueTypePtr = Type::get<T>();
+    ConstTypePtr valueTypePtr = Type::get<T>();
 
     // Check the type is the same of the object
     assert(typePtr == valueTypePtr);

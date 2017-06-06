@@ -10,8 +10,8 @@
 
 #include "em/base/array.h"
 
-
 class ImageImpl;
+
 
 namespace em
 {
@@ -20,22 +20,11 @@ namespace em
     /** @ingroup image
      * Image class
      */
-    class Image
+    class Image: public Array
     {
     public:
         Image();
         virtual ~Image();
-
-        // Dimensions
-        void resize(const ArrayDim &adim, const Type *type);
-        ArrayDim getDimensions() const;
-
-        // Operators
-        template <class T>
-        Image& operator=(const T);
-        // Return a raw pointer to data but doing some type checking
-        template <class T>
-        T * getDataPointer() const;
 
     private:
         // Pointer to implementation class, PIMPL idiom

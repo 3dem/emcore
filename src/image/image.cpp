@@ -18,9 +18,6 @@ using namespace em;
 
 class ImageImpl
 {
-public:
-    ArrayBase * arrayPtr = nullptr;
-    Type * typePtr = nullptr;
 
 };
 

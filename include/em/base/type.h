@@ -10,6 +10,9 @@ namespace em
     class TypeInfo;
     template <class T> class TypeInfoT;
     class TypeImpl;
+    class Type;
+
+    using ConstTypePtr = const Type *;
 
     /**
      *  \ingroup base
@@ -32,7 +35,7 @@ namespace em
          *
          * @return Returns a pointer to the singleton Type instance.
          */
-        template <class T> static Type * get()
+        template <class T> static ConstTypePtr get()
         {
             static TypeInfoT<T> ti;
             static Type t(&ti);
@@ -48,6 +51,10 @@ namespace em
     };// class Type
 
     std::ostream& operator<< (std::ostream &ostrm, const em::Type &t);
+
+    ConstTypePtr const TypeFloat = Type::get<float>();
+    ConstTypePtr const TypeInt = Type::get<int>();
+    ConstTypePtr const TypeDouble = Type::get<double>();
 
 #include "type_priv.h"
 

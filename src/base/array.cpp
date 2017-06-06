@@ -32,12 +32,14 @@ class ArrayImpl
 public:
     ArrayDim adim;
     size_t msize = 0; // allocated memory size
-    Type * typePtr = nullptr;
+    ConstTypePtr typePtr = nullptr;
     void * dataPtr = nullptr;
 
     // Allocate enough memory to store all elements
-    void allocate()
+    void allocate(const ArrayDim &adim, ConstTypePtr type)
     {
+        this->adim = adim;
+        this->typePtr = type;
         msize = adim.size() * typePtr->size();
         dataPtr = malloc(msize);
     }
@@ -54,69 +56,102 @@ public:
 };
 
 
-// ===================== ArrayBase Implementation =======================
+// ===================== Array Implementation =======================
 
-ArrayBase::ArrayBase()
+Array::Array(const ArrayDim &adim, ConstTypePtr type)
 {
     implPtr = new ArrayImpl();
+    // Type should be not null (another option could be assume float or double by default)
+    assert(type != nullptr);
+    implPtr->allocate(adim, type);
 }
 
-ArrayBase::~ArrayBase()
+Array::~Array()
 {
     implPtr->deallocate();
     delete implPtr;
 }
 
-ArrayDim ArrayBase::getDimensions() const
+ArrayDim Array::getDimensions() const
 {
     return implPtr->adim;
 }
 
-void ArrayBase::resize(const ArrayDim &adim)
+void Array::resize(const ArrayDim &adim, ConstTypePtr type)
 {
     implPtr->deallocate();
-    implPtr->adim = adim;
-    implPtr->allocate();
+    // Use type if not none, the current type if not
+    implPtr->allocate(adim, type == nullptr ? implPtr->typePtr : type);
 }
 
-template <class T>
-T* ArrayBase::getDataPointer() const
-{
-    Type *valueTypePtr = Type::get<T>();
-
-    // Check the type is the same of the object
-    assert(implPtr->typePtr == valueTypePtr);
-
-    // Cast the void* to the specific pointer type
-    return static_cast<T*>(implPtr->dataPtr);
-}
-
-
-// ===================== Array<T> Implementation =======================
-
-template <class T>
-Array<T>::Array(const ArrayDim &adim)
-{
-    implPtr->adim = adim;
-    implPtr->typePtr = Type::get<T>();
-    implPtr->allocate();
-}
-
-template <class T>
-Array<T>::~Array()
-{
-    // implPtr->deallocate();
-}
-
-template <class T>
-std::string Array<T>::toString() const
+std::string Array::toString() const
 {
     std::stringstream ss;
 
-    T *ptr = getDataPointer<T>();
-    T *ptrIter = ptr;
-    size_t n = implPtr->adim.size();
-    size_t xdim = implPtr->adim.x;
+//    T *ptr = getDataPointer<T>();
+//    T *ptrIter = ptr;
+//    size_t n = implPtr->adim.size();
+//    size_t xdim = implPtr->adim.x;
+
+    ss << "[";
+
+//    for (size_t i = 0; i < n; ++i, ++ptrIter)
+//    {
+//        ss << *ptrIter << " ";
+//        if (i % xdim == xdim-1)
+//            ss << "\n";
+//    }
+
+    ss << "]";
+
+    return ss.str();
+}
+
+template <class T>
+ArrayView<T> Array::getView()
+{
+    ConstTypePtr valueTypePtr = Type::get<T>();
+    // Check the type is the same of the object
+    assert(implPtr->typePtr == valueTypePtr);
+
+    return ArrayView<T>(implPtr->adim, implPtr->dataPtr);
+}
+
+// ===================== ArrayView Implementation =======================
+
+template <class T>
+ArrayView<T>::ArrayView(const ArrayDim &adim, void * rawMemory)
+{
+    this->data = static_cast<T*>(rawMemory);
+    this->adim = adim;
+}
+
+template <class T>
+void ArrayView<T>::assign(const T &value)
+{
+    T *ptrIter = data;
+    size_t n = adim.size();
+
+    for (size_t i = 0; i < n; ++i, ++ptrIter)
+        *ptrIter = value;
+}
+
+template <class T>
+T& ArrayView<T>::operator()(int x, int y, int z, size_t n)
+{
+    T *ptr = data;
+    ptr += x + y * adim.y;
+    return *ptr;
+}
+
+template <class T>
+std::string ArrayView<T>::toString() const
+{
+    std::stringstream ss;
+
+    T *ptrIter = data;
+    size_t n = adim.size();
+    size_t xdim = adim.x;
 
     ss << "[";
 
@@ -130,35 +165,21 @@ std::string Array<T>::toString() const
     ss << "]";
 
     return ss.str();
-
 }
 
 template <class T>
-void Array<T>::assign(const T &value)
+T* ArrayView<T>::getDataPointer()
 {
-    T *ptr = getDataPointer<T>();
-    T *ptrIter = ptr;
-    size_t n = implPtr->adim.size();
-
-    for (size_t i = 0; i < n; ++i, ++ptrIter)
-    {
-        *ptrIter = value;
-    }
+    return data;
 }
 
-template <class T>
-T& Array<T>::operator()(int x, int y, int z, size_t n)
-{
-    T *ptr = getDataPointer<T>();
-    ArrayDim &adim = implPtr->adim;
+// ================ Explicit instantiations of Templates ==============================
+// This allows to implement template code in the .cpp
 
-    ptr += x + y * adim.y;
-    return *ptr;
-}
+template ArrayView<int> Array::getView();
+template ArrayView<float> Array::getView();
+template ArrayView<double> Array::getView();
 
-
-// Explicit instantiations of Array class in order to allows
-// its implementation in the .cpp file
-template class em::Array<float>;
-template class em::Array<double>;
-template class em::Array<int>;
+template class ArrayView<int>;
+template class ArrayView<float>;
+template class ArrayView<double>;
