@@ -176,10 +176,10 @@ T* ArrayView<T>::getDataPointer()
 // ================ Explicit instantiations of Templates ==============================
 // This allows to implement template code in the .cpp
 
-template ArrayView<int> Array::getView();
-template ArrayView<float> Array::getView();
-template ArrayView<double> Array::getView();
+template em::ArrayView<int> em::Array::getView();
+template em::ArrayView<float> em::Array::getView();
+template em::ArrayView<double> em::Array::getView();
 
-template class ArrayView<int>;
-template class ArrayView<float>;
-template class ArrayView<double>;
+template class em::ArrayView<int>;
+template class em::ArrayView<float>;
+template class em::ArrayView<double>;
