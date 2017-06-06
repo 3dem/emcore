@@ -14,7 +14,7 @@ using namespace em;
 
 // IndependentMethod is a test case - here, we have 2 tests for this 1 test case
 TEST(IndependentMethod, ResetsToZero) {
-    std::cout << "Hello, World!" << std::endl;
+    std::cout << std::endl << "Hello, World!" << std::endl;
 
     em::Timer t;
 
@@ -67,7 +67,7 @@ TEST(IndependentMethod, ResetsToZero) {
         d3 = d2 / 100.f;
     }
 
-    t.toc(">>> Loop 1: ");
+    t.toc(">>> Loop 1 (using Object): ");
 
     t.tic();
 
@@ -79,7 +79,7 @@ TEST(IndependentMethod, ResetsToZero) {
         d3 = d2 / 100.f;
     }
 
-    t.toc(">>> Loop 2: ");
+    t.toc(">>> Loop 2 (using float): ");
 
     std::cout << "Creating an Array: " << std::endl;
 
