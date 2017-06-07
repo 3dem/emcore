@@ -42,6 +42,20 @@ namespace em
             return &t;
         }
 
+        /** Copy n elements from inputMem to outputMem assuming both
+         * memory locations point to data of this Type.
+         *
+         * This function is useful for memory manipulation from generic
+         * memory container such as Array or Image where they store the
+         * pointer to the data and know the underlying data type.
+         *
+         * @param inputMem Memory location of the input data
+         * @param outputMem Memory location of the output data
+         * @param n Number of elements that are in inputMem
+         * @return
+         */
+        void copy(void * inputMem, void * outputMem, size_t count) const;
+
     private:
         // Type can only be instantiated via the Type::get<T> static method
         Type(TypeInfo *typeInfoPtr);

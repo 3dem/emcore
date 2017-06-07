@@ -44,7 +44,7 @@ TEST(IndependentMethod, ResetsToZero) {
 
     std::cout << "T0: " << *em::Type::get<em::Object>() << std::endl;
 
-    em:ConstTypePtr type1 = em::Type::get<double>();
+    em::ConstTypePtr type1 = em::Type::get<double>();
     o2 = 1.1; // o2 should be float
     assert(o2.type() == type1);
     std::cout << "T1: " << *type1 << std::endl;
@@ -86,8 +86,6 @@ TEST(IndependentMethod, ResetsToZero) {
     ArrayDim adim(10, 10);
     Array A(adim, em::TypeInt);
     ArrayView<int> Av = A.getView<int>();
-    ArrayView<int> Av2;
-    Av = Av;
 
     Av.assign(11);
     Av(3, 3) = 20;
@@ -96,45 +94,14 @@ TEST(IndependentMethod, ResetsToZero) {
     int * ptr = Av.getDataPointer();
     ptr[10] = 15;
 
-    std::cout << Av.toString() << std::endl;
+    //std::cout << Av.toString() << std::endl;
 
-    em::Array A2(adim, em::TypeFloat);
+    em::Array A2 = A;
+//
+//    ArrayView<int> Av2 = A2.getView<int>();
+//
+//    std::cout << Av2.toString() << std::endl;
 
-}
 
-
-// The fixture for testing class Project1. From google test primer.
-class Project1Test : public ::testing::Test {
-protected:
-    // You can remove any or all of the following functions if its body
-    // is empty.
-
-    Project1Test() {
-        // You can do set-up work for each test here.
-    }
-
-    virtual ~Project1Test() {
-        // You can do clean-up work that doesn't throw exceptions here.
-    }
-
-    // If the constructor and destructor are not enough for setting up
-    // and cleaning up each test, you can define the following methods:
-    virtual void SetUp() {
-        // Code here will be called immediately after the constructor (right
-        // before each test).
-    }
-
-    virtual void TearDown() {
-        // Code here will be called immediately after each test (right
-        // before the destructor).
-    }
-
-    // Objects declared here can be used by all tests in the test case for Project1.
-
-};
-
-// Test case must be called the class above
-// Also note: use TEST_F instead of TEST to access the test fixture (from google test primer)
-TEST_F(Project1Test, MethodBarDoesAbc) {
 
 }

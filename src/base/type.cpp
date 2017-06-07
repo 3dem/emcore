@@ -36,6 +36,11 @@ bool Type::isPod() const
     return implPtr->isPod;
 }
 
+void Type::copy(void *inputMem, void *outputMem, size_t count) const
+{
+    implPtr->typeInfoPtr->copy(inputMem, outputMem, count);
+}
+
 std::ostream& em::operator<< (std::ostream &ostrm, const Type &t)
 {
     ostrm << "Type " << t.name()

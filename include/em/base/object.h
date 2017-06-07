@@ -6,6 +6,7 @@
 #define EM_CORE_OBJECT_H
 
 #include <iostream>
+#include <map>
 #include <cassert>
 
 #include "type.h"
@@ -53,6 +54,8 @@ namespace em
         void * valuePtr = nullptr;
         ConstTypePtr typePtr = nullptr;
     };
+
+    using ObjectDict = std::map<std::string, Object>;
 
 #include "object_priv.h"
 

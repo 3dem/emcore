@@ -23,12 +23,11 @@ namespace em
     {
     public:
         size_t x, y, z, n;
-
-    public:
         // Default Ctor for empty dimensions
         ArrayDim();
         ArrayDim(size_t xdim, size_t ydim=1, size_t zdim=1, size_t ndim=1);
         size_t size() const;
+        bool operator==(const ArrayDim &other);
     }; // class ArrayDim
 
     /** @ingroup base
@@ -37,34 +36,43 @@ namespace em
     class Array
     {
     public:
-        // Ctor and Dtor
-        Array(const ArrayDim &adim, ConstTypePtr  type= nullptr);
+        /** Default constructor.
+         * The Array will not have any data associated and
+         * the type will be nullptr.
+         */
+        Array();
+
+        // Constructor from dimensions and type
+        Array(const ArrayDim &adim, ConstTypePtr type);
+
+        /** Copy constructor from another Array.
+         * This Array will have the same dimensions, data type
+         * and values of the other Array.
+         * @param other Other Array to be copied
+         */
+        Array(const Array &other);
+
+        // Destructor
         virtual ~Array();
 
+        // Assign operator
+        Array& operator=(const Array &other);
+
+        // String representation
         virtual std::string toString() const;
 
         // Dimensions
         virtual void resize(const ArrayDim &adim, ConstTypePtr type=nullptr);
         ArrayDim getDimensions() const;
 
-//        // Operators
-//        template <class T>
-//        Array& operator=(const T);
-//
-//        template <class T>
-//        T& operator()(const int x, const int y=0, const int z=0, const size_t n=1);
-//
+        ConstTypePtr getType() const;
+
         template <class T>
         ArrayView<T> getView();
-
-        // Assign a constant value to all the array
-        template <class T>
-        void assign(const T &value);
 
     protected:
         // Pointer to implementation class, PIMPL idiom
         ArrayImpl * implPtr;
-
     }; // class Array
 
     /** @ingroup base

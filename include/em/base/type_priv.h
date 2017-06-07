@@ -12,6 +12,7 @@ class TypeInfo
 public:
     virtual std::string name() const = 0;
     virtual std::size_t size() const = 0;
+    virtual void copy(void * inputMem, void * outputMem, size_t count) const = 0;
     virtual bool isPod() const = 0;
 };
 
@@ -47,6 +48,26 @@ public:
     {
         return std::is_pod<T>();
     }
+
+    virtual void copy(void * inputMem, void * outputMem, size_t count) const
+    {
+        if (isPod())
+            memcpy(outputMem, inputMem, count * size());
+        else
+        {
+            T * inPtr = static_cast<T *>(inputMem);
+            T * outPtr = static_cast<T *>(outputMem);
+            for (size_t i = 0; i < count; ++i)
+            {
+                *outPtr = *inPtr; // copy objects
+                ++inPtr;
+                ++outPtr;
+            }
+        }
+
+
+    }
+
 };
 
 
