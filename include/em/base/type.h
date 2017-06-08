@@ -4,6 +4,8 @@
 
 #include <typeinfo>
 #include <iostream>
+#include <cstring>
+
 
 namespace em
 {

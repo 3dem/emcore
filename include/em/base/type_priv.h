@@ -5,6 +5,7 @@
 #ifndef EM_CORE_TYPE_PRIV_H_H
 #define EM_CORE_TYPE_PRIV_H_H
 
+
 //-------------- Auxiliary Type classes -----------------------
 
 class TypeInfo
