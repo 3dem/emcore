@@ -47,14 +47,17 @@ if (BUILD_TESTS)
     ##############
     add_executable(em-test test/test_main.cpp)
     add_executable(em-test-base test/test_base.cpp)
+    add_executable(em-test-image test/test_image.cpp)
 
     # Standard linking to gtest stuff.
     target_link_libraries(em-test gtest gtest_main)
     target_link_libraries(em-test-base gtest gtest_main)
+    target_link_libraries(em-test-image gtest gtest_main)
 
     # Extra linking for the project.
     target_link_libraries(em-test em-core)
     target_link_libraries(em-test-base em-core)
+    target_link_libraries(em-test-image em-core)
 
     # This is so you can do 'make test' to see all your tests run, instead of
     # manually running the executable em-test to see those specific tests.

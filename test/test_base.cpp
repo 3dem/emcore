@@ -8,6 +8,7 @@
 #include "em/base/object.h"
 #include "em/base/array.h"
 #include "em/image/image.h"
+//#include "em/image/rw_spider.h.h"
 
 using namespace em;
 
@@ -102,13 +103,5 @@ TEST(ArrayTest, Constructor) {
 
     //std::cout << "Array printed: " << std::endl;
     //std::cout << A << std::endl;
-
-    //Image
-    Image img(ArrayDim(10, 10), em::TypeDouble);
-    ObjectDict &header = img.getHeader();
-    header["x"] = 10;
-    header["y"] = 20.5;
-    //header["filename"] = "/path/to/image/";
-    std::cout << img << std::endl;
 
 } // TEST(ArrayTest, Constructor)

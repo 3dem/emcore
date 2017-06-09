@@ -11,11 +11,16 @@
 #include "em/base/object.h"
 #include "em/base/array.h"
 
+
 class ImageImpl;
 
 
 namespace em
 {
+
+    class ImageReader;
+    class ImageWriter;
+
     /** @ingroup image
      * Image class
      */
@@ -48,6 +53,14 @@ namespace em
 
         // String representation
         virtual void toStream(std::ostream &ostream) const override;
+
+        // This method should be called to register a ImageReader that is able
+        // to read a new image format
+        static bool registerReader(const ImageReader * reader);
+        // Check if there is a registered reader for a given extension
+        static bool hasReader(const std::string &extension);
+        // Retrieve an existing reader for a given extension
+        static ImageReader* getReader(const std::string &extension);
 
     private:
         // Pointer to implementation class, PIMPL idiom
@@ -83,6 +96,10 @@ namespace em
     class ImageReader
     {
     public:
+        /** Return a name identifying this reader. */
+        virtual std::string getName() const = 0;
+        /** Return the extensions this reader is able to read. */
+        virtual std::string getExtensions() const = 0;
         /** Read a given image from file.
          * This function is the most basic way to read an image from disk.
          * The file will be open before data is read and close after it.
@@ -92,15 +109,32 @@ namespace em
          * @param location Input image location (index range and path) to be read
          * @param image Image where data will be read
          */
-        void read(const ImageLocation &location, Image &image);
+        virtual void read(const ImageLocation &location, Image &image) = 0;
 
-        void openFile(const std::string &path);
-        void read(const size_t index, Image &image);
-        void closeFile();
+        virtual void openFile(const std::string &path) = 0;
+        virtual void read(const size_t index, Image &image) = 0;
+        virtual void closeFile() = 0;
 
+    private:
+        /** Clone this reader and obtain a new copy.
+         * The caller to this functions should take care
+         * of memory disposal. This function should only be accessible
+         * Image class when retrieving a registered reader.
+         *
+         * @return
+         */
+        virtual ImageReader * create() const = 0;
+
+        friend class Image;
     }; // class ImageReader
 
-}
+//extern bool reg;
+} // em namespace
 
+
+// The following macro can be used as a shortcut to register new ImageReader subclasses
+#define REGISTER_IMAGE_READER(readerClassName) \
+    readerClassName reader_##readerClassName; \
+    bool register_##readerClassName = Image::registerReader(&reader_##readerClassName)
 
 #endif //EM_CORE_IMAGE_H
