@@ -13,8 +13,8 @@ class SpiderReader: public ImageReader
 {
 
 public:
-    virtual std::string getName() const;
-    virtual std::string getExtensions() const;
+    virtual std::string getName() const override;
+    virtual std::string getExtensions() const override;
 
     virtual void read(const ImageLocation &location, Image &image) override;
 
@@ -23,7 +23,7 @@ public:
     virtual void closeFile() override;
 
 private:
-    virtual ImageReader* create() const;
+    virtual ImageReader* create() const override;
 }; // class SpiderReader
 
 #endif // EM_CORE_RW_SPIDER_H
