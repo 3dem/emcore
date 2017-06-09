@@ -109,3 +109,5 @@ ImageReader* Image::getReader(const std::string &extension)
 #include "em/image/rw_spider.h"
 REGISTER_IMAGE_READER(SpiderReader);
 
+#include "em/image/rw_mrc.h"
+REGISTER_IMAGE_READER(MrcReader);

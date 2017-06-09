@@ -134,7 +134,7 @@ namespace em
 
 // The following macro can be used as a shortcut to register new ImageReader subclasses
 #define REGISTER_IMAGE_READER(readerClassName) \
-    readerClassName reader_##readerClassName__; \
-    bool register_##readerClassName__ = Image::registerReader(&reader_##readerClassName__)
+    readerClassName reader_##readerClassName; \
+    bool register_##readerClassName = Image::registerReader(&reader_##readerClassName)
 
 #endif //EM_CORE_IMAGE_H

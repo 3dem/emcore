@@ -2,14 +2,14 @@
 // Created by josem on 2017-06-09.
 //
 
-#ifndef EM_CORE_RW_SPIDER_H
-#define EM_CORE_RW_SPIDER_H
+#ifndef EM_CORE_RW_MRC_H
+#define EM_CORE_RW_MRC_H
 
 #include "em/image/image.h"
 
 using namespace em;
 
-class SpiderReader: public ImageReader
+class MrcReader: public ImageReader
 {
 
 public:
@@ -24,6 +24,6 @@ public:
 
 private:
     virtual ImageReader* create() const;
-}; // class SpiderReader
+}; // class MrcReader
 
-#endif // EM_CORE_RW_SPIDER_H
+#endif // EM_CORE_RW_MRC_H
