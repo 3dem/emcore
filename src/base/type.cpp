@@ -41,10 +41,15 @@ void Type::copy(void *inputMem, void *outputMem, size_t count) const
     implPtr->typeInfoPtr->copy(inputMem, outputMem, count);
 }
 
+void Type::toStream(void * inputMem, std::ostream &stream, size_t count) const
+{
+    implPtr->typeInfoPtr->toStream(inputMem, stream, count);
+}
+
 std::ostream& em::operator<< (std::ostream &ostrm, const Type &t)
 {
-    ostrm << "Type " << t.name()
-          << " (size " << t.size()
+    ostrm << "Type '" << t.name()
+          << "' (size " << t.size()
           << ", pod " << (t.isPod() ? "true" : "false")
           << ")";
     return ostrm;

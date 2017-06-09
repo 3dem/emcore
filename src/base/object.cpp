@@ -16,7 +16,18 @@ Object::~Object()
     free(valuePtr);
 }
 
-const Type * Object::type() const
+ConstTypePtr Object::getType() const
 {
     return typePtr;
+}
+
+void Object::toStream(std::ostream &ostream) const
+{
+    typePtr->toStream(valuePtr, ostream, 1);
+}
+
+std::ostream& em::operator<< (std::ostream &ostream, const em::Object &object)
+{
+    object.toStream(ostream);
+    return ostream;
 }

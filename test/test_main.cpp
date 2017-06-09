@@ -20,14 +20,14 @@ TEST(IndependentMethod, ResetsToZero) {
 
     t.tic();
 
-    em::Object o = 1;
+    em::Object o(1);
     o = 2;
 
     int x = o;
 
     std::cout << "x = " << x << std::endl;
 
-    em::Object o2 = 3.5;
+    em::Object o2(3.5);
 
     o2 = 1.3f;
 
@@ -42,11 +42,11 @@ TEST(IndependentMethod, ResetsToZero) {
 
     std::cout << "d2 = " << d2 << std::endl;
 
-    std::cout << "T0: " << *em::Type::get<em::Object>() << std::endl;
+    //std::cout << "T0: " << *em::Type::get<em::Object>() << std::endl;
 
     em::ConstTypePtr type1 = em::Type::get<double>();
     o2 = 1.1; // o2 should be float
-    assert(o2.type() == type1);
+    assert(o2.getType() == type1);
     std::cout << "T1: " << *type1 << std::endl;
 
     em::ConstTypePtr  type2 = em::Type::get<float>();

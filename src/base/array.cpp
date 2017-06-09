@@ -119,33 +119,42 @@ void Array::resize(const ArrayDim &adim, ConstTypePtr type)
     implPtr->allocate(adim, type == nullptr ? implPtr->typePtr : type);
 }
 
+void Array::toStream(std::ostream &ostream) const
+{
+    char * data = static_cast<char*>(implPtr->dataPtr);
+    size_t n = implPtr->adim.size();
+    size_t xdim = implPtr->adim.x;
+    size_t ydim = implPtr->adim.y;
+    size_t typeSize = implPtr->typePtr->size();
+
+    ostream << '[';
+
+    for (size_t i = 0; i < ydim; ++i)
+    {
+        implPtr->typePtr->toStream(data, ostream, xdim);
+        ostream << std::endl;
+        data += xdim * typeSize; // Increment point row by row
+    }
+
+    ostream << ']';
+}
+
 std::string Array::toString() const
 {
     std::stringstream ss;
-
-//    T *ptr = getDataPointer<T>();
-//    T *ptrIter = ptr;
-//    size_t n = implPtr->adim.size();
-//    size_t xdim = implPtr->adim.x;
-
-    ss << "[";
-
-//    for (size_t i = 0; i < n; ++i, ++ptrIter)
-//    {
-//        ss << *ptrIter << " ";
-//        if (i % xdim == xdim-1)
-//            ss << "\n";
-//    }
-
-    ss << "]";
-
+    toStream(ss);
     return ss.str();
 }
 
 ConstTypePtr Array::getType() const
 {
     return implPtr->typePtr;
-}
+} // getType
+
+void * Array::getDataPointer()
+{
+    return implPtr->dataPtr;
+} // getDataPointer
 
 template <class T>
 ArrayView<T> Array::getView()
@@ -155,6 +164,12 @@ ArrayView<T> Array::getView()
     assert(implPtr->typePtr == valueTypePtr);
 
     return ArrayView<T>(implPtr->adim, implPtr->dataPtr);
+}
+
+std::ostream& em::operator<< (std::ostream &ostream, const Array &array)
+{
+    array.toStream(ostream);
+    return ostream;
 }
 
 // ===================== ArrayView Implementation =======================

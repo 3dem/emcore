@@ -13,8 +13,10 @@ class TypeInfo
 public:
     virtual std::string name() const = 0;
     virtual std::size_t size() const = 0;
-    virtual void copy(void * inputMem, void * outputMem, size_t count) const = 0;
     virtual bool isPod() const = 0;
+
+    virtual void copy(void * inputMem, void * outputMem, size_t count) const = 0;
+    virtual void toStream(void * inputMem, std::ostream &stream, size_t count) const = 0;
 };
 
 
@@ -50,7 +52,7 @@ public:
         return std::is_pod<T>();
     }
 
-    virtual void copy(void * inputMem, void * outputMem, size_t count) const
+    virtual void copy(void * inputMem, void * outputMem, size_t count) const override
     {
         if (isPod())
             memcpy(outputMem, inputMem, count * size());
@@ -65,9 +67,17 @@ public:
                 ++outPtr;
             }
         }
+    } //copy
 
-
-    }
+    virtual void toStream(void * inputMem, std::ostream &stream, size_t count) const override
+    {
+        T * inPtr = static_cast<T *>(inputMem);
+        for (size_t i = 0; i < count; ++i)
+        {
+            stream << *inPtr << " ";
+            ++inPtr;
+        }
+    } // toStream
 
 };
 
@@ -93,5 +103,11 @@ public:
     virtual std::string name() const { return "float"; }
 };
 
+template <>
+class TypeInfoT<int>: public TypeInfoBase<int>
+{
+public:
+    virtual std::string name() const { return "int"; }
+};
 
 #endif //EM_CORE_TYPE_PRIV_H_H

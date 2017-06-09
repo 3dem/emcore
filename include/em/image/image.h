@@ -46,11 +46,59 @@ namespace em
          */
         ObjectDict& getHeader(size_t index=0);
 
+        // String representation
+        virtual void toStream(std::ostream &ostream) const override;
+
     private:
         // Pointer to implementation class, PIMPL idiom
         ImageImpl * implPtr;
     }; // class Image
 
+    std::ostream& operator<< (std::ostream &ostream, const em::Image &t);
+
+    /** @ingroup image
+     * This class represent the location of one or several images in disk.
+     * It contains a path to a physical file on disk, and a given index
+     * or range. In EM, many images are usually grouped in a single file (stack).
+     * So we need to store the path and the indexes of the image(s).
+     */
+    class ImageLocation
+    {
+    public:
+        // TODO: maybe consider a pointer to string, so many ImageLocation objects
+        // could share the same path string without extra memory
+        std::string path;
+        size_t start; ///< Starting index to read from file (first one is 1)
+        size_t end; ///< Last index to read (0 means just the starting one, -1 means till the end)
+    }; // class ImageLocation
+
+    /** @ingroup image
+     * Base class to read Image from disk.
+     *
+     * Sub-classes of ImageReader should be implemented for reading
+     * form the EM formats such as: spider, mrc, img, etc.
+     * Other more standard formats should also be supported,
+     * including: tiff, png, jpeg, hdf5
+     */
+    class ImageReader
+    {
+    public:
+        /** Read a given image from file.
+         * This function is the most basic way to read an image from disk.
+         * The file will be open before data is read and close after it.
+         * If you want to read multiple images from the same file, it
+         * would be better to first open the file explicitly,
+         * read the images and then close the file.
+         * @param location Input image location (index range and path) to be read
+         * @param image Image where data will be read
+         */
+        void read(const ImageLocation &location, Image &image);
+
+        void openFile(const std::string &path);
+        void read(const size_t index, Image &image);
+        void closeFile();
+
+    }; // class ImageReader
 
 }
 

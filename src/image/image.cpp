@@ -60,3 +60,15 @@ ObjectDict& Image::getHeader(size_t index)
 {
     return implPtr->headers[index];
 }
+
+void Image::toStream(std::ostream &ostream) const
+{
+    ostream << "Image: " << std::endl;
+    Array::toStream(ostream);
+}
+
+std::ostream& em::operator<< (std::ostream &ostream, const em::Image &image)
+{
+    image.toStream(ostream);
+    return ostream;
+}

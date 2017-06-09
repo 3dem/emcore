@@ -25,7 +25,7 @@ namespace em
         size_t x, y, z, n;
         // Default Ctor for empty dimensions
         ArrayDim();
-        ArrayDim(size_t xdim, size_t ydim=1, size_t zdim=1, size_t ndim=1);
+        explicit ArrayDim(size_t xdim, size_t ydim=1, size_t zdim=1, size_t ndim=1);
         size_t size() const;
         bool operator==(const ArrayDim &other);
     }; // class ArrayDim
@@ -58,22 +58,37 @@ namespace em
         // Assign operator
         Array& operator=(const Array &other);
 
-        // String representation
-        virtual std::string toString() const;
-
         // Dimensions
         virtual void resize(const ArrayDim &adim, ConstTypePtr type=nullptr);
         ArrayDim getDimensions() const;
 
+        /** Return a constant pointer to underlying Type object. */
         ConstTypePtr getType() const;
+
+        /** Return a pointer to the internal data.
+         * Use this function with care. It is intended to be used by
+         * ImageReader subclasses to allow read from disk and put
+         * directly into memory without need of a buffer.
+         *
+         * For other memory manipulation, use the provided
+         * functions to copy element into the array from
+         * a given memory location.
+         */
+        void * getDataPointer();
 
         template <class T>
         ArrayView<T> getView();
+
+        // String representation
+        virtual void toStream(std::ostream &ostream) const;
+        virtual std::string toString() const;
 
     protected:
         // Pointer to implementation class, PIMPL idiom
         ArrayImpl * implPtr;
     }; // class Array
+
+    std::ostream& operator<< (std::ostream &ostream, const Array &array);
 
     /** @ingroup base
      *  View of an Array that is parametrized.

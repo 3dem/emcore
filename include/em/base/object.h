@@ -9,7 +9,7 @@
 #include <map>
 #include <cassert>
 
-#include "type.h"
+#include "em/base/type.h"
 
 
 namespace em
@@ -25,8 +25,8 @@ namespace em
     public:
         /** Default empty constructor for an Object.
          *
-         * After an Object instance is created through this contructor,
-         * the internal data is void.
+         * After an Object instance is created through this constructor,
+         * the both the data type and the internal data are void.
          */
         Object();
 
@@ -34,7 +34,7 @@ namespace em
         ~Object();
 
         /** Copy construct from an existing Object. */
-        template <class T> Object(const T &valueIn);
+        template <class T> explicit Object(const T &valueIn);
 
         /** Assign operator to store an given value.
          *
@@ -48,18 +48,23 @@ namespace em
         template<class T> operator T() const;
 
         /** Return the Type singleton instance of this object. */
-        const Type * type() const;
+        ConstTypePtr getType() const;
+
+        void toStream(std::ostream &ostream) const;
 
     private:
         void * valuePtr = nullptr;
         ConstTypePtr typePtr = nullptr;
     };
 
+    std::ostream& operator<< (std::ostream &ostream, const em::Object &object);
+
     using ObjectDict = std::map<std::string, Object>;
 
 #include "object_priv.h"
-
 }
+
+
 
 
 #endif //EM_CORE_OBJECT_H
