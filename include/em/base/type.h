@@ -27,9 +27,9 @@ namespace em
     {
     public:
         /** Return the name of the type */
-        std::string name() const;
+        std::string getName() const;
         /** Return the size in bytes of this type */
-        std::size_t size() const;
+        std::size_t getSize() const;
         /** Return True if this type is a plain old type (POD) */
         bool isPod() const;
 

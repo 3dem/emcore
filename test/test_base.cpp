@@ -14,21 +14,21 @@ using namespace em;
 TEST(Type, Basic) {
     // Test basic properties of Type singleton instances
     ConstTypePtr i = em::TypeInt;
-    ASSERT_EQ(i->name(), "int");
+    ASSERT_EQ(i->getName(), "int");
     ASSERT_TRUE(i->isPod());
-    ASSERT_EQ(i->size(), sizeof(int));
+    ASSERT_EQ(i->getSize(), sizeof(int));
     std::cout << std::endl << *i << std::endl;
 
     ConstTypePtr f = em::TypeFloat;
-    ASSERT_EQ(f->name(), "float");
+    ASSERT_EQ(f->getName(), "float");
     ASSERT_TRUE(f->isPod());
-    ASSERT_EQ(f->size(), sizeof(float));
+    ASSERT_EQ(f->getSize(), sizeof(float));
     std::cout << *f << std::endl;
 
     ConstTypePtr d = em::TypeDouble;
-    ASSERT_EQ(d->name(), "double");
+    ASSERT_EQ(d->getName(), "double");
     ASSERT_TRUE(d->isPod());
-    ASSERT_EQ(d->size(), sizeof(double));
+    ASSERT_EQ(d->getSize(), sizeof(double));
     std::cout << *d << std::endl;
 }
 

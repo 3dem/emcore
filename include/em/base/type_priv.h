@@ -11,8 +11,8 @@
 class TypeInfo
 {
 public:
-    virtual std::string name() const = 0;
-    virtual std::size_t size() const = 0;
+    virtual std::string getName() const = 0;
+    virtual std::size_t getSize() const = 0;
     virtual bool isPod() const = 0;
 
     virtual void copy(void * inputMem, void * outputMem, size_t count) const = 0;
@@ -36,18 +36,18 @@ class TypeInfoBase: public TypeInfo
 public:
     TypeInfoBase() = default;
 
-    virtual std::string name() const
+    virtual std::string getName() const override
     {
         T x;
         return typeid(T).name();
     }
 
-    virtual std::size_t size() const
+    virtual std::size_t getSize() const override
     {
         return sizeof(T);
     }
 
-    virtual bool isPod() const
+    virtual bool isPod() const override
     {
         return std::is_pod<T>();
     }
@@ -55,7 +55,7 @@ public:
     virtual void copy(void * inputMem, void * outputMem, size_t count) const override
     {
         if (isPod())
-            memcpy(outputMem, inputMem, count * size());
+            memcpy(outputMem, inputMem, count * getSize());
         else
         {
             T * inPtr = static_cast<T *>(inputMem);
@@ -93,21 +93,30 @@ template <>
 class TypeInfoT<double>: public TypeInfoBase<double>
 {
 public:
-    virtual std::string name() const { return "double"; }
+    virtual std::string getName() const override
+    {
+        return "double";
+    }
 };
 
 template <>
 class TypeInfoT<float>: public TypeInfoBase<float>
 {
 public:
-    virtual std::string name() const { return "float"; }
+    virtual std::string getName() const override
+    {
+        return "float";
+    }
 };
 
 template <>
 class TypeInfoT<int>: public TypeInfoBase<int>
 {
 public:
-    virtual std::string name() const { return "int"; }
+    virtual std::string getName() const override
+    {
+        return "int";
+    }
 };
 
 #endif //EM_CORE_TYPE_PRIV_H_H

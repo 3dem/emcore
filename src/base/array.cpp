@@ -45,7 +45,7 @@ public:
     {
         this->adim = adim;
         this->typePtr = type;
-        msize = adim.size() * typePtr->size();
+        msize = adim.size() * typePtr->getSize();
         dataPtr = malloc(msize);
         std::cout << "this: " << this << " allocate: msize: " << msize << " dataPtr: " << (dataPtr == nullptr) << std::endl;
 
@@ -125,7 +125,7 @@ void Array::toStream(std::ostream &ostream) const
     size_t n = implPtr->adim.size();
     size_t xdim = implPtr->adim.x;
     size_t ydim = implPtr->adim.y;
-    size_t typeSize = implPtr->typePtr->size();
+    size_t typeSize = implPtr->typePtr->getSize();
 
     ostream << '[';
 

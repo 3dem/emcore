@@ -11,8 +11,8 @@ Type::Type(TypeInfo *typeInfoPtr)
 {
     implPtr = new TypeImpl();
     implPtr->typeInfoPtr = typeInfoPtr;
-    implPtr->size = typeInfoPtr->size();
-    implPtr->name = typeInfoPtr->name();
+    implPtr->size = typeInfoPtr->getSize();
+    implPtr->name = typeInfoPtr->getName();
     implPtr->isPod = typeInfoPtr->isPod();
 }
 
@@ -21,12 +21,12 @@ Type::~Type()
     delete implPtr;
 }
 
-std::string Type::name() const
+std::string Type::getName() const
 {
     return implPtr->name;
 }
 
-std::size_t Type::size() const
+std::size_t Type::getSize() const
 {
     return implPtr->size;
 }
@@ -48,8 +48,8 @@ void Type::toStream(void * inputMem, std::ostream &stream, size_t count) const
 
 std::ostream& em::operator<< (std::ostream &ostrm, const Type &t)
 {
-    ostrm << "Type '" << t.name()
-          << "' (size " << t.size()
+    ostrm << "Type '" << t.getName()
+          << "' (getSize " << t.getSize()
           << ", pod " << (t.isPod() ? "true" : "false")
           << ")";
     return ostrm;
