@@ -9,7 +9,7 @@
 
 using namespace em;
 
-class MrcReader: public ImageReader
+class MrcIO: public ImageIO
 {
 
 public:
@@ -23,7 +23,7 @@ public:
     virtual void closeFile() override;
 
 private:
-    virtual ImageReader* create() const override;
-}; // class MrcReader
+    virtual ImageIO* create() const override;
+}; // class MrcIO
 
 #endif // EM_CORE_RW_MRC_H

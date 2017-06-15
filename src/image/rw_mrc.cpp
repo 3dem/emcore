@@ -5,37 +5,37 @@
 #include "em/image/rw_mrc.h"
 
 
-std::string MrcReader::getName() const
+std::string MrcIO::getName() const
 {
     return "mrc";
 }
 
-std::string MrcReader::getExtensions() const
+std::string MrcIO::getExtensions() const
 {
     return "mrc";
 }
 
-void MrcReader::read(const em::ImageLocation &location, em::Image &image)
+void MrcIO::read(const em::ImageLocation &location, em::Image &image)
 {
 
 }
 
-void MrcReader::openFile(const std::string &path)
+void MrcIO::openFile(const std::string &path)
 {
 
 }
 
-void MrcReader::read(const size_t index, em::Image &image)
+void MrcIO::read(const size_t index, em::Image &image)
 {
 
 }
 
-void MrcReader::closeFile()
+void MrcIO::closeFile()
 {
 
 }
 
-em::ImageReader* MrcReader::create() const
+em::ImageIO* MrcIO::create() const
 {
-    return new MrcReader();
+    return new MrcIO();
 }

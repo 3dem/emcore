@@ -24,7 +24,7 @@ public:
     // headers[0] will be the main header and
     // the rest one per image
     std::vector<ObjectDict> headers;
-    static std::map<std::string, const ImageReader*> readers;
+    static std::map<std::string, const ImageIO*> readers;
     //static std::map<std::string, ImageWriter*> writers;
 
     ImageImpl()
@@ -34,7 +34,7 @@ public:
     }
 };
 
-std::map<std::string, const ImageReader*> ImageImpl::readers;
+std::map<std::string, const ImageIO*> ImageImpl::readers;
 
 
 // ===================== Image Implementation =======================
@@ -82,32 +82,34 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::Image &image)
     return ostream;
 }
 
-bool Image::registerReader(const ImageReader *reader)
+bool Image::registerIO(const ImageIO *reader)
 {
     ImageImpl::readers[reader->getExtensions()] = reader;
     ImageImpl::readers[reader->getName()] = reader;
     return true;
-} // function registerReader
+} // function registerIO
 
-bool Image::hasReader(const std::string &extension)
+bool Image::hasIO(const std::string &extension)
 {
     auto it = ImageImpl::readers.find(extension);
     return it != ImageImpl::readers.end();
-} // function setReader
+} // function hasIO
 
-ImageReader* Image::getReader(const std::string &extension)
+ImageIO* Image::getIO(const std::string &extension)
 {
-    if (!Image::hasReader(extension))
+    if (!Image::hasIO(extension))
         return nullptr;
 
     return ImageImpl::readers[extension]->create();
-} // function setReader
+} // function getIO
 
 
-// ===================== ImageReader Implementation =======================
+// ===================== ImageIO Implementation =======================
 
 #include "em/image/rw_spider.h"
-REGISTER_IMAGE_READER(SpiderReader);
+
+REGISTER_IMAGE_IO(SpiderIO);
 
 #include "em/image/rw_mrc.h"
-REGISTER_IMAGE_READER(MrcReader);
+
+REGISTER_IMAGE_IO(MrcIO);

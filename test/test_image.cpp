@@ -18,13 +18,17 @@ TEST(Image, Constructor) {
     header["x"] = 10;
     header["y"] = 20.5;
     // The following one is make it crash
-    //header["filename"] = std::string("/path/to/image/");
+    header["filename"] = std::string("/path/to/image/");
     std::cout << img << std::endl;
 
 
-    ASSERT_TRUE(Image::hasReader("spi"));
-    ASSERT_TRUE(Image::hasReader("spider"));
-    ImageReader * reader = Image::getReader("spi");
+    ASSERT_TRUE(Image::hasIO("spi"));
+    ASSERT_TRUE(Image::hasIO("spider"));
+    ImageIO * reader = Image::getIO("spi");
     ASSERT_EQ(reader->getName(), "spider");
+
+    ASSERT_TRUE(Image::hasIO("mrc"));
+    ImageIO * reader2 = Image::getIO("mrc");
+    ASSERT_EQ(reader2->getName(), "mrc");
 
 } // TEST(ArrayTest, Constructor)

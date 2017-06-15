@@ -9,7 +9,7 @@
 
 using namespace em;
 
-class SpiderReader: public ImageReader
+class SpiderIO: public ImageIO
 {
 
 public:
@@ -23,7 +23,9 @@ public:
     virtual void closeFile() override;
 
 private:
-    virtual ImageReader* create() const override;
-}; // class SpiderReader
+    virtual ImageIO* create() const override;
+
+    FILE* imageFile = NULL;
+}; // class SpiderIO
 
 #endif // EM_CORE_RW_SPIDER_H

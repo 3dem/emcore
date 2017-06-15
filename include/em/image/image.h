@@ -18,7 +18,7 @@ class ImageImpl;
 namespace em
 {
 
-    class ImageReader;
+    class ImageIO;
     class ImageWriter;
 
     /** @ingroup image
@@ -54,13 +54,13 @@ namespace em
         // String representation
         virtual void toStream(std::ostream &ostream) const override;
 
-        // This method should be called to register a ImageReader that is able
+        // This method should be called to register a ImageIO that is able
         // to read a new image format
-        static bool registerReader(const ImageReader * reader);
+        static bool registerIO(const ImageIO *reader);
         // Check if there is a registered reader for a given extension
-        static bool hasReader(const std::string &extension);
+        static bool hasIO(const std::string &extOrName);
         // Retrieve an existing reader for a given extension
-        static ImageReader* getReader(const std::string &extension);
+        static ImageIO* getIO(const std::string &extOrName);
 
     private:
         // Pointer to implementation class, PIMPL idiom
@@ -93,7 +93,7 @@ namespace em
      * Other more standard formats should also be supported,
      * including: tiff, png, jpeg, hdf5
      */
-    class ImageReader
+    class ImageIO
     {
     public:
         /** Return a name identifying this reader. */
@@ -123,18 +123,18 @@ namespace em
          *
          * @return
          */
-        virtual ImageReader * create() const = 0;
+        virtual ImageIO * create() const = 0;
 
         friend class Image;
-    }; // class ImageReader
+    }; // class ImageIO
 
 //extern bool reg;
 } // em namespace
 
 
-// The following macro can be used as a shortcut to register new ImageReader subclasses
-#define REGISTER_IMAGE_READER(readerClassName) \
-    readerClassName reader_##readerClassName; \
-    bool register_##readerClassName = Image::registerReader(&reader_##readerClassName)
+// The following macro can be used as a shortcut to register new ImageIO subclasses
+#define REGISTER_IMAGE_IO(ioClassName) \
+    ioClassName reader_##ioClassName; \
+    bool register_##ioClassName = Image::registerIO(&reader_##ioClassName)
 
 #endif //EM_CORE_IMAGE_H
