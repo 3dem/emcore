@@ -22,7 +22,9 @@ public:
     virtual void read(const size_t index, Image &image) override;
     virtual void closeFile() override;
 
-private:
+    virtual ~MrcIO();
+
+protected:
     virtual ImageIO* create() const override;
 }; // class MrcIO
 

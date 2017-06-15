@@ -1,6 +1,4 @@
-#include <iostream>
-#include <sstream>
-#include <vector>
+#include <cstdio>
 
 #include "em/image/rw_spider.h"
 
@@ -92,7 +90,9 @@ void SpiderIO::read(const em::ImageLocation &location, em::Image &image)
 
 void SpiderIO::openFile(const std::string &path)
 {
-    imageFile = fopen(path.c_str());
+
+    FILE* imageFile = fopen(path.c_str(), "rb");
+    data["imageFile"] = Object(imageFile);
 }
 
 void SpiderIO::read(const size_t index, em::Image &image)
@@ -101,6 +101,12 @@ void SpiderIO::read(const size_t index, em::Image &image)
 }
 
 void SpiderIO::closeFile()
+{
+    FILE* imageFile = static_cast<FILE*>(data["imageFile"]);
+    fclose(imageFile);
+}
+
+SpiderIO::~SpiderIO()
 {
 
 }

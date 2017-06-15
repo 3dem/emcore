@@ -115,7 +115,9 @@ namespace em
         virtual void read(const size_t index, Image &image) = 0;
         virtual void closeFile() = 0;
 
-    private:
+        virtual ~ImageIO();
+
+    protected:
         /** Clone this reader and obtain a new copy.
          * The caller to this functions should take care
          * of memory disposal. This function should only be accessible
@@ -124,6 +126,8 @@ namespace em
          * @return
          */
         virtual ImageIO * create() const = 0;
+
+        ObjectDict data;
 
         friend class Image;
     }; // class ImageIO

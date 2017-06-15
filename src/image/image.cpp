@@ -106,10 +106,16 @@ ImageIO* Image::getIO(const std::string &extension)
 
 // ===================== ImageIO Implementation =======================
 
-#include "em/image/rw_spider.h"
+ImageIO::~ImageIO()
+{
+    // Nothing to do for the moment
+}
 
+#include "em/image/rw_spider.h"
 REGISTER_IMAGE_IO(SpiderIO);
 
 #include "em/image/rw_mrc.h"
-
 REGISTER_IMAGE_IO(MrcIO);
+
+#include "em/image/rw_tiff.h"
+REGISTER_IMAGE_IO(TiffIO);
