@@ -152,7 +152,7 @@ namespace em
     class ImageHandler
     {
     protected:
-        ImageHandler() {}; // avoid instances of this class
+        ImageHandler() = default; // avoid instances of this class
 
     public:
         // Store the name of the file that was read/written
