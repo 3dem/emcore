@@ -9,23 +9,24 @@
 
 using namespace em;
 
-class TiffIO: public ImageIO
+class ImageTiffIO: public ImageIO
 {
 
 public:
     virtual std::string getName() const override;
     virtual std::string getExtensions() const override;
 
-    virtual void read(const ImageLocation &location, Image &image) override;
+    //virtual void read(const ImageLocation &location, Image &image) override;
 
-    virtual void openFile(const std::string &path) override;
+    //virtual void openFile(const std::string &path) override;
     virtual void read(const size_t index, Image &image) override;
-    virtual void closeFile() override;
+    //virtual void closeFile() override;
 
-    virtual ~TiffIO();
+    virtual ~ImageTiffIO();
 
 protected:
+    virtual void readHeader() override ;
     virtual ImageIO* create() const override;
-}; // class TiffIO
+}; // class ImageTiffIO
 
 #endif // EM_CORE_RW_TIFF_H

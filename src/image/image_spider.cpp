@@ -1,6 +1,5 @@
-#include <cstdio>
 
-#include "em/image/rw_spider.h"
+#include "em/image/image_spider_priv.h"
 
 
 #define SPIDERSIZE 1024 // Minimum size of the SPIDER header (variable)
@@ -73,45 +72,32 @@ struct SPIDERhead
 
 
 
-std::string SpiderIO::getName() const
+std::string ImageSpiderIO::getName() const
 {
     return "spider";
 }
 
-std::string SpiderIO::getExtensions() const
+std::string ImageSpiderIO::getExtensions() const
 {
     return "spi";
 }
 
-void SpiderIO::read(const em::ImageLocation &location, em::Image &image)
+void ImageSpiderIO::read(const size_t index, em::Image &image)
 {
 
 }
 
-void SpiderIO::openFile(const std::string &path)
-{
-
-    FILE* imageFile = fopen(path.c_str(), "rb");
-    data["imageFile"] = Object(imageFile);
-}
-
-void SpiderIO::read(const size_t index, em::Image &image)
+ImageSpiderIO::~ImageSpiderIO()
 {
 
 }
 
-void SpiderIO::closeFile()
+void ImageSpiderIO::readHeader()
 {
-    FILE* imageFile = static_cast<FILE*>(data["imageFile"]);
-    fclose(imageFile);
+    // TODO: Implement it
 }
 
-SpiderIO::~SpiderIO()
+em::ImageIO* ImageSpiderIO::create() const
 {
-
-}
-
-em::ImageIO* SpiderIO::create() const
-{
-    return new SpiderIO();
+    return new ImageSpiderIO();
 }

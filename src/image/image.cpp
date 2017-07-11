@@ -108,14 +108,41 @@ ImageIO* Image::getIO(const std::string &extension)
 
 ImageIO::~ImageIO()
 {
-    // Nothing to do for the moment
 }
 
-#include "em/image/rw_spider.h"
-REGISTER_IMAGE_IO(SpiderIO);
+void ImageIO::openFile(const std::string &path)
+{
+    if (handler == nullptr)
+        handler = createHandler();
 
-#include "em/image/rw_mrc.h"
-REGISTER_IMAGE_IO(MrcIO);
+    handler->path = path;
+    handler->file = fopen(path.c_str(), "r");
+}
 
-#include "em/image/rw_tiff.h"
-REGISTER_IMAGE_IO(TiffIO);
+void ImageIO::closeFile()
+{
+    fclose(handler->file);
+}
+
+void ImageIO::read(const ImageLocation &location, Image &image)
+{
+    openFile(location.path);
+    // FIXME: Now only reading the first image in the location range
+    read(location.start, image);
+    closeFile();
+}
+
+ImageHandler* ImageIO::createHandler()
+{
+    return new ImageHandler;
+} // createHandler
+
+
+#include "em/image/image_spider_priv.h"
+REGISTER_IMAGE_IO(ImageSpiderIO);
+
+#include "em/image/image_mrc_priv.h"
+REGISTER_IMAGE_IO(ImageMrcIO);
+
+#include "em/image/image_tiff_priv.h"
+REGISTER_IMAGE_IO(ImageTiffIO);

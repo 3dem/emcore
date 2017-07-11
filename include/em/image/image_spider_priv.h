@@ -9,23 +9,25 @@
 
 using namespace em;
 
-class SpiderIO: public ImageIO
+class ImageSpiderIO: public ImageIO
 {
 
 public:
     virtual std::string getName() const override;
     virtual std::string getExtensions() const override;
 
-    virtual void read(const ImageLocation &location, Image &image) override;
+    //virtual void read(const ImageLocation &location, Image &image) override;
 
-    virtual void openFile(const std::string &path) override;
+    //virtual void openFile(const std::string &path) override;
     virtual void read(const size_t index, Image &image) override;
-    virtual void closeFile() override;
+    //virtual void closeFile() override;
 
-    virtual ~SpiderIO();
+    virtual ~ImageSpiderIO();
 
 protected:
-    virtual ImageIO* create() const override;
-}; // class SpiderIO
+    virtual void readHeader() override ;
+    virtual ImageIO* create() const override ;
+
+}; // class ImageSpiderIO
 
 #endif // EM_CORE_RW_SPIDER_H

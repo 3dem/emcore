@@ -6,6 +6,7 @@
 #define EM_CORE_IMAGE_H
 
 #include <cstddef>
+#include <cstdio>
 #include <string>
 
 #include "em/base/object.h"
@@ -19,7 +20,7 @@ namespace em
 {
 
     class ImageIO;
-    class ImageWriter;
+    class ImageHandler;
 
     /** @ingroup image
      * Image class
@@ -69,6 +70,7 @@ namespace em
 
     std::ostream& operator<< (std::ostream &ostream, const em::Image &t);
 
+
     /** @ingroup image
      * This class represent the location of one or several images in disk.
      * It contains a path to a physical file on disk, and a given index
@@ -85,12 +87,13 @@ namespace em
         size_t end; ///< Last index to read (0 means just the starting one, -1 means till the end)
     }; // class ImageLocation
 
+
     /** @ingroup image
      * Base class to read Image from disk.
      *
      * Sub-classes of ImageReader should be implemented for reading
-     * form the EM formats such as: spider, mrc, img, etc.
-     * Other more standard formats should also be supported,
+     * EM formats such as: spider, mrc, img, etc.
+     * Other standard formats should also be supported,
      * including: tiff, png, jpeg, hdf5
      */
     class ImageIO
@@ -98,8 +101,10 @@ namespace em
     public:
         /** Return a name identifying this reader. */
         virtual std::string getName() const = 0;
+
         /** Return the extensions this reader is able to read. */
         virtual std::string getExtensions() const = 0;
+
         /** Read a given image from file.
          * This function is the most basic way to read an image from disk.
          * The file will be open before data is read and close after it.
@@ -109,15 +114,23 @@ namespace em
          * @param location Input image location (index range and path) to be read
          * @param image Image where data will be read
          */
-        virtual void read(const ImageLocation &location, Image &image) = 0;
+        virtual void read(const ImageLocation &location, Image &image);
 
-        virtual void openFile(const std::string &path) = 0;
+        virtual void openFile(const std::string &path);
         virtual void read(const size_t index, Image &image) = 0;
-        virtual void closeFile() = 0;
+        virtual void closeFile();
 
         virtual ~ImageIO();
 
     protected:
+        /** Create an instance of ImageHandler (or subclass).
+         * @return A pointer to the given instance of the handler.
+         */
+        virtual ImageHandler* createHandler();
+
+        /** Reader the main header of an image file */
+        virtual void readHeader() = 0;
+
         /** Clone this reader and obtain a new copy.
          * The caller to this functions should take care
          * of memory disposal. This function should only be accessible
@@ -127,12 +140,34 @@ namespace em
          */
         virtual ImageIO * create() const = 0;
 
-        ObjectDict data;
+        ImageHandler* handler = nullptr;
 
         friend class Image;
     }; // class ImageIO
 
-//extern bool reg;
+
+    /** Helper class to store information about image file.
+     * This class can only be used from ImageIO class.
+     */
+    class ImageHandler
+    {
+    protected:
+        ImageHandler() {}; // avoid instances of this class
+
+    public:
+        // Store the name of the file that was read/written
+        std::string path;
+        // Keep a file handler to the image file
+        FILE* file;
+        // Store dimensions of the image file
+        ArrayDim dim;
+
+        friend class ImageIO;
+    }; // class ImageHandler
+
+
+
+
 } // em namespace
 
 
