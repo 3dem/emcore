@@ -14,7 +14,7 @@ struct MrcHeader
     int nx;              //  1      1-4     number of columns in 3D data array (fast axis, x dimension)
     int ny;              //  2      5-8     number of rows in 3D data array (medium axis, y dimension)
     int nz;              //  3	    9-12	number of sections in 3D data array (slow axis, z*n dimension)
-    int mode;            //  4      13-16   0  8-bit signed integer (range -128 to 127)
+    int mode;            //  4      13-16   0  8-bit signed integer (range -127 to 127)
                          //                 1  16-bit signed integer
                          //                 2  32-bit signed real (float)
                          //                 3  transform: complex 16-bit integers
@@ -100,21 +100,73 @@ std::string ImageMrcIO::getExtensions() const
 
 void ImageMrcIO::read(const size_t index, em::Image &image)
 {
-
-
-
+    image.resize(handler->dim, handler->type);
 }
 
 void ImageMrcIO::readHeader()
 {
     auto mrcHandler = static_cast<ImageMrcHandler*>(handler);
 
+    std::cout << " Reading header..." << std::endl;
+
     // Try to read the main header from the (already openened) file stream
     if ( fread(&mrcHandler->header, MRC_HEADER_SIZE, 1, mrcHandler->file) < 1 )
-        return; //FIXME: Set some error or throw an Exception
+        return; //FIXME: Set some error or throw an Exception errCode = -2;
 
-    // TODO: Determine dimensions (x, y, z, n)
-    // TODO: Determine DataType (if normal image or transform)
+    MrcHeader &header = mrcHandler->header;
+
+    bool isImgStack = (header.ispg == 0 and header.nx > 1);
+    bool isVolStack = (header.ispg == 401);
+
+    std::cout << " Checking dimensions... " << std::endl;
+    // Check dimensions of the data taking into account
+    // if it is a 2D or 3D stack
+    ArrayDim &adim = mrcHandler->dim; // short-hand alias
+    adim.x = header.nx;
+    adim.y = header.ny;
+
+    if (isImgStack)
+    {
+        adim.z = 1;
+        adim.n = header.nz;
+    }
+    else if (isVolStack)
+    {
+        adim.z = header.mz;
+        adim.n = header.nz / header.mz;
+    }
+
+    std::cout << " Checking datatype... " << std::endl;
+    // Check Datatype
+    switch (header.mode)
+    {
+        case 0:
+            mrcHandler->type = em::TypeSChar;
+            break;
+        case 1:
+            mrcHandler->type = em::TypeShort;
+            break;
+        case 2:
+            mrcHandler->type = em::TypeFloat;
+            break;
+        case 3:
+            // FIXME: datatype = DT_CShort;
+            mrcHandler->type = nullptr;
+            break;
+        case 4:
+            // FIXME: datatype = DT_CFloat;
+            mrcHandler->type = nullptr;
+            break;
+        case 6:
+            mrcHandler->type = em::TypeUShort;
+            break;
+        default:
+            mrcHandler->type = nullptr;
+            // FIXME: errCode = -1;
+            break;
+    }
+
+    // TODO: Check special cases where image is a transform
     // TODO: Determine swap order (little vs big endian)
 
 }

@@ -64,6 +64,10 @@ TEST(Type, General) {
     delete [] array;
     delete [] array2;
 
+    std::cout << "Signed char: " << *em::TypeSChar << std::endl;
+    std::cout << "Unsigned short: " <<  *em::TypeUShort << std::endl;
+    std::cout << "Int: " <<  *em::TypeInt << std::endl;
+
 } // TEST(ArrayTest, ArrayDim)
 
 
@@ -77,6 +81,8 @@ TEST(ArrayDim, Defaults) {
     // the rest will be set to 1
     ArrayDim adim2(100);
     ASSERT_TRUE((adim2 == ArrayDim(100, 1, 1, 1)));
+
+    std::cout << adim2 << std::endl;
 
 
 } // TEST(ArrayTest, ArrayDim)

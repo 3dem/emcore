@@ -30,6 +30,8 @@ namespace em
         bool operator==(const ArrayDim &other);
     }; // class ArrayDim
 
+    std::ostream& operator<< (std::ostream &ostream, const ArrayDim &adim);
+
     /** @ingroup base
      * Four dimensional array class to manage internal memory and data type.
      */

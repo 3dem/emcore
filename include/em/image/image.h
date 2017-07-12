@@ -117,7 +117,7 @@ namespace em
         virtual void read(const ImageLocation &location, Image &image);
 
         virtual void openFile(const std::string &path);
-        virtual void read(const size_t index, Image &image) = 0;
+        virtual void read(const size_t index, Image &image);
         virtual void closeFile();
 
         virtual ~ImageIO();
@@ -161,6 +161,8 @@ namespace em
         FILE* file;
         // Store dimensions of the image file
         ArrayDim dim;
+        // Detected datatype in the file
+        ConstTypePtr type;
 
         friend class ImageIO;
     }; // class ImageHandler

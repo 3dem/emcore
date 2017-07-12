@@ -79,6 +79,8 @@ public:
         }
     } // toStream
 
+
+
 };
 
 
@@ -116,6 +118,46 @@ public:
     virtual std::string getName() const override
     {
         return "int";
+    }
+};
+
+template <>
+class TypeInfoT<short>: public TypeInfoBase<int>
+{
+public:
+    virtual std::string getName() const override
+    {
+        return "short";
+    }
+};
+
+template <>
+class TypeInfoT<unsigned short>: public TypeInfoBase<int>
+{
+public:
+    virtual std::string getName() const override
+    {
+        return "unsigned short";
+    }
+};
+
+template <>
+class TypeInfoT<signed char>: public TypeInfoBase<int>
+{
+public:
+    virtual std::string getName() const override
+    {
+        return "signed char";
+    }
+};
+
+template <>
+class TypeInfoT<unsigned char>: public TypeInfoBase<int>
+{
+public:
+    virtual std::string getName() const override
+    {
+        return "unsigned char";
     }
 };
 

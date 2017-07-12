@@ -69,9 +69,16 @@ namespace em
 
     std::ostream& operator<< (std::ostream &ostrm, const em::Type &t);
 
-    ConstTypePtr const TypeFloat = Type::get<float>();
+    ConstTypePtr const TypeSChar = Type::get<signed char>();
+    ConstTypePtr const TypeUChar = Type::get<unsigned char>();
+    ConstTypePtr const TypeShort = Type::get<short>();
+    ConstTypePtr const TypeUShort = Type::get<unsigned short>();
     ConstTypePtr const TypeInt = Type::get<int>();
+    ConstTypePtr const TypeUInt = Type::get<unsigned int>();
+    ConstTypePtr const TypeFloat = Type::get<float>();
     ConstTypePtr const TypeDouble = Type::get<double>();
+
+
 
 #include "type_priv.h"
 

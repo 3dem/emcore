@@ -29,6 +29,12 @@ bool ArrayDim::operator==(const ArrayDim &other)
     return (x == other.x and y == other.y and z == other.z and n == other.n);
 }
 
+std::ostream& em::operator<< (std::ostream &ostream, const ArrayDim &adim)
+{
+    ostream << "(" << adim.x << " x " << adim.y << " x "
+            << adim.z << " x " << adim.n << ")";
+    return ostream;
+}
 
 // ===================== ArrayImpl Implementation =======================
 

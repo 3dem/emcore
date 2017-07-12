@@ -31,4 +31,22 @@ TEST(Image, Constructor) {
     ImageIO * reader2 = Image::getIO("mrc");
     ASSERT_EQ(reader2->getName(), "mrc");
 
+    ImageLocation loc;
+    std::map<std::string, ArrayDim> fileDims;
+
+    std::string root("/home/josem/scipion/data/tests/");
+
+    fileDims["xmipp_tutorial/micrographs/BPV_1386.mrc"] = ArrayDim(9216, 9441, 1, 1);
+    fileDims["emx/alignment/Test2/stack2D.mrc"] = ArrayDim(128, 128, 1, 100);
+
+    for (auto& pair: fileDims)
+    {
+        loc.path = root + pair.first;
+        reader2->read(loc, img);
+        std::cout << img << std::endl;
+        ASSERT_TRUE(img.getDimensions() == pair.second);
+    }
+
+
+
 } // TEST(ArrayTest, Constructor)

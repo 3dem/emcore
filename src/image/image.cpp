@@ -69,11 +69,13 @@ ObjectDict& Image::getHeader(size_t index)
 
 void Image::toStream(std::ostream &ostream) const
 {
+    ostream << "Dimensions: " << getDimensions() << std::endl;
+    ostream << "Type: " << *getType() << std::endl;
     ostream << "Header: " << std::endl;
     for (auto& x: implPtr->headers[0]) {
         std::cout << x.first << ": " << x.second << std::endl;
     }
-    Array::toStream(ostream);
+    // Array::toStream(ostream);
 }
 
 std::ostream& em::operator<< (std::ostream &ostream, const em::Image &image)
@@ -108,7 +110,7 @@ ImageIO* Image::getIO(const std::string &extension)
 
 ImageIO::~ImageIO()
 {
-}
+}// ImageIO ctor
 
 void ImageIO::openFile(const std::string &path)
 {
@@ -117,18 +119,29 @@ void ImageIO::openFile(const std::string &path)
 
     handler->path = path;
     handler->file = fopen(path.c_str(), "r");
-}
+    if (handler->file == nullptr)
+        std::cerr << "Error opening file '" << path << "'. Error code: " << errno << std::endl;
+    readHeader();
+} // openFile
 
 void ImageIO::closeFile()
 {
     fclose(handler->file);
 }
 
+void ImageIO::read(const size_t index, Image &image)
+{
+
+}
+
 void ImageIO::read(const ImageLocation &location, Image &image)
 {
+    std::cout << " openFile: " << location.path << std::endl;
     openFile(location.path);
     // FIXME: Now only reading the first image in the location range
+    std::cout << " read(location.start: " << location.start << std::endl;
     read(location.start, image);
+    std::cout << " Close file" << std::endl;
     closeFile();
 }
 
