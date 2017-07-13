@@ -5,10 +5,12 @@
 #include <iostream>
 #include "gtest/gtest.h"
 
+#include "em/base/error.h"
 #include "em/base/object.h"
 #include "em/base/array.h"
 #include "em/image/image.h"
-//#include "em/image/rw_spider.h.h"
+
+
 
 using namespace em;
 
@@ -84,6 +86,12 @@ TEST(ArrayDim, Defaults) {
 
     std::cout << adim2 << std::endl;
 
+    // Test helper functions to compute the size
+    ArrayDim adim3(100, 100, 1, 100);
+
+    ASSERT_EQ(adim3.getSize(), 100 * 100 * 100);
+    ASSERT_EQ(adim3.getItemSize(), 100 * 100);
+
 
 } // TEST(ArrayTest, ArrayDim)
 
@@ -111,3 +119,35 @@ TEST(ArrayTest, Constructor) {
     //std::cout << A << std::endl;
 
 } // TEST(ArrayTest, Constructor)
+
+
+TEST(Error, Basics) {
+
+    std::string errorMsg = "Testing error";
+
+    try
+    {
+        THROW_ERROR(errorMsg);
+    }
+    catch (Error &err)
+    {
+        ASSERT_EQ(err.msg, errorMsg);
+        ASSERT_EQ(err.filename, __FILE__);
+        std::cout << err << std::endl;
+    }
+
+    try
+    {
+        FILE * pFile;
+        pFile = fopen ("unexist.ent","r");
+        if (pFile == NULL)
+            THROW_SYS_ERROR("Error opening file unexist.ent");
+    }
+    catch (Error &err)
+    {
+        ASSERT_EQ(err.errorCode, ENOENT); // Not such file or directory error
+        ASSERT_EQ(err.filename, __FILE__);
+        std::cout << err << std::endl;
+    }
+} // TEST(ArrayTest, Constructor)
+
