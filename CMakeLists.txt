@@ -61,7 +61,10 @@ if (BUILD_TESTS)
 
     # This is so you can do 'make test' to see all your tests run, instead of
     # manually running the executable em-test to see those specific tests.
-    add_test(main-test em-test)
+    add_test(em-test em-test)
+    add_test(em-test-base em-test-base)
+    add_test(em-test-image em-test-image)
+
 
 endif()
 

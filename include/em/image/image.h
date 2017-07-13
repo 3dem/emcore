@@ -163,10 +163,10 @@ namespace em
         // Detected datatype in the file
         ConstTypePtr type;
 
+        Image image; ///< Temporary image used as buffer to read from disk
+
         friend class ImageIO;
     }; // class ImageHandler
-
-
 
 
 } // em namespace

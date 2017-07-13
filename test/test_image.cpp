@@ -5,6 +5,7 @@
 #include <iostream>
 #include "gtest/gtest.h"
 
+#include "em/base/error.h"
 #include "em/image/image.h"
 
 
@@ -34,18 +35,34 @@ TEST(Image, Constructor) {
     ImageLocation loc;
     std::map<std::string, ArrayDim> fileDims;
 
-    std::string root("/home/josem/scipion/data/tests/");
 
-    fileDims["xmipp_tutorial/micrographs/BPV_1386.mrc"] = ArrayDim(9216, 9441, 1, 1);
-    fileDims["emx/alignment/Test2/stack2D.mrc"] = ArrayDim(128, 128, 1, 100);
+    auto testDataPath = getenv("EM_TEST_DATA");
 
-    for (auto& pair: fileDims)
+    if (testDataPath != nullptr)
     {
-        loc.path = root + pair.first;
-        reader2->read(loc, img);
-        std::cout << img << std::endl;
-        ASSERT_TRUE(img.getDimensions() == pair.second);
+        try {
+            std::string root(testDataPath);
+
+            fileDims["xmipp_tutorial/micrographs/BPV_1386.mrc"] = ArrayDim(9216, 9441, 1, 1);
+            fileDims["emx/alignment/Test2/stack2D.mrc"] = ArrayDim(128, 128, 1, 100);
+
+            for (auto &pair: fileDims) {
+                loc.path = root + pair.first;
+                reader2->read(loc, img);
+                std::cout << img << std::endl;
+                ASSERT_TRUE(img.getDimensions() == pair.second);
+            }
+        }
+        catch (Error &err)
+        {
+            std::cout << err << std::endl;
+        }
     }
+    else
+    {
+        std::cout << "Skipping image format tests, EM_TEST_DATA not defined in environment. " << std::endl;
+    }
+
 
 
 

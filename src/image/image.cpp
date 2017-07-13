@@ -7,6 +7,7 @@
 #include <cassert>
 #include <vector>
 
+#include "em/base/error.h"
 #include "em/base/type.h"
 #include "em/base/array.h"
 #include "em/image/image.h"
@@ -119,8 +120,10 @@ void ImageIO::openFile(const std::string &path)
 
     handler->path = path;
     handler->file = fopen(path.c_str(), "r");
+
     if (handler->file == nullptr)
-        std::cerr << "Error opening file '" << path << "'. Error code: " << errno << std::endl;
+        THROW_SYS_ERROR(std::string("Error opening file '") + path);
+
     readHeader();
 } // openFile
 
@@ -131,6 +134,43 @@ void ImageIO::closeFile()
 
 void ImageIO::read(const size_t index, Image &image)
 {
+    // TODO: Validate that openFile has been previously called and succeeded
+
+    ArrayDim adim = handler->dim;
+    adim.n = 1; // Allocate for just one element
+
+    ConstTypePtr imageType = image.getType();
+    ConstTypePtr fileType = handler->type;
+
+    // If the image already has a defined Type, we should respect that
+    // one and then convert from the data read from disk.
+    // If the image
+    if (imageType == nullptr)
+    {
+        image.resize(adim, fileType);
+        imageType = fileType;
+    }
+    else
+        image.resize(adim);
+
+    bool sameType = (imageType == fileType);
+    void * data = nullptr;
+
+    // If the image has the same Type as the file
+    // we do not need an intermediate buffer, we can read data
+    // directly into the image memory
+    // TODO: Check how this plays with Images in GPU memory
+    if (sameType)
+    {
+        data = image.getDataPointer();
+    }
+    else
+    {
+        // TODO: image one item is too big, we could think of a
+        // smaller chunk of the image
+        handler->image.resize(adim, fileType);
+        data = handler->image.getDataPointer();
+    }
 
 }
 
