@@ -139,8 +139,8 @@ void ImageIO::read(const ImageLocation &location, Image &image)
     std::cout << " openFile: " << location.path << std::endl;
     openFile(location.path);
     // FIXME: Now only reading the first image in the location range
-    std::cout << " read(location.start: " << location.start << std::endl;
-    read(location.start, image);
+    std::cout << " read(location.start: " << location.index << std::endl;
+    read(location.index, image);
     std::cout << " Close file" << std::endl;
     closeFile();
 }

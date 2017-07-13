@@ -19,9 +19,14 @@ ArrayDim::ArrayDim() :x(0), y(0), z(0), n(0) {}
 ArrayDim::ArrayDim(size_t xdim, size_t ydim, size_t zdim, size_t ndim)
         :x(xdim), y(ydim), z(zdim), n(ndim) {}
 
-size_t ArrayDim::size() const
+inline size_t ArrayDim::getSize() const
 {
     return x * y * z * n;
+}
+
+inline size_t ArrayDim::getItemSize() const
+{
+    return x * y * z;
 }
 
 bool ArrayDim::operator==(const ArrayDim &other)
@@ -42,7 +47,7 @@ class ArrayImpl
 {
 public:
     ArrayDim adim;
-    size_t msize = 0; // allocated memory size
+    size_t msize = 0; // allocated memory getSize
     ConstTypePtr typePtr = nullptr;
     void * dataPtr = nullptr;
 
@@ -51,7 +56,7 @@ public:
     {
         this->adim = adim;
         this->typePtr = type;
-        msize = adim.size() * typePtr->getSize();
+        msize = adim.getSize() * typePtr->getSize();
         dataPtr = malloc(msize);
         std::cout << "this: " << this << " allocate: msize: " << msize << " dataPtr: " << (dataPtr == nullptr) << std::endl;
 
@@ -109,7 +114,7 @@ Array& Array::operator=(const Array &other)
     std::cout << "Assigning array..." << std::endl;
     ConstTypePtr typePtr = other.getType();
     implPtr->allocate(other.getDimensions(), typePtr);
-    typePtr->copy(other.implPtr->dataPtr, implPtr->dataPtr, implPtr->adim.size());
+    typePtr->copy(other.implPtr->dataPtr, implPtr->dataPtr, implPtr->adim.getSize());
     return *this;
 } //operator=
 
@@ -128,7 +133,7 @@ void Array::resize(const ArrayDim &adim, ConstTypePtr type)
 void Array::toStream(std::ostream &ostream) const
 {
     char * data = static_cast<char*>(implPtr->dataPtr);
-    size_t n = implPtr->adim.size();
+    size_t n = implPtr->adim.getSize();
     size_t xdim = implPtr->adim.x;
     size_t ydim = implPtr->adim.y;
     size_t typeSize = implPtr->typePtr->getSize();
@@ -191,7 +196,7 @@ template <class T>
 void ArrayView<T>::assign(const T &value)
 {
     T *ptrIter = data;
-    size_t n = adim.size();
+    size_t n = adim.getSize();
 
     for (size_t i = 0; i < n; ++i, ++ptrIter)
         *ptrIter = value;
@@ -211,7 +216,7 @@ std::string ArrayView<T>::toString() const
     std::stringstream ss;
 
     T *ptrIter = data;
-    size_t n = adim.size();
+    size_t n = adim.getSize();
     size_t xdim = adim.x;
 
     ss << "[";

@@ -48,7 +48,7 @@ void Type::toStream(void * inputMem, std::ostream &stream, size_t count) const
 
 std::ostream& em::operator<< (std::ostream &ostrm, const Type &t)
 {
-    ostrm << t.getName() << " (size: " << t.getSize()
+    ostrm << t.getName() << " (getSize: " << t.getSize()
           << " bytes)";
     return ostrm;
 }

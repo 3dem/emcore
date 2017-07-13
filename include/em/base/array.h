@@ -26,8 +26,19 @@ namespace em
         // Default Ctor for empty dimensions
         ArrayDim();
         explicit ArrayDim(size_t xdim, size_t ydim=1, size_t zdim=1, size_t ndim=1);
-        size_t size() const;
         bool operator==(const ArrayDim &other);
+
+        /** Return the total number of pixels/voxels of an 4D-array with these
+         * dimensions. (i.e. x * y * z * n).
+         * To obtain the memory size, the returned value should be multiplied
+         * by the size of the datatype of the Array.
+         */
+        size_t getSize() const;
+
+        /** Return the number of pixels/voxels of a single item (either 2D or 3D)
+         * in the Array. (i.e. x * y * z)
+         */
+        size_t getItemSize() const;
     }; // class ArrayDim
 
     std::ostream& operator<< (std::ostream &ostream, const ArrayDim &adim);

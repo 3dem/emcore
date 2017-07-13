@@ -73,9 +73,9 @@ namespace em
 
     /** @ingroup image
      * This class represent the location of one or several images in disk.
-     * It contains a path to a physical file on disk, and a given index
-     * or range. In EM, many images are usually grouped in a single file (stack).
-     * So we need to store the path and the indexes of the image(s).
+     * It contains a path to a physical file on disk, and a given index.
+     * In EM, many images are usually grouped in a single file (stack).
+     * So we need to store the path and the index of the image.
      */
     class ImageLocation
     {
@@ -83,8 +83,7 @@ namespace em
         // TODO: maybe consider a pointer to string, so many ImageLocation objects
         // could share the same path string without extra memory
         std::string path;
-        size_t start; ///< Starting index to read from file (first one is 1)
-        size_t end; ///< Last index to read (0 means just the starting one, -1 means till the end)
+        size_t index; ///< Index to read from file (first one is 1, 0 means all images)
     }; // class ImageLocation
 
 
