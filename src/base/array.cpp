@@ -19,12 +19,12 @@ ArrayDim::ArrayDim() :x(0), y(0), z(0), n(0) {}
 ArrayDim::ArrayDim(size_t xdim, size_t ydim, size_t zdim, size_t ndim)
         :x(xdim), y(ydim), z(zdim), n(ndim) {}
 
-inline size_t ArrayDim::getSize() const
+size_t ArrayDim::getSize() const
 {
     return x * y * z * n;
 }
 
-inline size_t ArrayDim::getItemSize() const
+size_t ArrayDim::getItemSize() const
 {
     return x * y * z;
 }
