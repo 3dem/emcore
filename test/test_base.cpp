@@ -17,7 +17,7 @@ using namespace em;
 TEST(Type, Basic) {
     // Test basic properties of Type singleton instances
     ConstTypePtr i = em::TypeInt;
-    ASSERT_EQ(i->getName(), "int");
+    ASSERT_EQ(i->getName(), "int32");
     ASSERT_TRUE(i->isPod());
     ASSERT_EQ(i->getSize(), sizeof(int));
     std::cout << std::endl << *i << std::endl;
@@ -33,6 +33,13 @@ TEST(Type, Basic) {
     ASSERT_TRUE(d->isPod());
     ASSERT_EQ(d->getSize(), sizeof(double));
     std::cout << *d << std::endl;
+
+    ConstTypePtr i8 = em::TypeInt8;
+    ASSERT_EQ(i8->getName(), "int8");
+    ASSERT_TRUE(i8->isPod());
+    ASSERT_EQ(i8->getSize(), sizeof(int8_t));
+    std::cout << *i8 << std::endl;
+
 }
 
 TEST(Type, General) {
@@ -66,7 +73,8 @@ TEST(Type, General) {
     delete [] array;
     delete [] array2;
 
-    std::cout << "Signed char: " << *em::TypeSChar << std::endl;
+    std::cout << "sizeof int8_t: " << sizeof(int8_t) << std::endl;
+    std::cout << "Signed Int8: " << *em::TypeInt8 << std::endl;
     std::cout << "Unsigned short: " <<  *em::TypeUShort << std::endl;
     std::cout << "Int: " <<  *em::TypeInt << std::endl;
 
@@ -91,6 +99,13 @@ TEST(ArrayDim, Defaults) {
 
     ASSERT_EQ(adim3.getSize(), 100 * 100 * 100);
     ASSERT_EQ(adim3.getItemSize(), 100 * 100);
+
+    // Test copy constructor
+    ArrayDim adim4(adim3);
+
+    ASSERT_TRUE(adim4 == adim3);
+    ASSERT_EQ(adim4.getSize(), 100 * 100 * 100);
+    ASSERT_EQ(adim4.getItemSize(), 100 * 100);
 
 
 } // TEST(ArrayTest, ArrayDim)
@@ -132,7 +147,7 @@ TEST(Error, Basics) {
     catch (Error &err)
     {
         ASSERT_EQ(err.msg, errorMsg);
-        ASSERT_EQ(err.filename, __FILE__);
+        ASSERT_EQ(err.fileName, __FILE__);
         std::cout << err << std::endl;
     }
 
@@ -146,7 +161,7 @@ TEST(Error, Basics) {
     catch (Error &err)
     {
         ASSERT_EQ(err.errorCode, ENOENT); // Not such file or directory error
-        ASSERT_EQ(err.filename, __FILE__);
+        ASSERT_EQ(err.fileName, __FILE__);
         std::cout << err << std::endl;
     }
 } // TEST(ArrayTest, Constructor)
