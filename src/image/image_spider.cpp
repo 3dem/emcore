@@ -2,7 +2,7 @@
 #include "em/image/image_spider_priv.h"
 
 
-#define SPIDERSIZE 1024 // Minimum size of the SPIDER header (variable)
+#define SPIDER_HEADER_SIZE 1024 // Minimum size of the SPIDER header (variable)
 
 
 struct SPIDERhead
@@ -71,7 +71,6 @@ struct SPIDERhead
 } ;
 
 
-
 std::string ImageSpiderIO::getName() const
 {
     return "spider";
@@ -95,6 +94,16 @@ ImageSpiderIO::~ImageSpiderIO()
 void ImageSpiderIO::readHeader()
 {
     // TODO: Implement it
+}
+
+size_t ImageSpiderIO::getHeaderSize() const
+{
+    return SPIDER_HEADER_SIZE;
+}
+
+size_t ImageSpiderIO::getPadSize() const
+{
+    return 0;
 }
 
 em::ImageIO* ImageSpiderIO::create() const

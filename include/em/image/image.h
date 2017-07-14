@@ -119,6 +119,9 @@ namespace em
         virtual void read(const size_t index, Image &image);
         virtual void closeFile();
 
+        /** Return the dimensions of the file opened. */
+        ArrayDim getDimensions() const;
+
         virtual ~ImageIO();
 
     protected:
@@ -129,6 +132,12 @@ namespace em
 
         /** Reader the main header of an image file */
         virtual void readHeader() = 0;
+
+        /** Return the size of the header for this format */
+        virtual size_t getHeaderSize() const = 0;
+
+        /** Return the size of padding between images/volumes in a stack */
+        virtual size_t getPadSize() const = 0;
 
         /** Clone this reader and obtain a new copy.
          * The caller to this functions should take care

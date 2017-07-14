@@ -15,13 +15,13 @@ class ImageMrcIO: public ImageIO
 public:
     virtual std::string getName() const override;
     virtual std::string getExtensions() const override;
-
-    virtual void read(const size_t index, Image &image) override;
     virtual ~ImageMrcIO();
 
 protected:
     virtual ImageHandler* createHandler() override ;
     virtual void readHeader() override ;
+    virtual size_t getHeaderSize() const override ;
+    virtual size_t getPadSize() const override ;
     virtual ImageIO* create() const override;
 }; // class ImageMrcIO
 

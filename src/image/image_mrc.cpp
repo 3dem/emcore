@@ -97,17 +97,11 @@ std::string ImageMrcIO::getExtensions() const
     return "mrc";
 }
 
-
-void ImageMrcIO::read(const size_t index, em::Image &image)
-{
-    image.resize(handler->dim, handler->type);
-}
-
 void ImageMrcIO::readHeader()
 {
     auto mrcHandler = static_cast<ImageMrcHandler*>(handler);
 
-    std::cout << " Reading header..." << std::endl;
+    std::cout << "DEBUG: Reading header...file " << mrcHandler->path << std::endl;
 
     // Try to read the main header from the (already openened) file stream
     if ( fread(&mrcHandler->header, MRC_HEADER_SIZE, 1, mrcHandler->file) < 1 )
@@ -118,7 +112,7 @@ void ImageMrcIO::readHeader()
     bool isImgStack = (header.ispg == 0 and header.nx > 1);
     bool isVolStack = (header.ispg == 401);
 
-    std::cout << " Checking dimensions... " << std::endl;
+
     // Check dimensions of the data taking into account
     // if it is a 2D or 3D stack
     ArrayDim &adim = mrcHandler->dim; // short-hand alias
@@ -136,12 +130,14 @@ void ImageMrcIO::readHeader()
         adim.n = header.nz / header.mz;
     }
 
-    std::cout << " Checking datatype... " << std::endl;
+    std::cout << "DEBUG: Dimensions: " << adim << std::endl;
+
+
     // Check Datatype
     switch (header.mode)
     {
         case 0:
-            mrcHandler->type = em::TypeSChar;
+            mrcHandler->type = em::TypeInt8;
             break;
         case 1:
             mrcHandler->type = em::TypeShort;
@@ -158,7 +154,7 @@ void ImageMrcIO::readHeader()
             mrcHandler->type = nullptr;
             break;
         case 6:
-            mrcHandler->type = em::TypeUShort;
+            mrcHandler->type = em::TypeUInt8;
             break;
         default:
             mrcHandler->type = nullptr;
@@ -166,11 +162,22 @@ void ImageMrcIO::readHeader()
             break;
     }
 
+    std::cout << "DEBUG: Data Type: " << *mrcHandler->type << std::endl;
+
     // TODO: Check special cases where image is a transform
     // TODO: Determine swap order (little vs big endian)
 
 }
 
+size_t ImageMrcIO::getHeaderSize() const
+{
+    return MRC_HEADER_SIZE;
+}
+
+size_t ImageMrcIO::getPadSize() const
+{
+    return 0;
+}
 
 ImageHandler* ImageMrcIO::createHandler()
 {

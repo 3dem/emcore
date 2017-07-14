@@ -132,6 +132,13 @@ void ImageIO::closeFile()
     fclose(handler->file);
 }
 
+ArrayDim ImageIO::getDimensions() const
+{
+    ASSERT_ERROR(handler == nullptr, "File has not been opened. ");
+
+    return handler->dim;
+}
+
 void ImageIO::read(const size_t index, Image &image)
 {
     // TODO: Validate that openFile has been previously called and succeeded
@@ -156,6 +163,9 @@ void ImageIO::read(const size_t index, Image &image)
     bool sameType = (imageType == fileType);
     void * data = nullptr;
 
+    std::cout << "DEBUG:read: imageType: " << *imageType << std::endl;
+    std::cout << "DEBUG:read: fileType: " << *fileType << std::endl;
+
     // If the image has the same Type as the file
     // we do not need an intermediate buffer, we can read data
     // directly into the image memory
@@ -172,6 +182,32 @@ void ImageIO::read(const size_t index, Image &image)
         data = handler->image.getDataPointer();
     }
 
+    // NOTE: If in a future we want to read more than one continuous image
+    // we could just move point the padding space between images
+    // For now, we are just positioning the pointer to the place where
+    // the required image is stored. Basically we need to shift the pointer
+    // HEADER_SIZE + (IMAGE_SIZE + PAD_SIZE) * (IMG_INDEX - 1)
+    size_t itemSize = adim.getItemSize() * fileType->getSize();
+    size_t itemPosition = getHeaderSize() + (itemSize + getPadSize()) * (index - 1);
+
+    std::cerr << "DEBUG: fseeking to " << itemPosition << std::endl;
+
+    if (fseek(handler->file, itemPosition, SEEK_SET) != 0)
+        THROW_SYS_ERROR("Could not 'fseek' in file. ");
+
+    // FIXME: change this to read by chunks when we change this
+    // approach, right now only read a big chunk of one item size
+    std::cerr << "DEBUG: reading " << itemSize << " bytes." << std::endl;
+
+    if (fread(data, itemSize, 1, handler->file) != 1)
+        THROW_SYS_ERROR("Could not 'fread' data from file. ");
+
+    // TODO
+    //swap per page
+    //if (swap)
+    //    swapPage(page, readsize, datatype);
+    // cast to T per page
+    //castPage2T(page, MULTIDIM_ARRAY(data) + haveread_n, datatype, readsize_n);
 }
 
 void ImageIO::read(const ImageLocation &location, Image &image)
