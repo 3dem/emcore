@@ -23,9 +23,16 @@ namespace em
     {
     public:
         size_t x, y, z, n;
+
         // Default Ctor for empty dimensions
         ArrayDim();
+
+        // Copy constructor from another ArrayDim
+        ArrayDim(const ArrayDim &adim);
+
+        // Constructor from a given dimensions
         explicit ArrayDim(size_t xdim, size_t ydim=1, size_t zdim=1, size_t ndim=1);
+
         bool operator==(const ArrayDim &other);
 
         /** Return the total number of pixels/voxels of an 4D-array with these

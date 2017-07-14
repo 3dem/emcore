@@ -16,6 +16,9 @@ using namespace em;
 
 ArrayDim::ArrayDim() :x(0), y(0), z(0), n(0) {}
 
+ArrayDim::ArrayDim(const ArrayDim &adim)
+        :x(adim.x), y(adim.y), z(adim.z), n(adim.n) {}
+
 ArrayDim::ArrayDim(size_t xdim, size_t ydim, size_t zdim, size_t ndim)
         :x(xdim), y(ydim), z(zdim), n(ndim) {}
 
