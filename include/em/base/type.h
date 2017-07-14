@@ -69,8 +69,8 @@ namespace em
 
     std::ostream& operator<< (std::ostream &ostrm, const em::Type &t);
 
-    ConstTypePtr const TypeSChar = Type::get<signed char>();
-    ConstTypePtr const TypeUChar = Type::get<unsigned char>();
+    ConstTypePtr const TypeInt8 = Type::get<int8_t>();
+    ConstTypePtr const TypeUInt8 = Type::get<uint8_t>();
     ConstTypePtr const TypeShort = Type::get<short>();
     ConstTypePtr const TypeUShort = Type::get<unsigned short>();
     ConstTypePtr const TypeInt = Type::get<int>();

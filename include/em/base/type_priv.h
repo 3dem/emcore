@@ -90,17 +90,6 @@ class TypeInfoT: public TypeInfoBase<T>
 
 };
 
-
-template <>
-class TypeInfoT<double>: public TypeInfoBase<double>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "double";
-    }
-};
-
 template <>
 class TypeInfoT<float>: public TypeInfoBase<float>
 {
@@ -112,52 +101,76 @@ public:
 };
 
 template <>
-class TypeInfoT<int>: public TypeInfoBase<int>
+class TypeInfoT<double>: public TypeInfoBase<double>
 {
 public:
     virtual std::string getName() const override
     {
-        return "int";
+        return "double";
+    }
+};
+
+//------------ 8 bits signed and unsigned int ----------
+template <>
+class TypeInfoT<int8_t >: public TypeInfoBase<int8_t>
+{
+public:
+    virtual std::string getName() const override
+    {
+        return "int8";
     }
 };
 
 template <>
-class TypeInfoT<short>: public TypeInfoBase<int>
+class TypeInfoT<uint8_t>: public TypeInfoBase<uint8_t>
 {
 public:
     virtual std::string getName() const override
     {
-        return "short";
+        return "uint8";
+    }
+};
+
+//------------ 16 bits signed and unsigned int ----------
+template <>
+class TypeInfoT<int16_t>: public TypeInfoBase<int16_t>
+{
+public:
+    virtual std::string getName() const override
+    {
+        return "int16";
     }
 };
 
 template <>
-class TypeInfoT<unsigned short>: public TypeInfoBase<int>
+class TypeInfoT<uint16_t>: public TypeInfoBase<uint16_t>
 {
 public:
     virtual std::string getName() const override
     {
-        return "unsigned short";
+        return "uint16";
+    }
+};
+
+//------------ 32 bits signed and unsigned int ----------
+
+template <>
+class TypeInfoT<int32_t>: public TypeInfoBase<int32_t>
+{
+public:
+    virtual std::string getName() const override
+    {
+        return "int32";
     }
 };
 
 template <>
-class TypeInfoT<signed char>: public TypeInfoBase<int>
+class TypeInfoT<uint32_t>: public TypeInfoBase<uint32_t>
 {
 public:
     virtual std::string getName() const override
     {
-        return "signed char";
-    }
-};
-
-template <>
-class TypeInfoT<unsigned char>: public TypeInfoBase<int>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "unsigned char";
+        return "uint32";
     }
 };
 
