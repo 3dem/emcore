@@ -19,10 +19,12 @@ namespace em {
     public:
         int errorCode; ///< Error code
         std::string msg; ///< Message of this error
-        std::string filename; ///< Filename where the error was produced in the code
+        std::string fileName; ///< Filename where the error was produced in the code
+        std::string fuctionName; ///< Name of the function where the error was produced
         long line; ///< Line number where the error was produced
 
-        Error(const std::string &msg, const std::string &filename, const long line, const int errorCode=0);
+        Error(const std::string &msg, const std::string &filename, const long line,
+              const int errorCode=0, const std::string &func="");
     };
 
     /** Define how an Error is put into an stream.
@@ -34,10 +36,14 @@ namespace em {
 
 // The following macro throws an Exception with a given error message
 // and provides the file name and the line number
-#define THROW_ERROR(msg) throw Error(msg, __FILE__, __LINE__)
+#define THROW_ERROR(msg) throw Error(msg, __FILE__, __LINE__, 0, __func__)
 
 // This other macro throws an Error using the errno macro from the system
-#define THROW_SYS_ERROR(msg) throw Error(msg, __FILE__, __LINE__, errno)
+#define THROW_SYS_ERROR(msg) throw Error(msg, __FILE__, __LINE__, errno, __func__)
+
+// Similar to THROW_ERROR but taking a condition as input and if True
+// then throws the Error
+#define ASSERT_ERROR(cond, msg) if ((cond)) THROW_ERROR(msg);
 
 #endif //EM_CORE_ERROR_H
 
