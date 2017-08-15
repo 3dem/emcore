@@ -113,7 +113,7 @@ ImageIO::~ImageIO()
 {
 }// ImageIO ctor
 
-void ImageIO::openFile(const std::string &path)
+void ImageIO::openFile(const std::string &path, FileMode mode)
 {
     if (handler == nullptr)
         handler = createHandler();

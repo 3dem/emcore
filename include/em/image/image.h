@@ -87,6 +87,7 @@ namespace em
     }; // class ImageLocation
 
 
+    using FileMode = const uint8_t;
     /** @ingroup image
      * Base class to read Image from disk.
      *
@@ -98,6 +99,11 @@ namespace em
     class ImageIO
     {
     public:
+        /** Constants for open files. */
+        static FileMode READ_ONLY = 0;
+        static FileMode READ_WRITE = 1;
+        static FileMode WRITE_ONLY = 2;
+
         /** Return a name identifying this reader. */
         virtual std::string getName() const = 0;
 
@@ -115,7 +121,7 @@ namespace em
          */
         virtual void read(const ImageLocation &location, Image &image);
 
-        virtual void openFile(const std::string &path);
+        virtual void openFile(const std::string &path, FileMode mode=READ_ONLY);
         virtual void read(const size_t index, Image &image);
         virtual void closeFile();
 
