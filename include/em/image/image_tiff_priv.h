@@ -18,9 +18,9 @@ public:
 
     //virtual void read(const ImageLocation &location, Image &image) override;
 
-    //virtual void openFile(const std::string &path) override;
+    //virtual void open(const std::string &path) override;
     virtual void read(const size_t index, Image &image) override;
-    //virtual void closeFile() override;
+    //virtual void close() override;
 
     virtual ~ImageTiffIO();
 

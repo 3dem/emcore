@@ -121,9 +121,9 @@ namespace em
          */
         virtual void read(const ImageLocation &location, Image &image);
 
-        virtual void openFile(const std::string &path, FileMode mode=READ_ONLY);
+        virtual void open(const std::string &path, FileMode mode=READ_ONLY);
         virtual void read(const size_t index, Image &image);
-        virtual void closeFile();
+        virtual void close();
 
         /** Return the dimensions of the file opened. */
         ArrayDim getDimensions() const;

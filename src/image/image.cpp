@@ -113,7 +113,7 @@ ImageIO::~ImageIO()
 {
 }// ImageIO ctor
 
-void ImageIO::openFile(const std::string &path, FileMode mode)
+void ImageIO::open(const std::string &path, FileMode mode)
 {
     if (handler == nullptr)
         handler = createHandler();
@@ -125,9 +125,9 @@ void ImageIO::openFile(const std::string &path, FileMode mode)
         THROW_SYS_ERROR(std::string("Error opening file '") + path);
 
     readHeader();
-} // openFile
+} // open
 
-void ImageIO::closeFile()
+void ImageIO::close()
 {
     fclose(handler->file);
 }
@@ -141,7 +141,7 @@ ArrayDim ImageIO::getDimensions() const
 
 void ImageIO::read(const size_t index, Image &image)
 {
-    // TODO: Validate that openFile has been previously called and succeeded
+    // TODO: Validate that open has been previously called and succeeded
 
     ArrayDim adim = handler->dim;
     adim.n = 1; // Allocate for just one element
@@ -212,13 +212,13 @@ void ImageIO::read(const size_t index, Image &image)
 
 void ImageIO::read(const ImageLocation &location, Image &image)
 {
-    std::cout << " openFile: " << location.path << std::endl;
-    openFile(location.path);
+    std::cout << " open: " << location.path << std::endl;
+    open(location.path);
     // FIXME: Now only reading the first image in the location range
     std::cout << " read(location.start: " << location.index << std::endl;
     read(location.index, image);
     std::cout << " Close file" << std::endl;
-    closeFile();
+    close();
 }
 
 ImageHandler* ImageIO::createHandler()
