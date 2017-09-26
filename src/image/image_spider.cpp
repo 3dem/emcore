@@ -76,9 +76,9 @@ std::string ImageSpiderIO::getName() const
     return "spider";
 }
 
-std::string ImageSpiderIO::getExtensions() const
+StringVector ImageSpiderIO::getExtensions() const
 {
-    return "spi";
+    return {"spi", "stk", "vol"};
 }
 
 void ImageSpiderIO::read(const size_t index, em::Image &image)

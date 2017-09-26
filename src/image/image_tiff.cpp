@@ -8,9 +8,9 @@ std::string ImageTiffIO::getName() const
     return "tiff";
 }
 
-std::string ImageTiffIO::getExtensions() const
+StringVector ImageTiffIO::getExtensions() const
 {
-    return "tiff";
+    return {"tiff"};
 }
 
 

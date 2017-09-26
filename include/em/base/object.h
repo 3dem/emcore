@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <map>
+#include <vector>
 #include <cassert>
 
 #include "em/base/type.h"
@@ -59,7 +60,9 @@ namespace em
 
     std::ostream& operator<< (std::ostream &ostream, const em::Object &object);
 
+    // Some class name definitions for ease of use
     using ObjectDict = std::map<std::string, Object>;
+    using StringVector = std::vector<std::string>;
 
 #include "object_priv.h"
 }

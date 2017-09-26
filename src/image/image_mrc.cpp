@@ -2,6 +2,7 @@
 #include "em/image/image_mrc_priv.h"
 
 
+
 #define MRC_HEADER_SIZE    1024 // Minimum size of the MRC header (when nsymbt = 0)
 
 
@@ -92,9 +93,9 @@ std::string ImageMrcIO::getName() const
     return "mrc";
 }
 
-std::string ImageMrcIO::getExtensions() const
+StringVector ImageMrcIO::getExtensions() const
 {
-    return "mrc";
+    return {"mrc", "mrcs"};
 }
 
 void ImageMrcIO::readHeader()

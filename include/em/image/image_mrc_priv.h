@@ -14,7 +14,7 @@ class ImageMrcIO: public ImageIO
 
 public:
     virtual std::string getName() const override;
-    virtual std::string getExtensions() const override;
+    virtual StringVector getExtensions() const override;
     virtual ~ImageMrcIO();
 
 protected:

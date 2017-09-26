@@ -14,7 +14,7 @@ class ImageTiffIO: public ImageIO
 
 public:
     virtual std::string getName() const override;
-    virtual std::string getExtensions() const override;
+    virtual StringVector getExtensions() const override;
 
     //virtual void read(const ImageLocation &location, Image &image) override;
 

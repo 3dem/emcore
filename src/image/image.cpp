@@ -48,7 +48,8 @@ Image::Image(): Array()
 Image::Image(const ArrayDim &adim, ConstTypePtr type): Array(adim, type)
 {
     implPtr = new ImageImpl();
-    // Type should be not null (another option could be assume float or double by default)
+    // Type should be not null
+    // (another option could be assume float or double by default)
     assert(type != nullptr);
 } // Ctor for ArrayDim and ConstTypePtr
 
@@ -87,7 +88,11 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::Image &image)
 
 bool Image::registerIO(const ImageIO *reader)
 {
-    ImageImpl::readers[reader->getExtensions()] = reader;
+    for (auto ext: reader->getExtensions())
+    {
+        ImageImpl::readers[ext] = reader;
+    }
+
     ImageImpl::readers[reader->getName()] = reader;
     return true;
 } // function registerIO

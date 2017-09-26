@@ -108,7 +108,7 @@ namespace em
         virtual std::string getName() const = 0;
 
         /** Return the extensions this reader is able to read. */
-        virtual std::string getExtensions() const = 0;
+        virtual StringVector getExtensions() const = 0;
 
         /** Read a given image from file.
          * This function is the most basic way to read an image from disk.

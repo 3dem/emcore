@@ -33,6 +33,7 @@ TEST(Image, Constructor) {
 TEST(ImageMrcIO, Read) {
 
     ASSERT_TRUE(Image::hasIO("mrc"));
+    ASSERT_TRUE(Image::hasIO("mrcs"));
     ImageIO * mrcIO = Image::getIO("mrc");
     ASSERT_EQ(mrcIO->getName(), "mrc");
 
