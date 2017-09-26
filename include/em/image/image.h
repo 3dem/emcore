@@ -93,9 +93,9 @@ namespace em
     {
     public:
         /** Constants for open files. */
-        static FileMode READ_ONLY = 0;
-        static FileMode READ_WRITE = 1;
-        static FileMode WRITE_ONLY = 2;
+        static const FileMode READ_ONLY = 0;
+        static const FileMode READ_WRITE = 1;
+        static const FileMode TRUNCATE = 2;
 
         // ---- Static methods related to ImageIO instances --------
         /**
@@ -130,6 +130,11 @@ namespace em
         /** Return the extensions this reader is able to read. */
         virtual StringVector getExtensions() const = 0;
 
+        // TODO: DOCUMENT
+        virtual void open(const std::string &path, const FileMode mode=READ_ONLY);
+        // TODO: DOCUMENT
+        virtual void close();
+
         /** Read a given image from file.
          * This function is the most basic way to read an image from disk.
          * The file will be open before data is read and close after it.
@@ -141,9 +146,8 @@ namespace em
          */
         virtual void read(const ImageLocation &location, Image &image);
 
-        virtual void open(const std::string &path, FileMode mode=READ_ONLY);
         virtual void read(const size_t index, Image &image);
-        virtual void close();
+        // virtual void write(const size_t index, Image &image);
 
         /** Return the dimensions of the file opened. */
         ArrayDim getDimensions() const;
@@ -158,6 +162,9 @@ namespace em
 
         /** Reader the main header of an image file */
         virtual void readHeader() = 0;
+
+        // virtual void readImageHeader(const size_t index, Image &image) = 0;
+        // virtual void writeImageHeader(const size_t index, Image &image) = 0;
 
         /** Return the size of the header for this format */
         virtual size_t getHeaderSize() const = 0;
@@ -176,43 +183,12 @@ namespace em
 
         ImageHandler* handler = nullptr;
 
-        friend class Image;
-
     private:
         static std::map<std::string, const ImageIO*> iomap;
     }; // class ImageIO
 
 
-    /** Helper class to store information about image file.
-     * This class can only be used from ImageIO class.
-     */
-    class ImageHandler
-    {
-    protected:
-        ImageHandler() = default; // avoid instances of this class
-
-    public:
-        // Store the name of the file that was read/written
-        std::string path;
-        // Keep a file handler to the image file
-        FILE* file;
-        // Store dimensions of the image file
-        ArrayDim dim;
-        // Detected datatype in the file
-        ConstTypePtr type;
-
-        Image image; ///< Temporary image used as buffer to read from disk
-
-        friend class ImageIO;
-    }; // class ImageHandler
-
-
 } // em namespace
 
-
-// The following macro can be used as a shortcut to register new ImageIO subclasses
-#define REGISTER_IMAGE_IO(ioClassName) \
-    ioClassName reader_##ioClassName; \
-    bool register_##ioClassName = ImageIO::set(&reader_##ioClassName)
 
 #endif //EM_CORE_IMAGE_H

@@ -1,4 +1,5 @@
 
+#include "em/image/image_priv.h"
 #include "em/image/image_mrc_priv.h"
 
 
@@ -81,7 +82,7 @@ struct MrcHeader
  * Inherit properties from base ImageHandler and add information
  * specific for MRC format (e.g, the MrcHeader struct)
  */
-class ImageMrcHandler: public ImageHandler
+class ImageMrcHandler: public em::ImageHandler
 {
 public:
     MrcHeader header;
@@ -189,8 +190,6 @@ ImageMrcIO::~ImageMrcIO()
 {
 
 }
-
-
 
 em::ImageIO* ImageMrcIO::create() const
 {

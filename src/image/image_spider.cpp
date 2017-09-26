@@ -1,4 +1,5 @@
 
+#include "em/image/image_priv.h"
 #include "em/image/image_spider_priv.h"
 
 

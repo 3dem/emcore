@@ -10,7 +10,7 @@
 #include "em/base/error.h"
 #include "em/base/type.h"
 #include "em/base/array.h"
-#include "em/image/image.h"
+#include "em/image/image_priv.h"
 
 
 
@@ -121,13 +121,24 @@ ImageIO::~ImageIO()
 {
 }// ImageIO ctor
 
-void ImageIO::open(const std::string &path, FileMode mode)
+void ImageIO::open(const std::string &path, FileMode const mode)
 {
+    // Keep a mapping between our numeric FileMode and the string modes
+    const char * openMode = "r";
+
+    switch (mode)
+    {
+        case ImageIO::READ_WRITE:
+            openMode = "r+"; break;  // FIXME: File must exits
+        case ImageIO::TRUNCATE:
+            openMode = "w"; break;
+    }
+
     if (handler == nullptr)
         handler = createHandler();
 
     handler->path = path;
-    handler->file = fopen(path.c_str(), "r");
+    handler->file = fopen(path.c_str(), openMode);
 
     if (handler->file == nullptr)
         THROW_SYS_ERROR(std::string("Error opening file '") + path);
@@ -229,7 +240,7 @@ void ImageIO::read(const ImageLocation &location, Image &image)
     close();
 }
 
-ImageHandler* ImageIO::createHandler()
+em::ImageHandler* ImageIO::createHandler()
 {
     return new ImageHandler;
 } // createHandler
