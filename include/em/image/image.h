@@ -55,13 +55,6 @@ namespace em
         // String representation
         virtual void toStream(std::ostream &ostream) const override;
 
-        // This method should be called to register a ImageIO that is able
-        // to read a new image format
-        static bool registerIO(const ImageIO *reader);
-        // Check if there is a registered reader for a given extension
-        static bool hasIO(const std::string &extOrName);
-        // Retrieve an existing reader for a given extension
-        static ImageIO* getIO(const std::string &extOrName);
 
     private:
         // Pointer to implementation class, PIMPL idiom
@@ -103,6 +96,33 @@ namespace em
         static FileMode READ_ONLY = 0;
         static FileMode READ_WRITE = 1;
         static FileMode WRITE_ONLY = 2;
+
+        // ---- Static methods related to ImageIO instances --------
+        /**
+         * Register a ImageIO class to be available for reading/writing images.
+         * The class will be accessible via the ImageIO name and the extensions
+         * defined by the class.
+         * @param imgio Input pointer to the ImageIO subclass that will be
+         * registred.
+         * @return Return True if the new ImageIO was sucessfully registered.
+         */
+        static bool set(const ImageIO *imgio);
+
+        /**
+         * Check if some ImageIO is registered for a given name or extension.
+         *
+         * @param extOrName Input string representing either the ImageIO name
+         * or one of the extensions registered.
+         * @return Return True if there is any ImageIO registered.
+         */
+        static bool has(const std::string &extOrName);
+
+        /**
+         * Retrieve an ImageIO instance for a given name or extension.
+         * @param extOrName Input string representing either the ImageIO name
+         * @return Return a pointer to a new ImageIO instance.
+         */
+        static ImageIO* get(const std::string &extOrName);
 
         /** Return a name identifying this reader. */
         virtual std::string getName() const = 0;
@@ -157,6 +177,9 @@ namespace em
         ImageHandler* handler = nullptr;
 
         friend class Image;
+
+    private:
+        static std::map<std::string, const ImageIO*> iomap;
     }; // class ImageIO
 
 
@@ -190,6 +213,6 @@ namespace em
 // The following macro can be used as a shortcut to register new ImageIO subclasses
 #define REGISTER_IMAGE_IO(ioClassName) \
     ioClassName reader_##ioClassName; \
-    bool register_##ioClassName = Image::registerIO(&reader_##ioClassName)
+    bool register_##ioClassName = ImageIO::set(&reader_##ioClassName)
 
 #endif //EM_CORE_IMAGE_H

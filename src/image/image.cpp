@@ -25,7 +25,7 @@ public:
     // headers[0] will be the main header and
     // the rest one per image
     std::vector<ObjectDict> headers;
-    static std::map<std::string, const ImageIO*> readers;
+
     //static std::map<std::string, ImageWriter*> writers;
 
     ImageImpl()
@@ -35,7 +35,6 @@ public:
     }
 };
 
-std::map<std::string, const ImageIO*> ImageImpl::readers;
 
 
 // ===================== Image Implementation =======================
@@ -86,33 +85,37 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::Image &image)
     return ostream;
 }
 
-bool Image::registerIO(const ImageIO *reader)
-{
-    for (auto ext: reader->getExtensions())
-    {
-        ImageImpl::readers[ext] = reader;
-    }
 
-    ImageImpl::readers[reader->getName()] = reader;
-    return true;
-} // function registerIO
-
-bool Image::hasIO(const std::string &extension)
-{
-    auto it = ImageImpl::readers.find(extension);
-    return it != ImageImpl::readers.end();
-} // function hasIO
-
-ImageIO* Image::getIO(const std::string &extension)
-{
-    if (!Image::hasIO(extension))
-        return nullptr;
-
-    return ImageImpl::readers[extension]->create();
-} // function getIO
 
 
 // ===================== ImageIO Implementation =======================
+
+std::map<std::string, const ImageIO*> ImageIO::iomap;
+
+bool ImageIO::set(const ImageIO *reader)
+{
+    for (auto ext: reader->getExtensions())
+    {
+        iomap[ext] = reader;
+    }
+
+    iomap[reader->getName()] = reader;
+    return true;
+} // function registerIO
+
+bool ImageIO::has(const std::string &extension)
+{
+    auto it = iomap.find(extension);
+    return it != iomap.end();
+} // function hasIO
+
+ImageIO* ImageIO::get(const std::string &extension)
+{
+    if (!ImageIO::has(extension))
+        return nullptr;
+
+    return iomap[extension]->create();
+} // function getIO
 
 ImageIO::~ImageIO()
 {

@@ -22,21 +22,19 @@ TEST(Image, Constructor) {
     header["filename"] = std::string("/path/to/image/");
     std::cout << img << std::endl;
 
-
-    ASSERT_TRUE(Image::hasIO("spi"));
-    ASSERT_TRUE(Image::hasIO("spider"));
-    ImageIO * spiderIO = Image::getIO("spi");
+    ASSERT_TRUE(ImageIO::has("spi"));
+    ASSERT_TRUE(ImageIO::has("spider"));
+    ImageIO * spiderIO = ImageIO::get("spi");
     ASSERT_EQ(spiderIO->getName(), "spider");
 
 } // TEST(ArrayTest, Constructor)
 
 TEST(ImageMrcIO, Read) {
 
-    ASSERT_TRUE(Image::hasIO("mrc"));
-    ASSERT_TRUE(Image::hasIO("mrcs"));
-    ImageIO * mrcIO = Image::getIO("mrc");
+    ASSERT_TRUE(ImageIO::has("mrc"));
+    ASSERT_TRUE(ImageIO::has("mrcs"));
+    ImageIO * mrcIO = ImageIO::get("mrc");
     ASSERT_EQ(mrcIO->getName(), "mrc");
-
 
     ImageLocation loc;
     std::map<std::string, ArrayDim> fileDims;
