@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 project(em-core)
 
+# Add option to build examples, turn on with 'cmake -DBUILD_TESTS=ON'
+option(BUILD_EXAMPLES "Build all examples." OFF)
 # Add option to build tests, turn on with 'cmake -DBUILD_TESTS=ON'
 option(BUILD_TESTS "Build all tests." OFF)
 # Add option to build the doxygen documentation, turn on with 'cmake -DBUILD_DOCS=ON'
@@ -27,7 +29,36 @@ set(HEADER_FILES test/test_main.cpp)
 file(GLOB HEADER_FILES "${INCLUDE_PATH}/*/*.h")
 file(GLOB SOURCE_FILES "${SRC_PATH}/*/*.cpp")
 
-add_library(em-core  ${SOURCE_FILES} ${HEADER_FILES})
+add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES})
+
+
+################################
+# Examples
+################################
+if (BUILD_EXAMPLES)
+    #add_subdirectory(examples)
+
+    file(GLOB EXAMPLE_FILES "${CMAKE_SOURCE_DIR}/examples/*.cpp")
+
+    foreach (_file ${EXAMPLE_FILES})
+        # Specify target name WE=WithoutExtension
+        GET_FILENAME_COMPONENT(_target "${_file}" NAME_WE)
+        message(STATUS "File ${_file}...")
+        message(STATUS "target ${_target}...")
+
+        add_executable(${_target} ${_file})
+        target_link_libraries(${_target} em-core)
+
+    endforeach()
+
+
+
+
+    #add_executable(example examples/example.cpp)
+    #target_link_libraries(example em-core)
+
+endif()
+
 
 ################################
 # Testing
