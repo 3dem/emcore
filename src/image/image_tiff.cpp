@@ -13,13 +13,6 @@ StringVector ImageTiffIO::getExtensions() const
     return {"tiff"};
 }
 
-
-void ImageTiffIO::read(const size_t index, em::Image &image)
-{
-
-}
-
-
 ImageTiffIO::~ImageTiffIO()
 {
 
@@ -33,11 +26,6 @@ void ImageTiffIO::readHeader()
 size_t ImageTiffIO::getHeaderSize() const
 {
     return 0; // FIXME
-}
-
-size_t ImageTiffIO::getPadSize() const
-{
-    return 0;
 }
 
 em::ImageIO* ImageTiffIO::create() const

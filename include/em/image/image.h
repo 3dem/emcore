@@ -81,6 +81,7 @@ namespace em
 
 
     using FileMode = const uint8_t;
+
     /** @ingroup image
      * Base class to read Image from disk.
      *
@@ -130,11 +131,33 @@ namespace em
         /** Return the extensions this reader is able to read. */
         virtual StringVector getExtensions() const = 0;
 
+        /** Return the dimensions of the file opened. */
+        ArrayDim getDimensions() const;
+
         // TODO: DOCUMENT
         virtual void open(const std::string &path, const FileMode mode=READ_ONLY);
         // TODO: DOCUMENT
         virtual void close();
 
+        /**
+         * Create an empty file with a given dimensions and a given type.
+         * This function should be used once and only when the file was opened
+         * with TRUNCATE mode (also with READ_WRITE when the file does not exist).
+         * @param adim The dimensions of the new file to be created.
+         * @param type The data type of the elements that will be in the file.
+         */
+        virtual void createFile(const ArrayDim &adim, ConstTypePtr type);
+
+        /**
+         * Expand the current file for adding more elements.
+         * The file needs to be opened with READ_WRITE mode and it should
+         * exists. The provided number of elements should be greater that
+         * the current ndim of the file.
+         * @param ndim The new number of desired elements in the file.
+         */
+        virtual void expandFile(const size_t ndim);
+
+        // TODO: Move this basic function to the Image class as a shortcut
         /** Read a given image from file.
          * This function is the most basic way to read an image from disk.
          * The file will be open before data is read and close after it.
@@ -146,11 +169,14 @@ namespace em
          */
         virtual void read(const ImageLocation &location, Image &image);
 
-        virtual void read(const size_t index, Image &image);
-        // virtual void write(const size_t index, Image &image);
+        // TODO: Move this basic function to the Image class as a shortcut
+        // virtual void write(const ImageLocation &location, const Image &image);
 
-        /** Return the dimensions of the file opened. */
-        ArrayDim getDimensions() const;
+        virtual void read(const size_t index, Image &image);
+        virtual void write(const size_t index, const Image &image);
+
+        virtual void readImageHeader(const size_t index, Image &image) = 0;
+        virtual void writeImageHeader(const size_t index, Image &image) = 0;
 
         virtual ~ImageIO();
 
@@ -160,11 +186,11 @@ namespace em
          */
         virtual ImageHandler* createHandler();
 
-        /** Reader the main header of an image file */
+        /** Read the main header of an image file */
         virtual void readHeader() = 0;
 
-        // virtual void readImageHeader(const size_t index, Image &image) = 0;
-        // virtual void writeImageHeader(const size_t index, Image &image) = 0;
+        /** Write the main header of an image file */
+        virtual void writeHeader() = 0;
 
         /** Return the size of the header for this format */
         virtual size_t getHeaderSize() const = 0;

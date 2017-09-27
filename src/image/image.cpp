@@ -162,6 +162,16 @@ void ImageIO::close()
     std::cout << "Close handle after" << std::endl;
 }
 
+void ImageIO::createFile(const ArrayDim &adim, ConstTypePtr type)
+{
+    //TODO: IMPLEMENT
+} // function createFile
+
+void ImageIO::expandFile(const size_t ndim)
+{
+    // TODO: IMPLEMENT
+} // function expandFile
+
 ArrayDim ImageIO::getDimensions() const
 {
     ASSERT_ERROR(handler == nullptr, "File has not been opened. ");
@@ -238,6 +248,11 @@ void ImageIO::read(const size_t index, Image &image)
     //    swapPage(page, readsize, datatype);
     // cast to T per page
     //castPage2T(page, MULTIDIM_ARRAY(data) + haveread_n, datatype, readsize_n);
+}
+
+void ImageIO::write(const size_t index, const Image &image)
+{
+
 }
 
 void ImageIO::read(const ImageLocation &location, Image &image)

@@ -16,11 +16,15 @@ public:
     virtual std::string getName() const override;
     virtual StringVector getExtensions() const override;
 
+    virtual void readImageHeader(const size_t index, Image &image) override {} ;
+    virtual void writeImageHeader(const size_t index, Image &image) override {} ;
+
     virtual ~ImageSpiderIO();
 
 protected:
     virtual ImageHandler* createHandler() override ;
     virtual void readHeader() override ;
+    virtual void writeHeader() override {} ;
     virtual size_t getHeaderSize() const override ;
     virtual ImageIO* create() const override ;
 
