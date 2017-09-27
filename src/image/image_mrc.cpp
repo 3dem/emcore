@@ -105,7 +105,7 @@ void ImageMrcIO::readHeader()
 
     std::cout << "DEBUG: Reading header...file " << mrcHandler->path << std::endl;
 
-    // Try to read the main header from the (already openened) file stream
+    // Try to read the main header from the (already opened) file stream
     if ( fread(&mrcHandler->header, MRC_HEADER_SIZE, 1, mrcHandler->file) < 1 )
         return; //FIXME: Set some error or throw an Exception errCode = -2;
 
@@ -169,16 +169,12 @@ void ImageMrcIO::readHeader()
     // TODO: Check special cases where image is a transform
     // TODO: Determine swap order (little vs big endian)
 
+    mrcHandler->pad = 0;
 }
 
 size_t ImageMrcIO::getHeaderSize() const
 {
     return MRC_HEADER_SIZE;
-}
-
-size_t ImageMrcIO::getPadSize() const
-{
-    return 0;
 }
 
 ImageHandler* ImageMrcIO::createHandler()

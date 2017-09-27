@@ -21,7 +21,6 @@ protected:
     virtual ImageHandler* createHandler() override ;
     virtual void readHeader() override ;
     virtual size_t getHeaderSize() const override ;
-    virtual size_t getPadSize() const override ;
     virtual ImageIO* create() const override;
 }; // class ImageMrcIO
 

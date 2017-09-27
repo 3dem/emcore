@@ -119,6 +119,8 @@ ImageIO* ImageIO::get(const std::string &extension)
 
 ImageIO::~ImageIO()
 {
+    close();
+    delete handler;
 }// ImageIO ctor
 
 void ImageIO::open(const std::string &path, FileMode const mode)
@@ -134,6 +136,9 @@ void ImageIO::open(const std::string &path, FileMode const mode)
             openMode = "w"; break;
     }
 
+    // We create the handler the first time that we enter this point.
+    // It makes sense to create the handler in the constructor
+    // but we cannot not do that because it is a virtual function
     if (handler == nullptr)
         handler = createHandler();
 
@@ -148,7 +153,13 @@ void ImageIO::open(const std::string &path, FileMode const mode)
 
 void ImageIO::close()
 {
-    fclose(handler->file);
+    if (handler != nullptr && handler->file != nullptr)
+    {
+        fclose(handler->file);
+        handler->file = nullptr;
+    }
+
+    std::cout << "Close handle after" << std::endl;
 }
 
 ArrayDim ImageIO::getDimensions() const
@@ -236,11 +247,18 @@ void ImageIO::read(const ImageLocation &location, Image &image)
     // FIXME: Now only reading the first image in the location range
     std::cout << " read(location.start: " << location.index << std::endl;
     read(location.index, image);
-    std::cout << " Close file" << std::endl;
     close();
+    std::cout << " Close file" << std::endl;
+
 }
 
-em::ImageHandler* ImageIO::createHandler()
+size_t ImageIO::getPadSize() const
+{
+    return handler->pad;
+}
+
+
+ImageHandler* ImageIO::createHandler()
 {
     return new ImageHandler;
 } // createHandler

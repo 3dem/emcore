@@ -29,6 +29,10 @@ namespace em
         ConstTypePtr type = nullptr;
         // Mode in which the file was open
         FileMode fileMode = ImageIO::READ_ONLY;
+        // Swap bytes in case file Endian differs from local Endian
+        bool swap;
+        // Return the size of padding between images/volumes in a stack
+        size_t pad;
 
         Image image; ///< Temporary image used as buffer to read from disk
 

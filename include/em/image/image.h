@@ -170,7 +170,7 @@ namespace em
         virtual size_t getHeaderSize() const = 0;
 
         /** Return the size of padding between images/volumes in a stack */
-        virtual size_t getPadSize() const = 0;
+        virtual size_t getPadSize() const;
 
         /** Clone this reader and obtain a new copy.
          * The caller to this functions should take care
