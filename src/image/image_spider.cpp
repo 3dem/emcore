@@ -252,3 +252,6 @@ ImageHandler* ImageSpiderIO::createHandler()
 {
     return new ImageSpiderHandler;
 } // createHandler
+
+
+REGISTER_IMAGE_IO(ImageSpiderIO);

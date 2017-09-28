@@ -1,6 +1,8 @@
 #include <cstdio>
 
+#include "em/image/image_priv.h"
 #include "em/image/image_tiff_priv.h"
+
 
 
 std::string ImageTiffIO::getName() const
@@ -44,3 +46,5 @@ em::ImageIO* ImageTiffIO::create() const
 {
     return new ImageTiffIO();
 }
+
+REGISTER_IMAGE_IO(ImageTiffIO);

@@ -192,6 +192,7 @@ em::ImageIO* ImageMrcIO::create() const
     return new ImageMrcIO();
 }
 
+REGISTER_IMAGE_IO(ImageMrcIO);
 
 #ifdef NEVER_DEFINED
 
