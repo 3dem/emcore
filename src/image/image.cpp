@@ -279,11 +279,3 @@ ImageHandler* ImageIO::createHandler()
 } // createHandler
 
 
-#include "em/image/image_spider_priv.h"
-REGISTER_IMAGE_IO(ImageSpiderIO);
-
-#include "em/image/image_mrc_priv.h"
-REGISTER_IMAGE_IO(ImageMrcIO);
-
-#include "em/image/image_tiff_priv.h"
-REGISTER_IMAGE_IO(ImageTiffIO);
