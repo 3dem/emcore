@@ -210,7 +210,7 @@ namespace em
         ImageHandler* handler = nullptr;
 
     private:
-        static std::map<std::string, const ImageIO*> iomap;
+        static std::map<std::string, const ImageIO*> * iomap;
     }; // class ImageIO
 
 

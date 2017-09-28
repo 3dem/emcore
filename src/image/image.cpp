@@ -90,23 +90,24 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::Image &image)
 
 // ===================== ImageIO Implementation =======================
 
-std::map<std::string, const ImageIO*> ImageIO::iomap;
+std::map<std::string, const ImageIO*>* ImageIO::iomap;
 
 bool ImageIO::set(const ImageIO *reader)
 {
-    for (auto ext: reader->getExtensions())
-    {
-        iomap[ext] = reader;
-    }
+    static std::map<std::string, const ImageIO*> localmap;
+    iomap = &localmap;
 
-    iomap[reader->getName()] = reader;
+    for (auto ext: reader->getExtensions())
+        (*iomap)[ext] = reader;
+
+    (*iomap)[reader->getName()] = reader;
     return true;
 } // function registerIO
 
 bool ImageIO::has(const std::string &extension)
 {
-    auto it = iomap.find(extension);
-    return it != iomap.end();
+    auto it = (*iomap).find(extension);
+    return it != (*iomap).end();
 } // function hasIO
 
 ImageIO* ImageIO::get(const std::string &extension)
@@ -114,7 +115,7 @@ ImageIO* ImageIO::get(const std::string &extension)
     if (!ImageIO::has(extension))
         return nullptr;
 
-    return iomap[extension]->create();
+    return (*iomap)[extension]->create();
 } // function getIO
 
 ImageIO::~ImageIO()
