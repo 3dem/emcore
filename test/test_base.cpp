@@ -16,7 +16,7 @@ using namespace em;
 
 TEST(Type, Basic) {
     // Test basic properties of Type singleton instances
-    ConstTypePtr i = em::TypeInt;
+    ConstTypePtr i = em::TypeInt32;
     ASSERT_EQ(i->getName(), "int32");
     ASSERT_TRUE(i->isPod());
     ASSERT_EQ(i->getSize(), sizeof(int));
@@ -75,8 +75,8 @@ TEST(Type, General) {
 
     std::cout << "sizeof int8_t: " << sizeof(int8_t) << std::endl;
     std::cout << "Signed Int8: " << *em::TypeInt8 << std::endl;
-    std::cout << "Unsigned short: " <<  *em::TypeUShort << std::endl;
-    std::cout << "Int: " <<  *em::TypeInt << std::endl;
+    std::cout << "Unsigned short: " <<  *em::TypeUInt16 << std::endl;
+    std::cout << "Int: " <<  *em::TypeInt32 << std::endl;
 
 } // TEST(ArrayTest, ArrayDim)
 
@@ -114,7 +114,7 @@ TEST(ArrayDim, Defaults) {
 TEST(ArrayTest, Constructor) {
 
     ArrayDim adim(10, 10);
-    Array A(adim, TypeInt);
+    Array A(adim, TypeInt32);
     ArrayView<int> Av = A.getView<int>();
 
     Av.assign(11);

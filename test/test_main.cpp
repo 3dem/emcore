@@ -84,7 +84,7 @@ TEST(IndependentMethod, ResetsToZero) {
     std::cout << "Creating an Array: " << std::endl;
 
     ArrayDim adim(10, 10);
-    Array A(adim, em::TypeInt);
+    Array A(adim, em::TypeInt32);
     ArrayView<int> Av = A.getView<int>();
 
     Av.assign(11);
