@@ -1,4 +1,5 @@
 
+#include "em/base/error.h"
 #include "em/image/image_priv.h"
 #include "em/image/image_mrc_priv.h"
 
@@ -142,7 +143,7 @@ void ImageMrcIO::readHeader()
             mrcHandler->type = em::TypeInt8;
             break;
         case 1:
-            mrcHandler->type = em::TypeShort;
+            mrcHandler->type = em::TypeInt16;
             break;
         case 2:
             mrcHandler->type = em::TypeFloat;
@@ -156,7 +157,7 @@ void ImageMrcIO::readHeader()
             mrcHandler->type = nullptr;
             break;
         case 6:
-            mrcHandler->type = em::TypeUInt8;
+            mrcHandler->type = em::TypeUInt16;
             break;
         default:
             mrcHandler->type = nullptr;
@@ -171,6 +172,88 @@ void ImageMrcIO::readHeader()
 
     mrcHandler->pad = 0;
 }
+
+/** Returns true if machine is little endian else false */
+bool isLittleEndian(void)
+{
+    static const unsigned long ul = 0x00000001;
+    return ((int)(*((unsigned char *) &ul)))!=0;
+}
+
+void ImageMrcIO::writeHeader()
+{
+    auto mrcHandler = static_cast<ImageMrcHandler*>(handler);
+    auto& header = mrcHandler->header;
+    auto& dim = mrcHandler->dim;
+
+    ConstTypePtr type = mrcHandler->type;
+
+    if (type == em::TypeDouble || type == em::TypeFloat || type == em::TypeInt32 || em::TypeUInt32)
+        header.mode = 2;
+    else if (type == em::TypeInt16)
+        header.mode = 1;
+    else if (type == em::TypeUInt16)
+        header.mode = 6;
+    else if (type == em::TypeInt8 || type == em::TypeUInt8)
+        header.mode = 0;
+    // TODO: Implement complex float and double
+    else
+        THROW_ERROR("Unsupported type for MRC format. ");
+
+    // Map the parameters
+    strncpy(header.map, "MAP ", 4);
+
+    // Set the machine Endianess
+    auto machine_stamp = static_cast<char *>(header.machst);
+    if (isLittleEndian())
+    {
+        machine_stamp[0] = 68;
+        machine_stamp[1] = 65;
+    }
+    else
+    {
+        machine_stamp[0] = machine_stamp[1] = 17;
+    }
+
+    // Set Image dimensions and Pixel size
+    header.mx = header.nx = dim.x;
+    header.my = header.ny = dim.y;
+    header.nz = dim.z * dim.n;
+    header.mz = dim.z;
+
+    float pixelSize = 1; // FIXME
+
+    header.cella[0] = dim.x * pixelSize;
+    header.cella[1] = dim.y * pixelSize;
+    header.cella[2] = dim.z * pixelSize;
+
+    // FIXME: consider complex transforms
+    //    if ( transform == CentHerm )
+    //        header.nx = Xdim/2 + 1;        // If a transform, physical storage is nx/2 + 1
+
+    // Cells angles in degrees, only used in Crystallography
+    header.cellb[0] = header.cellb[1] = header.cellb[2] = 90.; // FIXME Why 90?
+
+    header.mapc = 1;
+    header.mapr = 2;
+    header.maps = 3;
+
+    // For the moment, set that Image statistics are not well determined
+    header.rms = -1;
+
+    // Set if volume or not, if stack or not
+    // ispg = 0 if image or stack, 1 if volume, 401 if volume stack
+    header.ispg = (dim.z == 1) ? 0 : (dim.n == 1) ?  1 : 401;
+    header.nsymbt = 0;
+    header.nlabl = 10; // FIXME: or zero?
+
+    fwrite(&header, MRC_HEADER_SIZE, 1, mrcHandler->file);
+
+    // FIXME: consider swap
+    // if ( swapWrite )
+    //   swapPage((char *) header, MRCSIZE - 800, DT_Float);
+
+} // function writeHeader
 
 size_t ImageMrcIO::getHeaderSize() const
 {

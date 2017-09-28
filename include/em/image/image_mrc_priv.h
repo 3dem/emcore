@@ -24,7 +24,7 @@ public:
 protected:
     virtual ImageHandler* createHandler() override ;
     virtual void readHeader() override ;
-    virtual void writeHeader() override {} ;
+    virtual void writeHeader() override ;
     virtual size_t getHeaderSize() const override ;
     virtual ImageIO* create() const override;
 }; // class ImageMrcIO
