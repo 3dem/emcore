@@ -71,10 +71,10 @@ namespace em
 
     ConstTypePtr const TypeInt8 = Type::get<int8_t>();
     ConstTypePtr const TypeUInt8 = Type::get<uint8_t>();
-    ConstTypePtr const TypeShort = Type::get<short>();
-    ConstTypePtr const TypeUShort = Type::get<unsigned short>();
-    ConstTypePtr const TypeInt = Type::get<int>();
-    ConstTypePtr const TypeUInt = Type::get<unsigned int>();
+    ConstTypePtr const TypeInt16 = Type::get<int16_t>();
+    ConstTypePtr const TypeUInt16 = Type::get<uint16_t>();
+    ConstTypePtr const TypeInt32 = Type::get<int32_t>();
+    ConstTypePtr const TypeUInt32 = Type::get<uint32_t>();
     ConstTypePtr const TypeFloat = Type::get<float>();
     ConstTypePtr const TypeDouble = Type::get<double>();
 
