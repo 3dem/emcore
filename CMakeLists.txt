@@ -29,7 +29,20 @@ set(HEADER_FILES test/test_main.cpp)
 file(GLOB HEADER_FILES "${INCLUDE_PATH}/*/*.h")
 file(GLOB SOURCE_FILES "${SRC_PATH}/*/*.cpp")
 
-add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES})
+
+find_package(TIFF)
+if (TIFF_FOUND)
+    include_directories(${TIFF_INCLUDE_DIRS})
+    MESSAGE( STATUS "TIFF_INCLUDE_DIRS:         " ${TIFF_INCLUDE_DIRS} )
+    MESSAGE( STATUS "TIFF_LIBRARIES:         " ${TIFF_LIBRARIES} )
+else (TIFF_FOUND)
+    list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_tiff.cpp")
+endif (TIFF_FOUND)
+
+find_package(JPEG)
+find_package(PNG)
+
+add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES} ${TIFF_LIBRARIES})
 
 
 ################################
@@ -48,7 +61,7 @@ if (BUILD_EXAMPLES)
         message(STATUS "    ${_target}...")
 
         add_executable(${_target} ${_file})
-        target_link_libraries(${_target} em-core)
+        target_link_libraries(${_target} em-core ${TIFF_LIBRARIES})
 
     endforeach()
 
@@ -111,3 +124,4 @@ if(BUILD_DOCS)
     add_custom_target(docs COMMAND ${DOXYGEN_EXECUTABLE} ${BUILD_PATH}/Doxyfile)
 
 endif(BUILD_DOCS)
+

@@ -128,6 +128,7 @@ void ImageIO::open(const std::string &path, const FileMode mode)
     // but we cannot not do that because it is a virtual function
 
     // We create the handler the first time that we enter this point.
+    std::cout << "just before openFile" << std::endl;
     if (handler == nullptr)
         handler = createHandler();
 
@@ -310,7 +311,7 @@ void ImageIO::read(const ImageLocation &location, Image &image)
     std::cout << " open in read: " << location.path << std::endl;
     open(location.path);
     // FIXME: Now only reading the first image in the location range
-    std::cout << " read(location.start: " << location.index << std::endl;
+    std::cout << " read(location.start: " << location.index << ")" << std::endl;
     read(location.index, image);
     close();
     std::cout << " Close file" << std::endl;
