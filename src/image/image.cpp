@@ -124,31 +124,19 @@ ImageIO::~ImageIO()
     delete handler;
 }// ImageIO ctor
 
-void ImageIO::open(const std::string &path, FileMode const mode)
+void ImageIO::open(const std::string &path, const FileMode mode)
 {
-    // Keep a mapping between our numeric FileMode and the string modes
-    const char * openMode = "r";
-
-    switch (mode)
-    {
-        case ImageIO::READ_WRITE:
-            openMode = "r+"; break;  // FIXME: File must exits
-        case ImageIO::TRUNCATE:
-            openMode = "w"; break;
-    }
-
-    // We create the handler the first time that we enter this point.
     // It makes sense to create the handler in the constructor
     // but we cannot not do that because it is a virtual function
+
+    // We create the handler the first time that we enter this point.
     if (handler == nullptr)
         handler = createHandler();
 
     handler->path = path;
-    handler->file = fopen(path.c_str(), openMode);
+    handler->fileMode = mode;
 
-    if (handler->file == nullptr)
-        THROW_SYS_ERROR(std::string("Error opening file '") + path);
-
+    handler->openFile();
     readHeader();
 } // open
 
@@ -258,7 +246,7 @@ void ImageIO::write(const size_t index, const Image &image)
 
 void ImageIO::read(const ImageLocation &location, Image &image)
 {
-    std::cout << " open: " << location.path << std::endl;
+    std::cout << " open in read: " << location.path << std::endl;
     open(location.path);
     // FIXME: Now only reading the first image in the location range
     std::cout << " read(location.start: " << location.index << std::endl;
@@ -279,4 +267,25 @@ ImageHandler* ImageIO::createHandler()
     return new ImageHandler;
 } // createHandler
 
+const char * ImageHandler::getOpenMode(FileMode mode) const
+{
+    const char * openMode = "r";
 
+    switch (mode)
+    {
+        case ImageIO::READ_WRITE:
+            openMode = "r+"; break;  // FIXME: File must exits
+        case ImageIO::TRUNCATE:
+            openMode = "w"; break;
+    }
+
+    return openMode;
+}
+
+void ImageHandler::openFile()
+{
+    file = fopen(path.c_str(), getOpenMode(fileMode));
+
+    if (file == nullptr)
+        THROW_SYS_ERROR(std::string("Error opening file '") + path);
+}

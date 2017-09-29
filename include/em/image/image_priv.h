@@ -15,28 +15,43 @@ namespace em
      */
     class ImageHandler
     {
-    protected:
-        ImageHandler() = default; // avoid instances of this class
-
     public:
         // Store the name of the file that was read/written
         std::string path;
+
+        // Mode in which the file was open
+        FileMode fileMode;
+
         // Keep a file handler to the image file
         FILE* file;
+
         // Store dimensions of the image file
         ArrayDim dim;
+
         // Detected datatype in the file
         ConstTypePtr type = nullptr;
-        // Mode in which the file was open
-        FileMode fileMode = ImageIO::READ_ONLY;
+
         // Swap bytes in case file Endian differs from local Endian
         bool swap;
+
         // Return the size of padding between images/volumes in a stack
         size_t pad;
 
         Image image; ///< Temporary image used as buffer to read from disk
 
         friend class ImageIO;
+
+    protected:
+        /**
+         * Return the string file open mode from our numerical
+         * open mode value. This could be format-specific.
+         */
+        const char * getOpenMode(FileMode mode) const;
+
+        /** Open the file for this format. The path and mode
+         * should be set before calling this function.
+         */
+        virtual void openFile();
     }; // class ImageHandler
 
 

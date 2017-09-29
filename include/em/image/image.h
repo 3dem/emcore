@@ -80,7 +80,7 @@ namespace em
     }; // class ImageLocation
 
 
-    using FileMode = const uint8_t;
+    using FileMode = uint8_t;
 
     /** @ingroup image
      * Base class to read Image from disk.

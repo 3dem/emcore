@@ -53,6 +53,8 @@ TEST(ImageMrcIO, Read) {
                 Image img;
                 loc.index = 1;
                 loc.path = root + pair.first;
+                std::cout << "Before reading. " << std::endl;
+
                 mrcIO->read(loc, img);
                 std::cout << img << std::endl;
                 ArrayDim imgDim(pair.second);
