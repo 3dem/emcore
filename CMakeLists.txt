@@ -40,22 +40,17 @@ if (BUILD_EXAMPLES)
 
     file(GLOB EXAMPLE_FILES "${CMAKE_SOURCE_DIR}/examples/*.cpp")
 
+    message(STATUS "Found examples:")
+
     foreach (_file ${EXAMPLE_FILES})
         # Specify target name WE=WithoutExtension
         GET_FILENAME_COMPONENT(_target "${_file}" NAME_WE)
-        message(STATUS "File ${_file}...")
-        message(STATUS "target ${_target}...")
+        message(STATUS "    ${_target}...")
 
         add_executable(${_target} ${_file})
         target_link_libraries(${_target} em-core)
 
     endforeach()
-
-
-
-
-    #add_executable(example examples/example.cpp)
-    #target_link_libraries(example em-core)
 
 endif()
 
@@ -76,28 +71,23 @@ if (BUILD_TESTS)
     ##############
     # Unit Tests
     ##############
-    add_executable(em-test test/test_main.cpp)
-    add_executable(em-test-base test/test_base.cpp)
-    add_executable(em-test-image test/test_image.cpp)
+    file(GLOB TEST_FILES "${CMAKE_SOURCE_DIR}/test/*.cpp")
 
-    # Standard linking to gtest stuff.
-    target_link_libraries(em-test gtest gtest_main)
-    target_link_libraries(em-test-base gtest gtest_main)
-    target_link_libraries(em-test-image gtest gtest_main)
+    message(STATUS "Found tests:")
 
-    # Extra linking for the project.
-    target_link_libraries(em-test em-core)
-    target_link_libraries(em-test-base em-core)
-    target_link_libraries(em-test-image em-core)
+    foreach (_file ${TEST_FILES})
+        # Specify target name WE=WithoutExtension
+        GET_FILENAME_COMPONENT(_target "${_file}" NAME_WE)
+        message(STATUS "    ${_target}...")
 
-    # This is so you can do 'make test' to see all your tests run, instead of
-    # manually running the executable em-test to see those specific tests.
-    add_test(em-test em-test)
-    add_test(em-test-base em-test-base)
-    add_test(em-test-image em-test-image)
+        add_executable(${_target} ${_file})
+        target_link_libraries(${_target} em-core gtest gtest_main)
+        add_test(${_target} ${_target})
 
+    endforeach()
 
 endif()
+
 
 ################################
 # Documentation
@@ -119,4 +109,5 @@ if(BUILD_DOCS)
     # If you do NOT want the documentation to be generated EVERY time you build the project
     # then leave out the 'ALL' keyword from the command below.
     add_custom_target(docs COMMAND ${DOXYGEN_EXECUTABLE} ${BUILD_PATH}/Doxyfile)
+
 endif(BUILD_DOCS)
