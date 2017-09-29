@@ -29,6 +29,19 @@ set(HEADER_FILES test/test_main.cpp)
 file(GLOB HEADER_FILES "${INCLUDE_PATH}/*/*.h")
 file(GLOB SOURCE_FILES "${SRC_PATH}/*/*.cpp")
 
+
+find_package(TIFF)
+#if (NOT TIFF_FOUND)
+   include_directories(${TIFF_INCLUDE_DIRS})
+MESSAGE( STATUS "TIFF_INCLUDE_DIRS:         " ${TIFF_INCLUDE_DIRS} )
+MESSAGE( STATUS "TIFF_LIBRARIES:         " ${TIFF_LIBRARIES} )
+
+#    target_link_libraries (helloworld ${TIFF_LIBRARIES})
+#else()
+list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_tiff.cpp")
+#endif (NOT TIFF_FOUND)
+
+
 add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES})
 
 
@@ -47,7 +60,7 @@ if (BUILD_EXAMPLES)
         message(STATUS "target ${_target}...")
 
         add_executable(${_target} ${_file})
-        target_link_libraries(${_target} em-core)
+        target_link_libraries(${_target} em-core ${TIFF_LIBRARIES})
 
     endforeach()
 
@@ -81,9 +94,9 @@ if (BUILD_TESTS)
     add_executable(em-test-image test/test_image.cpp)
 
     # Standard linking to gtest stuff.
-    target_link_libraries(em-test gtest gtest_main)
-    target_link_libraries(em-test-base gtest gtest_main)
-    target_link_libraries(em-test-image gtest gtest_main)
+    target_link_libraries(em-test gtest gtest_main ${TIFF_LIBRARIES})
+    target_link_libraries(em-test-base gtest gtest_main ${TIFF_LIBRARIES})
+    target_link_libraries(em-test-image gtest gtest_main ${TIFF_LIBRARIES})
 
     # Extra linking for the project.
     target_link_libraries(em-test em-core)
@@ -120,3 +133,4 @@ if(BUILD_DOCS)
     # then leave out the 'ALL' keyword from the command below.
     add_custom_target(docs COMMAND ${DOXYGEN_EXECUTABLE} ${BUILD_PATH}/Doxyfile)
 endif(BUILD_DOCS)
+
