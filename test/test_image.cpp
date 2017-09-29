@@ -132,6 +132,7 @@ TEST(ImageIO, Create)
 {
 
     StringVector exts = {"mrc", "spi"};
+    const size_t DIM = 16; // 128
 
     for (auto ext: exts)
     {
@@ -142,13 +143,22 @@ TEST(ImageIO, Create)
         // Write a single image
         fn = "image-single." + ext;
         imgio->open(fn.c_str(), ImageIO::TRUNCATE);
-        imgio->createFile(ArrayDim(128, 128, 1, 1), em::TypeFloat);
+        imgio->createFile(ArrayDim(DIM, DIM, 1, 1), em::TypeFloat);
         imgio->close();
 
         // Write a stack of images
         fn = "image-stack." + ext;
         imgio->open(fn.c_str(), ImageIO::TRUNCATE);
-        imgio->createFile(ArrayDim(128, 128, 1, 100), em::TypeFloat);
+        imgio->createFile(ArrayDim(DIM, DIM, 1, 100), em::TypeFloat);
+
+        Image img(ArrayDim(DIM, DIM, 1, 1), em::TypeFloat);
+        auto av = img.getView<float>();
+        av.assign(200);
+
+std::cout << "Array: " << av.toString() << std::endl;
+
+        imgio->write(1, img);
+
         imgio->close();
 
         delete imgio;

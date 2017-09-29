@@ -115,7 +115,6 @@ void ImageMrcIO::readHeader()
     bool isImgStack = (header.ispg == 0 and header.nx > 1);
     bool isVolStack = (header.ispg == 401);
 
-
     // Check dimensions of the data taking into account
     // if it is a 2D or 3D stack
     ArrayDim &adim = mrcHandler->dim; // short-hand alias

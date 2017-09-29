@@ -259,6 +259,22 @@ void ImageIO::read(const size_t index, Image &image)
 
 void ImageIO::write(const size_t index, const Image &image)
 {
+    auto type = handler->type;
+
+    ASSERT_ERROR(image.getType() != type,
+                 "Type cast not implemented. Now image should have the same "
+                 "type.")
+
+    auto data = handler->image.getDataPointer();
+
+    size_t itemSize = handler->dim.getItemSize() * type->getSize();
+    size_t itemPos = getHeaderSize() + (itemSize + getPadSize()) * (index - 1);
+
+    if (fseek(handler->file, itemPos, SEEK_SET) != 0)
+        THROW_SYS_ERROR("Could not 'fseek' in file. ");
+
+    fwrite(data, itemSize, 1, handler->file);
+
         // void writeData(FILE* fimg, size_t offset, DataType wDType, size_t datasize_n, CastWriteMode castMode = CW_CAST)
 //        size_t dTypeSize = gettypesize(wDType);
 //        size_t datasize = datasize_n * dTypeSize;
