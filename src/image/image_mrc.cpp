@@ -135,7 +135,7 @@ void ImageMrcIO::readHeader()
 
     std::cout << "DEBUG: Dimensions: " << adim << std::endl;
 
-
+    // FIXME: Implement more general mechanism of Type matching
     // Check Datatype
     switch (header.mode)
     {
@@ -188,6 +188,7 @@ void ImageMrcIO::writeHeader()
 
     ConstTypePtr type = mrcHandler->type;
 
+    // FIXME: Implement more general mechanism of Type matching
     if (type == em::TypeDouble || type == em::TypeFloat || type == em::TypeInt32 || em::TypeUInt32)
         header.mode = 2;
     else if (type == em::TypeInt16)

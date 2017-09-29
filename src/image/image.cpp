@@ -10,6 +10,7 @@
 #include "em/base/error.h"
 #include "em/base/type.h"
 #include "em/base/array.h"
+#include "em/os/file.h"
 #include "em/image/image_priv.h"
 
 
@@ -34,7 +35,6 @@ public:
         headers.push_back(ObjectDict());
     }
 };
-
 
 
 // ===================== Image Implementation =======================
@@ -84,8 +84,6 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::Image &image)
     image.toStream(ostream);
     return ostream;
 }
-
-
 
 
 // ===================== ImageIO Implementation =======================
@@ -153,7 +151,26 @@ void ImageIO::close()
 
 void ImageIO::createFile(const ArrayDim &adim, ConstTypePtr type)
 {
-    //TODO: IMPLEMENT
+    if (handler->fileMode != ImageIO::TRUNCATE)
+        THROW_ERROR("ImageIO::createFile can only be used with TRUNCATE mode.");
+
+    // TODO: Check that the format supports this Type
+
+    handler->dim = adim;
+    handler->type = type;
+
+    writeHeader(); // write the main header of the file
+
+    // Compute the size of one item, taking into account its x, y, z dimensions
+    // and the size of the type that will be used
+    size_t itemSize = adim.getItemSize() * type->getSize();
+
+    // Compute the total size of the file taking into account the general header
+    // size and the size of all items (including extra padding per item)
+    size_t fileSize = getHeaderSize() + (itemSize + getPadSize()) * adim.n;
+
+    File::expand(handler->file, fileSize);
+
 } // function createFile
 
 void ImageIO::expandFile(const size_t ndim)
@@ -217,11 +234,11 @@ void ImageIO::read(const size_t index, Image &image)
     // the required image is stored. Basically we need to shift the pointer
     // HEADER_SIZE + (IMAGE_SIZE + PAD_SIZE) * (IMG_INDEX - 1)
     size_t itemSize = adim.getItemSize() * fileType->getSize();
-    size_t itemPosition = getHeaderSize() + (itemSize + getPadSize()) * (index - 1);
+    size_t itemPos = getHeaderSize() + (itemSize + getPadSize()) * (index - 1);
 
-    std::cerr << "DEBUG: fseeking to " << itemPosition << std::endl;
+    std::cerr << "DEBUG: fseeking to " << itemPos << std::endl;
 
-    if (fseek(handler->file, itemPosition, SEEK_SET) != 0)
+    if (fseek(handler->file, itemPos, SEEK_SET) != 0)
         THROW_SYS_ERROR("Could not 'fseek' in file. ");
 
     // FIXME: change this to read by chunks when we change this
@@ -231,7 +248,7 @@ void ImageIO::read(const size_t index, Image &image)
     if (fread(data, itemSize, 1, handler->file) != 1)
         THROW_SYS_ERROR("Could not 'fread' data from file. ");
 
-    // TODO
+    // TODO: Check swap
     //swap per page
     //if (swap)
     //    swapPage(page, readsize, datatype);
@@ -241,8 +258,52 @@ void ImageIO::read(const size_t index, Image &image)
 
 void ImageIO::write(const size_t index, const Image &image)
 {
-
-}
+        // void writeData(FILE* fimg, size_t offset, DataType wDType, size_t datasize_n, CastWriteMode castMode = CW_CAST)
+//        size_t dTypeSize = gettypesize(wDType);
+//        size_t datasize = datasize_n * dTypeSize;
+//        size_t ds2Write = rw_max_page_size;
+//        size_t dsN2Write = rw_max_page_size / dTypeSize;
+//        size_t rw_max_n = dsN2Write;
+//
+//        char* fdata;
+//        double min0 = 0, max0 = 0;
+//
+//        if (wDType == myT() && castMode == CW_CONVERT)
+//            castMode = CW_CAST;
+//
+//        if (castMode != CW_CAST)
+//            data.computeDoubleMinMaxRange(min0, max0, offset, datasize_n);
+//
+//        if (datasize > rw_max_page_size)
+//            fdata = (char *) askMemory(rw_max_page_size * sizeof(char));
+//        else
+//            fdata = (char *) askMemory(datasize * sizeof(char));
+//
+//        for (size_t writtenDataN = 0; writtenDataN < datasize_n; writtenDataN +=
+//                                                                         rw_max_n)
+//        {
+//
+//            if (writtenDataN + rw_max_n > datasize_n)
+//            {
+//                dsN2Write = datasize_n - writtenDataN;
+//                ds2Write = dsN2Write * dTypeSize;
+//            }
+//
+//            if (castMode == CW_CAST)
+//                castPage2Datatype(MULTIDIM_ARRAY(data) + offset + writtenDataN, fdata,
+//                                  wDType, dsN2Write);
+//            else
+//                castConvertPage2Datatype(MULTIDIM_ARRAY(data) + offset + writtenDataN,
+//                                         fdata, wDType, dsN2Write, min0, max0, castMode);
+//
+//            //swap per page
+//            if (swapWrite)
+//                swapPage(fdata, ds2Write, wDType);
+//
+//            fwrite(fdata, ds2Write, 1, fimg);
+//        }
+//        freeMemory(fdata, rw_max_page_size);
+} // function write
 
 void ImageIO::read(const ImageLocation &location, Image &image)
 {

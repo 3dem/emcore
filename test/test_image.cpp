@@ -11,8 +11,8 @@
 
 using namespace em;
 
-TEST(Image, Constructor) {
-
+TEST(Image, Constructor)
+{
     //Image
     Image img(ArrayDim(10, 10), em::TypeDouble);
     ObjectDict &header = img.getHeader();
@@ -27,9 +27,10 @@ TEST(Image, Constructor) {
     ImageIO * spiderIO = ImageIO::get("spi");
     ASSERT_EQ(spiderIO->getName(), "spider");
 
-} // TEST(ArrayTest, Constructor)
+} // TEST(Image, Constructor)
 
-TEST(ImageMrcIO, Read) {
+TEST(ImageMrcIO, Read)
+{
 
     ASSERT_TRUE(ImageIO::has("mrc"));
     ASSERT_TRUE(ImageIO::has("mrcs"));
@@ -73,10 +74,11 @@ TEST(ImageMrcIO, Read) {
         std::cout << "Skipping image format tests, EM_TEST_DATA not defined in environment. " << std::endl;
     }
 
-} // TEST(ArrayTest, Constructor)
+} // TEST(ImageMrcIO, Read)
 
 
-TEST(ImageSpiderIO, Read) {
+TEST(ImageSpiderIO, Read)
+{
 
     ASSERT_TRUE(ImageIO::has("spider"));
     ImageIO * spiIO = ImageIO::get("spi");
@@ -123,5 +125,35 @@ TEST(ImageSpiderIO, Read) {
         std::cout << "Skipping image format tests, EM_TEST_DATA not defined in environment. " << std::endl;
     }
 
-} // TEST(ArrayTest, Constructor)
+} // TEST(ImageSpiderIO, Read)
 
+
+TEST(ImageIO, Create)
+{
+
+    StringVector exts = {"mrc", "spi"};
+
+    for (auto ext: exts)
+    {
+        ImageIO * imgio = ImageIO::get(ext);
+        std::cout << "Using IO: " << imgio->getName() << std::endl;
+
+        std::string fn;
+        // Write a single image
+        fn = "image-single." + ext;
+        imgio->open(fn.c_str(), ImageIO::TRUNCATE);
+        imgio->createFile(ArrayDim(128, 128, 1, 1), em::TypeFloat);
+        imgio->close();
+
+        // Write a stack of images
+        fn = "image-stack." + ext;
+        imgio->open(fn.c_str(), ImageIO::TRUNCATE);
+        imgio->createFile(ArrayDim(128, 128, 1, 100), em::TypeFloat);
+        imgio->close();
+
+        delete imgio;
+    }
+
+
+
+} // TEST(ImageIO, Create)
