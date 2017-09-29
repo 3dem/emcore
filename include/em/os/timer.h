@@ -27,7 +27,7 @@ namespace em
         TimerImpl *pimpl;
     };
 
-}
+} // namespace em
 
 
 #endif //EM_CORE_TIMER_H
