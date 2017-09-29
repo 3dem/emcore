@@ -39,8 +39,10 @@ else (TIFF_FOUND)
     list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_tiff.cpp")
 endif (TIFF_FOUND)
 
-find_package(JPEG)
-find_package(PNG)
+#find_package(JPEG)
+#find_package(PNG)
+
+
 
 add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES} ${TIFF_LIBRARIES})
 
@@ -94,7 +96,7 @@ if (BUILD_TESTS)
         message(STATUS "    ${_target}...")
 
         add_executable(${_target} ${_file})
-        target_link_libraries(${_target} em-core gtest gtest_main)
+        target_link_libraries(${_target} em-core gtest gtest_main ${TIFF_LIBRARIES})
         add_test(${_target} ${_target})
 
     endforeach()
