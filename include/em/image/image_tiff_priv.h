@@ -39,7 +39,7 @@ struct TiffHeader
 class ImageTiffHandler: public ImageHandler
 {
 public:
-    TiffHeader header;
+    std::vector<TiffHeader> vHeader;
     TIFF*      tif;        // TIFF Image file handler
 
 protected:
@@ -57,9 +57,6 @@ public:
     virtual std::string getName() const override;
     virtual StringVector getExtensions() const override;
 
-    // TODO: DOCUMENT
-    virtual void open(const std::string &path, const FileMode mode=READ_ONLY) override;
-
     virtual void readImageHeader(const size_t index, Image &image) override {};
     virtual void writeImageHeader(const size_t index, Image &image) override {};
 
@@ -69,6 +66,7 @@ protected:
     virtual ImageHandler* createHandler() override ;
     virtual void readHeader() override ;
     virtual void writeHeader() override {} ;
+    virtual void read(const size_t index, Image &image) override ;
     virtual size_t getHeaderSize() const override ;
     virtual ImageIO* create() const override;
 

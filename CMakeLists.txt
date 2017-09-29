@@ -31,18 +31,18 @@ file(GLOB SOURCE_FILES "${SRC_PATH}/*/*.cpp")
 
 
 find_package(TIFF)
-#if (NOT TIFF_FOUND)
-   include_directories(${TIFF_INCLUDE_DIRS})
-MESSAGE( STATUS "TIFF_INCLUDE_DIRS:         " ${TIFF_INCLUDE_DIRS} )
-MESSAGE( STATUS "TIFF_LIBRARIES:         " ${TIFF_LIBRARIES} )
+if (TIFF_FOUND)
+    include_directories(${TIFF_INCLUDE_DIRS})
+    MESSAGE( STATUS "TIFF_INCLUDE_DIRS:         " ${TIFF_INCLUDE_DIRS} )
+    MESSAGE( STATUS "TIFF_LIBRARIES:         " ${TIFF_LIBRARIES} )
+else (TIFF_FOUND)
+    list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_tiff.cpp")
+endif (TIFF_FOUND)
 
-#    target_link_libraries (helloworld ${TIFF_LIBRARIES})
-#else()
-list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_tiff.cpp")
-#endif (NOT TIFF_FOUND)
+find_package(JPEG)
+find_package(PNG)
 
-
-add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES})
+add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES} ${TIFF_LIBRARIES})
 
 
 ################################
