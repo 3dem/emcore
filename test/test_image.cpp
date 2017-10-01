@@ -48,9 +48,12 @@ TEST(ImageMrcIO, Read)
             std::string root(testDataPath);
 
             fileDims["xmipp_tutorial/micrographs/BPV_1386.mrc"] = ArrayDim(9216, 9441, 1, 1);
-            fileDims["emx/alignment/Test2/stack2D.mrc"] = ArrayDim(128, 128, 1, 100);
+            std::string stackFn = "emx/alignment/Test2/stack2D.mrc";
+            ArrayDim stackDim(128, 128, 1, 100);
+            fileDims[stackFn] = stackDim;
 
-            for (auto &pair: fileDims) {
+            for (auto &pair: fileDims)
+            {
                 Image img;
                 loc.index = 1;
                 loc.path = root + pair.first;
@@ -63,6 +66,33 @@ TEST(ImageMrcIO, Read)
                 ASSERT_TRUE(img.getDimensions() == imgDim);
                 ASSERT_TRUE(mrcIO->getDimensions() == pair.second);
             }
+
+            // Use mrcIO2 for writing individual images
+            ImageIO * mrcIO2 = ImageIO::get("mrc");
+            mrcIO->open(root + stackFn);
+            Image img;
+            char suffix[4];
+            std::string imgFn;
+            ArrayDim imgDim(stackDim);
+            imgDim.n = 1;
+
+            for (size_t i = 1; i < 11; ++i)
+            {
+                mrcIO->read(i, img);
+                snprintf (suffix, 4, "%03d", (int)i);
+                imgFn = std::string("image") + suffix + ".mrc";
+                std::cout << ">>> Writing image: " << imgFn << std::endl;
+                mrcIO2->open(imgFn, ImageIO::TRUNCATE);
+                mrcIO2->createFile(imgDim, img.getType());
+                mrcIO2->write(1, img);
+                mrcIO2->close();
+
+            }
+
+            delete mrcIO;
+            delete mrcIO2;
+
+
         }
         catch (Error &err)
         {
@@ -154,11 +184,7 @@ TEST(ImageIO, Create)
         Image img(ArrayDim(DIM, DIM, 1, 1), em::TypeFloat);
         auto av = img.getView<float>();
         av.assign(200);
-
-std::cout << "Array: " << av.toString() << std::endl;
-
         imgio->write(1, img);
-
         imgio->close();
 
         delete imgio;
