@@ -20,10 +20,10 @@ namespace em
         std::string path;
 
         // Mode in which the file was open
-        FileMode fileMode;
+        FileMode fileMode = ImageIO::READ_ONLY;
 
         // Keep a file handler to the image file
-        FILE* file;
+        FILE* file = nullptr;
 
         // Store dimensions of the image file
         ArrayDim dim;
@@ -32,14 +32,16 @@ namespace em
         ConstTypePtr type = nullptr;
 
         // Swap bytes in case file Endian differs from local Endian
-        bool swap;
+        bool swap = false;
 
         // Return the size of padding between images/volumes in a stack
-        size_t pad;
+        size_t pad = 0;
 
         Image image; ///< Temporary image used as buffer to read from disk
 
         friend class ImageIO;
+
+        virtual ~ImageHandler();
 
     protected:
         /**
