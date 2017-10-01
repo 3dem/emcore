@@ -8,6 +8,9 @@ option(BUILD_TESTS "Build all tests." OFF)
 # Add option to build the doxygen documentation, turn on with 'cmake -DBUILD_DOCS=ON'
 option(BUILD_DOCS "Build the doxygen documentation" OFF)
 
+# Add option to decide if build tiff or not, useful when the library is not detected
+option(BUILD_TIFF "Build library with TIFF support" ON)
+
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -31,7 +34,7 @@ file(GLOB SOURCE_FILES "${SRC_PATH}/*/*.cpp")
 
 
 find_package(TIFF)
-if (TIFF_FOUND)
+if (TIFF_FOUND AND BUILD_TIFF)
     include_directories(${TIFF_INCLUDE_DIRS})
     MESSAGE( STATUS "TIFF_INCLUDE_DIRS:         " ${TIFF_INCLUDE_DIRS} )
     MESSAGE( STATUS "TIFF_LIBRARIES:         " ${TIFF_LIBRARIES} )
