@@ -45,6 +45,8 @@ namespace em
         Image(const Image &other);
         virtual ~Image();
 
+        Image& operator=(const Image &other);
+
         /** Return the header of a given image.
          *
          * @param index If 0, return the main header, if not, the specified one

@@ -55,7 +55,16 @@ Image::Image(const ArrayDim &adim, ConstTypePtr type): Array(adim, type)
 Image::Image(const Image &other): Array(other)
 {
     implPtr = new ImageImpl();
+    *this = other;
 } // Copy ctor Image
+
+Image& Image::operator=(const Image &other)
+{
+    std::cout << "Assigning Image..." << std::endl;
+    Array::operator=(other);
+    implPtr->headers = other.implPtr->headers;
+    return *this;
+} //operator=
 
 Image::~Image()
 {
@@ -122,6 +131,10 @@ ImageIO::~ImageIO()
     delete handler;
 }// ImageIO ctor
 
+
+ImageHandler::~ImageHandler() {}
+
+
 void ImageIO::open(const std::string &path, const FileMode mode)
 {
     // It makes sense to create the handler in the constructor
@@ -136,7 +149,9 @@ void ImageIO::open(const std::string &path, const FileMode mode)
     handler->fileMode = mode;
 
     handler->openFile();
-    readHeader();
+
+    if (mode != TRUNCATE)
+        readHeader();
 } // open
 
 void ImageIO::close()
@@ -152,7 +167,7 @@ void ImageIO::close()
 
 void ImageIO::createFile(const ArrayDim &adim, ConstTypePtr type)
 {
-    if (handler->fileMode != ImageIO::TRUNCATE)
+    if (handler->fileMode != TRUNCATE)
         THROW_ERROR("ImageIO::createFile can only be used with TRUNCATE mode.");
 
     // TODO: Check that the format supports this Type
@@ -170,7 +185,13 @@ void ImageIO::createFile(const ArrayDim &adim, ConstTypePtr type)
     // size and the size of all items (including extra padding per item)
     size_t fileSize = getHeaderSize() + (itemSize + getPadSize()) * adim.n;
 
+    std::cout << "ImageIO::createFile: fileSize: " << fileSize << std::endl;
+    std::cout << "ImageIO::createFile:    itemSize: " << itemSize << std::endl;
+    std::cout << "ImageIO::createFile:    getHeaderSize(): " << getHeaderSize() << std::endl;
+    std::cout << "ImageIO::createFile:    getPadSize(): " << getPadSize() << std::endl;
+
     File::expand(handler->file, fileSize);
+    fflush(handler->file);
 
 } // function createFile
 
@@ -259,6 +280,31 @@ void ImageIO::read(const size_t index, Image &image)
 
 void ImageIO::write(const size_t index, const Image &image)
 {
+    auto type = handler->type;
+
+    std::cerr << "ImageIO::write: type: " << type << std::endl;
+    std::cerr << "ImageIO::write: image.getType(): " << image.getType() << std::endl;
+
+    ASSERT_ERROR(image.getType() != type,
+                 "Type cast not implemented. Now image should have the same "
+                 "type.")
+
+    handler->image = image;
+    auto data = handler->image.getDataPointer();
+
+    size_t itemSize = handler->dim.getItemSize() * type->getSize();
+
+    size_t itemPos = getHeaderSize() + (itemSize + getPadSize()) * (index - 1);
+
+    std::cerr << "ImageIO::write: itemPos: " << itemPos << std::endl;
+    std::cerr << "ImageIO::write: itemSize: " << itemSize << std::endl;
+
+
+    if (fseek(handler->file, itemPos, SEEK_SET) != 0)
+        THROW_SYS_ERROR("Could not 'fseek' in file. ");
+
+    fwrite(data, itemSize, 1, handler->file);
+
         // void writeData(FILE* fimg, size_t offset, DataType wDType, size_t datasize_n, CastWriteMode castMode = CW_CAST)
 //        size_t dTypeSize = gettypesize(wDType);
 //        size_t datasize = datasize_n * dTypeSize;
@@ -329,6 +375,8 @@ ImageHandler* ImageIO::createHandler()
     return new ImageHandler;
 } // createHandler
 
+
+
 const char * ImageHandler::getOpenMode(FileMode mode) const
 {
     const char * openMode = "r";
@@ -346,6 +394,9 @@ const char * ImageHandler::getOpenMode(FileMode mode) const
 
 void ImageHandler::openFile()
 {
+    std::cout << "ImageHandler::openFile: mode: " << getOpenMode(fileMode) <<
+              "file: " << path << std::endl;
+
     file = fopen(path.c_str(), getOpenMode(fileMode));
 
     if (file == nullptr)

@@ -17,7 +17,7 @@ namespace em
     template <class T> class ArrayView;
 
     /** @ingroup base
-     * Simple class to hold the Array dimensions.
+     * Simple class to hold an Array dimensions.
      */
     class ArrayDim
     {
@@ -31,7 +31,8 @@ namespace em
         ArrayDim(const ArrayDim &adim);
 
         // Constructor from a given dimensions
-        explicit ArrayDim(size_t xdim, size_t ydim=1, size_t zdim=1, size_t ndim=1);
+        explicit ArrayDim(size_t xdim, size_t ydim=1, size_t zdim=1,
+                          size_t ndim=1);
 
         bool operator==(const ArrayDim &other);
 
@@ -42,16 +43,17 @@ namespace em
          */
         size_t getSize() const;
 
-        /** Return the number of pixels/voxels of a single item (either 2D or 3D)
-         * in the Array. (i.e. x * y * z)
+        /** Return the number of pixels/voxels of a single item
+         * (either 2D or 3D) in the Array. (i.e. x * y * z)
          */
         size_t getItemSize() const;
+
     }; // class ArrayDim
 
     std::ostream& operator<< (std::ostream &ostream, const ArrayDim &adim);
 
     /** @ingroup base
-     * Four dimensional array class to manage internal memory and data type.
+     * Four dimensional Array class to manage internal memory and data type.
      */
     class Array
     {
@@ -106,6 +108,7 @@ namespace em
     protected:
         // Pointer to implementation class, PIMPL idiom
         ArrayImpl * implPtr;
+
     }; // class Array
 
     std::ostream& operator<< (std::ostream &ostream, const Array &array);

@@ -62,8 +62,6 @@ public:
         msize = adim.getSize() * typePtr->getSize();
         dataPtr = malloc(msize);
         std::cout << "this: " << this << " allocate: msize: " << msize << " dataPtr: " << (dataPtr == nullptr) << std::endl;
-
-
     }
 
     // Deallocate memory
@@ -94,7 +92,8 @@ Array::Array()
 Array::Array(const ArrayDim &adim, ConstTypePtr type)
 {
     implPtr = new ArrayImpl();
-    // Type should be not null (another option could be assume float or double by default)
+    // Type should be not null (another option could be assume float
+    // or double by default)
     assert(type != nullptr);
     implPtr->allocate(adim, type);
 } // Ctor for ArrayDim and ConstTypePtr
@@ -114,10 +113,11 @@ Array::~Array()
 
 Array& Array::operator=(const Array &other)
 {
-    std::cout << "Assigning array..." << std::endl;
+    std::cout << "Assigning Array..." << std::endl;
     ConstTypePtr typePtr = other.getType();
-    implPtr->allocate(other.getDimensions(), typePtr);
-    typePtr->copy(other.implPtr->dataPtr, implPtr->dataPtr, implPtr->adim.getSize());
+    resize(other.getDimensions(), typePtr);
+    typePtr->copy(other.implPtr->dataPtr, implPtr->dataPtr,
+                  implPtr->adim.getSize());
     return *this;
 } //operator=
 

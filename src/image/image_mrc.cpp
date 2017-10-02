@@ -87,6 +87,16 @@ class ImageMrcHandler: public em::ImageHandler
 {
 public:
     MrcHeader header;
+
+    ImageMrcHandler(): em::ImageHandler()
+    {
+        std::cout << "ImageMrcHandler" << std::endl;
+    }
+
+    ~ImageMrcHandler()
+    {
+        std::cout << "~~~ImageMrcHandler" << std::endl;
+    }
 };
 
 
@@ -114,7 +124,6 @@ void ImageMrcIO::readHeader()
 
     bool isImgStack = (header.ispg == 0 and header.nx > 1);
     bool isVolStack = (header.ispg == 401);
-
 
     // Check dimensions of the data taking into account
     // if it is a 2D or 3D stack
@@ -170,8 +179,7 @@ void ImageMrcIO::readHeader()
     // TODO: Check special cases where image is a transform
     // TODO: Determine swap order (little vs big endian)
 
-    mrcHandler->pad = 0;
-}
+} // function readHeader
 
 /** Returns true if machine is little endian else false */
 bool isLittleEndian(void)
@@ -185,6 +193,8 @@ void ImageMrcIO::writeHeader()
     auto mrcHandler = static_cast<ImageMrcHandler*>(handler);
     auto& header = mrcHandler->header;
     auto& dim = mrcHandler->dim;
+
+    memset(&header, 0, MRC_HEADER_SIZE);
 
     ConstTypePtr type = mrcHandler->type;
 
@@ -248,6 +258,9 @@ void ImageMrcIO::writeHeader()
     header.nsymbt = 0;
     header.nlabl = 10; // FIXME: or zero?
 
+    std::cout << "header size: " << sizeof(MrcHeader)
+              << "MRC_HEADER_SIZE: " << MRC_HEADER_SIZE
+              << std::endl;
     fwrite(&header, MRC_HEADER_SIZE, 1, mrcHandler->file);
 
     // FIXME: consider swap
