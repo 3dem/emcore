@@ -238,6 +238,113 @@ void ImageSpiderIO::readHeader()
 
 }
 
+
+void ImageSpiderIO::writeHeader()
+{
+    auto spiHandler = static_cast<ImageSpiderHandler*>(handler);
+    SpiderHeader &header = spiHandler->header;
+    auto& dim = spiHandler->dim;
+
+    ConstTypePtr type = spiHandler->type;
+
+    size_t datasize = dim.getItemSize() * type->getSize();
+
+    // Filling the main header
+    float  lenbyt = type->getSize()*dim.x;  // Record length (in bytes)
+    float  labrec = floor(SPIDER_HEADER_SIZE/lenbyt); // # header records
+    if ( fmod(SPIDER_HEADER_SIZE,lenbyt) != 0 )
+        labrec++;
+    float  labbyt = labrec*lenbyt;   // Size of header in bytes
+    size_t offset = (size_t) labbyt;
+
+
+    // Map the parameters
+    header.lenbyt = lenbyt;     // Record length (in bytes)
+    header.labrec = labrec;     // # header records
+    header.labbyt = labbyt;      // Size of header in bytes
+
+    header.irec   = labrec + floor(datasize/lenbyt + 0.999999); // Total # records
+    header.nsam   = dim.x;
+    header.nrow   = dim.y;
+    header.nslice = dim.z;
+
+//    // If a transform, then the physical storage in x is only half+1
+//    size_t xstore  = dim.x;
+//    if ( transform == Hermitian )
+//    {
+//        xstore = (size_t)(dim.x * 0.5 + 1);
+//        header.nsam = 2*xstore;
+//    }
+//
+//
+//    if ( dim.z < 2 )
+//    {
+//        // 2D image or 2D Fourier transform
+//        header.iform = ( transform == NoTransform ) ? 1 :  -12 + (int)header.nsam%2;
+//    }
+//    else
+//    {
+//        // 3D volume or 3D Fourier transform
+//        header.iform = ( transform == NoTransform )? 3 : -22 + (int)header.nsam%2;
+//    }
+//    double aux;
+//    bool baux;
+//    header.imami = 0;//never trust max/min
+//
+//
+//    if (!MDMainHeader.empty())
+//    {
+//#define SET_MAIN_HEADER_VALUE(field, label, aux)  MDMainHeader.getValueOrDefault(label, aux, 0.); header.field = (float)aux
+//        SET_MAIN_HEADER_VALUE(fmin, MDL_MIN, aux);
+//        SET_MAIN_HEADER_VALUE(fmax, MDL_MAX, aux);
+//        SET_MAIN_HEADER_VALUE(av, MDL_AVG, aux);
+//        SET_MAIN_HEADER_VALUE(sig, MDL_STDDEV, aux);
+//    }
+//
+//
+//    if (Ndim == 1 && mode != WRITE_APPEND && !isStack && !MD.empty())
+//    {
+//        if ((dataMode == _HEADER_ALL || dataMode == _DATA_ALL))
+//        {
+//#define SET_HEADER_VALUE(field, label, aux)  MD[0].getValueOrDefault((label), (aux), 0.); header.field = (float)(aux)
+//            SET_HEADER_VALUE(xoff, MDL_SHIFT_X, aux);
+//            SET_HEADER_VALUE(yoff, MDL_SHIFT_Y, aux);
+//            SET_HEADER_VALUE(zoff, MDL_SHIFT_Z, aux);
+//            SET_HEADER_VALUE(phi, MDL_ANGLE_ROT, aux);
+//            SET_HEADER_VALUE(theta, MDL_ANGLE_TILT, aux);
+//            SET_HEADER_VALUE(gamma, MDL_ANGLE_PSI, aux);
+//            SET_HEADER_VALUE(weight, MDL_WEIGHT, aux);
+//            SET_HEADER_VALUE(flip, MDL_FLIP, baux);
+//            SET_HEADER_VALUE(scale, MDL_SCALE, aux);
+//        }
+//        else
+//        {
+//            header.xoff = header.yoff = header.zoff =\
+//                                          header.phi = header.theta = header.gamma = header.weight = 0.;
+//            header.scale = 1.;
+//        }
+//    }
+
+
+    if (dim.n > 1 )
+    {
+        header.istack = 2;
+        header.inuse =  1;
+        header.maxim = dim.n;
+    }
+
+
+
+//    fwrite( header, offset, 1, spiHandler->file);
+
+
+
+}
+
+
+
+
+
 size_t ImageSpiderIO::getHeaderSize() const
 {
     return SPIDER_HEADER_SIZE;
