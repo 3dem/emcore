@@ -20,7 +20,7 @@ namespace em
 {
 
     class ImageIO;
-    class ImageHandler;
+    class ImageIOImpl;
 
     /** @ingroup image
      * Image class
@@ -183,10 +183,10 @@ namespace em
         virtual ~ImageIO();
 
     protected:
-        /** Create an instance of ImageHandler (or subclass).
+        /** Create an instance of ImageIOImpl (or subclass).
          * @return A pointer to the given instance of the handler.
          */
-        virtual ImageHandler* createHandler();
+        virtual ImageIOImpl* createHandler();
 
         /** Read the main header of an image file */
         virtual void readHeader() = 0;
@@ -209,7 +209,7 @@ namespace em
          */
         virtual ImageIO * create() const = 0;
 
-        ImageHandler* handler = nullptr;
+        ImageIOImpl* handler = nullptr;
 
     private:
         static std::map<std::string, const ImageIO*> * iomap;

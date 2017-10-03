@@ -94,7 +94,7 @@ public:
     virtual ~ImageMrcIO();
 
 protected:
-    virtual ImageHandler* createHandler() override ;
+    virtual ImageIOImpl* createHandler() override ;
     virtual void readHeader() override ;
     virtual void writeHeader() override ;
     virtual size_t getHeaderSize() const override ;
@@ -103,15 +103,15 @@ protected:
 
 
 /**
- * Inherit properties from base ImageHandler and add information
+ * Inherit properties from base ImageIOImpl and add information
  * specific for MRC format (e.g, the MrcHeader struct)
  */
-class ImageMrcHandler: public em::ImageHandler
+class ImageMrcHandler: public em::ImageIOImpl
 {
 public:
     MrcHeader header;
 
-    ImageMrcHandler(): em::ImageHandler()
+    ImageMrcHandler(): em::ImageIOImpl()
     {
         std::cout << "ImageMrcHandler" << std::endl;
     }
@@ -297,7 +297,7 @@ size_t ImageMrcIO::getHeaderSize() const
     return MRC_HEADER_SIZE;
 }
 
-ImageHandler* ImageMrcIO::createHandler()
+ImageIOImpl* ImageMrcIO::createHandler()
 {
     return new ImageMrcHandler;
 } // createHandler

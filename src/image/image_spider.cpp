@@ -93,7 +93,7 @@ public:
     virtual ~ImageSpiderIO();
 
 protected:
-    virtual ImageHandler* createHandler() override ;
+    virtual ImageIOImpl* createHandler() override ;
     virtual void readHeader() override ;
     virtual void writeHeader() override ;
     virtual size_t getHeaderSize() const override ;
@@ -103,10 +103,10 @@ protected:
 
 
 /**
- * Inherit properties from base ImageHandler and add information
+ * Inherit properties from base ImageIOImpl and add information
  * specific for Spider format (e.g, the SpiderHeader struct)
  */
-class ImageSpiderHandler: public ImageHandler
+class ImageSpiderHandler: public ImageIOImpl
 {
 public:
     SpiderHeader header;
@@ -382,7 +382,7 @@ em::ImageIO* ImageSpiderIO::create() const
     return new ImageSpiderIO();
 }
 
-ImageHandler* ImageSpiderIO::createHandler()
+ImageIOImpl* ImageSpiderIO::createHandler()
 {
     return new ImageSpiderHandler;
 } // createHandler

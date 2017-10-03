@@ -13,7 +13,7 @@ namespace em
     /** Helper class to store information about image file.
      * This class can only be used from ImageIO class.
      */
-    class ImageHandler
+    class ImageIOImpl
     {
     public:
         // Store the name of the file that was read/written
@@ -41,7 +41,7 @@ namespace em
 
         friend class ImageIO;
 
-        virtual ~ImageHandler();
+        virtual ~ImageIOImpl();
 
     protected:
         /**
@@ -54,7 +54,7 @@ namespace em
          * should be set before calling this function.
          */
         virtual void openFile();
-    }; // class ImageHandler
+    }; // class ImageIOImpl
 
 
 } // em namespace

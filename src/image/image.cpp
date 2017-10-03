@@ -132,7 +132,7 @@ ImageIO::~ImageIO()
 }// ImageIO ctor
 
 
-ImageHandler::~ImageHandler() {}
+ImageIOImpl::~ImageIOImpl() {}
 
 
 void ImageIO::open(const std::string &path, const FileMode mode)
@@ -370,14 +370,14 @@ size_t ImageIO::getPadSize() const
 }
 
 
-ImageHandler* ImageIO::createHandler()
+ImageIOImpl* ImageIO::createHandler()
 {
-    return new ImageHandler;
+    return new ImageIOImpl;
 } // createHandler
 
 
 
-const char * ImageHandler::getOpenMode(FileMode mode) const
+const char * ImageIOImpl::getOpenMode(FileMode mode) const
 {
     const char * openMode = "r";
 
@@ -392,9 +392,9 @@ const char * ImageHandler::getOpenMode(FileMode mode) const
     return openMode;
 }
 
-void ImageHandler::openFile()
+void ImageIOImpl::openFile()
 {
-    std::cout << "ImageHandler::openFile: mode: " << getOpenMode(fileMode) <<
+    std::cout << "ImageIOImpl::openFile: mode: " << getOpenMode(fileMode) <<
               "file: " << path << std::endl;
 
     file = fopen(path.c_str(), getOpenMode(fileMode));

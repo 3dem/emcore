@@ -29,10 +29,10 @@ struct TiffHeader
 
 
 /**
- * Inherit properties from base ImageHandler and add information
+ * Inherit properties from base ImageIOImpl and add information
  * specific for TIFF format (e.g, the TiffHeader struct)
  */
-class ImageTiffHandler: public ImageHandler
+class ImageTiffHandler: public ImageIOImpl
 {
 public:
     std::vector<TiffHeader> vHeader;
@@ -59,7 +59,7 @@ public:
     virtual ~ImageTiffIO();
 
 protected:
-    virtual ImageHandler* createHandler() override ;
+    virtual ImageIOImpl* createHandler() override ;
     virtual void readHeader() override ;
     virtual void writeHeader() override {} ;
     virtual void read(const size_t index, Image &image) override ;
@@ -82,7 +82,7 @@ void ImageTiffHandler::openFile()
 
 }
 
-ImageHandler* ImageTiffIO::createHandler()
+ImageIOImpl* ImageTiffIO::createHandler()
 {
     return new ImageTiffHandler;
 } // createHandler
