@@ -98,6 +98,8 @@ namespace em
          */
         void * getDataPointer();
 
+        const void * getDataPointer() const;
+
         template <class T>
         ArrayView<T> getView();
 

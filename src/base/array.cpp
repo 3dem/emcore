@@ -170,6 +170,11 @@ void * Array::getDataPointer()
     return implPtr->dataPtr;
 } // getDataPointer
 
+const void * Array::getDataPointer() const
+{
+    return implPtr->dataPtr;
+} // getDataPointer
+
 template <class T>
 ArrayView<T> Array::getView()
 {
