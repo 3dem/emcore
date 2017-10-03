@@ -22,8 +22,6 @@ namespace em
     class ImageIO;
     class ImageIOImpl;
 
-    using ImageIOImplBuilder = ImageIO* (*)();
-
     /** @ingroup image
      * Image class
      */
@@ -102,16 +100,13 @@ namespace em
         static const FileMode READ_WRITE = 1;
         static const FileMode TRUNCATE = 2;
 
-        // ---- Static methods related to ImageIO instances --------
         /**
-         * Register a ImageIO class to be available for reading/writing images.
-         * The class will be accessible via the ImageIO name and the extensions
-         * defined by the class.
-         * @param imgio Input pointer to the ImageIO subclass that will be
-         * registred.
-         * @return Return True if the new ImageIO was sucessfully registered.
+         * Constructor to build a new ImageIO instance given its name or
+         * an extension related to it.
+         * @param extOrName Input string representing either the ImageIO name
+         * or one of the extensions registered for it.
          */
-        static bool set(const ImageIO *imgio, ImageIOImplBuilder builder);
+        ImageIO(const std::string &extOrName);
 
         /**
          * Check if some ImageIO is registered for a given name or extension.
@@ -120,28 +115,15 @@ namespace em
          * or one of the extensions registered.
          * @return Return True if there is any ImageIO registered.
          */
-        static bool has(const std::string &extOrName);
-
-        /**
-         * Retrieve an ImageIO instance for a given name or extension.
-         * @param extOrName Input string representing either the ImageIO name
-         * @return Return a pointer to a new ImageIO instance.
-         */
-        static ImageIO* get(const std::string &extOrName);
-
-        /** Return a name identifying this reader. */
-        virtual std::string getName() const = 0;
-
-        /** Return the extensions this reader is able to read. */
-        virtual StringVector getExtensions() const = 0;
+        static bool hasImpl(const std::string &extOrName);
 
         /** Return the dimensions of the file opened. */
         ArrayDim getDimensions() const;
 
         // TODO: DOCUMENT
-        virtual void open(const std::string &path, const FileMode mode=READ_ONLY);
+        void open(const std::string &path, const FileMode mode=READ_ONLY);
         // TODO: DOCUMENT
-        virtual void close();
+        void close();
 
         /**
          * Create an empty file with a given dimensions and a given type.
@@ -150,7 +132,7 @@ namespace em
          * @param adim The dimensions of the new file to be created.
          * @param type The data type of the elements that will be in the file.
          */
-        virtual void createFile(const ArrayDim &adim, ConstTypePtr type);
+        void createFile(const ArrayDim &adim, ConstTypePtr type);
 
         /**
          * Expand the current file for adding more elements.
@@ -159,7 +141,7 @@ namespace em
          * the current ndim of the file.
          * @param ndim The new number of desired elements in the file.
          */
-        virtual void expandFile(const size_t ndim);
+        void expandFile(const size_t ndim);
 
         // TODO: Move this basic function to the Image class as a shortcut
         /** Read a given image from file.
@@ -171,47 +153,20 @@ namespace em
          * @param location Input image location (index range and path) to be read
          * @param image Image where data will be read
          */
-        virtual void read(const ImageLocation &location, Image &image);
+        void read(const ImageLocation &location, Image &image);
 
         // TODO: Move this basic function to the Image class as a shortcut
-        // virtual void write(const ImageLocation &location, const Image &image);
+        // void write(const ImageLocation &location, const Image &image);
 
-        virtual void read(const size_t index, Image &image);
-        virtual void write(const size_t index, const Image &image);
+        void read(const size_t index, Image &image);
+        void write(const size_t index, const Image &image);
 
-        virtual void readImageHeader(const size_t index, Image &image) = 0;
-        virtual void writeImageHeader(const size_t index, Image &image) = 0;
 
-        virtual ~ImageIO();
+        ~ImageIO();
 
-    protected:
-        /** Create an instance of ImageIOImpl (or subclass).
-         * @return A pointer to the given instance of the handler.
-         */
-        virtual ImageIOImpl* createHandler();
-
-        /** Read the main header of an image file */
-        virtual void readHeader() = 0;
-
-        /** Write the main header of an image file */
-        virtual void writeHeader() = 0;
-
-        /** Return the size of the header for this format */
-        virtual size_t getHeaderSize() const = 0;
-
-        /** Return the size of padding between images/volumes in a stack */
-        virtual size_t getPadSize() const;
-
-        /** Clone this reader and obtain a new copy.
-         * The caller to this functions should take care
-         * of memory disposal. This function should only be accessible
-         * Image class when retrieving a registered reader.
-         *
-         * @return
-         */
-        virtual ImageIO * create() const = 0;
-
+    private:
         ImageIOImpl* impl = nullptr;
+
     }; // class ImageIO
 
 

@@ -22,20 +22,20 @@ TEST(Image, Constructor)
     header["filename"] = std::string("/path/to/image/");
     std::cout << img << std::endl;
 
-    ASSERT_TRUE(ImageIO::has("spi"));
-    ASSERT_TRUE(ImageIO::has("spider"));
-    ImageIO * spiderIO = ImageIO::get("spi");
-    ASSERT_EQ(spiderIO->getName(), "spider");
+    ASSERT_TRUE(ImageIO::hasImpl("spi"));
+    ASSERT_TRUE(ImageIO::hasImpl("spider"));
+    ImageIO spiderIO = ImageIO("spi");
+    // ASSERT_EQ(spiderIO->getName(), "spider");
 
 } // TEST(Image, Constructor)
 
 TEST(ImageMrcIO, Read)
 {
 
-    ASSERT_TRUE(ImageIO::has("mrc"));
-    ASSERT_TRUE(ImageIO::has("mrcs"));
-    ImageIO * mrcIO = ImageIO::get("mrc");
-    ASSERT_EQ(mrcIO->getName(), "mrc");
+    ASSERT_TRUE(ImageIO::hasImpl("mrc"));
+    ASSERT_TRUE(ImageIO::hasImpl("mrcs"));
+    ImageIO mrcIO = ImageIO("mrc");
+    // ASSERT_EQ(mrcIO.getName(), "mrc");
 
     ImageLocation loc;
     std::map<std::string, ArrayDim> fileDims;
@@ -59,17 +59,17 @@ TEST(ImageMrcIO, Read)
                 loc.path = root + pair.first;
                 std::cout << "Before reading. " << std::endl;
 
-                mrcIO->read(loc, img);
+                mrcIO.read(loc, img);
                 std::cout << img << std::endl;
                 ArrayDim imgDim(pair.second);
                 imgDim.n = 1;
                 ASSERT_TRUE(img.getDimensions() == imgDim);
-                ASSERT_TRUE(mrcIO->getDimensions() == pair.second);
+                ASSERT_TRUE(mrcIO.getDimensions() == pair.second);
             }
 
             // Use mrcIO2 for writing individual images
-            ImageIO * mrcIO2 = ImageIO::get("mrc");
-            mrcIO->open(root + stackFn);
+            ImageIO mrcIO2 = ImageIO("mrc");
+            mrcIO.open(root + stackFn);
             Image img;
             char suffix[4];
             std::string imgFn;
@@ -78,21 +78,16 @@ TEST(ImageMrcIO, Read)
 
             for (size_t i = 1; i < 11; ++i)
             {
-                mrcIO->read(i, img);
+                mrcIO.read(i, img);
                 snprintf (suffix, 4, "%03d", (int)i);
                 imgFn = std::string("image") + suffix + ".mrc";
                 std::cout << ">>> Writing image: " << imgFn << std::endl;
-                mrcIO2->open(imgFn, ImageIO::TRUNCATE);
-                mrcIO2->createFile(imgDim, img.getType());
-                mrcIO2->write(1, img);
-                mrcIO2->close();
+                mrcIO2.open(imgFn, ImageIO::TRUNCATE);
+                mrcIO2.createFile(imgDim, img.getType());
+                mrcIO2.write(1, img);
+                mrcIO2.close();
 
             }
-
-            delete mrcIO;
-            delete mrcIO2;
-
-
         }
         catch (Error &err)
         {
@@ -110,9 +105,9 @@ TEST(ImageMrcIO, Read)
 TEST(ImageSpiderIO, Read)
 {
 
-    ASSERT_TRUE(ImageIO::has("spider"));
-    ImageIO * spiIO = ImageIO::get("spi");
-    ASSERT_EQ(spiIO->getName(), "spider");
+    ASSERT_TRUE(ImageIO::hasImpl("spider"));
+    ImageIO spiIO = ImageIO("spi");
+    //ASSERT_EQ(spiIO->getName(), "spider");
 
 
     ImageLocation loc;
@@ -136,13 +131,13 @@ TEST(ImageSpiderIO, Read)
                 Image img;
                 loc.index = 1;
                 loc.path = root + pair.first;
-                spiIO->read(loc, img);
+                spiIO.read(loc, img);
                 std::cout << "Back in test" << std::endl;
                 std::cout << img << std::endl;
                 ArrayDim imgDim(pair.second);
                 imgDim.n = 1;
                 ASSERT_TRUE(img.getDimensions() == imgDim);
-                ASSERT_TRUE(spiIO->getDimensions() == pair.second);
+                ASSERT_TRUE(spiIO.getDimensions() == pair.second);
             }
         }
         catch (Error &err)
@@ -166,28 +161,27 @@ TEST(ImageIO, Create)
 
     for (auto ext: exts)
     {
-        ImageIO * imgio = ImageIO::get(ext);
-        std::cout << "Using IO: " << imgio->getName() << std::endl;
+        ImageIO imgio = ImageIO(ext);
+        std::cout << "Using IO: " << ext << std::endl;
 
         std::string fn;
         // Write a single image
         fn = "image-single." + ext;
-        imgio->open(fn.c_str(), ImageIO::TRUNCATE);
-        imgio->createFile(ArrayDim(DIM, DIM, 1, 1), em::TypeFloat);
-        imgio->close();
+        imgio.open(fn.c_str(), ImageIO::TRUNCATE);
+        imgio.createFile(ArrayDim(DIM, DIM, 1, 1), em::TypeFloat);
+        imgio.close();
 
         // Write a stack of images
         fn = "image-stack." + ext;
-        imgio->open(fn.c_str(), ImageIO::TRUNCATE);
-        imgio->createFile(ArrayDim(DIM, DIM, 1, 100), em::TypeFloat);
+        imgio.open(fn.c_str(), ImageIO::TRUNCATE);
+        imgio.createFile(ArrayDim(DIM, DIM, 1, 100), em::TypeFloat);
 
         Image img(ArrayDim(DIM, DIM, 1, 1), em::TypeFloat);
         auto av = img.getView<float>();
         av.assign(200);
-        imgio->write(1, img);
-        imgio->close();
+        imgio.write(1, img);
+        imgio.close();
 
-        delete imgio;
     }
 
 

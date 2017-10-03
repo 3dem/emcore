@@ -1,5 +1,7 @@
 #include <cstdio>
 
+#ifdef NEVER
+
 #include "tiffio.h"
 
 #include "em/base/error.h"
@@ -169,3 +171,5 @@ em::ImageIO* ImageTiffIO::create() const
 }
 
 REGISTER_IMAGE_IO(ImageTiffIO);
+
+#endif

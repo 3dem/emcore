@@ -6,6 +6,7 @@
 
 using namespace em;
 
+#ifdef NEVER
 
 #define SPIDER_HEADER_SIZE 1024 // Minimum size of the SPIDER header (variable)
 
@@ -389,3 +390,5 @@ ImageIOImpl* ImageSpiderIO::createHandler()
 
 
 REGISTER_IMAGE_IO(ImageSpiderIO);
+
+#endif
