@@ -1,8 +1,9 @@
 
 #include "em/base/error.h"
+#include "em/image/image.h"
 #include "em/image/image_priv.h"
-#include "em/image/image_mrc_priv.h"
 
+using namespace em;
 
 
 #define MRC_HEADER_SIZE    1024 // Minimum size of the MRC header (when nsymbt = 0)
@@ -78,6 +79,28 @@ struct MrcHeader
     int nlabl;           // 56     221-224  number of labels being used
     char labels[800];    // 57-256 225-1024 10 80-character labels
 }; // MrcHeader
+
+
+class ImageMrcIO: public ImageIO
+{
+
+public:
+    virtual std::string getName() const override;
+    virtual StringVector getExtensions() const override;
+
+    virtual void readImageHeader(const size_t index, Image &image) override {};
+    virtual void writeImageHeader(const size_t index, Image &image) override {};
+
+    virtual ~ImageMrcIO();
+
+protected:
+    virtual ImageHandler* createHandler() override ;
+    virtual void readHeader() override ;
+    virtual void writeHeader() override ;
+    virtual size_t getHeaderSize() const override ;
+    virtual ImageIO* create() const override;
+}; // class ImageMrcIO
+
 
 /**
  * Inherit properties from base ImageHandler and add information

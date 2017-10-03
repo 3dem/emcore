@@ -1,7 +1,11 @@
 
-#include "em/image/image_priv.h"
-#include "em/image/image_spider_priv.h"
 #include <math.h>
+#include "em/base/error.h"
+#include "em/image/image.h"
+#include "em/image/image_priv.h"
+
+using namespace em;
+
 
 #define SPIDER_HEADER_SIZE 1024 // Minimum size of the SPIDER header (variable)
 
@@ -74,6 +78,29 @@ struct SpiderHeader
     char ctim[8];  // 214-215   creation time
     char ctit[160];  // 216-255   title
 } ;
+
+
+class ImageSpiderIO: public ImageIO
+{
+
+public:
+    virtual std::string getName() const override;
+    virtual StringVector getExtensions() const override;
+
+    virtual void readImageHeader(const size_t index, Image &image) override {} ;
+    virtual void writeImageHeader(const size_t index, Image &image) override {} ;
+
+    virtual ~ImageSpiderIO();
+
+protected:
+    virtual ImageHandler* createHandler() override ;
+    virtual void readHeader() override ;
+    virtual void writeHeader() override ;
+    virtual size_t getHeaderSize() const override ;
+    virtual ImageIO* create() const override ;
+
+}; // class ImageSpiderIO
+
 
 /**
  * Inherit properties from base ImageHandler and add information
