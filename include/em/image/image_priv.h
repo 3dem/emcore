@@ -62,7 +62,8 @@ namespace em
 
 // The following macro can be used as a shortcut to register new ImageIO subclasses
 #define REGISTER_IMAGE_IO(ioClassName) \
-    ioClassName reader_##ioClassName; \
-    bool register_##ioClassName = ImageIO::set(&reader_##ioClassName)
+    ImageIO * new___##ioClassName(){ return new ioClassName(); } \
+    ioClassName reader___##ioClassName; \
+    bool register___##ioClassName = ImageIO::set(&reader___##ioClassName, &new___##ioClassName)
 
 #endif //EM_CORE_IMAGE_PRIV_H

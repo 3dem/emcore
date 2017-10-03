@@ -22,6 +22,8 @@ namespace em
     class ImageIO;
     class ImageIOImpl;
 
+    using ImageIOImplBuilder = ImageIO* (*)();
+
     /** @ingroup image
      * Image class
      */
@@ -109,7 +111,7 @@ namespace em
          * registred.
          * @return Return True if the new ImageIO was sucessfully registered.
          */
-        static bool set(const ImageIO *imgio);
+        static bool set(const ImageIO *imgio, ImageIOImplBuilder builder);
 
         /**
          * Check if some ImageIO is registered for a given name or extension.
@@ -209,10 +211,7 @@ namespace em
          */
         virtual ImageIO * create() const = 0;
 
-        ImageIOImpl* handler = nullptr;
-
-    private:
-        static std::map<std::string, const ImageIO*> * iomap;
+        ImageIOImpl* impl = nullptr;
     }; // class ImageIO
 
 

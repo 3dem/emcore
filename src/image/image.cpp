@@ -10,6 +10,7 @@
 #include "em/base/error.h"
 #include "em/base/type.h"
 #include "em/base/array.h"
+#include "em/base/registry.h"
 #include "em/os/file.h"
 #include "em/image/image_priv.h"
 
@@ -97,58 +98,68 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::Image &image)
 
 // ===================== ImageIO Implementation =======================
 
-std::map<std::string, const ImageIO*>* ImageIO::iomap;
+using ImageIORegistry = ImplRegistry<ImageIO>;
 
-bool ImageIO::set(const ImageIO *reader)
+ImageIORegistry * getRegistry()
+{
+    static ImageIORegistry registry;
+
+    return &registry;
+}
+
+bool ImageIO::set(const ImageIO *reader, ImageIOImplBuilder builder)
 {
     static std::map<std::string, const ImageIO*> localmap;
-    iomap = &localmap;
+    auto registry = getRegistry();
 
     for (auto ext: reader->getExtensions())
-        (*iomap)[ext] = reader;
+        registry->registerImpl(ext, builder);
 
-    (*iomap)[reader->getName()] = reader;
+    registry->registerImpl(reader->getName(), builder);
+
     return true;
 } // function registerIO
 
 bool ImageIO::has(const std::string &extension)
 {
-    auto it = (*iomap).find(extension);
-    return it != (*iomap).end();
+    return getRegistry()->hasImpl(extension);
 } // function hasIO
 
 ImageIO* ImageIO::get(const std::string &extension)
 {
-    if (!ImageIO::has(extension))
-        return nullptr;
-
-    return (*iomap)[extension]->create();
+    auto builder = getRegistry()->getImplBuilder(extension);
+    return builder != nullptr ? builder() : nullptr;
 } // function getIO
+
+
 
 ImageIO::~ImageIO()
 {
     close();
-    delete handler;
+    delete impl;
 }// ImageIO ctor
 
 
-ImageIOImpl::~ImageIOImpl() {}
+ImageIOImpl::~ImageIOImpl()
+{
+
+}
 
 
 void ImageIO::open(const std::string &path, const FileMode mode)
 {
-    // It makes sense to create the handler in the constructor
+    // It makes sense to create the impl in the constructor
     // but we cannot not do that because it is a virtual function
 
-    // We create the handler the first time that we enter this point.
+    // We create the impl the first time that we enter this point.
     std::cout << "just before openFile" << std::endl;
-    if (handler == nullptr)
-        handler = createHandler();
+    if (impl == nullptr)
+        impl = createHandler();
 
-    handler->path = path;
-    handler->fileMode = mode;
+    impl->path = path;
+    impl->fileMode = mode;
 
-    handler->openFile();
+    impl->openFile();
 
     if (mode != TRUNCATE)
         readHeader();
@@ -156,10 +167,10 @@ void ImageIO::open(const std::string &path, const FileMode mode)
 
 void ImageIO::close()
 {
-    if (handler != nullptr && handler->file != nullptr)
+    if (impl != nullptr && impl->file != nullptr)
     {
-        fclose(handler->file);
-        handler->file = nullptr;
+        fclose(impl->file);
+        impl->file = nullptr;
     }
 
     std::cout << "Close handle after" << std::endl;
@@ -167,13 +178,13 @@ void ImageIO::close()
 
 void ImageIO::createFile(const ArrayDim &adim, ConstTypePtr type)
 {
-    if (handler->fileMode != TRUNCATE)
+    if (impl->fileMode != TRUNCATE)
         THROW_ERROR("ImageIO::createFile can only be used with TRUNCATE mode.");
 
     // TODO: Check that the format supports this Type
 
-    handler->dim = adim;
-    handler->type = type;
+    impl->dim = adim;
+    impl->type = type;
 
     writeHeader(); // write the main header of the file
 
@@ -190,8 +201,8 @@ void ImageIO::createFile(const ArrayDim &adim, ConstTypePtr type)
     std::cout << "ImageIO::createFile:    getHeaderSize(): " << getHeaderSize() << std::endl;
     std::cout << "ImageIO::createFile:    getPadSize(): " << getPadSize() << std::endl;
 
-    File::expand(handler->file, fileSize);
-    fflush(handler->file);
+    File::expand(impl->file, fileSize);
+    fflush(impl->file);
 
 } // function createFile
 
@@ -202,20 +213,20 @@ void ImageIO::expandFile(const size_t ndim)
 
 ArrayDim ImageIO::getDimensions() const
 {
-    ASSERT_ERROR(handler == nullptr, "File has not been opened. ");
+    ASSERT_ERROR(impl == nullptr, "File has not been opened. ");
 
-    return handler->dim;
+    return impl->dim;
 }
 
 void ImageIO::read(const size_t index, Image &image)
 {
     // TODO: Validate that open has been previously called and succeeded
 
-    ArrayDim adim = handler->dim;
+    ArrayDim adim = impl->dim;
     adim.n = 1; // Allocate for just one element
 
     ConstTypePtr imageType = image.getType();
-    ConstTypePtr fileType = handler->type;
+    ConstTypePtr fileType = impl->type;
 
     // If the image already has a defined Type, we should respect that
     // one and then convert from the data read from disk.
@@ -246,8 +257,8 @@ void ImageIO::read(const size_t index, Image &image)
     {
         // TODO: image one item is too big, we could think of a
         // smaller chunk of the image
-        handler->image.resize(adim, fileType);
-        data = handler->image.getDataPointer();
+        impl->image.resize(adim, fileType);
+        data = impl->image.getDataPointer();
     }
 
     // NOTE: If in a future we want to read more than one continuous image
@@ -260,14 +271,14 @@ void ImageIO::read(const size_t index, Image &image)
 
     std::cerr << "DEBUG: fseeking to " << itemPos << std::endl;
 
-    if (fseek(handler->file, itemPos, SEEK_SET) != 0)
+    if (fseek(impl->file, itemPos, SEEK_SET) != 0)
         THROW_SYS_ERROR("Could not 'fseek' in file. ");
 
     // FIXME: change this to read by chunks when we change this
     // approach, right now only read a big chunk of one item size
     std::cerr << "DEBUG: reading " << itemSize << " bytes." << std::endl;
 
-    if (fread(data, itemSize, 1, handler->file) != 1)
+    if (fread(data, itemSize, 1, impl->file) != 1)
         THROW_SYS_ERROR("Could not 'fread' data from file. ");
 
     // TODO: Check swap
@@ -280,7 +291,7 @@ void ImageIO::read(const size_t index, Image &image)
 
 void ImageIO::write(const size_t index, const Image &image)
 {
-    auto type = handler->type;
+    auto type = impl->type;
 
     std::cerr << "ImageIO::write: type: " << type << std::endl;
     std::cerr << "ImageIO::write: image.getType(): " << image.getType() << std::endl;
@@ -289,10 +300,10 @@ void ImageIO::write(const size_t index, const Image &image)
                  "Type cast not implemented. Now image should have the same "
                  "type.")
 
-    handler->image = image;
-    auto data = handler->image.getDataPointer();
+    impl->image = image;
+    auto data = impl->image.getDataPointer();
 
-    size_t itemSize = handler->dim.getItemSize() * type->getSize();
+    size_t itemSize = impl->dim.getItemSize() * type->getSize();
 
     size_t itemPos = getHeaderSize() + (itemSize + getPadSize()) * (index - 1);
 
@@ -300,10 +311,10 @@ void ImageIO::write(const size_t index, const Image &image)
     std::cerr << "ImageIO::write: itemSize: " << itemSize << std::endl;
 
 
-    if (fseek(handler->file, itemPos, SEEK_SET) != 0)
+    if (fseek(impl->file, itemPos, SEEK_SET) != 0)
         THROW_SYS_ERROR("Could not 'fseek' in file. ");
 
-    fwrite(data, itemSize, 1, handler->file);
+    fwrite(data, itemSize, 1, impl->file);
 
         // void writeData(FILE* fimg, size_t offset, DataType wDType, size_t datasize_n, CastWriteMode castMode = CW_CAST)
 //        size_t dTypeSize = gettypesize(wDType);
@@ -366,7 +377,7 @@ void ImageIO::read(const ImageLocation &location, Image &image)
 
 size_t ImageIO::getPadSize() const
 {
-    return handler->pad;
+    return impl->pad;
 }
 
 
