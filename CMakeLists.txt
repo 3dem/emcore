@@ -40,7 +40,7 @@ if (TIFF_FOUND AND BUILD_TIFF)
     MESSAGE( STATUS "TIFF_LIBRARIES:         " ${TIFF_LIBRARIES} )
 else (TIFF_FOUND)
     list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_tiff.cpp")
-endif (TIFF_FOUND)
+endif (TIFF_FOUND AND BUILD_TIFF)
 
 #find_package(JPEG)
 #find_package(PNG)
