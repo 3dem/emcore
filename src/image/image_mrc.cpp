@@ -103,7 +103,7 @@ public:
 
         // Try to read the main header from the (already opened) file stream
         if ( fread(&header, MRC_HEADER_SIZE, 1, file) < 1 )
-            return; //FIXME: Set some error or throw an Exception errCode = -2;
+            THROW_SYS_ERROR(std::string("Error reading MRC header in file: ") + path);
 
         bool isImgStack = (header.ispg == 0 and header.nx > 1);
         bool isVolStack = (header.ispg == 401);

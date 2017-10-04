@@ -297,7 +297,7 @@ void ImageIOImpl::openFile()
     file = fopen(path.c_str(), getOpenMode(fileMode));
 
     if (file == nullptr)
-        THROW_SYS_ERROR(std::string("Error opening file '") + path);
+        THROW_SYS_ERROR(std::string("Error opening file: ") + path);
 } // function ImageIOImpl::openFile
 
 void ImageIOImpl::closeFile()
