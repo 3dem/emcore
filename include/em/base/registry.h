@@ -31,6 +31,7 @@ namespace em
                           BuilderFuncPtr newImplBuilder)
         {
             registryMap[extOrName] = newImplBuilder;
+            return true;
         }
 
         /**
@@ -65,7 +66,7 @@ namespace em
         {
             auto implBuilder = getImplBuilder(extOrName);
             assert(implBuilder!= nullptr);
-            return implBuilder(extOrName)();
+            return implBuilder();
         }
 
     private:
