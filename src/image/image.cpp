@@ -222,7 +222,7 @@ void ImageIO::read(const size_t index, Image &image)
     void * data = nullptr;
 
     std::cout << "DEBUG:ImageIO::read: imageType: " << *imageType << std::endl;
-    std::cout << "DEBUG:ImageIO::read: " << *fileType << std::endl;
+    std::cout << "DEBUG:ImageIO::read: fileType: " << *fileType << std::endl;
 
     // If the image has the same Type as the file
     // we do not need an intermediate buffer, we can read data
@@ -273,6 +273,11 @@ size_t ImageIOImpl::getPadSize() const
     return pad;
 } // function ImageIOImpl::getPadSize
 
+size_t ImageIOImpl::getImageSize() const
+{
+    return dim.getItemSize() * type->getSize() + getPadSize();
+} // function ImageIOImpl::getImageSize
+
 const char * ImageIOImpl::getOpenMode(FileMode mode) const
 {
     const char * openMode = "r";
@@ -309,11 +314,11 @@ void ImageIOImpl::expandFile()
 {
     // Compute the size of one item, taking into account its x, y, z dimensions
     // and the size of the type that will be used
-    size_t itemSize = dim.getItemSize() * type->getSize();
+    size_t itemSize = getImageSize();
 
     // Compute the total size of the file taking into account the general header
     // size and the size of all items (including extra padding per item)
-    size_t fileSize = getHeaderSize() + (itemSize + getPadSize()) * dim.n;
+    size_t fileSize = getHeaderSize() + itemSize * dim.n;
 
     std::cout << "ImageIO::createFile: fileSize: " << fileSize << std::endl;
     std::cout << "                     itemSize: " << itemSize << std::endl;
@@ -337,13 +342,9 @@ void ImageIOImpl::writeImageHeader(const size_t index, const Image &image)
 
 void ImageIOImpl::readImageData(const size_t index, Image &image)
 {
-    // NOTE: If in a future we want to read more than one continuous image
-    // we could just move point the padding space between images
-    // For now, we are just positioning the pointer to the place where
-    // the required image is stored. Basically we need to shift the pointer
-    // HEADER_SIZE + (IMAGE_SIZE + PAD_SIZE) * (IMG_INDEX - 1)
-    size_t itemSize = dim.getItemSize() * type->getSize();
-    size_t itemPos = getHeaderSize() + (itemSize + getPadSize()) * (index - 1);
+    size_t itemSize = getImageSize();
+    // Compute the position of the item data in the file given its size
+    size_t itemPos = getHeaderSize() + itemSize * (index - 1) + getPadSize();
 
     std::cerr << "DEBUG: fseeking to " << itemPos << std::endl;
 
@@ -360,18 +361,16 @@ void ImageIOImpl::readImageData(const size_t index, Image &image)
 
 void ImageIOImpl::writeImageData(const size_t index, const Image &image)
 {
-    auto data = image.getDataPointer();
-    size_t itemSize = dim.getItemSize() * type->getSize();
-    size_t itemPos = getHeaderSize() + (itemSize + getPadSize()) * (index - 1);
+    size_t itemSize = getImageSize();
+    size_t itemPos = getHeaderSize() + itemSize * (index - 1) + getPadSize();
 
     std::cerr << "ImageIOImpl::write: itemPos: " << itemPos << std::endl;
     std::cerr << "ImageIOImpl::write: itemSize: " << itemSize << std::endl;
 
-
     if (fseek(file, itemPos, SEEK_SET) != 0)
         THROW_SYS_ERROR("Could not 'fseek' in file. ");
 
-    fwrite(data, itemSize, 1, file);
+    fwrite(image.getDataPointer(), itemSize, 1, file);
 
 } // function ImageIOImpl::write
 
