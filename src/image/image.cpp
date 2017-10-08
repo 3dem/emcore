@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "em/base/error.h"
+#include "em/base/log.h"
 #include "em/base/type.h"
 #include "em/base/array.h"
 #include "em/base/registry.h"
@@ -163,6 +164,7 @@ void ImageIO::open(const std::string &path, const FileMode mode)
     if (impl == nullptr)
     {
         std::string ext = Path::getExtension(path);
+        LOG_VAR(ext);
         auto builder = getRegistry()->getImplBuilder(ext);
         assert(builder!= nullptr);
         impl = builder();
@@ -190,8 +192,9 @@ void ImageIO::close()
 
 void ImageIO::createFile(const ArrayDim &adim, ConstTypePtr type)
 {
-    if (impl->fileMode != TRUNCATE)
-        THROW_ERROR("ImageIO::createFile can only be used with TRUNCATE mode.");
+    ASSERT_ERROR(type == nullptr, "Input type can not be null. ");
+    ASSERT_ERROR(impl->fileMode != TRUNCATE,
+                 "ImageIO::createFile can only be used with TRUNCATE mode.");
 
     // TODO: Check that the format supports this Type
 
@@ -348,11 +351,13 @@ void ImageIOImpl::writeImageHeader(const size_t index, const Image &image)
 
 void ImageIOImpl::readImageData(const size_t index, Image &image)
 {
-    size_t itemSize = getImageSize();
+    size_t itemSize = getImageSize(); // Size of an item containing the padSize
+    size_t padSize = getPadSize();
+    size_t readSize = itemSize - padSize;
     // Compute the position of the item data in the file given its size
-    size_t itemPos = getHeaderSize() + itemSize * (index - 1) + getPadSize();
+    size_t itemPos = getHeaderSize() + itemSize * (index - 1) + padSize;
 
-    std::cerr << "ImageIOImpl::readImageData: getPadSize() " << getPadSize() << std::endl;
+    std::cerr << "ImageIOImpl::readImageData: getPadSize() " << padSize << std::endl;
     std::cerr << "DEBUG: fseeking to " << itemPos << std::endl;
 
     if (fseek(file, itemPos, SEEK_SET) != 0)
@@ -360,16 +365,18 @@ void ImageIOImpl::readImageData(const size_t index, Image &image)
 
     // FIXME: change this to read by chunks when we change this
     // approach, right now only read a big chunk of one item size
-    std::cerr << "DEBUG: reading " << itemSize << " bytes." << std::endl;
+    std::cerr << "DEBUG: reading " << readSize << " bytes." << std::endl;
 
-    if (fread(image.getDataPointer(), itemSize, 1, file) != 1)
+    if (fread(image.getDataPointer(), readSize, 1, file) != 1)
         THROW_SYS_ERROR("Could not 'fread' data from file. ");
 }
 
 void ImageIOImpl::writeImageData(const size_t index, const Image &image)
 {
     size_t itemSize = getImageSize();
-    size_t itemPos = getHeaderSize() + itemSize * (index - 1) + getPadSize();
+    size_t padSize = getPadSize();
+    size_t writeSize = itemSize - padSize;
+    size_t itemPos = getHeaderSize() + itemSize * (index - 1) + padSize;
 
     std::cerr << "ImageIOImpl::write: itemPos: " << itemPos << std::endl;
     std::cerr << "ImageIOImpl::write: itemSize: " << itemSize << std::endl;
@@ -377,7 +384,7 @@ void ImageIOImpl::writeImageData(const size_t index, const Image &image)
     if (fseek(file, itemPos, SEEK_SET) != 0)
         THROW_SYS_ERROR("Could not 'fseek' in file. ");
 
-    fwrite(image.getDataPointer(), itemSize, 1, file);
+    fwrite(image.getDataPointer(), writeSize, 1, file);
 
 } // function ImageIOImpl::write
 
