@@ -35,7 +35,7 @@ int main (int argc, char *argv[])
                 loc.path = root + pair.first;
                 std::cout << "Before reading. " << std::endl;
 
-                mrcIO.read(loc, img);
+                img.read(loc);
                 std::cout << img << std::endl;
                 ArrayDim imgDim(pair.second);
                 imgDim.n = 1;
@@ -80,7 +80,7 @@ int main (int argc, char *argv[])
                 for (auto fn: filenames)
                 {
                     imgLoc.path = fn;
-                    mrcIO.read(imgLoc, img);
+                    img.read(imgLoc);
                     ++count;
                     mrcIO2.write(count, img);
                 }

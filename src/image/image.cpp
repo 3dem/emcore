@@ -11,7 +11,7 @@
 #include "em/base/type.h"
 #include "em/base/array.h"
 #include "em/base/registry.h"
-#include "em/os/file.h"
+#include "em/os/filesystem.h"
 #include "em/image/image_priv.h"
 
 
@@ -95,6 +95,18 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::Image &image)
     return ostream;
 }
 
+void Image::read(const ImageLocation &location)
+{
+    std::cout << " open in read: " << location.path << std::endl;
+    ImageIO imgio = ImageIO();
+    imgio.open(location.path);
+    // FIXME: Now only reading the first image in the location range
+    std::cout << " read(location.start: " << location.index << ")" << std::endl;
+    imgio.read(location.index, *this);
+    imgio.close();
+    std::cout << " Close file" << std::endl;
+
+} // function Image::read
 
 // ===================== ImageIO Implementation =======================
 
@@ -117,17 +129,15 @@ bool em::registerImageIOImpl(const StringVector &extensions,
     return true;
 } // function registerImageIOImpl
 
-
 bool ImageIO::hasImpl(const std::string &extension)
 {
     return getRegistry()->hasImpl(extension);
 } // function hasIO
 
-//ImageIO* ImageIO::get(const std::string &extension)
-//{
-//    auto builder = getRegistry()->getImplBuilder(extension);
-//    return builder != nullptr ? builder() : nullptr;
-//} // function getIO
+ImageIO::ImageIO()
+{
+    impl = nullptr;
+} // Ctor ImageIO
 
 ImageIO::ImageIO(const std::string &extOrName)
 {
@@ -150,6 +160,14 @@ ImageIOImpl::~ImageIOImpl()
 
 void ImageIO::open(const std::string &path, const FileMode mode)
 {
+    if (impl == nullptr)
+    {
+        std::string ext = Path::getExtension(path);
+        auto builder = getRegistry()->getImplBuilder(ext);
+        assert(builder!= nullptr);
+        impl = builder();
+    }
+
     impl->path = path;
     impl->fileMode = mode;
 
@@ -242,18 +260,6 @@ void ImageIO::read(const size_t index, Image &image)
     //castPage2T(page, MULTIDIM_ARRAY(data) + haveread_n, datatype, readsize_n);
 }
 
-void ImageIO::read(const ImageLocation &location, Image &image)
-{
-    std::cout << " open in read: " << location.path << std::endl;
-    open(location.path);
-    // FIXME: Now only reading the first image in the location range
-    std::cout << " read(location.start: " << location.index << ")" << std::endl;
-    read(location.index, image);
-    close();
-    std::cout << " Close file" << std::endl;
-
-} // ImageIO::read
-
 void ImageIO::write(const size_t index, const Image &image)
 {
     auto type = impl->type;
@@ -325,7 +331,7 @@ void ImageIOImpl::expandFile()
     std::cout << "                     getHeaderSize(): " << getHeaderSize() << std::endl;
     std::cout << "                     getPadSize(): " << getPadSize() << std::endl;
 
-    File::expand(file, fileSize);
+    File::resize(file, fileSize);
     fflush(file);
 
 } // function ImageIOImpl::expandFile
@@ -346,6 +352,7 @@ void ImageIOImpl::readImageData(const size_t index, Image &image)
     // Compute the position of the item data in the file given its size
     size_t itemPos = getHeaderSize() + itemSize * (index - 1) + getPadSize();
 
+    std::cerr << "ImageIOImpl::readImageData: getPadSize() " << getPadSize() << std::endl;
     std::cerr << "DEBUG: fseeking to " << itemPos << std::endl;
 
     if (fseek(file, itemPos, SEEK_SET) != 0)

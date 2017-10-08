@@ -24,15 +24,14 @@ int main(int argc, char *argv[]) {
 
         std::map<std::string, ArrayDim> fileDims;
 
-        fileDims["/home/joton/projects/em-core/resources/images/singleImage.tif"] = ArrayDim(3, 3, 1,
-                                                                 1);
+        fileDims["/home/joton/projects/em-core/"
+                 "resources/images/singleImage.tif"] = ArrayDim(3, 3, 1, 1);
 
         for (auto &pair: fileDims) {
             Image img;
             loc.index = 1;
             loc.path = pair.first;
-
-            imIO.read(loc, img);
+            img.read(loc);
             std::cout << "Back in test" << std::endl;
             std::cout << img << std::endl;
             ArrayDim imgDim(pair.second);

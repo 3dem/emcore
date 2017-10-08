@@ -59,7 +59,7 @@ TEST(ImageMrcIO, Read)
                 loc.path = root + pair.first;
                 std::cout << "Before reading. " << std::endl;
 
-                mrcIO.read(loc, img);
+                img.read(loc);
                 std::cout << img << std::endl;
                 ArrayDim imgDim(pair.second);
                 imgDim.n = 1;
@@ -96,7 +96,8 @@ TEST(ImageMrcIO, Read)
     }
     else
     {
-        std::cout << "Skipping image format tests, EM_TEST_DATA not defined in environment. " << std::endl;
+        std::cout << "Skipping image format tests, EM_TEST_DATA not defined in "
+                     "environment. " << std::endl;
     }
 
 } // TEST(ImageMrcIO, Read)
@@ -131,7 +132,7 @@ TEST(ImageSpiderIO, Read)
                 Image img;
                 loc.index = 1;
                 loc.path = root + pair.first;
-                spiIO.read(loc, img);
+                img.read(loc);
                 std::cout << "Back in test" << std::endl;
                 std::cout << img << std::endl;
                 ArrayDim imgDim(pair.second);

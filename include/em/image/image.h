@@ -23,6 +23,21 @@ namespace em
     class ImageIOImpl;
 
     /** @ingroup image
+     * This class represent the location of one or several images in disk.
+     * It contains a path to a physical file on disk, and a given index.
+     * In EM, many images are usually grouped in a single file (stack).
+     * So we need to store the path and the index of the image.
+     */
+    class ImageLocation
+    {
+    public:
+        // TODO: maybe consider a pointer to string, so many ImageLocation objects
+        // could share the same path string without extra memory
+        std::string path;
+        size_t index; ///< Index to read from file (first one is 1, 0 means all images)
+    }; // class ImageLocation
+
+    /** @ingroup image
      * Image class
      */
     class Image: public Array
@@ -57,6 +72,17 @@ namespace em
         // String representation
         virtual void toStream(std::ostream &ostream) const override;
 
+        /** Read image data from a given location.
+         * This function is a shortcut to easily read an image from a location
+         * without using the ImageIO class.
+         * The file will be open before data is read and close after it.
+         * If you want to read multiple images from the same file, it
+         * would be better to first open the file explicitly using ImageIO,
+         * read all the images and then close the file.
+         * @param location Input image location (index range and path) to be read
+         */
+        void read(const ImageLocation &location);
+
 
     private:
         // Pointer to implementation class, PIMPL idiom
@@ -65,21 +91,6 @@ namespace em
 
     std::ostream& operator<< (std::ostream &ostream, const em::Image &t);
 
-
-    /** @ingroup image
-     * This class represent the location of one or several images in disk.
-     * It contains a path to a physical file on disk, and a given index.
-     * In EM, many images are usually grouped in a single file (stack).
-     * So we need to store the path and the index of the image.
-     */
-    class ImageLocation
-    {
-    public:
-        // TODO: maybe consider a pointer to string, so many ImageLocation objects
-        // could share the same path string without extra memory
-        std::string path;
-        size_t index; ///< Index to read from file (first one is 1, 0 means all images)
-    }; // class ImageLocation
 
 
     using FileMode = uint8_t;
@@ -101,8 +112,25 @@ namespace em
         static const FileMode TRUNCATE = 2;
 
         /**
+         * Empty constructor for ImageIO.
+         * In this case the newly created instance will have no format
+         * implementation associated to read/write formats. Then, when the
+         * open() method is called to open a file, the format implementation
+         * will be inferred from the filename extension. Some functions will
+         * raise an exception if called without had opened a file and, therefore,
+         * having an underlying format implementation.
+         */
+        ImageIO();
+
+        /**
          * Constructor to build a new ImageIO instance given its name or
-         * an extension related to it.
+         * an extension related to the format implementation. The provided
+         * input string should be the key associated to a know format
+         * implementation. If not, an exception will be thrown. If the format
+         * implementation is associated to the ImageIO instance, it will not
+         * change when calling the open() method. This allow to read/write
+         * images with unknown (or non-standard) file extensions.
+         *
          * @param extOrName Input string representing either the ImageIO name
          * or one of the extensions registered for it.
          */
@@ -143,17 +171,7 @@ namespace em
          */
         void expandFile(const size_t ndim);
 
-        // TODO: Move this basic function to the Image class as a shortcut
-        /** Read a given image from file.
-         * This function is the most basic way to read an image from disk.
-         * The file will be open before data is read and close after it.
-         * If you want to read multiple images from the same file, it
-         * would be better to first open the file explicitly,
-         * read the images and then close the file.
-         * @param location Input image location (index range and path) to be read
-         * @param image Image where data will be read
-         */
-        void read(const ImageLocation &location, Image &image);
+
 
         // TODO: Move this basic function to the Image class as a shortcut
         // void write(const ImageLocation &location, const Image &image);
