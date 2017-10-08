@@ -32,7 +32,7 @@ size_t ArrayDim::getItemSize() const
     return x * y * z;
 }
 
-bool ArrayDim::operator==(const ArrayDim &other)
+bool ArrayDim::operator==(const ArrayDim &other) const
 {
     return (x == other.x and y == other.y and z == other.z and n == other.n);
 }
