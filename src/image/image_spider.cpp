@@ -84,6 +84,7 @@ class ImageIOSpider: public em::ImageIOImpl
 {
 private:
     SpiderHeader header;
+    bool isStack;
 
 public:
 
@@ -104,11 +105,11 @@ public:
 
         //"Invalid Spider file:  %s", filename.c_str()));
         if(header.labbyt != header.labrec*header.lenbyt)
-            return; //FIXME: Set some error or throw an Exception errCode = -2;
+            THROW_ERROR(std::string("Invalid SPIDER file: ") + path);
 
         // Check dimensions of the data taking into account
         // if it is a 2D or 3D stack
-        bool isStack = ( header.istack > 0 );
+        isStack = ( header.istack > 0 );
         dim.x = header.nsam;
         dim.y = header.nrow;
         dim.z = header.nslice;
@@ -216,6 +217,11 @@ public:
     virtual size_t getHeaderSize() const override
     {
         return SPIDER_HEADER_SIZE;
+    }
+
+    virtual size_t getPadSize() const override
+    {
+        return dim.n > 1 ? SPIDER_HEADER_SIZE : 0;
     }
 
 }; // class ImageIOSpider
