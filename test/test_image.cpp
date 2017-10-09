@@ -131,14 +131,14 @@ TEST(ImageSpiderIO, Read)
             {
                 Image img;
                 loc.index = 1;
+                std::cerr << ">>>>>>>>>>>>>>>>> Reading " << pair.first << std::endl;
                 loc.path = root + pair.first;
                 img.read(loc);
                 std::cout << "Back in test" << std::endl;
                 std::cout << img << std::endl;
                 ArrayDim imgDim(pair.second);
                 imgDim.n = 1;
-                ASSERT_TRUE(img.getDimensions() == imgDim);
-                ASSERT_TRUE(spiIO.getDimensions() == pair.second);
+                ASSERT_EQ(img.getDimensions(), imgDim);
             }
         }
         catch (Error &err)
@@ -184,7 +184,5 @@ TEST(ImageIO, Create)
         imgio.close();
 
     }
-
-
-
 } // TEST(ImageIO, Create)
+
