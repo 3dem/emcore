@@ -62,7 +62,6 @@ Image::Image(const Image &other): Array(other)
 
 Image& Image::operator=(const Image &other)
 {
-    std::cout << "Assigning Image..." << std::endl;
     Array::operator=(other);
     implPtr->headers = other.implPtr->headers;
     return *this;
@@ -70,7 +69,6 @@ Image& Image::operator=(const Image &other)
 
 Image::~Image()
 {
-    std::cout << "this: " << this << " ~Image()" << std::endl;
     delete implPtr;
 } // Dtor
 
@@ -98,16 +96,28 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::Image &image)
 
 void Image::read(const ImageLocation &location)
 {
-    std::cout << " open in read: " << location.path << std::endl;
-    ImageIO imgio = ImageIO();
+    ImageIO imgio;
     imgio.open(location.path);
     // FIXME: Now only reading the first image in the location range
-    std::cout << " read(location.start: " << location.index << ")" << std::endl;
     imgio.read(location.index, *this);
     imgio.close();
-    std::cout << " Close file" << std::endl;
-
 } // function Image::read
+
+void Image::write(const ImageLocation &location) const
+{
+    ImageIO imgio;
+
+    if (Path::exists(location.path))
+        imgio.open(location.path, ImageIO::READ_WRITE);
+    else
+    {
+        imgio.open(location.path, ImageIO::TRUNCATE);
+        imgio.createFile(getDimensions(), getType());
+    }
+    
+    imgio.write(location.index, *this);
+    imgio.close();
+} // function Image::write
 
 // ===================== ImageIO Implementation =======================
 
@@ -116,9 +126,8 @@ using ImageIOImplRegistry = ImplRegistry<ImageIOImpl>;
 ImageIOImplRegistry * getRegistry()
 {
     static ImageIOImplRegistry registry;
-
     return &registry;
-}
+} // function getRegistry
 
 bool em::registerImageIOImpl(const StringVector &extensions,
                              ImageIOImplBuilder builder)
@@ -143,7 +152,9 @@ ImageIO::ImageIO()
 ImageIO::ImageIO(const std::string &extOrName)
 {
     auto builder = getRegistry()->getImplBuilder(extOrName);
-    assert(builder!= nullptr);
+    ASSERT_ERROR(builder == nullptr,
+                 std::string("Can not find image format implementation for ")
+                 + extOrName);
     impl = builder();
 } // Ctor ImageIO
 
@@ -173,9 +184,18 @@ void ImageIO::open(const std::string &path, const FileMode mode)
     impl->path = path;
     impl->fileMode = mode;
 
+    // If the file does not exists and mode is READ_WRITE
+    // switch automatically to TRUNCATE mode
+    if (mode == READ_WRITE and !Path::exists(path))
+        impl->fileMode = TRUNCATE;
+
+    std::cerr << "ImageIO::open: " << std::endl <<
+                 "         path: " << path << std::endl <<
+                 "    file Mode: " << (int)impl->fileMode << std::endl <<
+                 "  file Exists: " << Path::exists(path) << std::endl;
     impl->openFile();
 
-    if (mode != TRUNCATE)
+    if (impl->fileMode != TRUNCATE)
         impl->readHeader();
 } // open
 
@@ -186,8 +206,6 @@ void ImageIO::close()
         fclose(impl->file);
         impl->file = nullptr;
     }
-
-    std::cout << "Close handle after" << std::endl;
 }
 
 void ImageIO::createFile(const ArrayDim &adim, ConstTypePtr type)
@@ -267,8 +285,8 @@ void ImageIO::write(const size_t index, const Image &image)
 {
     auto type = impl->type;
 
-    std::cerr << "ImageIO::write: type: " << type << std::endl;
-    std::cerr << "ImageIO::write: image.getType(): " << image.getType() << std::endl;
+    std::cerr << "ImageIO::write: type: " << *type << std::endl;
+    std::cerr << "ImageIO::write: image.getType(): " << *image.getType() << std::endl;
 
     ASSERT_ERROR(image.getType() != type,
                  "Type cast not implemented. Now image should have the same "

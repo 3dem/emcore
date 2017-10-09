@@ -75,13 +75,20 @@ namespace em
         /** Read image data from a given location.
          * This function is a shortcut to easily read an image from a location
          * without using the ImageIO class.
-         * The file will be open before data is read and close after it.
+         * The file will be open before data is read and closed after it.
          * If you want to read multiple images from the same file, it
          * would be better to first open the file explicitly using ImageIO,
          * read all the images and then close the file.
          * @param location Input image location (index range and path) to be read
          */
         void read(const ImageLocation &location);
+
+        /** Write the image data into a file location.
+         * This function is a shortcut to easily write an image without
+         * using the ImageIO class.
+         * @param location Input location where the image will be written.
+         */
+        void write(const ImageLocation &location) const;
 
 
     private:
