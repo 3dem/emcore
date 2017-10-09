@@ -61,13 +61,13 @@ public:
         this->typePtr = type;
         msize = adim.getSize() * typePtr->getSize();
         dataPtr = malloc(msize);
-        std::cout << "this: " << this << " allocate: msize: " << msize << " dataPtr: " << (dataPtr == nullptr) << std::endl;
+        // std::cout << "this: " << this << " allocate: msize: " << msize << " dataPtr: " << (dataPtr == nullptr) << std::endl;
     }
 
     // Deallocate memory
     void deallocate()
     {
-        std::cout << "this: " << this << " deallocate: msize: " << msize << " dataPtr: " << (dataPtr == nullptr) << std::endl;
+        // std::cout << "this: " << this << " deallocate: msize: " << msize << " dataPtr: " << (dataPtr == nullptr) << std::endl;
         if (msize > 0)
         {
             free(dataPtr);
@@ -106,20 +106,17 @@ Array::Array(const Array &other)
 
 Array::~Array()
 {
-    std::cout << "this: " << this << " ~Array()" << std::endl;
     delete implPtr;
-} // Dtor
-
+} // Dtor Array
 
 Array& Array::operator=(const Array &other)
 {
-    std::cout << "Assigning Array..." << std::endl;
     ConstTypePtr typePtr = other.getType();
     resize(other.getDimensions(), typePtr);
     typePtr->copy(other.implPtr->dataPtr, implPtr->dataPtr,
                   implPtr->adim.getSize());
     return *this;
-} //operator=
+} // function Array.operator=
 
 ArrayDim Array::getDimensions() const
 {
@@ -131,7 +128,7 @@ void Array::resize(const ArrayDim &adim, ConstTypePtr type)
     implPtr->deallocate();
     // Use type if not none, the current type if not
     implPtr->allocate(adim, type == nullptr ? implPtr->typePtr : type);
-}
+} // function Array.resize
 
 void Array::toStream(std::ostream &ostream) const
 {
@@ -151,29 +148,29 @@ void Array::toStream(std::ostream &ostream) const
     }
 
     ostream << ']';
-}
+} // function Array.toStream
 
 std::string Array::toString() const
 {
     std::stringstream ss;
     toStream(ss);
     return ss.str();
-}
+} // function Array.toString
 
 ConstTypePtr Array::getType() const
 {
     return implPtr->typePtr;
-} // getType
+} // function Array.getType
 
 void * Array::getDataPointer()
 {
     return implPtr->dataPtr;
-} // getDataPointer
+} // function Array.getDataPointer
 
 const void * Array::getDataPointer() const
 {
     return implPtr->dataPtr;
-} // getDataPointer
+} // function Array.getDataPointer
 
 template <class T>
 ArrayView<T> Array::getView()
@@ -183,7 +180,7 @@ ArrayView<T> Array::getView()
     assert(implPtr->typePtr == valueTypePtr);
 
     return ArrayView<T>(implPtr->adim, implPtr->dataPtr);
-}
+} // function Array.getView
 
 std::ostream& em::operator<< (std::ostream &ostream, const Array &array)
 {
@@ -198,7 +195,7 @@ ArrayView<T>::ArrayView(const ArrayDim &adim, void * rawMemory)
 {
     this->data = static_cast<T*>(rawMemory);
     this->adim = adim;
-}
+} // Ctor ArrayView
 
 template <class T>
 void ArrayView<T>::assign(const T &value)
@@ -208,7 +205,7 @@ void ArrayView<T>::assign(const T &value)
 
     for (size_t i = 0; i < n; ++i, ++ptrIter)
         *ptrIter = value;
-}
+} // function ArrayView.assign
 
 template <class T>
 T& ArrayView<T>::operator()(int x, int y, int z, size_t n)
@@ -216,7 +213,7 @@ T& ArrayView<T>::operator()(int x, int y, int z, size_t n)
     T *ptr = data;
     ptr += x + y * adim.y;
     return *ptr;
-}
+} // function ArrayView.operator()
 
 template <class T>
 std::string ArrayView<T>::toString() const
@@ -239,13 +236,13 @@ std::string ArrayView<T>::toString() const
     ss << "]";
 
     return ss.str();
-}
+} // function ArrayView.toString
 
 template <class T>
 T* ArrayView<T>::getDataPointer()
 {
     return data;
-}
+} // function ArrayView.getDataPointer
 
 // ================ Explicit instantiations of Templates ==============================
 // This allows to implement template code in the .cpp
