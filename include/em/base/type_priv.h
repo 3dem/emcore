@@ -16,6 +16,8 @@ public:
     virtual bool isPod() const = 0;
 
     virtual void copy(void * inputMem, void * outputMem, size_t count) const = 0;
+    virtual void cast(void * inputMem, void * outputMem, size_t count,
+                      ConstTypePtr inputType) const = 0;
     virtual void toStream(void * inputMem, std::ostream &stream, size_t count) const = 0;
 };
 
@@ -29,6 +31,28 @@ public:
     TypeInfo *typeInfoPtr;
 };
 
+template <class T1, class T2>
+void castTypes(T1 *inputMem, T2 *outputMem, size_t count)
+{
+    for (size_t i = 0; i < count; ++i)
+    {
+        *outputMem = (T2) *inputMem;
+        ++outputMem;
+        ++inputMem;
+    }
+}
+
+template <class T2>
+void castTypes(std::string *inputMem, T2 *outputMem, size_t count)
+{
+    THROW_ERROR("Cast is not implemented from char *");
+}
+
+template <class T1>
+void castTypes(T1 *inputMem, std::string *outputMem, size_t count)
+{
+    THROW_ERROR("Cast is not implemented to char *");
+}
 
 template <class T>
 class TypeInfoBase: public TypeInfo
@@ -52,7 +76,8 @@ public:
         return std::is_pod<T>();
     }
 
-    virtual void copy(void * inputMem, void * outputMem, size_t count) const override
+    virtual void copy(void * inputMem, void * outputMem,
+                      size_t count) const override
     {
         if (isPod())
             memcpy(outputMem, inputMem, count * getSize());
@@ -67,9 +92,26 @@ public:
                 ++outPtr;
             }
         }
-    } //copy
+    } // function TypeInfoBase.copy
 
-    virtual void toStream(void * inputMem, std::ostream &stream, size_t count) const override
+    virtual void cast(void * inputMem, void * outputMem, size_t count,
+                      ConstTypePtr inputType) const override
+    {
+
+#define CAST_IF_TYPE(type) if (inputType == Type::get<type>()) castTypes(static_cast<type *>(inputMem), static_cast<T *>(outputMem), count)
+
+        CAST_IF_TYPE(int8_t);
+        CAST_IF_TYPE(uint8_t);
+        CAST_IF_TYPE(int16_t);
+        CAST_IF_TYPE(uint16_t);
+        CAST_IF_TYPE(int32_t);
+        CAST_IF_TYPE(uint32_t);
+        CAST_IF_TYPE(float);
+        CAST_IF_TYPE(double);
+    } // function TypeInfoBase.cast
+
+    virtual void toStream(void * inputMem, std::ostream &stream,
+                          size_t count) const override
     {
         T * inPtr = static_cast<T *>(inputMem);
         for (size_t i = 0; i < count; ++i)
@@ -78,8 +120,6 @@ public:
             ++inPtr;
         }
     } // toStream
-
-
 
 };
 

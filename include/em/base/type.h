@@ -6,6 +6,8 @@
 #include <iostream>
 #include <cstring>
 
+#include "em/base/error.h"
+
 
 namespace em
 {
