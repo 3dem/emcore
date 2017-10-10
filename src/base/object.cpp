@@ -24,6 +24,8 @@ ConstTypePtr Object::getType() const
 void Object::toStream(std::ostream &ostream) const
 {
     typePtr->toStream(valuePtr, ostream, 1);
+    else
+        typePtr->toStream(*valuePtr, ostream, 1);
 }
 
 std::ostream& em::operator<< (std::ostream &ostream, const em::Object &object)

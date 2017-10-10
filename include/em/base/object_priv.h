@@ -16,11 +16,16 @@ Object::Object(const T& value): Object()
 template <class T>
 Object& Object::operator=(const T& valueIn)
 {
+    // Set the new type from the input value
     typePtr = Type::get<T>();
+
     // Cast the void* to the specific pointer type
-    T *ptr = static_cast<T*>(valuePtr);
-    // Extract the value
-    *ptr = valueIn;
+    T *ptr = static_cast<T *>(valuePtr);
+
+    if (typePtr->isPod())
+        *ptr = valueIn; // Store the value of the plain-old datatype
+    else
+        ptr = const_cast<T*>(&valueIn); // Store a pointer to object types
 
     return *this;
 }

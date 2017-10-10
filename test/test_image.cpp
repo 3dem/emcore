@@ -11,13 +11,14 @@
 
 using namespace em;
 
+
 TEST(Image, Constructor)
 {
     //Image
     Image img(ArrayDim(10, 10), em::TypeDouble);
     ObjectDict &header = img.getHeader();
-    header["x"] = 10;
-    header["y"] = 20.5;
+    //header["x"] = 10;
+    //header["y"] = 20.5;
     // The following one is make it crash
     header["filename"] = std::string("/path/to/image/");
     std::cout << img << std::endl;
@@ -28,6 +29,7 @@ TEST(Image, Constructor)
     // ASSERT_EQ(spiderIO->getName(), "spider");
 
 } // TEST(Image, Constructor)
+
 
 TEST(ImageMrcIO, Read)
 {
@@ -58,6 +60,7 @@ TEST(ImageMrcIO, Read)
                 loc.index = 1;
                 loc.path = root + pair.first;
                 std::cout << "Before reading. " << std::endl;
+                mrcIO.open(loc.path);
 
                 img.read(loc);
                 std::cout << img << std::endl;
@@ -65,6 +68,7 @@ TEST(ImageMrcIO, Read)
                 imgDim.n = 1;
                 ASSERT_TRUE(img.getDimensions() == imgDim);
                 ASSERT_TRUE(mrcIO.getDimensions() == pair.second);
+                mrcIO.close();
             }
 
             // Use mrcIO2 for writing individual images
