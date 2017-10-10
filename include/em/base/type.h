@@ -57,9 +57,11 @@ namespace em
          * @param outputMem Memory location of the output data
          * @param count Number of elements that are in inputMem
          */
-        void copy(void * inputMem, void * outputMem, size_t count) const;
+        void copy(const void * inputMem, void * outputMem, size_t count) const;
 
-        void toStream(void * inputMem, std::ostream &stream, size_t count) const;
+        void destroy(void * inputMem) const;
+
+        void toStream(const void * inputMem, std::ostream &stream, size_t count) const;
 
     private:
         // Type can only be instantiated via the Type::get<T> static method

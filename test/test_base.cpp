@@ -81,6 +81,56 @@ TEST(Type, General) {
 } // TEST(ArrayTest, ArrayDim)
 
 
+TEST(Object, Basic)
+{
+
+    // Copy constructor
+    em::Object o(1);
+    int x = o;
+    ASSERT_EQ(o.getType(), em::TypeInt32);
+    ASSERT_EQ(x, 1);
+    o = 2;
+    ASSERT_EQ(int(o), 2);
+
+    em::Object o2(3.5); // Type should be double
+    ASSERT_EQ(o2.getType(), em::TypeDouble);
+    o2 = 1.3f; // Now type should change to float
+    ASSERT_EQ(o2.getType(), em::TypeFloat);
+    float f = o2;
+    ASSERT_FLOAT_EQ(f, 1.3f);
+
+    o2 = 5.6f;
+
+    float d, d2 = 5.6 + float(o2);
+    float d3;
+
+    size_t N = 100;
+    float values [] = {1.5f, 2.3f, 5.7f, 3.2f, 10.f, 56.f};
+    std::vector<Object> vobj;
+
+    for (int i = 0; i < N; i++)
+    {
+        d = values[i % 6];
+        vobj.push_back(Object(d));
+    }
+
+    for (int i = 0; i < N; ++i)
+    {
+        d = vobj[i];
+        ASSERT_FLOAT_EQ(d, values[i % 6]);
+    }
+
+    const char * str = "This is a test string";
+
+    Object o3;
+    o3 = std::string(str);
+
+    std::string s2 = o3;
+    ASSERT_EQ(s2, str);
+
+} // TEST Object.Basic
+
+
 TEST(ArrayDim, Defaults) {
 
     // Default ctor of ArrayDim should set everything to 0

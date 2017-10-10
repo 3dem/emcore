@@ -15,10 +15,11 @@ public:
     virtual std::size_t getSize() const = 0;
     virtual bool isPod() const = 0;
 
-    virtual void copy(void * inputMem, void * outputMem, size_t count) const = 0;
+    virtual void copy(const void * inputMem, void * outputMem, size_t count) const = 0;
+    virtual void destroy(void *inputMem) const = 0;
     virtual void cast(void * inputMem, void * outputMem, size_t count,
                       ConstTypePtr inputType) const = 0;
-    virtual void toStream(void * inputMem, std::ostream &stream, size_t count) const = 0;
+    virtual void toStream(const void * inputMem, std::ostream &stream, size_t count) const = 0;
 };
 
 
@@ -76,14 +77,14 @@ public:
         return std::is_pod<T>();
     }
 
-    virtual void copy(void * inputMem, void * outputMem,
+    virtual void copy(const void * inputMem, void * outputMem,
                       size_t count) const override
     {
         if (isPod())
             memcpy(outputMem, inputMem, count * getSize());
         else
         {
-            T * inPtr = static_cast<T *>(inputMem);
+            auto inPtr = static_cast<const T *>(inputMem);
             T * outPtr = static_cast<T *>(outputMem);
             for (size_t i = 0; i < count; ++i)
             {
@@ -93,6 +94,12 @@ public:
             }
         }
     } // function TypeInfoBase.copy
+
+    virtual void destroy(void *inputMem) const override
+    {
+       auto ptr = static_cast<T*>(inputMem);
+       delete ptr;
+    } // function TypeInfoBase.destroy
 
     virtual void cast(void * inputMem, void * outputMem, size_t count,
                       ConstTypePtr inputType) const override
@@ -110,10 +117,10 @@ public:
         CAST_IF_TYPE(double);
     } // function TypeInfoBase.cast
 
-    virtual void toStream(void * inputMem, std::ostream &stream,
+    virtual void toStream(const void * inputMem, std::ostream &stream,
                           size_t count) const override
     {
-        T * inPtr = static_cast<T *>(inputMem);
+        auto inPtr = static_cast<const T *>(inputMem);
         for (size_t i = 0; i < count; ++i)
         {
             stream << *inPtr << " ";

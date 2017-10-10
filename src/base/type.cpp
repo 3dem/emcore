@@ -19,32 +19,37 @@ Type::Type(TypeInfo *typeInfoPtr)
 Type::~Type()
 {
     delete implPtr;
-}
+} // Dtor Type
 
 std::string Type::getName() const
 {
     return implPtr->name;
-}
+} // function Type.getName
 
 std::size_t Type::getSize() const
 {
     return implPtr->size;
-}
+} // function Type.getSize
 
 bool Type::isPod() const
 {
     return implPtr->isPod;
-}
+} // function Type.isPod
 
-void Type::copy(void *inputMem, void *outputMem, size_t count) const
+void Type::copy(const void *inputMem, void *outputMem, size_t count) const
 {
     implPtr->typeInfoPtr->copy(inputMem, outputMem, count);
-}
+} // function Type.copy
 
-void Type::toStream(void * inputMem, std::ostream &stream, size_t count) const
+void Type::destroy(void *inputMem) const
+{
+    implPtr->typeInfoPtr->destroy(inputMem);
+} // function Type.destroy
+
+void Type::toStream(const void * inputMem, std::ostream &stream, size_t count) const
 {
     implPtr->typeInfoPtr->toStream(inputMem, stream, count);
-}
+} // function Type.toStream
 
 std::ostream& em::operator<< (std::ostream &ostrm, const Type &t)
 {
