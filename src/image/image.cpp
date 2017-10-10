@@ -114,7 +114,7 @@ void Image::write(const ImageLocation &location) const
         imgio.open(location.path, ImageIO::TRUNCATE);
         imgio.createFile(getDimensions(), getType());
     }
-    
+
     imgio.write(location.index, *this);
     imgio.close();
 } // function Image::write

@@ -124,8 +124,8 @@ namespace em
          * implementation associated to read/write formats. Then, when the
          * open() method is called to open a file, the format implementation
          * will be inferred from the filename extension. Some functions will
-         * raise an exception if called without had opened a file and, therefore,
-         * having an underlying format implementation.
+         * raise an exception if called without having opened a file and,
+         * therefore, without having an underlying format implementation.
          */
         ImageIO();
 
@@ -178,14 +178,8 @@ namespace em
          */
         void expandFile(const size_t ndim);
 
-
-
-        // TODO: Move this basic function to the Image class as a shortcut
-        // void write(const ImageLocation &location, const Image &image);
-
         void read(const size_t index, Image &image);
         void write(const size_t index, const Image &image);
-
 
         ~ImageIO();
 
