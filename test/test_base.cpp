@@ -130,11 +130,14 @@ TEST(Object, Basic)
 
     Object o3;
     o3 = std::string(str);
-    Image img(ArrayDim(10, 10), em::TypeFloat);
-    // o3 = img;
-
     std::string s2 = o3;
     ASSERT_EQ(s2, str);
+
+    Image img(ArrayDim(10, 10), TypeFloat);
+    o3 = img;
+    ASSERT_EQ(o3.getType(), Type::get<Image>());
+    Image img2 = o3;
+
 
 } // TEST Object.Basic
 
@@ -169,7 +172,7 @@ TEST(ArrayDim, Defaults) {
 } // TEST(ArrayTest, ArrayDim)
 
 
-TEST(Array, Constructor) {
+TEST(Array, Basic) {
 
     ArrayDim adim(10, 10);
     Array A(adim, TypeInt32);
@@ -186,6 +189,29 @@ TEST(Array, Constructor) {
 
     Array A2(A);
     ArrayView<int> Av2 = A2.getView<int>();
+    const int * data2 = Av2.getDataPointer();
+    for (size_t i = 0; i < adim.getSize(); ++i)
+        ASSERT_EQ(data2[i], ptr[i]);
+
+    Array A3(adim, TypeFloat);
+    A3.copy(A);
+    ASSERT_EQ(A3.getType(), TypeFloat);
+    auto data3f = static_cast<const float *>(A3.getDataPointer());
+    for (size_t i = 0; i < adim.getSize(); ++i)
+        ASSERT_FLOAT_EQ(data3f[i], (float)ptr[i]);
+
+    A3.copy(A, TypeUInt32);
+    ASSERT_EQ(A3.getType(), TypeUInt32);
+    auto data3ui = static_cast<const uint32_t *>(A3.getDataPointer());
+    for (size_t i = 0; i < adim.getSize(); ++i)
+        ASSERT_EQ(data3ui[i], (uint32_t)ptr[i]);
+
+    Array A4;
+    A4.copy(A);
+    ASSERT_EQ(A3.getType(), TypeInt32);
+    auto data3i = static_cast<const int32_t *>(A3.getDataPointer());
+    for (size_t i = 0; i < adim.getSize(); ++i)
+    ASSERT_FLOAT_EQ(data3i[i], (int32_t)ptr[i]);
 } // TEST(ArrayTest, Constructor)
 
 

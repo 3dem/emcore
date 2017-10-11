@@ -80,9 +80,20 @@ namespace em
         // Assign operator
         Array& operator=(const Array &other);
 
+        /**
+         * Copy the elements from another array. The input type, if not null,
+         * will be used for the resulting elements. If type is null, the type
+         * of this array will be used. If the type of the array is also null,
+         * then the type of the input array will be used.
+         * @param other The other array from which to copy the elements.
+         * @param type Type to be used for resulting elements, if null, use the
+         * current type of the array.
+         */
+        void copy(const Array &other, ConstTypePtr type=nullptr);
+
         // Dimensions
         virtual void resize(const ArrayDim &adim, ConstTypePtr type=nullptr);
-        ArrayDim getDimensions() const;
+        ArrayDim getDim() const;
 
         /** Return a constant pointer to underlying Type object. */
         ConstTypePtr getType() const;
@@ -126,7 +137,8 @@ namespace em
         ArrayView(const ArrayView &aview) = default;
 
         std::string toString() const;
-        T& operator()(const int x, const int y=0, const int z=0, const size_t n=1);
+        T& operator()(const int x, const int y=0, const int z=0,
+                      const size_t n=1);
         void assign(const T &value);
         T * getDataPointer();
 

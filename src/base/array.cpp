@@ -57,6 +57,7 @@ public:
     // Allocate enough memory to store all elements
     void allocate(const ArrayDim &adim, ConstTypePtr type)
     {
+        deallocate(); // Release memory if necessary
         this->adim = adim;
         this->typePtr = type;
         msize = adim.getSize() * typePtr->getSize();
@@ -73,6 +74,17 @@ public:
             free(dataPtr);
             msize = 0;
         }
+    }
+
+    void copy(const ArrayDim &adim, ConstTypePtr type,
+              const ArrayImpl *other)
+    {
+        allocate(adim, type);
+
+        if (type == other->typePtr)
+            type->copy(other->dataPtr, dataPtr, adim.getSize());
+        else
+            type->cast(other->dataPtr, dataPtr, adim.getSize(), other->typePtr);
     }
 
     ~ArrayImpl()
@@ -111,21 +123,25 @@ Array::~Array()
 
 Array& Array::operator=(const Array &other)
 {
-    ConstTypePtr typePtr = other.getType();
-    resize(other.getDimensions(), typePtr);
-    typePtr->copy(other.implPtr->dataPtr, implPtr->dataPtr,
-                  implPtr->adim.getSize());
+    implPtr->copy(other.getDim(), other.getType(), other.implPtr);
     return *this;
 } // function Array.operator=
 
-ArrayDim Array::getDimensions() const
+void Array::copy(const Array &other, ConstTypePtr type)
+{
+    auto finalType = type != nullptr ? type :
+                     implPtr->typePtr == nullptr ? other.getType() :
+                     implPtr->typePtr;
+    implPtr->copy(other.getDim(), finalType, other.implPtr);
+} // function Array.copy
+
+ArrayDim Array::getDim() const
 {
     return implPtr->adim;
-} // getDimensions
+} // function Array.getDim
 
 void Array::resize(const ArrayDim &adim, ConstTypePtr type)
 {
-    implPtr->deallocate();
     // Use type if not none, the current type if not
     implPtr->allocate(adim, type == nullptr ? implPtr->typePtr : type);
 } // function Array.resize

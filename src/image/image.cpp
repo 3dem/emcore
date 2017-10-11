@@ -79,7 +79,7 @@ ObjectDict& Image::getHeader(size_t index)
 
 void Image::toStream(std::ostream &ostream) const
 {
-    ostream << "Dimensions: " << getDimensions() << std::endl;
+    ostream << "Dimensions: " << getDim() << std::endl;
     ostream << "Type: " << *getType() << std::endl;
     ostream << "Header: " << std::endl;
     for (auto& x: implPtr->headers[0]) {
@@ -112,7 +112,7 @@ void Image::write(const ImageLocation &location) const
     else
     {
         imgio.open(location.path, ImageIO::TRUNCATE);
-        imgio.createFile(getDimensions(), getType());
+        imgio.createFile(getDim(), getType());
     }
 
     imgio.write(location.index, *this);
@@ -175,7 +175,6 @@ void ImageIO::open(const std::string &path, const FileMode mode)
     if (impl == nullptr)
     {
         std::string ext = Path::getExtension(path);
-        LOG_VAR(ext);
         auto builder = getRegistry()->getImplBuilder(ext);
         assert(builder!= nullptr);
         impl = builder();
@@ -189,10 +188,10 @@ void ImageIO::open(const std::string &path, const FileMode mode)
     if (mode == READ_WRITE and !Path::exists(path))
         impl->fileMode = TRUNCATE;
 
-    std::cerr << "ImageIO::open: " << std::endl <<
-                 "         path: " << path << std::endl <<
-                 "    file Mode: " << (int)impl->fileMode << std::endl <<
-                 "  file Exists: " << Path::exists(path) << std::endl;
+//    std::cerr << "ImageIO::open: " << std::endl <<
+//                 "         path: " << path << std::endl <<
+//                 "    file Mode: " << (int)impl->fileMode << std::endl <<
+//                 "  file Exists: " << Path::exists(path) << std::endl;
     impl->openFile();
 
     if (impl->fileMode != TRUNCATE)
@@ -229,7 +228,7 @@ void ImageIO::expandFile(const size_t ndim)
     // TODO: IMPLEMENT
 } // function expandFile
 
-ArrayDim ImageIO::getDimensions() const
+ArrayDim ImageIO::getDim() const
 {
     ASSERT_ERROR(impl == nullptr, "File has not been opened. ");
 
@@ -285,8 +284,8 @@ void ImageIO::write(const size_t index, const Image &image)
 {
     auto type = impl->type;
 
-    std::cerr << "ImageIO::write: type: " << *type << std::endl;
-    std::cerr << "ImageIO::write: image.getType(): " << *image.getType() << std::endl;
+//    std::cerr << "ImageIO::write: type: " << *type << std::endl;
+//    std::cerr << "ImageIO::write: image.getType(): " << *image.getType() << std::endl;
 
     ASSERT_ERROR(image.getType() != type,
                  "Type cast not implemented. Now image should have the same "

@@ -98,17 +98,16 @@ namespace em
 
     std::ostream& operator<< (std::ostream &ostream, const em::Image &t);
 
-
-
     using FileMode = uint8_t;
 
     /** @ingroup image
-     * Base class to read Image from disk.
+     * Class that will take care of read/write images from/to file.
      *
-     * Sub-classes of ImageReader should be implemented for reading
-     * EM formats such as: spider, mrc, img, etc.
-     * Other standard formats should also be supported,
-     * including: tiff, png, jpeg, hdf5
+     * Internally, the ImageIO class holds a pointer to ImageIOImpl class,
+     * that contains the details about how to open files and read the images
+     * data. This class contains some basic functionality that is shared
+     * among some formats. The ImageIOImpl class should be extended to provide
+     * support for other formats.
      */
     class ImageIO
     {
@@ -153,7 +152,7 @@ namespace em
         static bool hasImpl(const std::string &extOrName);
 
         /** Return the dimensions of the file opened. */
-        ArrayDim getDimensions() const;
+        ArrayDim getDim() const;
 
         // TODO: DOCUMENT
         void open(const std::string &path, const FileMode mode=READ_ONLY);

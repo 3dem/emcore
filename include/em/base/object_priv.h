@@ -45,7 +45,7 @@ Object::operator T() const
     ConstTypePtr valueTypePtr = Type::get<T>();
 
     // Check the type is the same of the object
-    assert(typePtr == valueTypePtr);
+    ASSERT_ERROR(typePtr != valueTypePtr, "Types are not the same");
 
     // Cast the void* to the specific pointer type
     auto ptr = typePtr->isPod() ? reinterpret_cast<const T*>(&valuePtr) :

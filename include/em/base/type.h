@@ -94,7 +94,6 @@ namespace em
     ConstTypePtr const TypeDouble = Type::get<double>();
 
 
-
 #include "type_priv.h"
 
 } // namespace em

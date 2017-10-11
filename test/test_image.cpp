@@ -66,8 +66,8 @@ TEST(ImageMrcIO, Read)
                 std::cout << img << std::endl;
                 ArrayDim imgDim(pair.second);
                 imgDim.n = 1;
-                ASSERT_TRUE(img.getDimensions() == imgDim);
-                ASSERT_TRUE(mrcIO.getDimensions() == pair.second);
+                ASSERT_TRUE(img.getDim() == imgDim);
+                ASSERT_TRUE(mrcIO.getDim() == pair.second);
                 mrcIO.close();
             }
 
@@ -142,7 +142,7 @@ TEST(ImageSpiderIO, Read)
                 std::cout << img << std::endl;
                 ArrayDim imgDim(pair.second);
                 imgDim.n = 1;
-                ASSERT_EQ(img.getDimensions(), imgDim);
+                ASSERT_EQ(img.getDim(), imgDim);
             }
         }
         catch (Error &err)
