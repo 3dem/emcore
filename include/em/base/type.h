@@ -59,6 +59,17 @@ namespace em
          */
         void copy(const void * inputMem, void * outputMem, size_t count) const;
 
+        /**
+         * Cast n elements from inputMem (of type inputType) into outputMem
+         * (of type of the caller type object).
+         * @param inputMem Memory location of the input data
+         * @param outputMem Memory where cast elements will be put
+         * @param count Number of elements in both input and output
+         * @param inputType The Type of the elements in inputMem
+         */
+        void cast(const void * inputMem, void * outputMem, size_t count,
+                  ConstTypePtr inputType) const;
+
         void destroy(void * inputMem) const;
 
         void toStream(const void * inputMem, std::ostream &stream, size_t count) const;

@@ -41,6 +41,12 @@ void Type::copy(const void *inputMem, void *outputMem, size_t count) const
     implPtr->typeInfoPtr->copy(inputMem, outputMem, count);
 } // function Type.copy
 
+void Type::cast(const void *inputMem, void *outputMem, size_t count,
+                ConstTypePtr inputType) const
+{
+    implPtr->typeInfoPtr->cast(inputMem, outputMem, count, inputType);
+} // function Type.cast
+
 void Type::destroy(void *inputMem) const
 {
     implPtr->typeInfoPtr->destroy(inputMem);

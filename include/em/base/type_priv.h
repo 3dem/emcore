@@ -8,6 +8,7 @@
 
 //-------------- Auxiliary Type classes -----------------------
 
+
 class TypeInfo
 {
 public:
@@ -16,12 +17,36 @@ public:
     virtual bool isPod() const = 0;
 
     virtual void copy(const void * inputMem, void * outputMem, size_t count) const = 0;
-    virtual void destroy(void *inputMem) const = 0;
-    virtual void cast(void * inputMem, void * outputMem, size_t count,
+    virtual void destroy(void *mem) const = 0;
+    virtual void cast(const void * inputMem, void * outputMem, size_t count,
                       ConstTypePtr inputType) const = 0;
     virtual void toStream(const void * inputMem, std::ostream &stream, size_t count) const = 0;
 };
 
+
+template <class T1, class T2>
+void typeCast(const T1 * inputMem, T2 * outputMem, size_t count)
+{
+    std::cerr << "Invalid CAST???" << std::endl;
+
+    THROW_ERROR("Invalid cast between types.");
+};
+
+#define TYPE_CAST_FUNC(type) template <class T1> \
+void typeCast(const T1 * inputMem, type * outputMem, size_t count) { \
+for (size_t i = 0; i < count; ++i, ++outputMem, ++inputMem) *outputMem = (float) *inputMem; \
+}
+
+TYPE_CAST_FUNC(int8_t);
+TYPE_CAST_FUNC(uint8_t);
+TYPE_CAST_FUNC(int16_t);
+TYPE_CAST_FUNC(uint16_t);
+TYPE_CAST_FUNC(int32_t);
+TYPE_CAST_FUNC(uint32_t);
+TYPE_CAST_FUNC(float);
+TYPE_CAST_FUNC(double);
+
+#undef TYPE_CAST_FUNC
 
 class TypeImpl
 {
@@ -31,29 +56,6 @@ public:
     bool isPod;
     TypeInfo *typeInfoPtr;
 };
-
-template <class T1, class T2>
-void castTypes(T1 *inputMem, T2 *outputMem, size_t count)
-{
-    for (size_t i = 0; i < count; ++i)
-    {
-        *outputMem = (T2) *inputMem;
-        ++outputMem;
-        ++inputMem;
-    }
-}
-
-template <class T2>
-void castTypes(std::string *inputMem, T2 *outputMem, size_t count)
-{
-    THROW_ERROR("Cast is not implemented from char *");
-}
-
-template <class T1>
-void castTypes(T1 *inputMem, std::string *outputMem, size_t count)
-{
-    THROW_ERROR("Cast is not implemented to char *");
-}
 
 template <class T>
 class TypeInfoBase: public TypeInfo
@@ -95,17 +97,18 @@ public:
         }
     } // function TypeInfoBase.copy
 
-    virtual void destroy(void *inputMem) const override
+    virtual void destroy(void *mem) const override
     {
-       auto ptr = static_cast<T*>(inputMem);
+       auto ptr = static_cast<T*>(mem);
        delete ptr;
     } // function TypeInfoBase.destroy
 
-    virtual void cast(void * inputMem, void * outputMem, size_t count,
+    virtual void cast(const void * inputMem, void * outputMem, size_t count,
                       ConstTypePtr inputType) const override
     {
+        auto outputMemT = static_cast<T *>(outputMem);
 
-#define CAST_IF_TYPE(type) if (inputType == Type::get<type>()) castTypes(static_cast<type *>(inputMem), static_cast<T *>(outputMem), count)
+#define CAST_IF_TYPE(type) if (inputType == Type::get<type>()) typeCast(static_cast<const type*>(inputMem), outputMemT, count)
 
         CAST_IF_TYPE(int8_t);
         CAST_IF_TYPE(uint8_t);
