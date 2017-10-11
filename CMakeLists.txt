@@ -32,22 +32,24 @@ set(HEADER_FILES test/test_main.cpp)
 file(GLOB HEADER_FILES "${INCLUDE_PATH}/*/*.h")
 file(GLOB SOURCE_FILES "${SRC_PATH}/*/*.cpp")
 
+set(EXT_LIBRARIES ) # Defined empty to be fullfiled, if necessary
 
 find_package(TIFF)
 if (TIFF_FOUND AND BUILD_TIFF)
     include_directories(${TIFF_INCLUDE_DIRS})
     MESSAGE( STATUS "TIFF_INCLUDE_DIRS:         " ${TIFF_INCLUDE_DIRS} )
     MESSAGE( STATUS "TIFF_LIBRARIES:         " ${TIFF_LIBRARIES} )
-else (TIFF_FOUND)
+    set(EXT_LIBRARIES ${EXT_LIBRARIES} ${TIFF_LIBRARIES})
+else ()
     list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_tiff.cpp")
-endif (TIFF_FOUND AND BUILD_TIFF)
+endif ()
 
 #find_package(JPEG)
 #find_package(PNG)
 
 
 
-add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES} ${TIFF_LIBRARIES})
+add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES} ${EXT_LIBRARIES})
 
 
 ################################
@@ -66,7 +68,7 @@ if (BUILD_EXAMPLES)
         message(STATUS "    ${_target}...")
 
         add_executable(${_target} ${_file})
-        target_link_libraries(${_target} em-core ${TIFF_LIBRARIES})
+        target_link_libraries(${_target} em-core ${EXT_LIBRARIES})
 
     endforeach()
 
@@ -99,7 +101,7 @@ if (BUILD_TESTS)
         message(STATUS "    ${_target}...")
 
         add_executable(${_target} ${_file})
-        target_link_libraries(${_target} em-core gtest gtest_main ${TIFF_LIBRARIES})
+        target_link_libraries(${_target} em-core gtest gtest_main ${EXT_LIBRARIES})
         add_test(${_target} ${_target})
 
     endforeach()
