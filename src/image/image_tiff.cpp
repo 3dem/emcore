@@ -1,10 +1,74 @@
 #include <cstdio>
 
+#ifdef NEVER
+
+#include "tiffio.h"
+
 #include "em/base/error.h"
 #include "em/image/image_priv.h"
-#include "em/image/image_tiff_priv.h"
+using namespace em;
 
 
+struct TiffHeader
+{                                   // Header for each Directory in TIFF
+    unsigned short  bitsPerSample;
+    unsigned short  samplesPerPixel;
+    unsigned int   imageWidth;
+    unsigned int   imageLength;
+    uint16           imageSampleFormat;
+    unsigned short  resUnit;
+    float            xTiffRes,yTiffRes;
+    unsigned int subFileType;
+    uint16 pNumber, pTotal; // pagenumber and total number of pages of current directory
+    TiffHeader()
+    {
+        bitsPerSample=samplesPerPixel=0;
+        imageWidth=imageLength=subFileType=0;
+        imageSampleFormat=0;
+        xTiffRes=yTiffRes=0;
+    }
+}; //TiffHeader
+
+
+/**
+ * Inherit properties from base ImageIOImpl and add information
+ * specific for TIFF format (e.g, the TiffHeader struct)
+ */
+class ImageTiffHandler: public ImageIOImpl
+{
+public:
+    std::vector<TiffHeader> vHeader;
+    TIFF*      tif;        // TIFF Image file handler
+
+protected:
+    /** Open the file for this format. The path and mode
+     * should be set before calling this function.
+     */
+    virtual void openFile();
+}; // class ImageTiffHandler
+
+
+class ImageTiffIO: public ImageIO
+{
+
+public:
+    virtual std::string getName() const override;
+    virtual StringVector getExtensions() const override;
+
+    virtual void readImageHeader(const size_t index, Image &image) override {};
+    virtual void writeImageHeader(const size_t index, Image &image) override {};
+
+    virtual ~ImageTiffIO();
+
+protected:
+    virtual ImageIOImpl* createHandler() override ;
+    virtual void readHeader() override ;
+    virtual void writeHeader() override {} ;
+    virtual void read(const size_t index, Image &image) override ;
+    virtual size_t getHeaderSize() const override ;
+    virtual ImageIO* create() const override;
+
+}; // class ImageTiffIO
 /** Open the file for this format. The path and mode
  * should be set before calling this function.
  */
@@ -20,7 +84,7 @@ void ImageTiffHandler::openFile()
 
 }
 
-ImageHandler* ImageTiffIO::createHandler()
+ImageIOImpl* ImageTiffIO::createHandler()
 {
     return new ImageTiffHandler;
 } // createHandler
@@ -107,3 +171,5 @@ em::ImageIO* ImageTiffIO::create() const
 }
 
 REGISTER_IMAGE_IO(ImageTiffIO);
+
+#endif

@@ -34,7 +34,7 @@ namespace em
         explicit ArrayDim(size_t xdim, size_t ydim=1, size_t zdim=1,
                           size_t ndim=1);
 
-        bool operator==(const ArrayDim &other);
+        bool operator==(const ArrayDim &other) const;
 
         /** Return the total number of pixels/voxels of an 4D-array with these
          * dimensions. (i.e. x * y * z * n).
@@ -97,6 +97,8 @@ namespace em
          * a given memory location.
          */
         void * getDataPointer();
+
+        const void * getDataPointer() const;
 
         template <class T>
         ArrayView<T> getView();

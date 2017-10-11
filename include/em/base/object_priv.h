@@ -7,6 +7,7 @@
 
 // ----------------- Object implementation --------------------------
 
+
 template <class T>
 Object::Object(const T& value): Object()
 {
@@ -16,11 +17,24 @@ Object::Object(const T& value): Object()
 template <class T>
 Object& Object::operator=(const T& valueIn)
 {
-    typePtr = Type::get<T>();
-    // Cast the void* to the specific pointer type
-    T *ptr = static_cast<T*>(valuePtr);
-    // Extract the value
-    *ptr = valueIn;
+    // Set the new type from the input value
+    auto newType = Type::get<T>();
+
+    if (newType->isPod())
+    {
+        // Cast the void* to the specific pointer type
+        auto ptr = reinterpret_cast<T *>(&valuePtr);
+        *ptr = valueIn; // Store the value of the plain-old datatype
+    }
+    else
+    {
+        if (typePtr != nullptr && !typePtr->isPod())
+            typePtr->destroy(valuePtr);
+        T *ptr = new T(valueIn);
+        valuePtr = ptr;
+    }
+
+    typePtr = newType;
 
     return *this;
 }
@@ -34,7 +48,8 @@ Object::operator T() const
     assert(typePtr == valueTypePtr);
 
     // Cast the void* to the specific pointer type
-    T *ptr = static_cast<T*>(valuePtr);
+    auto ptr = typePtr->isPod() ? reinterpret_cast<const T*>(&valuePtr) :
+               static_cast<const T*>(valuePtr);
     // Extract the value
     return *ptr;
 }

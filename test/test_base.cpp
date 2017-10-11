@@ -14,6 +14,7 @@
 
 using namespace em;
 
+
 TEST(Type, Basic) {
     // Test basic properties of Type singleton instances
     ConstTypePtr i = em::TypeInt32;
@@ -43,42 +44,99 @@ TEST(Type, Basic) {
 }
 
 TEST(Type, General) {
-    ConstTypePtr f = em::TypeFloat;
-
     size_t n = 10;
     float * array = new float[n];
     for (size_t i = 0; i < n; i++)
-    {
-    array[i] = i * 10;
-    }
+        array[i] = i * 10;
 
-    f->toStream(array, std::cout, n);
+    TypeFloat->toStream(array, std::cout, n);
     std::cout << std::endl;
 
     float * array2 = new float[n/2];
     for (size_t i = 0; i < n/2; i++)
-    {
-    array2[i] = i;
-    }
+        array2[i] = i;
 
     // Test copy of some elements
-    f->copy(array2, array, n/2);
+    TypeFloat->copy(array2, array, n/2);
     for (size_t i = 0; i < n/2; i++)
-    {
-    ASSERT_EQ(array[i], array2[i]);
-    }
-    f->toStream(array, std::cout, n);
+        ASSERT_EQ(array[i], array2[i]);
+
+    std::cout << "Float array: " << std::endl;
+    TypeFloat->toStream(array, std::cout, n);
+    std::cout << std::endl;
+
+    // Test type casting
+    int32_t * arrayInt = new int32_t[n];
+    TypeInt32->cast(array, arrayInt, n, TypeFloat);
+
+    for (size_t i = 0; i < n; ++i)
+        ASSERT_FLOAT_EQ(array[i], (float)arrayInt[i]);
+
+    std::cout << "Int32 array: " << std::endl;
+    TypeInt32->toStream(arrayInt, std::cout, n);
     std::cout << std::endl;
 
     delete [] array;
     delete [] array2;
+    delete [] arrayInt;
 
     std::cout << "sizeof int8_t: " << sizeof(int8_t) << std::endl;
     std::cout << "Signed Int8: " << *em::TypeInt8 << std::endl;
     std::cout << "Unsigned short: " <<  *em::TypeUInt16 << std::endl;
     std::cout << "Int: " <<  *em::TypeInt32 << std::endl;
 
-} // TEST(ArrayTest, ArrayDim)
+} // TEST(Type, General)
+
+
+TEST(Object, Basic)
+{
+    // Copy constructor
+    em::Object o(1);
+    int x = o;
+    ASSERT_EQ(o.getType(), em::TypeInt32);
+    ASSERT_EQ(x, 1);
+    o = 2;
+    ASSERT_EQ(int(o), 2);
+
+    em::Object o2(3.5); // Type should be double
+    ASSERT_EQ(o2.getType(), em::TypeDouble);
+    o2 = 1.3f; // Now type should change to float
+    ASSERT_EQ(o2.getType(), em::TypeFloat);
+    float f = o2;
+    ASSERT_FLOAT_EQ(f, 1.3f);
+
+    o2 = 5.6f;
+
+    float d, d2 = 5.6 + float(o2);
+    float d3;
+
+    size_t N = 100;
+    float values [] = {1.5f, 2.3f, 5.7f, 3.2f, 10.f, 56.f};
+    std::vector<Object> vobj;
+
+    for (int i = 0; i < N; i++)
+    {
+        d = values[i % 6];
+        vobj.push_back(Object(d));
+    }
+
+    for (int i = 0; i < N; ++i)
+    {
+        d = vobj[i];
+        ASSERT_FLOAT_EQ(d, values[i % 6]);
+    }
+
+    const char * str = "This is a test string";
+
+    Object o3;
+    o3 = std::string(str);
+    Image img(ArrayDim(10, 10), em::TypeFloat);
+    // o3 = img;
+
+    std::string s2 = o3;
+    ASSERT_EQ(s2, str);
+
+} // TEST Object.Basic
 
 
 TEST(ArrayDim, Defaults) {
@@ -103,7 +161,7 @@ TEST(ArrayDim, Defaults) {
     // Test copy constructor
     ArrayDim adim4(adim3);
 
-    ASSERT_TRUE(adim4 == adim3);
+    ASSERT_EQ(adim4, adim3);
     ASSERT_EQ(adim4.getSize(), 100 * 100 * 100);
     ASSERT_EQ(adim4.getItemSize(), 100 * 100);
 
@@ -111,7 +169,7 @@ TEST(ArrayDim, Defaults) {
 } // TEST(ArrayTest, ArrayDim)
 
 
-TEST(ArrayTest, Constructor) {
+TEST(Array, Constructor) {
 
     ArrayDim adim(10, 10);
     Array A(adim, TypeInt32);
@@ -128,11 +186,6 @@ TEST(ArrayTest, Constructor) {
 
     Array A2(A);
     ArrayView<int> Av2 = A2.getView<int>();
-    //std::cout << Av2.toString() << std::endl;
-
-    //std::cout << "Array printed: " << std::endl;
-    //std::cout << A << std::endl;
-
 } // TEST(ArrayTest, Constructor)
 
 

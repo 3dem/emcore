@@ -8,6 +8,7 @@
 
 //-------------- Auxiliary Type classes -----------------------
 
+
 class TypeInfo
 {
 public:
@@ -15,10 +16,37 @@ public:
     virtual std::size_t getSize() const = 0;
     virtual bool isPod() const = 0;
 
-    virtual void copy(void * inputMem, void * outputMem, size_t count) const = 0;
-    virtual void toStream(void * inputMem, std::ostream &stream, size_t count) const = 0;
+    virtual void copy(const void * inputMem, void * outputMem, size_t count) const = 0;
+    virtual void destroy(void *mem) const = 0;
+    virtual void cast(const void * inputMem, void * outputMem, size_t count,
+                      ConstTypePtr inputType) const = 0;
+    virtual void toStream(const void * inputMem, std::ostream &stream, size_t count) const = 0;
 };
 
+
+template <class T1, class T2>
+void typeCast(const T1 * inputMem, T2 * outputMem, size_t count)
+{
+    std::cerr << "Invalid CAST???" << std::endl;
+
+    THROW_ERROR("Invalid cast between types.");
+};
+
+#define TYPE_CAST_FUNC(type) template <class T1> \
+void typeCast(const T1 * inputMem, type * outputMem, size_t count) { \
+for (size_t i = 0; i < count; ++i, ++outputMem, ++inputMem) *outputMem = (float) *inputMem; \
+}
+
+TYPE_CAST_FUNC(int8_t);
+TYPE_CAST_FUNC(uint8_t);
+TYPE_CAST_FUNC(int16_t);
+TYPE_CAST_FUNC(uint16_t);
+TYPE_CAST_FUNC(int32_t);
+TYPE_CAST_FUNC(uint32_t);
+TYPE_CAST_FUNC(float);
+TYPE_CAST_FUNC(double);
+
+#undef TYPE_CAST_FUNC
 
 class TypeImpl
 {
@@ -28,7 +56,6 @@ public:
     bool isPod;
     TypeInfo *typeInfoPtr;
 };
-
 
 template <class T>
 class TypeInfoBase: public TypeInfo
@@ -52,13 +79,14 @@ public:
         return std::is_pod<T>();
     }
 
-    virtual void copy(void * inputMem, void * outputMem, size_t count) const override
+    virtual void copy(const void * inputMem, void * outputMem,
+                      size_t count) const override
     {
         if (isPod())
             memcpy(outputMem, inputMem, count * getSize());
         else
         {
-            T * inPtr = static_cast<T *>(inputMem);
+            auto inPtr = static_cast<const T *>(inputMem);
             T * outPtr = static_cast<T *>(outputMem);
             for (size_t i = 0; i < count; ++i)
             {
@@ -67,19 +95,41 @@ public:
                 ++outPtr;
             }
         }
-    } //copy
+    } // function TypeInfoBase.copy
 
-    virtual void toStream(void * inputMem, std::ostream &stream, size_t count) const override
+    virtual void destroy(void *mem) const override
     {
-        T * inPtr = static_cast<T *>(inputMem);
+       auto ptr = static_cast<T*>(mem);
+       delete ptr;
+    } // function TypeInfoBase.destroy
+
+    virtual void cast(const void * inputMem, void * outputMem, size_t count,
+                      ConstTypePtr inputType) const override
+    {
+        auto outputMemT = static_cast<T *>(outputMem);
+
+#define CAST_IF_TYPE(type) if (inputType == Type::get<type>()) typeCast(static_cast<const type*>(inputMem), outputMemT, count)
+
+        CAST_IF_TYPE(int8_t);
+        CAST_IF_TYPE(uint8_t);
+        CAST_IF_TYPE(int16_t);
+        CAST_IF_TYPE(uint16_t);
+        CAST_IF_TYPE(int32_t);
+        CAST_IF_TYPE(uint32_t);
+        CAST_IF_TYPE(float);
+        CAST_IF_TYPE(double);
+    } // function TypeInfoBase.cast
+
+    virtual void toStream(const void * inputMem, std::ostream &stream,
+                          size_t count) const override
+    {
+        auto inPtr = static_cast<const T *>(inputMem);
         for (size_t i = 0; i < count; ++i)
         {
             stream << *inPtr << " ";
             ++inPtr;
         }
     } // toStream
-
-
 
 };
 
