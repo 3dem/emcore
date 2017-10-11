@@ -105,6 +105,15 @@ namespace em
         virtual void readImageData(const size_t index, Image &image);
         virtual void writeImageData(const size_t index, const Image &image);
 
+        /**
+         * Return a map between the format integer modes and the supported
+         * Types for storing images.
+         */
+        virtual const TypeMap& getTypeMap() const = 0;
+
+        ConstTypePtr getTypeFromMode(int mode) const;
+        int getModeFromType(ConstTypePtr type) const;
+
     private:
         // Store a mapping between formats names (mrc, spider, etc)
         // and a function that help to build a new ImageIOImpl

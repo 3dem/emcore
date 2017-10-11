@@ -5,6 +5,7 @@
 #include <typeinfo>
 #include <iostream>
 #include <cstring>
+#include <map>
 
 #include "em/base/error.h"
 
@@ -17,6 +18,8 @@ namespace em
     class Type;
 
     using ConstTypePtr = const Type *;
+    using StringVector = std::vector<std::string>;
+    using TypeMap = std::map<int, ConstTypePtr >;
 
     /**
      *  \ingroup base

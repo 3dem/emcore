@@ -224,6 +224,12 @@ public:
         return dim.n > 1 ? SPIDER_HEADER_SIZE : 0;
     }
 
+    virtual const TypeMap & getTypeMap() const override
+    {
+        static const TypeMap tm = {{0, TypeFloat}};
+        return tm;
+    } // function getTypeMap
+
 }; // class ImageIOSpider
 
 

@@ -97,7 +97,7 @@ class ImageIOMrc: public em::ImageIOImpl
 public:
     MrcHeader header;
 
-    virtual void readHeader()
+    virtual void readHeader() override
     {
         std::cout << "DEBUG:ImageIOMrc:readHeader: file " << path << std::endl;
 
@@ -124,51 +124,21 @@ public:
             dim.n = header.nz / header.mz;
         }
 
-        std::cout << "DEBUG: Dimensions: " << dim << std::endl;
-
-        // FIXME: Implement more general mechanism of Type matching
-        // Check Datatype
-        switch (header.mode)
-        {
-            case 0:
-                type = em::TypeInt8;
-                break;
-            case 1:
-                type = em::TypeInt16;
-                break;
-            case 2:
-                type = em::TypeFloat;
-                break;
-            case 3:
-                // FIXME: datatype = DT_CShort;
-                type = nullptr;
-                break;
-            case 4:
-                // FIXME: datatype = DT_CFloat;
-                type = nullptr;
-                break;
-            case 6:
-                type = em::TypeUInt16;
-                break;
-            default:
-                type = nullptr;
-                // FIXME: errCode = -1;
-                break;
-        }
-
-        std::cout << "DEBUG: Data Type: " << *type << std::endl;
+        type = getTypeFromMode(header.mode);
+        ASSERT_ERROR(type == nullptr, "Unknown MRC type mode.");
 
         // TODO: Check special cases where image is a transform
         // TODO: Determine swap order (little vs big endian)
 
     } // function readHeader
 
-    virtual void writeHeader()
+    virtual void writeHeader() override
     {
         memset(&header, 0, MRC_HEADER_SIZE);
 
         // FIXME: Implement more general mechanism of Type matching
-        if (type == em::TypeDouble || type == em::TypeFloat || type == em::TypeInt32 || em::TypeUInt32)
+        if (type == em::TypeDouble || type == em::TypeFloat ||
+            type == em::TypeInt32 || em::TypeUInt32)
             header.mode = 2;
         else if (type == em::TypeInt16)
             header.mode = 1;
@@ -238,10 +208,20 @@ public:
 
     } // function writeHeader
 
-    size_t getHeaderSize() const
+    virtual size_t getHeaderSize() const override
     {
         return MRC_HEADER_SIZE;
     } // function getHeaderSize
+
+    virtual const TypeMap & getTypeMap() const override
+    {
+        static const TypeMap tm = {{0, TypeInt8}, {1, TypeInt16},
+                                   {2, TypeFloat}, {6, TypeUInt16}};
+        // TODO:
+        // 3: Complex short
+        // 4: Complex float
+        return tm;
+    } // function getTypeMap
 
 }; // class ImageIOMrc
 

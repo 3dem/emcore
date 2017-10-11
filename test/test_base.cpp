@@ -208,7 +208,7 @@ TEST(Array, Basic) {
 
     Array A4;
     A4.copy(A);
-    ASSERT_EQ(A3.getType(), TypeInt32);
+    ASSERT_EQ(A4.getType(), TypeInt32);
     auto data3i = static_cast<const int32_t *>(A3.getDataPointer());
     for (size_t i = 0; i < adim.getSize(); ++i)
     ASSERT_FLOAT_EQ(data3i[i], (int32_t)ptr[i]);

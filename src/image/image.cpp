@@ -405,3 +405,19 @@ void ImageIOImpl::writeImageData(const size_t index, const Image &image)
 
 } // function ImageIOImpl::write
 
+ConstTypePtr ImageIOImpl::getTypeFromMode(int mode) const
+{
+    auto tm = getTypeMap();
+    return tm.find(mode) != tm.end() ? tm[mode] : nullptr;
+} // function ImageIOImpl.getTypeFromMode
+
+int ImageIOImpl::getModeFromType(ConstTypePtr type) const
+{
+    for (auto &pair: getTypeMap())
+    {
+        if (type == pair.second)
+            return pair.first;
+    }
+
+    return -999;
+} // function ImageIOImpl.getTypeFromMode
