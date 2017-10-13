@@ -10,9 +10,9 @@
 
 namespace em
 {
-    // TODO: DOcument this class and its rationale
+    // TODO: Document this class and its rationale
 
-    /** Registry to specific implemenation classes.
+    /** Registry to specific implementation classes.
      */
     template <class T>
     class ImplRegistry
@@ -20,7 +20,7 @@ namespace em
     public:
         using BuilderFuncPtr = T* (*)();
         /**
-         * Register a ImageIO class to be available for reading/writing images.
+         * Register an ImageIO class to be available for reading/writing images.
          * The class will be accessible via the ImageIO name and the extensions
          * defined by the class.
          * @param imgio Input pointer to the ImageIO subclass that will be
