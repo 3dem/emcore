@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cstring>
 #include <map>
+#include <vector>
 
 #include "em/base/error.h"
 
