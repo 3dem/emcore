@@ -129,6 +129,6 @@ namespace em
 // The following macro can be used as a shortcut to register new ImageIO subclasses
 #define REGISTER_IMAGE_IO(extensions, ioClassName) \
     ImageIOImpl * new___##ioClassName(){ return new ioClassName(); } \
-    bool reg___##ioClassName = em::registerImageIOImpl(extensions, &new___##ioClassName)
+    bool reg___##ioClassName = em::registerImageIOImpl(extensions, new___##ioClassName)
 
 #endif //EM_CORE_IMAGE_PRIV_H

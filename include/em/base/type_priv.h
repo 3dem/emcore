@@ -34,7 +34,7 @@ void typeCast(const T1 * inputMem, T2 * outputMem, size_t count)
 
 #define TYPE_CAST_FUNC(type) template <class T1> \
 void typeCast(const T1 * inputMem, type * outputMem, size_t count) { \
-for (size_t i = 0; i < count; ++i, ++outputMem, ++inputMem) *outputMem = (float) *inputMem; \
+for (size_t i = 0; i < count; ++i, ++outputMem, ++inputMem) *outputMem = (T1) *inputMem; \
 }
 
 TYPE_CAST_FUNC(int8_t);
