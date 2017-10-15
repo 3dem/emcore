@@ -25,7 +25,7 @@ namespace em
     /** @ingroup image
      * This class represent the location of one or several images in disk.
      * It contains a path to a physical file on disk, and a given index.
-     * In EM, many images are usually grouped in a single file (stack).
+     * In EM, many images are usually grouped in one single file (stack).
      * So we need to store the path and the index of the image.
      */
     class ImageLocation
@@ -177,12 +177,16 @@ namespace em
          */
         void expandFile(const size_t ndim);
 
+        // TODO: DOCUMENT
         void read(const size_t index, Image &image);
+
+        // TODO: DOCUMENT
         void write(const size_t index, const Image &image);
 
         ~ImageIO();
 
     private:
+        // Pointer to implementation class, PIMPL idiom
         ImageIOImpl* impl = nullptr;
 
     }; // class ImageIO
