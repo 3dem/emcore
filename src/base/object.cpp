@@ -12,7 +12,7 @@ Object::Object()
 
 Object::~Object()
 {
-    if (!typePtr->isPod())
+    if (typePtr != nullptr && !typePtr->isPod())
         typePtr->destroy(valuePtr);
 } // Dtor Object
 

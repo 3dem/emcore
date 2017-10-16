@@ -62,6 +62,7 @@ namespace em
 
     // Some class name definitions for ease of use
     using ObjectDict = std::map<std::string, Object>;
+    using ObjectVector = std::vector<Object>;
 
 #include "object_priv.h"
 }
