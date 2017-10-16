@@ -65,6 +65,7 @@ public:
 
     virtual std::string getName() const override
     {
+        //TODO: is this x variable used?
         T x;
         return typeid(T).name();
     }

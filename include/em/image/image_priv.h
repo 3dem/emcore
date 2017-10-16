@@ -47,7 +47,7 @@ namespace em
          * defined by the class.
          * @param imgio Input pointer to the ImageIO subclass that will be
          * registred.
-         * @return Return True if the new ImageIO was sucessfully registered.
+         * @return Return True if the new ImageIO was successfully registered.
          */
         static bool registerImpl(const ImageIO *imgio);
 
@@ -93,6 +93,7 @@ namespace em
          */
         virtual void openFile();
         virtual void closeFile();
+
         /**
          * Expand the existing file with unset values.
          * This function should be called after setting dim and type.
@@ -115,8 +116,8 @@ namespace em
         int getModeFromType(ConstTypePtr type) const;
 
     private:
-        // Store a mapping between formats names (mrc, spider, etc)
-        // and a function that help to build a new ImageIOImpl
+        // Store a mapping between format names (mrc, spider, etc)
+        // and a function that helps to build a new ImageIOImpl
         static std::map<std::string, const ImageIO*> * implMap;
     }; // class ImageIOImpl
 
