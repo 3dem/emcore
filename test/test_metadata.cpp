@@ -43,13 +43,36 @@ TEST(ColumnIndex, Basic)
 
 TEST(Row, Basic)
 {
-    Table t({Column(1, "col1", TypeFloat),
+    Table table({Column(1, "col1", TypeFloat),
              Column(2, "col2", TypeInt16),
              Column(3, "col3", Type::get<std::string>())
             });
 
-    auto row = t.createRow();
+    auto row = table.createRow();
 
     row[1] = 3.1416f;
+    std::cerr << row << std::endl;
+
+    row[2] = 300;
+    row[3] = std::string("My name");
+    std::cerr << "Row: " << std::endl << row << std::endl;
+
+    ASSERT_EQ(row[1], row["col1"]);
+    ASSERT_EQ(row[2], row["col2"]);
+    ASSERT_EQ(row[3], row["col3"]);
+
+    int x = row[2];
+    ASSERT_EQ(x, 300);
+
+    row["col2"] = 400;
+    x = row[2];
+    ASSERT_EQ(x, 400);
+
+    //auto row2 = table.createRow();
+
+    Table::Row row3(row);
+    std::cerr << "Row3: " << std::endl << row << std::endl;
+    //row2 = row;
+    //table.addRow();
 
 } // TEST Row.Basic
