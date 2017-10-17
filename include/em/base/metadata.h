@@ -74,6 +74,8 @@ namespace em {
         /** Return how many columns there are in the Index. */
         size_t size() const;
 
+        const ColumnVector& getColumns() const;
+
     private:
         ColumnVector columns;
         std::map<size_t, size_t> colIntMap;
@@ -117,6 +119,8 @@ namespace em {
             Row(const Row& other);
             Row& operator=(const Row& other);
 
+            void toStream(std::ostream &ostream) const;
+
         private:
             RowImpl * impl = nullptr;
             /** Construction of a Row, given its implementation.
@@ -137,13 +141,14 @@ namespace em {
         Row createRow() const;
 
         /** Add a new row to the set */
-        bool addRow(const Row & row);
+        bool addRow(const Row &row);
 
 
     }; // class Table
 
-
-
 } // namespace em
+
+std::ostream& operator<< (std::ostream &ostream, const em::Table::Row &row);
+
 
 #endif //EM_CORE_METADATA_H

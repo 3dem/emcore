@@ -52,6 +52,9 @@ size_t ColumnIndex::operator[](const std::string &columnName)
 
 size_t ColumnIndex::size() const { return columns.size(); }
 
+const ColumnVector& ColumnIndex::getColumns() const { return columns; }
+
+
 // ========================== Table Implementation =============================
 
 class Table::RowImpl
@@ -59,6 +62,9 @@ class Table::RowImpl
 public:
     const Table * parent;
     std::vector<Object> objects;
+
+    /** Default empty constructor */
+    RowImpl() = default;
 
     /** Constructor of RowImpl. Receives the parent Table pointer and
      * the number of objects.
@@ -86,15 +92,27 @@ Table::Row::Row(RowImpl *rowImpl): impl(rowImpl)
     std::cerr << "Row constructor..." << std::endl;
 } // Ctor
 
-Table::Row::Row(const Row &other): impl(other.impl) {} // Copy ctor
+Table::Row::Row(const Row &other)
+{
+    std::cerr << "Row copy CTOR " << std::endl;
+    impl = new RowImpl();
+    *this = other;
+} // Copy ctor
 
 Table::Row& Table::Row::operator=(const Row &other)
 {
+    std::cerr << "Row operator= " << std::endl;
     *impl = *(other.impl);
     return *this;
 } // Copy Ctor Table::Row
 
-Table::Row::~Row() { delete impl; } // Dtor Table::Row
+Table::Row::~Row()
+{
+    std::cerr << "Destroying Row: " << std::endl <<
+              "   this: " << this << std::endl <<
+              "   impl: " << impl << std::endl;
+    delete impl;
+} // Dtor Table::Row
 
 Object& Table::Row::operator[](size_t columnId)
 {
@@ -107,6 +125,23 @@ Object& Table::Row::operator[](const std::string &columnName)
     size_t index = impl->parent->impl->colIndex[columnName];
     return impl->objects[index];
 } // function Table::Row.operator[string]
+
+void Table::Row::toStream(std::ostream &ostream) const
+{
+    auto& columns = impl->parent->impl->colIndex.getColumns();
+    for (size_t i = 0; i < columns.size(); ++i)
+    {
+        ostream << columns[i].getName() << ": ";
+        impl->objects[i].toStream(ostream);
+        ostream << std::endl;
+    }
+} // function Table::Row.toStream
+
+std::ostream& operator<< (std::ostream &ostream, const Table::Row &row)
+{
+    row.toStream(ostream);
+    return ostream;
+}
 
 Table::Table(const ColumnVector &columns)
 {
