@@ -27,15 +27,24 @@ namespace em
         /** Default empty constructor for an Object.
          *
          * After an Object instance is created through this constructor,
-         * the both the data type and the internal data are void.
+         * both the data type and the internal data are void.
          */
         Object();
+
+        /** Object constructor where the memory and type are provided.
+         * In this case the Object will not be the "owner" of the memory
+         * and should not free it when it is destroyed.
+         */
+         Object(ConstTypePtr type, void *memory);
+
+        /** Standard copy constructor */
+        Object(const Object &other);
 
         /** Object class destructor. */
         ~Object();
 
         /** Copy construct from an existing Object. */
-        template <class T> explicit Object(const T &valueIn);
+        template <class T> Object(const T &valueIn);
 
         /** Assign operator to store an given value.
          *
@@ -44,6 +53,11 @@ namespace em
          * @return Return a references to 'this' object.
          */
         template <class T> Object& operator=(const T &valueIn);
+        Object& operator=(const Object &other);
+
+
+        bool operator==(const Object &other) const;
+        bool operator!=(const Object &other) const;
 
         // Extract the value
         template<class T> operator T() const;
@@ -53,9 +67,20 @@ namespace em
 
         void toStream(std::ostream &ostream) const;
 
+        /** Return a pointer to the memory where this object data is stored. */
+        inline void * getPointer();
+        inline const void * getConstPointer() const;
+
     private:
         void * valuePtr = nullptr;
         ConstTypePtr typePtr = nullptr;
+        bool isPointer = true; // Flag to store where the valuePtr points to the data
+        bool isOwner = false; // Flag to know whether this object owns the memory
+
+        /** Set a new type to this object.
+         * Release current memory if needed and allocate new one if needed as well.
+         */
+        void setType(ConstTypePtr newType);
     };
 
     std::ostream& operator<< (std::ostream &ostream, const em::Object &object);
