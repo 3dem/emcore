@@ -40,6 +40,17 @@ TEST(ColumnIndex, Basic)
 
 } // TEST Column.Basic
 
+void printTable(Table &table)
+{
+    std::cerr << std::endl <<
+              "============== Table ===============" << std::endl;
+
+    for (auto& row: table)
+    {
+        std::cerr << row << std::endl;
+
+    }
+}
 
 TEST(Row, Basic)
 {
@@ -64,15 +75,29 @@ TEST(Row, Basic)
     int x = row[2];
     ASSERT_EQ(x, 300);
 
-    row["col2"] = 400;
-    x = row[2];
-    ASSERT_EQ(x, 400);
+
 
     //auto row2 = table.createRow();
 
     Table::Row row3(row);
+    row3["col2"] = 400;
+    x = row3[2];
+    ASSERT_EQ(x, 400);
+
     std::cerr << "Row3: " << std::endl << row << std::endl;
     //row2 = row;
-    //table.addRow();
+
+    table.addRow(row);
+    table.addRow(row3);
+
+    printTable(table);
+
+    for (auto& row: table)
+    {
+        row["col3"] = std::string("Other name");
+        row["col2"] = (int)row["col2"] / 10;
+    }
+
+    printTable(table);
 
 } // TEST Row.Basic
