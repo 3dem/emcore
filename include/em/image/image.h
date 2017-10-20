@@ -183,6 +183,9 @@ namespace em
         // TODO: DOCUMENT
         void write(const size_t index, const Image &image);
 
+        // String representation
+        void toStream(std::ostream &ostream) const;
+
         ~ImageIO();
 
     private:
@@ -191,6 +194,7 @@ namespace em
 
     }; // class ImageIO
 
+    std::ostream& operator<< (std::ostream &ostream, const em::ImageIO &t);
 
 } // em namespace
 

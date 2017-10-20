@@ -79,6 +79,7 @@ ObjectDict& Image::getHeader(size_t index)
 
 void Image::toStream(std::ostream &ostream) const
 {
+    ostream << " -- Image info --" << std::endl;
     ostream << "Dimensions: " << getDim() << std::endl;
     ostream << "Type: " << *getType() << std::endl;
     ostream << "Header: " << std::endl;
@@ -293,6 +294,23 @@ void ImageIO::write(const size_t index, const Image &image)
 
     impl->writeImageData(index, image);
 } // function ImageIO::write
+
+void ImageIO::toStream(std::ostream &ostream) const
+{
+    ostream << " -- File info --" << std::endl;
+    ostream << "Dimensions: " << impl->dim << std::endl;
+    ostream << "Type: " << * impl->type << std::endl;
+    ostream << "Header size: " << impl->getHeaderSize() << std::endl;
+    ostream << "Pad size: " << impl->getPadSize() << std::endl;
+    ostream << "Swap: " << impl->swap << std::endl;
+
+}
+
+std::ostream& em::operator<< (std::ostream &ostream, const em::ImageIO &imageIO)
+{
+    imageIO.toStream(ostream);
+    return ostream;
+}
 
 size_t ImageIOImpl::getPadSize() const
 {
