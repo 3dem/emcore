@@ -74,9 +74,14 @@ namespace em
         void cast(const void * inputMem, void * outputMem, size_t count,
                   ConstTypePtr inputType) const;
 
-        void destroy(void * inputMem) const;
+        void * allocate(size_t count) const;
+        void deallocate(void * inputMem, size_t count) const;
 
-        void toStream(const void * inputMem, std::ostream &stream, size_t count) const;
+        void toStream(const void * inputMem,
+                      std::ostream &stream, size_t count) const;
+
+        bool equals(const void *inputMem1, const void *inputMem2,
+                    size_t count) const;
 
     private:
         // Type can only be instantiated via the Type::get<T> static method
@@ -96,6 +101,8 @@ namespace em
     ConstTypePtr const TypeUInt32 = Type::get<uint32_t>();
     ConstTypePtr const TypeFloat = Type::get<float>();
     ConstTypePtr const TypeDouble = Type::get<double>();
+
+    ConstTypePtr const TypeString = Type::get<std::string>();
 
 
 #include "type_priv.h"

@@ -9,40 +9,39 @@
 
 
 template <class T>
-Object::Object(const T& value): Object()
+Object::Object(const T& value)
 {
     *this = value; // call operator =
 }
+
+void * Object::getPointer()
+{
+    return isPointer ? valuePtr : reinterpret_cast<void *>(&valuePtr);
+}
+
+const void * Object::getConstPointer() const
+{
+    return isPointer ? valuePtr : reinterpret_cast<const void *>(&valuePtr);
+}
+
 
 template <class T>
 Object& Object::operator=(const T& valueIn)
 {
     // Set the new type from the input value
     auto newType = Type::get<T>();
+    const void * inputMem = &valueIn;
 
-    if (newType->isPod())
-    {
-        // Cast the void* to the specific pointer type
-        auto ptr = reinterpret_cast<T *>(&valuePtr);
-        *ptr = valueIn; // Store the value of the plain-old datatype
-    }
-    else
-    {
-        if (typePtr != nullptr && !typePtr->isPod())
-            typePtr->destroy(valuePtr);
-        T *ptr = new T(valueIn);
-        valuePtr = ptr;
-    }
-
-    typePtr = newType;
-
+    setType(newType);
+    typePtr->copy(inputMem, getPointer(), 1);
     return *this;
 }
+
 
 template <class T>
 Object::operator T() const
 {
-    ConstTypePtr valueTypePtr = Type::get<T>();
+    auto valueTypePtr = Type::get<T>();
 
     // Check the type is the same of the object
     ASSERT_ERROR(typePtr != valueTypePtr, "Types are not the same");
@@ -53,5 +52,6 @@ Object::operator T() const
     // Extract the value
     return *ptr;
 }
+
 
 #endif //EM_CORE_OBJECT_PRIV_H

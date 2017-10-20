@@ -16,11 +16,17 @@ public:
     virtual std::size_t getSize() const = 0;
     virtual bool isPod() const = 0;
 
-    virtual void copy(const void * inputMem, void * outputMem, size_t count) const = 0;
-    virtual void destroy(void *mem) const = 0;
+    virtual void copy(const void *inputMem, void *outputMem,
+                      size_t count) const = 0;
+    virtual void * allocate(size_t count) const = 0;
+    virtual void deallocate(void *mem, size_t count) const = 0;
     virtual void cast(const void * inputMem, void * outputMem, size_t count,
                       ConstTypePtr inputType) const = 0;
-    virtual void toStream(const void * inputMem, std::ostream &stream, size_t count) const = 0;
+    virtual void toStream(const void * inputMem,
+                          std::ostream &stream, size_t count) const = 0;
+    virtual bool equals(const void *inputMem1,
+                        const void *inputMem2, size_t count) const = 0;
+
 };
 
 
@@ -65,8 +71,6 @@ public:
 
     virtual std::string getName() const override
     {
-        //TODO: is this x variable used?
-        T x;
         return typeid(T).name();
     }
 
@@ -98,10 +102,21 @@ public:
         }
     } // function TypeInfoBase.copy
 
-    virtual void destroy(void *mem) const override
+    virtual void * allocate(size_t count) const override
     {
-       auto ptr = static_cast<T*>(mem);
-       delete ptr;
+        if (count > 1)
+            return new T[count];
+        else
+            return new T;
+    } // function TypeInfoBase.destroy
+
+    virtual void deallocate(void *mem, size_t count) const override
+    {
+        auto ptr = static_cast<T*>(mem);
+        if (count > 1)
+            delete [] ptr;
+        else
+            delete ptr;
     } // function TypeInfoBase.destroy
 
     virtual void cast(const void * inputMem, void * outputMem, size_t count,
@@ -130,7 +145,19 @@ public:
             stream << *inPtr << " ";
             ++inPtr;
         }
-    } // toStream
+    } // function toStream
+
+    virtual bool equals(const void *inputMem1, const void *inputMem2,
+                        size_t count) const override
+    {
+        auto ptr1 = static_cast<const T *>(inputMem1);
+        auto ptr2 = static_cast<const T *>(inputMem2);
+
+        for (size_t i = 0; i < count; ++i, ++ptr1, ++ptr2)
+            if (*ptr1 != *ptr2)
+                return false;
+        return true;
+    } // function equals
 
 };
 
@@ -141,88 +168,23 @@ class TypeInfoT: public TypeInfoBase<T>
 
 };
 
-template <>
-class TypeInfoT<float>: public TypeInfoBase<float>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "float";
-    }
-};
+#define DEFINE_TYPENAME(type, name) \
+template <> class TypeInfoT<type>: public TypeInfoBase<type> { \
+public: \
+    virtual std::string getName() const override { return name; } \
+}
 
-template <>
-class TypeInfoT<double>: public TypeInfoBase<double>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "double";
-    }
-};
+DEFINE_TYPENAME(float, "float");
+DEFINE_TYPENAME(double, "double");
+DEFINE_TYPENAME(int8_t, "int8");
+DEFINE_TYPENAME(uint8_t, "uint8");
+DEFINE_TYPENAME(int16_t, "int16");
+DEFINE_TYPENAME(uint16_t, "uint16");
+DEFINE_TYPENAME(int32_t, "int32");
+DEFINE_TYPENAME(uint32_t, "uint32");
 
-//------------ 8 bits signed and unsigned int ----------
-template <>
-class TypeInfoT<int8_t >: public TypeInfoBase<int8_t>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "int8";
-    }
-};
+DEFINE_TYPENAME(std::string, "string");
 
-template <>
-class TypeInfoT<uint8_t>: public TypeInfoBase<uint8_t>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "uint8";
-    }
-};
-
-//------------ 16 bits signed and unsigned int ----------
-template <>
-class TypeInfoT<int16_t>: public TypeInfoBase<int16_t>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "int16";
-    }
-};
-
-template <>
-class TypeInfoT<uint16_t>: public TypeInfoBase<uint16_t>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "uint16";
-    }
-};
-
-//------------ 32 bits signed and unsigned int ----------
-
-template <>
-class TypeInfoT<int32_t>: public TypeInfoBase<int32_t>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "int32";
-    }
-};
-
-template <>
-class TypeInfoT<uint32_t>: public TypeInfoBase<uint32_t>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "uint32";
-    }
-};
+#undef DEFINE_TYPENAME
 
 #endif //EM_CORE_TYPE_PRIV_H_H

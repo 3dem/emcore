@@ -138,6 +138,23 @@ TEST(Object, Basic)
     ASSERT_EQ(o3.getType(), Type::get<Image>());
     Image img2 = o3;
 
+    // Test copy and equality
+    o3 = std::string("One string");
+    o2 = o3;
+    ASSERT_EQ(o2, o3);
+
+    Object o4(o3);
+    ASSERT_EQ(o4, o3);
+
+    ObjectVector ov;
+    ov.resize(3);
+
+    ov[0] = o3;
+    ASSERT_EQ(ov[0], o3);
+    ASSERT_EQ(ov[0], o2);
+    //ASSERT_EQ((std::string) o2, (std::string) o3);
+    Object o5(o2);
+    ASSERT_EQ(o2, o5);
 
 } // TEST Object.Basic
 

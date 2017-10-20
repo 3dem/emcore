@@ -34,7 +34,9 @@ namespace em
         explicit ArrayDim(size_t xdim, size_t ydim=1, size_t zdim=1,
                           size_t ndim=1);
 
+        // Comparison operators
         bool operator==(const ArrayDim &other) const;
+        bool operator!=(const ArrayDim &other) const;
 
         /** Return the total number of pixels/voxels of an 4D-array with these
          * dimensions. (i.e. x * y * z * n).
@@ -79,6 +81,10 @@ namespace em
 
         // Assign operator
         Array& operator=(const Array &other);
+
+        // Comparison operator
+        bool operator==(const Array &other) const;
+        bool operator!=(const Array &other) const;
 
         /**
          * Copy the elements from another array. The input type, if not null,

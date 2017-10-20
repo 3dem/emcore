@@ -37,6 +37,11 @@ bool ArrayDim::operator==(const ArrayDim &other) const
     return (x == other.x and y == other.y and z == other.z and n == other.n);
 }
 
+bool ArrayDim::operator!=(const ArrayDim &other) const
+{
+    return !(*this == other);
+}
+
 std::ostream& em::operator<< (std::ostream &ostream, const ArrayDim &adim)
 {
     ostream << "(" << adim.x << " x " << adim.y << " x "
@@ -126,6 +131,23 @@ Array& Array::operator=(const Array &other)
     implPtr->copy(other.getDim(), other.getType(), other.implPtr);
     return *this;
 } // function Array.operator=
+
+bool Array::operator==(const Array &other) const
+{
+    auto type = getType();
+    auto dim = getDim();
+
+    if (type != other.getType() || type == nullptr || dim != other.getDim())
+        return false;
+
+    return type->equals(getDataPointer(), other.getDataPointer(), dim.getSize());
+
+} // function Array.operator==
+
+bool Array::operator!=(const Array &other) const
+{
+    return !(*this == other);
+} // function Array.operator!=
 
 void Array::copy(const Array &other, ConstTypePtr type)
 {

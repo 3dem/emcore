@@ -6,9 +6,9 @@
 #define EM_CORE_ERROR_H
 
 #include <cstdlib>
-
 #include <string>
 #include <iostream>
+
 
 namespace em {
 
@@ -32,7 +32,7 @@ namespace em {
      */
     std::ostream& operator<< (std::ostream &ostream, const Error &err);
 
-}
+} // namespace em
 
 // The following macro throws an Exception with a given error message
 // and provides the file name and the line number

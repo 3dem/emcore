@@ -47,15 +47,27 @@ void Type::cast(const void *inputMem, void *outputMem, size_t count,
     implPtr->typeInfoPtr->cast(inputMem, outputMem, count, inputType);
 } // function Type.cast
 
-void Type::destroy(void *inputMem) const
+void* Type::allocate(size_t count) const
 {
-    implPtr->typeInfoPtr->destroy(inputMem);
+    return implPtr->typeInfoPtr->allocate(count);
 } // function Type.destroy
 
-void Type::toStream(const void * inputMem, std::ostream &stream, size_t count) const
+void Type::deallocate(void *inputMem, size_t count) const
+{
+    implPtr->typeInfoPtr->deallocate(inputMem, count);
+} // function Type.destroy
+
+void Type::toStream(const void * inputMem, std::ostream &stream,
+                    size_t count) const
 {
     implPtr->typeInfoPtr->toStream(inputMem, stream, count);
 } // function Type.toStream
+
+bool Type::equals(const void *inputMem1, const void *inputMem2,
+                  size_t count) const
+{
+    return implPtr->typeInfoPtr->equals(inputMem1, inputMem2, count);
+} // function Type.equals
 
 std::ostream& em::operator<< (std::ostream &ostrm, const Type &t)
 {
