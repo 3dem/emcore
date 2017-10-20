@@ -158,12 +158,16 @@ void Array::toStream(std::ostream &ostream) const
 
     for (size_t i = 0; i < ydim; ++i)
     {
+        ostream << '[';
         implPtr->typePtr->toStream(data, ostream, xdim);
-        ostream << std::endl;
+        if (i < ydim-1)
+            ostream << ']' << std::endl;
+        else
+            ostream << "]]" << std::endl;
         data += xdim * typeSize; // Increment point row by row
     }
 
-    ostream << ']';
+    //ostream << ']';
 } // function Array.toStream
 
 std::string Array::toString() const
