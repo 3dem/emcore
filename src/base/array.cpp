@@ -231,29 +231,48 @@ std::ostream& em::operator<< (std::ostream &ostream, const Array &array)
 }
 
 // ===================== ArrayView Implementation =======================
+class ArrayViewImpl
+{
+public:
+    void * data;
+    ArrayDim adim;
+
+    ArrayViewImpl(const ArrayDim &adim, void * rawMemory)
+    {
+        data = rawMemory;
+        this->adim = adim;
+    }
+}; // class ArrayViewImpl
+
+#define GET_DATA() static_cast<T*>(impl->data)
 
 template <class T>
 ArrayView<T>::ArrayView(const ArrayDim &adim, void * rawMemory)
 {
-    this->data = static_cast<T*>(rawMemory);
-    this->adim = adim;
+    impl = new ArrayViewImpl(adim, rawMemory);
 } // Ctor ArrayView
 
 template <class T>
 void ArrayView<T>::assign(const T &value)
 {
-    T *ptrIter = data;
-    size_t n = adim.getSize();
+    T *ptr = GET_DATA();
+    size_t n = impl->adim.getSize();
 
-    for (size_t i = 0; i < n; ++i, ++ptrIter)
-        *ptrIter = value;
+    for (size_t i = 0; i < n; ++i, ++ptr)
+        *ptr = value;
 } // function ArrayView.assign
+
+template <class T>
+ArrayView<T>::~ArrayView()
+{
+    delete impl;
+}
 
 template <class T>
 T& ArrayView<T>::operator()(int x, int y, int z, size_t n)
 {
-    T *ptr = data;
-    ptr += x + y * adim.y;
+    T *ptr = GET_DATA();
+    ptr += x + y * impl->adim.y;
     return *ptr;
 } // function ArrayView.operator()
 
@@ -262,15 +281,15 @@ std::string ArrayView<T>::toString() const
 {
     std::stringstream ss;
 
-    T *ptrIter = data;
-    size_t n = adim.getSize();
-    size_t xdim = adim.x;
+    T *ptr = GET_DATA();
+    size_t n = impl->adim.getSize();
+    size_t xdim = impl->adim.x;
 
     ss << "[";
 
-    for (size_t i = 0; i < n; ++i, ++ptrIter)
+    for (size_t i = 0; i < n; ++i, ++ptr)
     {
-        ss << *ptrIter << " ";
+        ss << *ptr << " ";
         if (i % xdim == xdim-1)
             ss << "\n";
     }
@@ -283,8 +302,9 @@ std::string ArrayView<T>::toString() const
 template <class T>
 T* ArrayView<T>::getDataPointer()
 {
-    return data;
+    return GET_DATA();
 } // function ArrayView.getDataPointer
+
 
 // ================ Explicit instantiations of Templates ==============================
 // This allows to implement template code in the .cpp

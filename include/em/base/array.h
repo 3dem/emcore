@@ -10,6 +10,8 @@
 
 
 class ArrayImpl;
+class ArrayViewImpl;
+
 
 namespace em
 {
@@ -141,6 +143,7 @@ namespace em
     public:
         ArrayView() = default;
         ArrayView(const ArrayView &aview) = default;
+        ~ArrayView();
 
         std::string toString() const;
         T& operator()(const int x, const int y=0, const int z=0,
@@ -152,8 +155,7 @@ namespace em
         // Only friend class Array can create ArrayView objects
         ArrayView(const ArrayDim &adim, void * rawMemory);
 
-        T * data = nullptr;
-        ArrayDim adim;
+        ArrayViewImpl * impl;
 
     friend class Array;
     }; // class ArrayView<T>
