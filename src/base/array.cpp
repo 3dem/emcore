@@ -305,6 +305,12 @@ T* ArrayView<T>::getDataPointer()
     return GET_DATA();
 } // function ArrayView.getDataPointer
 
+template <class T>
+ArrayDim ArrayView<T>::getDim() const
+{
+    return impl->adim;
+} // getDim
+
 
 // ================ Explicit instantiations of Templates ==============================
 // This allows to implement template code in the .cpp

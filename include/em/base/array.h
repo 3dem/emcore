@@ -150,6 +150,7 @@ namespace em
                       const size_t n=1);
         void assign(const T &value);
         T * getDataPointer();
+        ArrayDim getDim() const;
 
     private:
         // Only friend class Array can create ArrayView objects
