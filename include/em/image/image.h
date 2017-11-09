@@ -35,6 +35,9 @@ namespace em
         // could share the same path string without extra memory
         std::string path;
         size_t index; ///< Index to read from file (first one is 1, 0 means all images)
+
+        ImageLocation() = default;
+        ImageLocation(size_t index, const std::string &path);
     }; // class ImageLocation
 
     /** @ingroup image

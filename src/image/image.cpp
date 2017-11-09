@@ -41,6 +41,10 @@ public:
 
 // ===================== Image Implementation =======================
 
+ImageLocation::ImageLocation(size_t index, const std::string &path):
+index(index), path(path)
+{}
+
 Image::Image(): Array()
 {
     implPtr = new ImageImpl();
