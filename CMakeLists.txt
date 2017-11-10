@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.0)
-project(em-core)
+project(em-core VERSION 0.0.1)
+
+#set(${CMAKE_PROJECT_NAME}_VERSION_MAJOR        0)
+#set(${CMAKE_PROJECT_NAME}_VERSION_MINOR        0)
+#set(${CMAKE_PROJECT_NAME}_VERSION_PATCH        1)
+
 
 # Add option to build examples, turn on with 'cmake -DBUILD_TESTS=ON'
 option(BUILD_EXAMPLES "Build all examples." OFF)
@@ -7,16 +12,13 @@ option(BUILD_EXAMPLES "Build all examples." OFF)
 option(BUILD_TESTS "Build all tests." OFF)
 # Add option to build the doxygen documentation, turn on with 'cmake -DBUILD_DOCS=ON'
 option(BUILD_DOCS "Build the doxygen documentation" OFF)
-
 # Add option to decide if build tiff or not, useful when the library is not detected
 option(BUILD_TIFF "Build library with TIFF support" ON)
 
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(${CMAKE_PROJECT_NAME}_VERSION_MAJOR        0)
-set(${CMAKE_PROJECT_NAME}_VERSION_MINOR        0)
-set(${CMAKE_PROJECT_NAME}_VERSION_PATCH        1)
+add_definitions(-DEM_CORE_VERSION="${PROJECT_VERSION}")
 
 set(PROJECT_PATH  "${CMAKE_CURRENT_SOURCE_DIR}")
 set(INCLUDE_PATH  "${PROJECT_PATH}/include")
@@ -39,7 +41,9 @@ if (TIFF_FOUND AND BUILD_TIFF)
     include_directories(${TIFF_INCLUDE_DIRS})
     MESSAGE( STATUS "TIFF_INCLUDE_DIRS:         " ${TIFF_INCLUDE_DIRS} )
     MESSAGE( STATUS "TIFF_LIBRARIES:         " ${TIFF_LIBRARIES} )
+
     set(EXT_LIBRARIES ${EXT_LIBRARIES} ${TIFF_LIBRARIES})
+
 else ()
     list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_tiff.cpp")
 endif ()
@@ -47,9 +51,8 @@ endif ()
 #find_package(JPEG)
 #find_package(PNG)
 
-
-
-add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES} ${EXT_LIBRARIES})
+add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES})
+target_link_libraries( em-core ${EXT_LIBRARIES} )
 
 
 ################################
