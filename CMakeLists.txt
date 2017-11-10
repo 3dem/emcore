@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.0)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+add_compile_options(-std=c++11)
+
+message(STATUS "Setting CXX supported standard '${CMAKE_CXX_STANDARD}'")
+
 project(em-core VERSION 0.0.1)
-
-#set(${CMAKE_PROJECT_NAME}_VERSION_MAJOR        0)
-#set(${CMAKE_PROJECT_NAME}_VERSION_MINOR        0)
-#set(${CMAKE_PROJECT_NAME}_VERSION_PATCH        1)
-
 
 # Add option to build examples, turn on with 'cmake -DBUILD_TESTS=ON'
 option(BUILD_EXAMPLES "Build all examples." OFF)
@@ -15,8 +17,6 @@ option(BUILD_DOCS "Build the doxygen documentation" OFF)
 # Add option to decide if build tiff or not, useful when the library is not detected
 option(BUILD_TIFF "Build library with TIFF support" ON)
 
-
-set(CMAKE_CXX_STANDARD 11)
 
 add_definitions(-DEM_CORE_VERSION="${PROJECT_VERSION}")
 
@@ -120,7 +120,8 @@ if(BUILD_DOCS)
 
     if(NOT DOXYGEN_FOUND)
         message(FATAL_ERROR
-                "Doxygen is needed to build the documentation. Please make sure it is installed.")
+                "Doxygen is needed to build the documentation.
+                Please make sure it is installed.")
     endif(NOT DOXYGEN_FOUND)
 
     configure_file(${DOC_PATH}/Doxyfile.in
