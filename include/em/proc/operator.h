@@ -22,7 +22,7 @@ namespace em
         static const std::string OPERATION;
         static const std::string OPERAND;
 
-        enum Operation {ADD, SUB, MUL, DIV, LOG};
+        enum Operation {ADD, SUB, MUL, DIV};
 
         ImageMathProc();
 
