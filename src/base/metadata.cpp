@@ -75,7 +75,6 @@ public:
         // contain a vector with all objects. So the row will only need
         // to point to the first object of this row.
         objects.resize(n); // Allocate space for N objects
-        std::cerr << "RowImpl constructor..." << std::endl;
     } // Ctor Table::RowImpl
 }; // class Table::RowImpl
 
@@ -89,28 +88,26 @@ public:
 
 Table::Row::Row(RowImpl *rowImpl): impl(rowImpl)
 {
-    std::cerr << "Row constructor..." << std::endl;
 } // Ctor
 
 Table::Row::Row(const Row &other)
 {
-    std::cerr << "Row copy CTOR " << std::endl;
     impl = new RowImpl();
     *this = other;
 } // Copy ctor
 
 Table::Row& Table::Row::operator=(const Row &other)
 {
-    std::cerr << "Row operator= " << std::endl;
+    std::cerr << "Assigning Row: " << this << std::endl;
     *impl = *(other.impl);
     return *this;
 } // Copy Ctor Table::Row
 
 Table::Row::~Row()
 {
-    std::cerr << "Destroying Row: " << std::endl <<
-              "   this: " << this << std::endl <<
-              "   impl: " << impl << std::endl;
+//    std::cerr << "Destroying Row: " << std::endl <<
+//              "   this: " << this << std::endl <<
+//              "   impl: " << impl << std::endl;
     delete impl;
 } // Dtor Table::Row
 
@@ -133,7 +130,7 @@ void Table::Row::toStream(std::ostream &ostream) const
     {
         ostream << columns[i].getName() << ": ";
         impl->objects[i].toStream(ostream);
-        ostream << std::endl;
+        ostream << "\t";
     }
 } // function Table::Row.toStream
 
@@ -158,7 +155,6 @@ Table::~Table()
 
 Table::Row Table::createRow() const
 {
-    std::cerr << "Number of columns: " << impl->colIndex.size() << std::endl;
     RowImpl *rowImpl = new RowImpl(this, impl->colIndex.size());
     return Row(rowImpl);
 } // function Table.createRow
@@ -172,3 +168,13 @@ bool Table::addRow(const Row &row)
 
     return true;
 } // function Table.addRow
+
+Table::iterator Table::begin()
+{
+    return impl->rows.begin();
+}
+
+Table::iterator Table::end()
+{
+    return impl->rows.end();
+}
