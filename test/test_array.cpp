@@ -11,8 +11,80 @@
 
 using namespace em;
 
+TEST(ArrayDim, Defaults) {
 
-TEST(Array, Basic)
+    // Default ctor of ArrayDim should set everything to 0
+    ArrayDim adim;
+    ASSERT_TRUE((adim == ArrayDim(0, 1, 1, 1)));
+
+    // When at least one of the dimensions is set
+    // the rest will be set to 1
+    ArrayDim adim2(100);
+    ASSERT_TRUE((adim2 == ArrayDim(100, 1, 1, 1)));
+
+    std::cout << adim2 << std::endl;
+
+    // Test helper functions to compute the size
+    ArrayDim adim3(100, 100, 1, 100);
+
+    ASSERT_EQ(adim3.getSize(), 100 * 100 * 100);
+    ASSERT_EQ(adim3.getItemSize(), 100 * 100);
+
+    // Test copy constructor
+    ArrayDim adim4(adim3);
+
+    ASSERT_EQ(adim4, adim3);
+    ASSERT_EQ(adim4.getSize(), 100 * 100 * 100);
+    ASSERT_EQ(adim4.getItemSize(), 100 * 100);
+
+
+} // TEST(ArrayTest, ArrayDim)
+
+
+TEST(Array, Basic) {
+
+    ArrayDim adim(10, 10);
+    Array A(adim, TypeInt32);
+    ArrayView<int> Av = A.getView<int>();
+
+    Av.assign(11);
+    Av(3, 3) = 20;
+    Av(4, 4) = 20;
+    Av(5, 5) = 20;
+    int * ptr = Av.getDataPointer();
+    ptr[10] = 15;
+
+    //std::cout << Av.toString() << std::endl;
+
+    Array A2(A);
+    ArrayView<int> Av2 = A2.getView<int>();
+    const int * data2 = Av2.getDataPointer();
+    for (size_t i = 0; i < adim.getSize(); ++i)
+        ASSERT_EQ(data2[i], ptr[i]);
+
+    Array A3(adim, TypeFloat);
+    A3.copy(A);
+    ASSERT_EQ(A3.getType(), TypeFloat);
+    auto data3f = static_cast<const float *>(A3.getDataPointer());
+    for (size_t i = 0; i < adim.getSize(); ++i)
+        ASSERT_FLOAT_EQ(data3f[i], (float)ptr[i]);
+
+    A3.copy(A, TypeUInt32);
+    ASSERT_EQ(A3.getType(), TypeUInt32);
+    auto data3ui = static_cast<const uint32_t *>(A3.getDataPointer());
+    for (size_t i = 0; i < adim.getSize(); ++i)
+        ASSERT_EQ(data3ui[i], (uint32_t)ptr[i]);
+
+    Array A4;
+    A4.copy(A);
+    ASSERT_EQ(A4.getType(), TypeInt32);
+    auto data3i = static_cast<const int32_t *>(A3.getDataPointer());
+    for (size_t i = 0; i < adim.getSize(); ++i)
+        ASSERT_FLOAT_EQ(data3i[i], (int32_t)ptr[i]);
+} // TEST(ArrayTest, Constructor)
+
+
+TEST(Array, IndexingAlias)
 {
     const size_t DIM = 16; // 128
     const size_t N = 10;
@@ -70,8 +142,8 @@ TEST(Array, Basic)
 
             // Now check that the indexing logic is symmetric
             // and also the assign operation over an alias
-            ASSERT_EQ(data[i], avAll(x, y, z, N));
-            ASSERT_EQ(data[i], N);
+            ASSERT_EQ(data[i], avAll(x, y, z, n));
+            ASSERT_EQ(data[i], n);
         }
     }
     catch (Error &e)

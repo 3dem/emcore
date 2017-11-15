@@ -41,8 +41,6 @@ bool ArrayDim::isValidIndex(size_t xi, size_t yi, size_t zi, size_t ni)
 {
     // We don't compare xi, yi and zi >= 0 because unsigned int values
     // are always greater than 0
-    std::cerr << "isValidIndex " << *this << std::endl;
-
     return (ni > 0 && ni <= n && zi < z && yi < y && xi < x);
 } // function ArrayDim.isValidIndex
 
