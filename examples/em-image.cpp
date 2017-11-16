@@ -15,6 +15,20 @@ static const char USAGE[] =
         R"(Naval Fate.
 
     Usage:
+      em-image <file> [<output>]
+      em-image <file> (add|sub|mul|div) <value> <output>
+
+    Options:
+      <file>        Specify an input file or a pattern.
+      -h --help     Show this screen.
+      --version     Show version.
+      --otype       Output file type
+)";
+
+static const char USAGE_EXAMPLE[] =
+        R"(Naval Fate.
+
+    Usage:
       naval_fate ship new <name>...
       naval_fate ship <name> move <x> <y> [--speed=<kn>]
       naval_fate ship shoot <x> <y>
