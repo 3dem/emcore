@@ -12,14 +12,18 @@
 using namespace em;
 
 static const char USAGE[] =
-        R"(Naval Fate.
+        R"(em-image.
 
     Usage:
-      em-image <file> [<output>]
-      em-image <file> (add|sub|mul|div) <value> <output>
+      em-image <input> [(add|sub|mul|div) <file_or_value>   |
+                        (shift|rotate) ((x|y|z) <value>)... |
+                        (lowpass|highpass) <frequency>      |
+                        (bandpass <low_freq> <high_freq>)
+                       ]... <output>
 
     Options:
-      <file>        Specify an input file or a pattern.
+      <input>       An input file or a pattern matching many files.
+      <output>      An output file or a suffix when many files are produced.
       -h --help     Show this screen.
       --version     Show version.
       --otype       Output file type
