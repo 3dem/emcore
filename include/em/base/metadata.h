@@ -131,6 +131,8 @@ namespace em {
             friend class Table;
         }; // class Row
 
+        using RowVector = std::vector<Row>;
+
         /** Constructor of Table base of input Columns */
         Table(const ColumnVector &columns);
 
@@ -143,6 +145,11 @@ namespace em {
         /** Add a new row to the set */
         bool addRow(const Row &row);
 
+        using iterator = RowVector::iterator;
+        using const_iterator = RowVector::const_iterator;
+
+        iterator begin();
+        iterator end();
 
     }; // class Table
 

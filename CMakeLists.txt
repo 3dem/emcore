@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.0)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+add_compile_options(-std=c++11)
+
+message(STATUS "Setting CXX supported standard '${CMAKE_CXX_STANDARD}'")
+
 project(em-core VERSION 0.0.1)
-
-#set(${CMAKE_PROJECT_NAME}_VERSION_MAJOR        0)
-#set(${CMAKE_PROJECT_NAME}_VERSION_MINOR        0)
-#set(${CMAKE_PROJECT_NAME}_VERSION_PATCH        1)
-
 
 # Add option to build examples, turn on with 'cmake -DBUILD_TESTS=ON'
 option(BUILD_EXAMPLES "Build all examples." OFF)
@@ -14,25 +16,36 @@ option(BUILD_TESTS "Build all tests." OFF)
 option(BUILD_DOCS "Build the doxygen documentation" OFF)
 # Add option to decide if build tiff or not, useful when the library is not detected
 option(BUILD_TIFF "Build library with TIFF support" ON)
+# Build docopt or not
+option(BUILD_DOCOPT "Build library with docopt support" OFF)
 
 
-set(CMAKE_CXX_STANDARD 11)
 
 add_definitions(-DEM_CORE_VERSION="${PROJECT_VERSION}")
 
 set(PROJECT_PATH  "${CMAKE_CURRENT_SOURCE_DIR}")
 set(INCLUDE_PATH  "${PROJECT_PATH}/include")
 set(SRC_PATH      "${PROJECT_PATH}/src")
-set(DOC_PATH      "${PROJECT_PATH}/doc")
 set(TEST_SRC_PATH "${PROJECT_PATH}/test")
-set(BUILD_PATH      "${PROJECT_PATH}/build")
+set(BUILD_PATH    "${PROJECT_PATH}/build")
+set(DOC_PATH      "${PROJECT_PATH}/doc")
 
 include_directories(AFTER "${INCLUDE_PATH}")
 
-set(HEADER_FILES test/test_main.cpp)
+#set(HEADER_FILES test/test_main.cpp)
 
 file(GLOB HEADER_FILES "${INCLUDE_PATH}/*/*.h")
 file(GLOB SOURCE_FILES "${SRC_PATH}/*/*.cpp")
+
+if (BUILD_DOCOPT)
+    set(DOCOPT_PATH "${PROJECT_PATH}/libs/docopt/")
+    include_directories(AFTER "${DOCOPT_PATH}")
+    file(GLOB DOCOPT_HEADER_FILES "${DOCOPT_PATH}/*.h")
+    set(HEADER_FILES ${HEADER_FILES} ${DOCOPT_HEADER_FILES})
+    set(SOURCE_FILES ${SOURCE_FILES} ${DOCOPT_PATH}/docopt.cpp)
+else ()
+    list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/examples/em-image.cpp")
+endif()
 
 set(EXT_LIBRARIES ) # Defined empty to be fullfiled, if necessary
 
@@ -120,7 +133,8 @@ if(BUILD_DOCS)
 
     if(NOT DOXYGEN_FOUND)
         message(FATAL_ERROR
-                "Doxygen is needed to build the documentation. Please make sure it is installed.")
+                "Doxygen is needed to build the documentation.
+                Please make sure it is installed.")
     endif(NOT DOXYGEN_FOUND)
 
     configure_file(${DOC_PATH}/Doxyfile.in

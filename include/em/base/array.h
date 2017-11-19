@@ -52,6 +52,17 @@ namespace em
          */
         size_t getItemSize() const;
 
+        /** Return the number of pixels is a slice of the volume.
+         * (i.e. x * y value)
+         */
+         size_t getSliceSize() const;
+
+        /** Return if some indexes are within the boundaries of these
+         * dimensions.
+         */
+         bool isValidIndex(size_t xi, size_t yi=0, size_t zi=0,
+                           size_t ni=1);
+
     }; // class ArrayDim
 
     std::ostream& operator<< (std::ostream &ostream, const ArrayDim &adim);
@@ -63,13 +74,25 @@ namespace em
     {
     public:
         /** Default constructor.
-         * The Array will not have any data associated and
-         * the type will be nullptr.
+         *
+         * The Array will not have any data associated and the type will be
+         * nullptr.
          */
         Array();
 
-        // Constructor from dimensions and type
-        Array(const ArrayDim &adim, ConstTypePtr type);
+        /** Create an Array by providing dimensions and type.
+         * Optionally, the memory address could be provided.
+         *
+         * This constructor should be used with care when providing the array
+         * memory address. It should be guaranteed that the memory address
+         * points to a place allocated for the given number of elements and
+         * size specified by ArrayDim and Type.
+         *
+         * When using this function, the created array could be seen as an
+         * "alias" of another array of a portion of it. In this case, the
+         * memory is considered not owned by this Array and it will not be freed.
+         */
+        Array(const ArrayDim &adim, ConstTypePtr type, void * memory = nullptr);
 
         /** Copy constructor from another Array.
          * This Array will have the same dimensions, data type
@@ -77,6 +100,7 @@ namespace em
          * @param other Other Array to be copied
          */
         Array(const Array &other);
+
 
         // Destructor
         virtual ~Array();
@@ -98,6 +122,16 @@ namespace em
          * current type of the array.
          */
         void copy(const Array &other, ConstTypePtr type=nullptr);
+
+        /** Return an "aliased" Array that share the memory with this one.
+         * If index is 0, the new Array will have exactly the same dimensions.
+         * If index is between 1 and n, then it will point to a single item
+         * but still with the same x, y and z dimensions.
+         * @param index If 0 the whole Array will be aliased, if not, just
+         * a single item.
+         * @return Array aliased that share the same memory
+         */
+        Array getAlias(size_t index = 0);
 
         // Dimensions
         virtual void resize(const ArrayDim &adim, ConstTypePtr type=nullptr);

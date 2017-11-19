@@ -189,4 +189,3 @@ TEST(ImageIO, Create)
 
     }
 } // TEST(ImageIO, Create)
-

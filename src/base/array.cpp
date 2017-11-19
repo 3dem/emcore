@@ -14,7 +14,7 @@ using namespace em;
 
 // ===================== ArrayDim Implementation =======================
 
-ArrayDim::ArrayDim() :x(0), y(0), z(0), n(0) {}
+ArrayDim::ArrayDim() :x(0), y(1), z(1), n(1) {}
 
 ArrayDim::ArrayDim(const ArrayDim &adim)
         :x(adim.x), y(adim.y), z(adim.z), n(adim.n) {}
@@ -31,6 +31,18 @@ size_t ArrayDim::getItemSize() const
 {
     return x * y * z;
 }
+
+size_t ArrayDim::getSliceSize() const
+{
+    return x * y;
+} // function ArrayDim.getSliceSize
+
+bool ArrayDim::isValidIndex(size_t xi, size_t yi, size_t zi, size_t ni)
+{
+    // We don't compare xi, yi and zi >= 0 because unsigned int values
+    // are always greater than 0
+    return (ni > 0 && ni <= n && zi < z && yi < y && xi < x);
+} // function ArrayDim.isValidIndex
 
 bool ArrayDim::operator==(const ArrayDim &other) const
 {
@@ -58,23 +70,28 @@ public:
     size_t msize = 0; // allocated memory getSize
     ConstTypePtr typePtr = nullptr;
     void * dataPtr = nullptr;
+    // Flag to know when the memory is "owned" by this array and when it should
+    // take care of freeing it.
+    bool ownsMemory = true;
 
-    // Allocate enough memory to store all elements
-    void allocate(const ArrayDim &adim, ConstTypePtr type)
+    // If the memory pointer is nullptr, allocate enough memory to store all
+    // elements. If not, point data to there and mark as memory not owned
+    // by this array
+    void allocate(const ArrayDim &adim, ConstTypePtr type,
+                  void * memory= nullptr)
     {
         deallocate(); // Release memory if necessary
         this->adim = adim;
         this->typePtr = type;
         msize = adim.getSize() * typePtr->getSize();
-        dataPtr = malloc(msize);
-        // std::cout << "this: " << this << " allocate: msize: " << msize << " dataPtr: " << (dataPtr == nullptr) << std::endl;
+        // Asign ownsMemory flag and dataPtr in the same statement
+        dataPtr = (ownsMemory = (memory == nullptr)) ? malloc(msize) : memory;
     }
 
     // Deallocate memory
     void deallocate()
     {
-        // std::cout << "this: " << this << " deallocate: msize: " << msize << " dataPtr: " << (dataPtr == nullptr) << std::endl;
-        if (msize > 0)
+        if (ownsMemory && msize > 0)
         {
             free(dataPtr);
             msize = 0;
@@ -106,13 +123,13 @@ Array::Array()
     implPtr = new ArrayImpl();
 } // empty Ctor
 
-Array::Array(const ArrayDim &adim, ConstTypePtr type)
+Array::Array(const ArrayDim &adim, ConstTypePtr type, void * memory)
 {
     implPtr = new ArrayImpl();
     // Type should be not null (another option could be assume float
     // or double by default)
     assert(type != nullptr);
-    implPtr->allocate(adim, type);
+    implPtr->allocate(adim, type, memory);
 } // Ctor for ArrayDim and ConstTypePtr
 
 Array::Array(const Array &other)
@@ -156,6 +173,25 @@ void Array::copy(const Array &other, ConstTypePtr type)
                      implPtr->typePtr;
     implPtr->copy(other.getDim(), finalType, other.implPtr);
 } // function Array.copy
+
+Array Array::getAlias(size_t index)
+{
+    auto adim = getDim();
+    ASSERT_ERROR((index < 0 or index > adim.n),
+                 "Index should be betweeen zero and the number of elements.")
+
+    void * data = getDataPointer();
+
+    if (index > 0)
+    {
+        adim.n = 1; // Alias to a single item of this array
+        data = (static_cast<uint8_t *>(data) +
+                (index - 1) * adim.getItemSize() * getType()->getSize());
+    }
+    //TODO: Consider aliasing to a single slice within a volume
+
+    return Array(adim, getType(), data);
+} // function Array.getAlias
 
 ArrayDim Array::getDim() const
 {
@@ -236,11 +272,14 @@ class ArrayViewImpl
 public:
     void * data;
     ArrayDim adim;
+    size_t xy, xyz; // Cached values to speed-up indexing
 
     ArrayViewImpl(const ArrayDim &adim, void * rawMemory)
     {
         data = rawMemory;
         this->adim = adim;
+        xy = adim.getSliceSize();
+        xyz = adim.getItemSize();
     }
 }; // class ArrayViewImpl
 
@@ -271,8 +310,11 @@ ArrayView<T>::~ArrayView()
 template <class T>
 T& ArrayView<T>::operator()(int x, int y, int z, size_t n)
 {
+    ASSERT_ERROR(!getDim().isValidIndex(x, y, z, n),
+                 "Invalid indexes for this array. ");
+
     T *ptr = GET_DATA();
-    ptr += x + y * impl->adim.y;
+    ptr += (n - 1) * impl->xyz + z * impl->xy + y * x + x;
     return *ptr;
 } // function ArrayView.operator()
 

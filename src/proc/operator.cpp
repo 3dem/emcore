@@ -41,7 +41,7 @@ void processImage(Image &image, const Object &object, ImageMathProc::Operation o
                 for (; i < size; ++data, ++data2, ++i)
                     *data /= *data2;
                 break;
-        }
+        } // switch (op)
     }
     else
     {
@@ -64,9 +64,10 @@ void processImage(Image &image, const Object &object, ImageMathProc::Operation o
                 for (; i < size; ++data, ++i)
                     *data /= value;
                 break;
-        }
+        } // switch (op)
     }
-}
+} // function processImage<T>
+
 
 ImageMathProc::ImageMathProc()
 {
@@ -75,7 +76,6 @@ ImageMathProc::ImageMathProc()
     REGISTER_TYPE(float);
     REGISTER_TYPE(uint8_t);
     REGISTER_TYPE(uint16_t);
-
 }
 
 void ImageMathProc::process(const Image &input, Image &output)
