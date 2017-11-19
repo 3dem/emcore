@@ -38,11 +38,13 @@ set(EXT_LIBRARIES ) # Defined empty to be fullfiled, if necessary
 
 find_package(TIFF)
 if (TIFF_FOUND AND BUILD_TIFF)
-    include_directories(${TIFF_INCLUDE_DIRS})
-    MESSAGE( STATUS "TIFF_INCLUDE_DIRS:         " ${TIFF_INCLUDE_DIRS} )
-    MESSAGE( STATUS "TIFF_LIBRARIES:         " ${TIFF_LIBRARIES} )
 
+    include_directories(${TIFF_INCLUDE_DIRS})
     set(EXT_LIBRARIES ${EXT_LIBRARIES} ${TIFF_LIBRARIES})
+
+    MESSAGE( STATUS "TIFF library: " ${TIFF_LIBRARIES} )
+    MESSAGE( STATUS "TIFF include: " ${TIFF_INCLUDE_DIRS} )
+
 
 else ()
     list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_tiff.cpp")
