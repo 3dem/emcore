@@ -13,20 +13,21 @@ using namespace em;
 
 struct TiffHeader
 {                                   // Header for each Directory in TIFF
+    uint16          dirIndex;      // Directory index
     unsigned short  bitsPerSample;
     unsigned short  samplesPerPixel;
-    unsigned int   imageWidth;
-    unsigned int   imageLength;
-    uint16           imageSampleFormat;
+    unsigned int    imageWidth;
+    unsigned int    imageLength;
+    uint16          imageSampleFormat;
     unsigned short  resUnit;
-    float            xTiffRes,yTiffRes;
-    unsigned int subFileType;
-    uint16 pNumber, pTotal; // pagenumber and total number of pages of current directory
+    float           xTiffRes,yTiffRes;
+    unsigned int    subFileType;
+    uint16          pNumber, pTotal; // pagenumber and total number of pages of current directory
     TiffHeader()
     {
-        bitsPerSample=samplesPerPixel=0;
+        bitsPerSample=samplesPerPixel=resUnit=0;
         imageWidth=imageLength=subFileType=0;
-        imageSampleFormat=0;
+        imageSampleFormat=pNumber=pTotal=0;
         xTiffRes=yTiffRes=0;
     }
 }; //TiffHeader
@@ -68,6 +69,8 @@ public:
          * and this same file returns an error when trying to open again, we are going
          * to suppose that under 8 bytes this is empty.
         */
+        //TODO update: we always write allocate an image in TIFF file directory
+        // so never there will never be this problem anymore
         //if (fileName.getFileSize() < 9)
         //    filename.deleteFile();
     }
@@ -75,33 +78,35 @@ public:
 
     void readHeader() override
     {
-        char*  tif_buf = NULL;
-        TiffHeader dhRef;
+        TiffHeader header;
 
         /* Get TIFF image properties */
         do
         {
-            dhRef.imageSampleFormat = SAMPLEFORMAT_VOID;
-            if (TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE,  &dhRef.bitsPerSample) == 0)
+            header.imageSampleFormat = SAMPLEFORMAT_VOID;
+            if (TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE,  &header.bitsPerSample) == 0)
                 THROW_SYS_ERROR("ImageIOTiff: Error reading TIFFTAG_BITSPERSAMPLE");
-            if (TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL,&dhRef.samplesPerPixel) == 0)
-                dhRef.samplesPerPixel = 1;
+            if (TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL,&header.samplesPerPixel) == 0)
+                header.samplesPerPixel = 1;
 
-            if (TIFFGetField(tif, TIFFTAG_IMAGEWIDTH,     &dhRef.imageWidth) == 0)
+            if (TIFFGetField(tif, TIFFTAG_IMAGEWIDTH,     &header.imageWidth) == 0)
                 THROW_SYS_ERROR("ImageIOTiff: Error reading TIFFTAG_IMAGEWIDTH");
-            if (TIFFGetField(tif, TIFFTAG_IMAGELENGTH,    &dhRef.imageLength) == 0)
+            if (TIFFGetField(tif, TIFFTAG_IMAGELENGTH,    &header.imageLength) == 0)
                 THROW_SYS_ERROR("ImageIOTiff: Error reading TIFFTAG_IMAGELENGTH");
-            if (TIFFGetField(tif, TIFFTAG_SUBFILETYPE,    &dhRef.subFileType) == 0)
-                dhRef.subFileType = 0; // Some scanners does not provide this label. So, we set this to zero
+            if (TIFFGetField(tif, TIFFTAG_SUBFILETYPE,    &header.subFileType) == 0)
+                header.subFileType = 0; // Some scanners does not provide this label. So, we set this to zero
             //            REPORT_ERROR(ERR_IO_NOREAD,"rwTIFF: Error reading TIFFTAG_SUBFILETYPE");
-            TIFFGetField(tif, TIFFTAG_SAMPLEFORMAT,   &dhRef.imageSampleFormat);
-            TIFFGetField(tif, TIFFTAG_RESOLUTIONUNIT, &dhRef.resUnit);
-            TIFFGetField(tif, TIFFTAG_XRESOLUTION,    &dhRef.xTiffRes);
-            TIFFGetField(tif, TIFFTAG_YRESOLUTION,    &dhRef.yTiffRes);
-            TIFFGetField(tif, TIFFTAG_PAGENUMBER,     &dhRef.pNumber, &dhRef.pTotal);
+            TIFFGetField(tif, TIFFTAG_SAMPLEFORMAT,   &header.imageSampleFormat);
+            TIFFGetField(tif, TIFFTAG_RESOLUTIONUNIT, &header.resUnit);
+            TIFFGetField(tif, TIFFTAG_XRESOLUTION,    &header.xTiffRes);
+            TIFFGetField(tif, TIFFTAG_YRESOLUTION,    &header.yTiffRes);
+            TIFFGetField(tif, TIFFTAG_PAGENUMBER,     &header.pNumber, &header.pTotal);
 
-            if ((dhRef.subFileType & 0x00000001) != 0x00000001) //add image if not a thumbnail
-                vHeader.push_back(dhRef);
+            if ((header.subFileType & 0x00000001) != 0x00000001) //add image if not a thumbnail
+            {
+                header.dirIndex = TIFFCurrentDirectory(tif);
+                vHeader.push_back(header);
+            }
         }
         while(TIFFReadDirectory(tif));
 
@@ -113,6 +118,7 @@ public:
         dim.z = 1;
         dim.n = vHeader.size();
 
+        // We obtain single value mode by adding bitspersample and sampleformat
         int mode = vHeader[0].bitsPerSample + vHeader[0].imageSampleFormat;
         type = getTypeFromMode(mode);
 
@@ -120,19 +126,76 @@ public:
     }
 
 
-protected:
-
     void writeHeader() override
     {
-        THROW_ERROR("ImageIOTiff::writeHeader not implemented yet.");
+        vHeader.clear();
+
+        TiffHeader header;
+
+        header.imageWidth = (unsigned int) dim.x;
+        header.imageLength = (unsigned int) dim.y;
+
+        header.samplesPerPixel = 1; //One channel images
+        header.resUnit = RESUNIT_CENTIMETER;
+
+        //Setting bitsPerSample and imageSampleFormat;
+        setHeaderType(header);
+
+        header.xTiffRes = 1;
+        header.yTiffRes = 1;
+
+
+        //Write each image in a directory
+        for (size_t i = 0; i < dim.n; ++i )
+        {
+            vHeader.push_back(header);
+
+            TIFFSetDirectory(tif,(tdir_t) i);
+
+            // Image header
+            TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL,header.samplesPerPixel);
+            TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE,  header.bitsPerSample);
+            TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT,   header.imageSampleFormat);
+            TIFFSetField(tif, TIFFTAG_IMAGEWIDTH,     header.imageWidth);
+            TIFFSetField(tif, TIFFTAG_IMAGELENGTH,    header.imageLength);
+            TIFFSetField(tif, TIFFTAG_RESOLUTIONUNIT, header.resUnit);
+            TIFFSetField(tif, TIFFTAG_XRESOLUTION,    header.xTiffRes);
+            TIFFSetField(tif, TIFFTAG_YRESOLUTION,    header.yTiffRes);
+            TIFFSetField(tif, TIFFTAG_PHOTOMETRIC,    PHOTOMETRIC_MINISBLACK);
+            TIFFSetField(tif, TIFFTAG_COMPRESSION,    COMPRESSION_NONE);
+            TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP,   (uint32) header.imageLength);
+            TIFFSetField(tif, TIFFTAG_PLANARCONFIG,   PLANARCONFIG_CONTIG);
+            TIFFSetField(tif, TIFFTAG_ORIENTATION ,   ORIENTATION_TOPLEFT);
+            TIFFSetField(tif, TIFFTAG_SOFTWARE,       "em-core v" EM_CORE_VERSION);
+
+            //if (dim.n == 1 && isStack == false)
+            if (dim.n == 1)
+            {
+                TIFFSetField(tif, TIFFTAG_SUBFILETYPE, (unsigned int) 0x0);
+                TIFFSetField(tif, TIFFTAG_PAGENUMBER, (uint16) 0, (uint16) 0);
+            }
+            else
+            {
+                TIFFSetField(tif, TIFFTAG_SUBFILETYPE, (unsigned int) 0x2);
+                TIFFSetField(tif, TIFFTAG_PAGENUMBER, (uint16) i, (uint16) dim.n);
+            }
+
+            size_t writeBuffer = header.imageWidth * type->getSize();
+
+            char*  tif_buf = nullptr;
+            tif_buf = (char*)_TIFFmalloc(writeBuffer);
+
+            /* We create the image to allocate the space in directory to avoid
+               because we don't know how to add the image to directory a posteriori */
+            for (size_t y = 0; y < header.imageLength; ++y)
+                TIFFWriteScanline(tif, tif_buf, y, 0);
+
+            TIFFWriteDirectory(tif);
+        }
     }
 
     void readImageData(const size_t index, Image &image) override
     {
-        size_t itemSize = getImageSize(); // Size of an item containing the padSize
-        size_t padSize = getPadSize();
-        size_t readSize = itemSize - padSize;
-
         char * data;
         data = static_cast<char*> (image.getDataPointer());
 
@@ -209,13 +272,41 @@ protected:
         }
 
         _TIFFfree(tif_buf);
-//        THROW_ERROR("ImageIOTiff::readImageData not implemented yet.");
     }
 
 
     void writeImageData(const size_t index, const Image &image) override
     {
-        THROW_ERROR("ImageIOTiff::writeImageData not implemented yet.");
+        size_t idx = index - 1;
+        TiffHeader &header = vHeader[idx];
+
+        TIFFSetDirectory(tif,(tdir_t) idx);
+
+        char*  tif_buf = nullptr;
+        size_t writeBuffer = header.imageWidth * type->getSize();
+        tif_buf = (char*)_TIFFmalloc(writeBuffer);
+
+        if (tif_buf == 0)
+        {
+            TIFFError(TIFFFileName(tif), "No space for strip buffer");
+            THROW_ERROR("ImageIOTiff: strip buffer allocation failed.");
+        }
+
+        char * data;
+        data = const_cast<char*>(static_cast<const char*> (image.getDataPointer()));
+
+        for (size_t y = 0; y < header.imageLength; ++y)
+        {
+            memcpy(tif_buf, data + y*writeBuffer, writeBuffer);
+            TIFFWriteScanline(tif, tif_buf, y, 0);
+        }
+
+        TIFFWriteDirectory(tif);
+
+        TIFFFlushData(tif);
+
+        _TIFFfree(tif_buf);
+
     }
 
     size_t getHeaderSize() const override
@@ -234,6 +325,30 @@ protected:
                                    {32+SAMPLEFORMAT_INT, TypeInt32},
                                    {32+SAMPLEFORMAT_IEEEFP, TypeFloat}};
         return tm;
+    }
+
+
+
+    void setHeaderType(TiffHeader &header) const
+    {
+        //int mode = vHeader[0].bitsPerSample + vHeader[0].imageSampleFormat;
+        int mode = getModeFromType(type);
+
+        if (mode < 16)
+            header.bitsPerSample = 8;
+        else if (mode < 32)
+            header.bitsPerSample = 16;
+        else
+            header.bitsPerSample = 32;
+
+        header.imageSampleFormat = (uint16)mode - header.bitsPerSample;
+    }
+
+
+    void expandFile() override
+    {
+        /* Expansion of data has to be implemented at the same time with header
+         * as image data has to be included in TIFF Directory when created */
     }
 
 
