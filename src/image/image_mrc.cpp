@@ -110,8 +110,8 @@ public:
 
         // Check dimensions of the data taking into account
         // if it is a 2D or 3D stack
-        dim.x = header.nx;
-        dim.y = header.ny;
+        dim.x = (size_t) header.nx;
+        dim.y = (size_t) header.ny;
 
         if (isImgStack)
         {
@@ -119,6 +119,12 @@ public:
             dim.n = header.nz;
         }
         else if (isVolStack)
+        {
+            dim.z = header.mz;
+            dim.n = header.nz / header.mz;
+        }
+        //if (isImgStack) TODO: default option?
+        else
         {
             dim.z = header.mz;
             dim.n = header.nz / header.mz;

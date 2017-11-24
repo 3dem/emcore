@@ -36,6 +36,8 @@ include_directories(AFTER "${INCLUDE_PATH}")
 
 file(GLOB HEADER_FILES "${INCLUDE_PATH}/*/*.h")
 file(GLOB SOURCE_FILES "${SRC_PATH}/*/*.cpp")
+file(GLOB EXAMPLE_FILES "${PROJECT_PATH}/examples/*.cpp")
+
 
 if (BUILD_DOCOPT)
     set(DOCOPT_PATH "${PROJECT_PATH}/libs/docopt/")
@@ -44,18 +46,20 @@ if (BUILD_DOCOPT)
     set(HEADER_FILES ${HEADER_FILES} ${DOCOPT_HEADER_FILES})
     set(SOURCE_FILES ${SOURCE_FILES} ${DOCOPT_PATH}/docopt.cpp)
 else ()
-    list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/examples/em-image.cpp")
+    list(REMOVE_ITEM EXAMPLE_FILES "${PROJECT_PATH}/examples/em-image.cpp")
 endif()
 
 set(EXT_LIBRARIES ) # Defined empty to be fullfiled, if necessary
 
 find_package(TIFF)
 if (TIFF_FOUND AND BUILD_TIFF)
-    include_directories(${TIFF_INCLUDE_DIRS})
-    MESSAGE( STATUS "TIFF_INCLUDE_DIRS:         " ${TIFF_INCLUDE_DIRS} )
-    MESSAGE( STATUS "TIFF_LIBRARIES:         " ${TIFF_LIBRARIES} )
 
+    include_directories(${TIFF_INCLUDE_DIRS})
     set(EXT_LIBRARIES ${EXT_LIBRARIES} ${TIFF_LIBRARIES})
+
+    MESSAGE( STATUS "TIFF library: " ${TIFF_LIBRARIES} )
+    MESSAGE( STATUS "TIFF include: " ${TIFF_INCLUDE_DIRS} )
+
 
 else ()
     list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_tiff.cpp")
@@ -73,8 +77,6 @@ target_link_libraries( em-core ${EXT_LIBRARIES} )
 ################################
 if (BUILD_EXAMPLES)
     #add_subdirectory(examples)
-
-    file(GLOB EXAMPLE_FILES "${CMAKE_SOURCE_DIR}/examples/*.cpp")
 
     message(STATUS "Found examples:")
 
