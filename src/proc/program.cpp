@@ -38,13 +38,22 @@ Program::~Program()
     delete impl;
 } // Dtor
 
+bool Program::checkArg(const std::string &arg) const
+{
+    return impl->docoptArgs.find(arg) != -1;
+} //function Program.checkArg
+
+std::string Program::getArg(const std::string &arg) const
+{
+    return impl->docoptArgs[arg].asString();
+}
 
 int Program::start(int argc, const char **argv)
 {
-     auto args = docopt::docopt(getUsage(), { argv + 1, argv + argc },
+    docoptArgs = docopt::docopt(getUsage(), { argv + 1, argv + argc },
                                 true, getName());
 
-    for(auto const& arg : args) {
+    for(auto const& arg : docoptArgs) {
         std::cout << arg.first << ": " << arg.second << std::endl;
     }
 

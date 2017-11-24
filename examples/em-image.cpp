@@ -51,6 +51,10 @@ public:
 protected:
     virtual int run() override ;
     virtual void readArgs() override ;
+
+private:
+    std::string inputFn;
+    std::string outputFn;
 }; // class EmImageProgram
 
 int EmImageProgram::run()
@@ -62,7 +66,16 @@ int EmImageProgram::run()
 
 void EmImageProgram::readArgs()
 {
-
+    if (checkArg("<input>"))
+    {
+        inputFn = getArg("<input>");
+        std::cout << "Input file: " << inputFn << std::endl;
+    }
+    if (checkArg("<output>"))
+    {
+        inputFn = getArg("<output>");
+        std::cout << "Input file: " << inputFn << std::endl;
+    }
 } // function EmImageProgram.readArgs
 
 
