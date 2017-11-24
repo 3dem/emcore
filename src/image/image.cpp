@@ -443,3 +443,9 @@ int ImageIOImpl::getModeFromType(ConstTypePtr type) const
 
     return -999;
 } // function ImageIOImpl.getTypeFromMode
+
+bool ImageIOImpl::isLittleEndian(void)
+{
+    static const unsigned long ul = 0x00000001;
+    return ((int)(*((unsigned char *) &ul)))!=0;
+}

@@ -115,6 +115,9 @@ namespace em
         ConstTypePtr getTypeFromMode(int mode) const;
         int getModeFromType(ConstTypePtr type) const;
 
+        /** Returns true if machine is little endian else false */
+        bool isLittleEndian(void);
+
     private:
         // Store a mapping between format names (mrc, spider, etc)
         // and a function that helps to build a new ImageIOImpl
