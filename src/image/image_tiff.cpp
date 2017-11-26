@@ -166,7 +166,7 @@ public:
             TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP,   (uint32) header.imageLength);
             TIFFSetField(tif, TIFFTAG_PLANARCONFIG,   PLANARCONFIG_CONTIG);
             TIFFSetField(tif, TIFFTAG_ORIENTATION ,   ORIENTATION_TOPLEFT);
-            TIFFSetField(tif, TIFFTAG_SOFTWARE,       "em-core v" EM_CORE_VERSION);
+            TIFFSetField(tif, TIFFTAG_SOFTWARE,       EM_CORE_VERSION);
 
             //if (dim.n == 1 && isStack == false)
             if (dim.n == 1)

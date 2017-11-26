@@ -21,7 +21,7 @@ option(BUILD_DOCOPT "Build library with docopt support" OFF)
 
 
 
-add_definitions(-DEM_CORE_VERSION="${PROJECT_VERSION}")
+add_definitions(-DEM_CORE_VERSION="em-core v${PROJECT_VERSION}")
 
 set(PROJECT_PATH  "${CMAKE_CURRENT_SOURCE_DIR}")
 set(INCLUDE_PATH  "${PROJECT_PATH}/include")
