@@ -116,7 +116,15 @@ namespace em
         int getModeFromType(ConstTypePtr type) const;
 
         /** Returns true if machine is little endian else false */
-        bool isLittleEndian(void);
+        bool isLittleEndian();
+
+        /** Swap the bytes order
+         *
+         * @param data Pointer to data
+         * @param dataSize Number of data elements
+         * @param typeSize Number of bytes for each element
+         */
+        void swapBytes(void * data, size_t dataSize, size_t typeSize);
 
     private:
         // Store a mapping between format names (mrc, spider, etc)

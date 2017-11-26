@@ -81,13 +81,6 @@ struct MrcHeader
 }; // MrcHeader
 
 
-/** Returns true if machine is little endian else false */
-bool isLittleEndian(void)
-{
-    static const unsigned long ul = 0x00000001;
-    return ((int)(*((unsigned char *) &ul)))!=0;
-}
-
 /**
  * Inherit properties from base ImageIOImpl and add information
  * specific for MRC format (e.g, the MrcHeader struct)
