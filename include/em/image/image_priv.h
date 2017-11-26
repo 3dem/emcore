@@ -115,6 +115,17 @@ namespace em
         ConstTypePtr getTypeFromMode(int mode) const;
         int getModeFromType(ConstTypePtr type) const;
 
+        /** Returns true if machine is little endian else false */
+        bool isLittleEndian();
+
+        /** Swap the bytes order
+         *
+         * @param data Pointer to data
+         * @param dataSize Number of data elements
+         * @param typeSize Number of bytes for each element
+         */
+        void swapBytes(void * data, size_t dataSize, size_t typeSize);
+
     private:
         // Store a mapping between format names (mrc, spider, etc)
         // and a function that helps to build a new ImageIOImpl

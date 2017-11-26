@@ -408,6 +408,10 @@ void ImageIOImpl::readImageData(const size_t index, Image &image)
 
     if (fread(image.getDataPointer(), readSize, 1, file) != 1)
         THROW_SYS_ERROR("Could not 'fread' data from file. ");
+
+    if (swap)
+        swapBytes(image.getDataPointer(), image.getDim().getItemSize(),
+                  image.getType()->getSize());
 }
 
 void ImageIOImpl::writeImageData(const size_t index, const Image &image)
@@ -443,3 +447,48 @@ int ImageIOImpl::getModeFromType(ConstTypePtr type) const
 
     return -999;
 } // function ImageIOImpl.getTypeFromMode
+
+bool ImageIOImpl::isLittleEndian()
+{
+    static const unsigned long ul = 0x00000001;
+    return ((int)(*((unsigned char *) &ul)))!=0;
+}
+
+void ImageIOImpl::swapBytes(void *data, size_t dataSize, size_t typeSize)
+{
+
+    size_t i = 0;
+
+    switch (typeSize)
+    {
+        case 8:
+        {
+            auto dtmp = (uint64_t*) data;
+
+            for (; i < dataSize; ++dtmp, ++i)
+                *dtmp = ((*dtmp & 0x00000000000000ff) << 56) | ((*dtmp & 0xff00000000000000) >> 56) |\
+                        ((*dtmp & 0x000000000000ff00) << 40) | ((*dtmp & 0x00ff000000000000) >> 40) |\
+                        ((*dtmp & 0x0000000000ff0000) << 24) | ((*dtmp & 0x0000ff0000000000) >> 24) |\
+                        ((*dtmp & 0x00000000ff000000) <<  8) | ((*dtmp & 0x000000ff00000000) >>  8);
+        }
+            break;
+        case 4:
+        {
+            auto * dtmp = (uint32_t*) data;
+
+            for (; i < dataSize; ++dtmp, ++i)
+                *dtmp = ((*dtmp & 0x000000ff) << 24) | ((*dtmp & 0xff000000) >> 24) |\
+                        ((*dtmp & 0x0000ff00) <<  8) | ((*dtmp & 0x00ff0000) >>  8);
+        }
+            break;
+        case 2:
+        {
+            auto dtmp = (uint16_t*) data;
+
+            for (; i < dataSize; ++dtmp, ++i)
+                *dtmp = static_cast<uint16_t>(((*dtmp & 0x00ff) << 8) | ((*dtmp & 0xff00) >> 8));
+        }
+            break;
+
+    }
+}
