@@ -19,9 +19,10 @@ option(BUILD_TIFF "Build library with TIFF support" ON)
 # Build docopt or not
 option(BUILD_DOCOPT "Build library with docopt support" OFF)
 
-
+string(TIMESTAMP EM_CORE_TIMESTAMP "%d-%m-%y %H:%M:%S")
 
 add_definitions(-DEM_CORE_VERSION="em-core v${PROJECT_VERSION}") # To be used in c++ code
+add_definitions(-DEM_CORE_TIMESTAMP="build ${EM_CORE_TIMESTAMP}")
 
 set(PROJECT_PATH  "${CMAKE_CURRENT_SOURCE_DIR}")
 set(INCLUDE_PATH  "${PROJECT_PATH}/include")

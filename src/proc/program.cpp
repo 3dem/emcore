@@ -40,7 +40,7 @@ Program::~Program()
 
 bool Program::checkArg(const std::string &arg) const
 {
-    return impl->docoptArgs.find(arg) != -1;
+    return impl->docoptArgs.find(arg) != impl->docoptArgs.end();
 } //function Program.checkArg
 
 std::string Program::getArg(const std::string &arg) const
@@ -50,10 +50,14 @@ std::string Program::getArg(const std::string &arg) const
 
 int Program::start(int argc, const char **argv)
 {
-    docoptArgs = docopt::docopt(getUsage(), { argv + 1, argv + argc },
+    std::cout << EM_CORE_VERSION
+              << " (" << EM_CORE_TIMESTAMP << ")"
+              << std::endl << std::endl;
+
+    impl->docoptArgs = docopt::docopt(getUsage(), { argv + 1, argv + argc },
                                 true, getName());
 
-    for(auto const& arg : docoptArgs) {
+    for(auto const& arg : impl->docoptArgs) {
         std::cout << arg.first << ": " << arg.second << std::endl;
     }
 
