@@ -19,38 +19,53 @@ option(BUILD_TIFF "Build library with TIFF support" ON)
 # Build docopt or not
 option(BUILD_DOCOPT "Build library with docopt support" OFF)
 
+string(TIMESTAMP EM_CORE_TIMESTAMP "%d-%m-%y %H:%M:%S")
 
-
-add_definitions(-DEM_CORE_VERSION="em-core v${PROJECT_VERSION}")
+add_definitions(-DEM_CORE_VERSION="em-core v${PROJECT_VERSION}") # To be used in c++ code
+add_definitions(-DEM_CORE_TIMESTAMP="build ${EM_CORE_TIMESTAMP}")
 
 set(PROJECT_PATH  "${CMAKE_CURRENT_SOURCE_DIR}")
 set(INCLUDE_PATH  "${PROJECT_PATH}/include")
 set(SRC_PATH      "${PROJECT_PATH}/src")
-set(TEST_SRC_PATH "${PROJECT_PATH}/test")
 set(BUILD_PATH    "${PROJECT_PATH}/build")
+set(TEST_SRC_PATH "${PROJECT_PATH}/test")
+set(EXAMPLE_PATH "${PROJECT_PATH}/examples")
 set(DOC_PATH      "${PROJECT_PATH}/doc")
+set(EXT_PATH      "${PROJECT_PATH}/libs")
 
 include_directories(AFTER "${INCLUDE_PATH}")
 
-#set(HEADER_FILES test/test_main.cpp)
+#file(GLOB HEADER_FILES "${INCLUDE_PATH}/*/*.h") # This is not necessary
 
-file(GLOB HEADER_FILES "${INCLUDE_PATH}/*/*.h")
+# File lists definitions
 file(GLOB SOURCE_FILES "${SRC_PATH}/*/*.cpp")
-file(GLOB EXAMPLE_FILES "${PROJECT_PATH}/examples/*.cpp")
+file(GLOB EXAMPLE_FILES "${EXAMPLE_PATH}/*.cpp")
 
-
-if (BUILD_DOCOPT)
-    set(DOCOPT_PATH "${PROJECT_PATH}/libs/docopt/")
-    include_directories(AFTER "${DOCOPT_PATH}")
-    file(GLOB DOCOPT_HEADER_FILES "${DOCOPT_PATH}/*.h")
-    set(HEADER_FILES ${HEADER_FILES} ${DOCOPT_HEADER_FILES})
-    set(SOURCE_FILES ${SOURCE_FILES} ${DOCOPT_PATH}/docopt.cpp)
-else ()
-    list(REMOVE_ITEM EXAMPLE_FILES "${PROJECT_PATH}/examples/em-image.cpp")
-endif()
+# Adding external project functions
+include(ExternalProject)
 
 set(EXT_LIBRARIES ) # Defined empty to be fullfiled, if necessary
 
+###################################
+# External libraries to be included
+###################################
+if (BUILD_DOCOPT)
+    set(DOCOPT_PATH "${EXT_PATH}/docopt")
+
+        if ( NOT EXISTS ${DOCOPT_PATH}/docopt.cpp )
+            MESSAGE( STATUS " Update submodule" )
+            execute_process(COMMAND git submodule update --init ${DOCOPT_PATH} )
+        endif()
+
+    include_directories(AFTER "${DOCOPT_PATH}")
+    list(APPEND SOURCE_FILES "${DOCOPT_PATH}/docopt.cpp")
+else ()
+    list(REMOVE_ITEM EXAMPLE_FILES "${EXAMPLE_PATH}/em-image.cpp")
+endif()
+
+################################
+# External system libraries
+################################
 find_package(TIFF)
 if (TIFF_FOUND AND BUILD_TIFF)
 
@@ -59,7 +74,6 @@ if (TIFF_FOUND AND BUILD_TIFF)
 
     MESSAGE( STATUS "TIFF library: " ${TIFF_LIBRARIES} )
     MESSAGE( STATUS "TIFF include: " ${TIFF_INCLUDE_DIRS} )
-
 
 else ()
     list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_tiff.cpp")
@@ -97,6 +111,13 @@ endif()
 # Testing
 ################################
 if (BUILD_TESTS)
+    set(GOOGLETEST_PATH "${EXT_PATH}/googletest")
+
+    if ( NOT EXISTS ${GOOGLETEST_PATH}/googletest )
+        MESSAGE( STATUS " Update submodule" )
+        execute_process(COMMAND git submodule update --init ${GOOGLETEST_PATH} )
+    endif()
+
     # This adds another subdirectory, which has 'project(gtest)'.
     add_subdirectory(libs/googletest/googletest)
 
