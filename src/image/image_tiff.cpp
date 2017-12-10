@@ -309,11 +309,6 @@ public:
 
     }
 
-    size_t getHeaderSize() const override
-    {
-        return 0;
-    }
-
 
     const TypeMap &getTypeMap() const override
     {
