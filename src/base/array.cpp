@@ -135,7 +135,8 @@ Array::Array(const ArrayDim &adim, ConstTypePtr type, void * memory)
 Array::Array(const Array &other)
 {
     implPtr = new ArrayImpl();
-    *this = other;
+    if (other.getType() != nullptr)
+        *this = other;
 } // Copy ctor Array
 
 Array::~Array()
