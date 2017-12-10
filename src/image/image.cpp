@@ -460,5 +460,25 @@ bool ImageIOImpl::isLittleEndian()
 }
 
 
+size_t em::freadSwap(void *data, size_t count, size_t typeSize, FILE *file,
+                 bool swap)
+{
+    size_t  out = fread(data, count, typeSize, file);
 
+    if (swap)
+        swapBytes(data, count, typeSize);
+    return out;
+}
 
+size_t em::freadArray(Array &array, FILE *file, bool swap)
+{
+    void * data = array.getDataPointer();
+    size_t count = array.getDim().getSize();
+    size_t typeSize = array.getType()->getSize();
+
+    size_t  out = fread(data, count, typeSize, file);
+
+    if (swap)
+        swapBytes(data, count, typeSize);
+    return out;
+}

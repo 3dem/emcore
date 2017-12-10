@@ -127,6 +127,26 @@ namespace em
     using ImageIOImplBuilder = ImageIOImpl* (*)();
     bool registerImageIOImpl(const StringVector &sv, ImageIOImplBuilder builder);
 
+    /**
+     * Read from file and swap the data if needed
+     * @param data Pointer to data
+     * @param count Number of data elements
+     * @param typeSize Number of bytes for each element
+     * @param file File handler
+     * @param swap Boolean to either swap or not the data array
+     * @return
+     */
+    size_t freadSwap(void *data, size_t count, size_t typeSize, FILE *file,
+                         bool swap = false);
+
+    /**
+     * Read from file to Array
+     * @param array object Array to copy data from file
+     * @param file File handler
+     * @param swap Boolean to either swap or not the data array
+     * @return
+     */
+    size_t freadArray(Array &array, FILE *file, bool swap = false);
 } // em namespace
 
 
