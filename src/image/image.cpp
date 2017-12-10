@@ -316,6 +316,11 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::ImageIO &imageIO)
     return ostream;
 }
 
+size_t ImageIOImpl::getHeaderSize() const
+{
+    return 0;
+}
+
 size_t ImageIOImpl::getPadSize() const
 {
     return pad;

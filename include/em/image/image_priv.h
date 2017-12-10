@@ -72,7 +72,7 @@ namespace em
         virtual void writeHeader() = 0;
 
         /** Return the size of the header for this format */
-        virtual size_t getHeaderSize() const = 0;
+        virtual size_t getHeaderSize() const;
 
         /** Return the size of padding between images/volumes in a stack */
         virtual size_t getPadSize() const;
