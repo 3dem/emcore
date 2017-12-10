@@ -74,3 +74,44 @@ std::ostream& em::operator<< (std::ostream &ostrm, const Type &t)
     ostrm << t.getName() << " (" << t.getSize() << " bytes)";
     return ostrm;
 }
+
+void em::swapBytes(void *mem, size_t count, size_t typeSize)
+{
+
+    size_t i = 0;
+
+    switch (typeSize)
+    {
+        case 8:
+        {
+            auto dtmp = (uint64_t*) mem;
+
+            for (; i < count; ++dtmp, ++i)
+                *dtmp = ((*dtmp & 0x00000000000000ff) << 56) | ((*dtmp & 0xff00000000000000) >> 56) |\
+                        ((*dtmp & 0x000000000000ff00) << 40) | ((*dtmp & 0x00ff000000000000) >> 40) |\
+                        ((*dtmp & 0x0000000000ff0000) << 24) | ((*dtmp & 0x0000ff0000000000) >> 24) |\
+                        ((*dtmp & 0x00000000ff000000) <<  8) | ((*dtmp & 0x000000ff00000000) >>  8);
+        }
+            break;
+        case 4:
+        {
+            auto * dtmp = (uint32_t*) mem;
+
+            for (; i < count; ++dtmp, ++i)
+                *dtmp = ((*dtmp & 0x000000ff) << 24) | ((*dtmp & 0xff000000) >> 24) |\
+                        ((*dtmp & 0x0000ff00) <<  8) | ((*dtmp & 0x00ff0000) >>  8);
+        }
+            break;
+        case 2:
+        {
+            auto dtmp = (uint16_t*) mem;
+
+            for (; i < count; ++dtmp, ++i)
+                *dtmp = static_cast<uint16_t>(((*dtmp & 0x00ff) << 8) | ((*dtmp & 0xff00) >> 8));
+        }
+            break;
+
+        default:
+            THROW_ERROR("swapBytes: unsupported byte size " + typeSize);
+    }
+}

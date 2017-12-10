@@ -105,6 +105,16 @@ namespace em
     ConstTypePtr const TypeString = Type::get<std::string>();
 
 
+    /** Swap the bytes order
+     *
+     * @param mem Pointer to data
+     * @param count Number of data elements
+     * @param typeSize Number of bytes for each element
+     */
+    void swapBytes(void * mem, size_t count, size_t typeSize);
+
+
+
 #include "type_priv.h"
 
 } // namespace em
