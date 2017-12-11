@@ -67,7 +67,7 @@ TEST(Type, General) {
 
     // Test type casting
     int32_t * arrayInt = new int32_t[n];
-    TypeInt32->cast(array, arrayInt, n, TypeFloat);
+    TypeInt32->castFrom(array, arrayInt, n, TypeFloat);
 
     for (size_t i = 0; i < n; ++i)
         ASSERT_FLOAT_EQ(array[i], (float)arrayInt[i]);
