@@ -110,8 +110,12 @@ namespace em
     ConstTypePtr const TypeUInt16 = Type::get<uint16_t>();
     ConstTypePtr const TypeInt32 = Type::get<int32_t>();
     ConstTypePtr const TypeUInt32 = Type::get<uint32_t>();
+    ConstTypePtr const TypeInt64 = Type::get<int64_t>();
+    ConstTypePtr const TypeUInt64 = Type::get<uint64_t>();
     ConstTypePtr const TypeFloat = Type::get<float>();
     ConstTypePtr const TypeDouble = Type::get<double>();
+    ConstTypePtr const TypeBool = Type::get<bool>();
+
 
     ConstTypePtr const TypeString = Type::get<std::string>();
 
