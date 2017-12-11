@@ -71,8 +71,19 @@ namespace em
          * @param count Number of elements in both input and output
          * @param inputType The Type of the elements in inputMem
          */
-        void cast(const void * inputMem, void * outputMem, size_t count,
-                  ConstTypePtr inputType) const;
+        void castFrom(const void *inputMem, void *outputMem, size_t count,
+                      ConstTypePtr inputType) const;
+
+        /**
+         * Cast n elements from inputMem (of type inputType) into outputMem
+         * (of type of the caller type object).
+         * @param inputMem Memory location of the input data
+         * @param outputMem Memory where cast elements will be put
+         * @param count Number of elements in both input and output
+         * @param outputType The Type of the elements in outputMem
+         */
+        void castTo(const void * inputMem, void * outputMem, size_t count,
+                  ConstTypePtr outputType) const;
 
         void * allocate(size_t count) const;
         void deallocate(void * inputMem, size_t count) const;

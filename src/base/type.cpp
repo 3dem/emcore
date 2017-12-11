@@ -41,11 +41,18 @@ void Type::copy(const void *inputMem, void *outputMem, size_t count) const
     implPtr->typeInfoPtr->copy(inputMem, outputMem, count);
 } // function Type.copy
 
-void Type::cast(const void *inputMem, void *outputMem, size_t count,
-                ConstTypePtr inputType) const
+void Type::castFrom(const void *inputMem, void *outputMem, size_t count,
+                    ConstTypePtr inputType) const
 {
-    implPtr->typeInfoPtr->cast(inputMem, outputMem, count, inputType);
+    implPtr->typeInfoPtr->castFrom(inputMem, outputMem, count, inputType);
 } // function Type.cast
+
+void Type::castTo(const void *inputMem, void *outputMem, size_t count,
+                ConstTypePtr outputType) const
+{
+    implPtr->typeInfoPtr->castTo(inputMem, outputMem, count, outputType);
+} // function Type.cast
+
 
 void* Type::allocate(size_t count) const
 {

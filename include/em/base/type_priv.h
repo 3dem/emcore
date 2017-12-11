@@ -20,8 +20,10 @@ public:
                       size_t count) const = 0;
     virtual void * allocate(size_t count) const = 0;
     virtual void deallocate(void *mem, size_t count) const = 0;
-    virtual void cast(const void * inputMem, void * outputMem, size_t count,
+    virtual void castFrom(const void * inputMem, void * outputMem, size_t count,
                       ConstTypePtr inputType) const = 0;
+    virtual void castTo(const void * inputMem, void * outputMem, size_t count,
+                        ConstTypePtr outputType) const = 0;
     virtual void toStream(const void * inputMem,
                           std::ostream &stream, size_t count) const = 0;
     virtual bool equals(const void *inputMem1,
@@ -119,8 +121,8 @@ public:
             delete ptr;
     } // function TypeInfoBase.destroy
 
-    virtual void cast(const void * inputMem, void * outputMem, size_t count,
-                      ConstTypePtr inputType) const override
+    virtual void castFrom(const void *inputMem, void *outputMem, size_t count,
+                          ConstTypePtr inputType) const override
     {
         auto outputMemT = static_cast<T *>(outputMem);
 
@@ -134,7 +136,29 @@ public:
         CAST_IF_TYPE(uint32_t);
         CAST_IF_TYPE(float);
         CAST_IF_TYPE(double);
+
+#undef CAST_IF_TYPE
     } // function TypeInfoBase.cast
+
+    virtual void castTo(const void * inputMem, void * outputMem, size_t count,
+    ConstTypePtr outputType) const override
+    {
+        auto inputMemT = static_cast<const T *>(inputMem);
+
+#define CAST_IF_TYPE(type) if (outputType == Type::get<type>()) typeCast(inputMemT, static_cast<type*>(outputMem), count)
+
+        CAST_IF_TYPE(int8_t);
+        CAST_IF_TYPE(uint8_t);
+        CAST_IF_TYPE(int16_t);
+        CAST_IF_TYPE(uint16_t);
+        CAST_IF_TYPE(int32_t);
+        CAST_IF_TYPE(uint32_t);
+        CAST_IF_TYPE(float);
+        CAST_IF_TYPE(double);
+
+#undef CAST_IF_TYPE
+
+    };
 
     virtual void toStream(const void * inputMem, std::ostream &stream,
                           size_t count) const override

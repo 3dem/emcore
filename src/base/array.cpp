@@ -106,7 +106,8 @@ public:
         if (type == other->typePtr)
             type->copy(other->dataPtr, dataPtr, adim.getSize());
         else
-            type->cast(other->dataPtr, dataPtr, adim.getSize(), other->typePtr);
+            type->castFrom(other->dataPtr, dataPtr, adim.getSize(),
+                           other->typePtr);
     }
 
     ~ArrayImpl()
