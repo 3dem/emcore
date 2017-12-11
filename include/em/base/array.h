@@ -123,6 +123,20 @@ namespace em
          */
         void copy(const Array &other, ConstTypePtr type=nullptr);
 
+        /**
+         * Copy the elements from an array pointer.
+         * @param other Array pointer to get copied.
+         * @param otherType Array pointer type.
+         */
+        void copyFrom(const void * other, ConstTypePtr otherType);
+
+        /**
+         * Copy the elements from an array pointer.
+         * @param other Array pointer to get copied.
+         * @param otherType Array pointer type.
+         */
+        void copyTo(void * other, ConstTypePtr otherType) const;
+
         /** Return an "aliased" Array that share the memory with this one.
          * If index is 0, the new Array will have exactly the same dimensions.
          * If index is between 1 and n, then it will point to a single item

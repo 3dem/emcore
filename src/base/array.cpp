@@ -110,6 +110,22 @@ public:
                            other->typePtr);
     }
 
+    void copyFrom(const void *other, ConstTypePtr otherType)
+    {
+        if (typePtr == otherType)
+            typePtr->copy(other, dataPtr, adim.getSize());
+        else
+            typePtr->castFrom(other, dataPtr, adim.getSize(), otherType);
+    }
+
+    void copyTo(void * other, ConstTypePtr otherType) const
+    {
+        if (typePtr == otherType)
+            typePtr->copy(dataPtr, other, adim.getSize());
+        else
+            typePtr->castTo(dataPtr, other, adim.getSize(), otherType);
+    }
+
     ~ArrayImpl()
     {
         deallocate();
@@ -175,6 +191,20 @@ void Array::copy(const Array &other, ConstTypePtr type)
                      implPtr->typePtr;
     implPtr->copy(other.getDim(), finalType, other.implPtr);
 } // function Array.copy
+
+void Array::copyFrom(const void *other, ConstTypePtr otherType)
+{
+    ASSERT_ERROR((implPtr->adim.getSize() == 0 || implPtr->typePtr == nullptr),
+        "em::Array::copyFrom: Array not initialized.");
+    implPtr->copyFrom(other, otherType);
+} // function Array.copyFrom
+
+void Array::copyTo(void *other, ConstTypePtr otherType) const
+{
+    ASSERT_ERROR((implPtr->adim.getSize() == 0 || implPtr->typePtr == nullptr),
+                 "em::Array::copyFrom: Array not initialized.");
+    implPtr->copyTo(other, otherType);
+}
 
 Array Array::getAlias(size_t index)
 {
