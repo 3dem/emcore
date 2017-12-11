@@ -120,8 +120,8 @@ public:
 
         if (swap)
         {
-            swapBytes((char *) &(this->header.xdim), 3, TypeUInt32->getSize());
-            swapBytes((char *) &(this->header.params), 40, TypeUInt32->getSize());
+            swapBytes(&(this->header.xdim), 3, TypeUInt32->getSize());
+            swapBytes(&(this->header.params), 40, TypeUInt32->getSize());
         }
 
         // Check dimensions of the data taking into account
