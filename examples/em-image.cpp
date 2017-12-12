@@ -53,13 +53,14 @@ protected:
     virtual void readArgs() override ;
 
 private:
-    std::string inputFn;
-    std::string outputFn;
+    std::string inputFn = "";
+    std::string outputFn = "";
 }; // class EmImageProgram
 
 int EmImageProgram::run()
 {
     std::cerr << "Doing nothing for now..." << std::endl;
+
 
     return 0;
 } // function EmImageProgram.run
@@ -73,9 +74,33 @@ void EmImageProgram::readArgs()
     }
     if (checkArg("<output>"))
     {
-        inputFn = getArg("<output>");
-        std::cout << "Input file: " << inputFn << std::endl;
+        outputFn = getArg("<output>");
+        std::cout << "Output file: " << outputFn << std::endl;
     }
+
+    StringVector commands = {"create", "add", "sub", "mul", "div",
+                             "shift", "rotate", "flip", "scale"};
+    // Store the pointers to each of the commands
+    std::vector<size_t> cmdPos;
+    size_t i = 0;
+    auto& args = getArgs();
+
+    for (auto &arg: args)
+    {
+        // Check if args is in commands
+        for (auto &cmd: commands)
+            if (arg == cmd)
+            {
+                cmdPos.push_back(i);
+                break;
+            }
+        ++i;
+    }
+
+    std::cout << "Found commands: " << std::endl;
+    for (auto& pos: cmdPos)
+        std::cout << args[pos] << std::endl;
+
 } // function EmImageProgram.readArgs
 
 

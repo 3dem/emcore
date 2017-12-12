@@ -4,6 +4,7 @@
 
 #include <map>
 #include <iostream>
+#include <em/base/type.h>
 
 #include "docopt.h"
 #include "em/proc/program.h"
@@ -19,11 +20,14 @@ public:
     std::map<std::string, docopt::value> docoptArgs;
     int argc;
     const char ** argv;
+    // Store arguments as std::string without the program name
+    StringVector args;
 
     void readArgs(int argc, const char ** argv)
     {
         this->argc = argc;
         this->argv = argv;
+        this->args = {argv + 1, argv + argc};
     }
 }; // class ProgramImpl
 
@@ -37,6 +41,11 @@ Program::~Program()
 {
     delete impl;
 } // Dtor
+
+const StringVector& Program::getArgs() const
+{
+    return impl->args;
+}
 
 bool Program::checkArg(const std::string &arg) const
 {
@@ -54,13 +63,17 @@ int Program::start(int argc, const char **argv)
               << " (" << EM_CORE_TIMESTAMP << ")"
               << std::endl << std::endl;
 
-    impl->docoptArgs = docopt::docopt(getUsage(), { argv + 1, argv + argc },
+    impl->readArgs(argc, argv);
+    impl->docoptArgs = docopt::docopt(getUsage(), getArgs(),
                                 true, getName());
 
     for(auto const& arg : impl->docoptArgs) {
         std::cout << arg.first << ": " << arg.second << std::endl;
     }
 
+    std::cout << std::endl << std::endl;
+
+    readArgs();
     return run();
 } // function start
 

@@ -37,6 +37,9 @@ namespace em
         /** Public function used to start a program. */
         int start(int argc, const char ** argv);
 
+        /** Return a cont array of strings with the input arguments */
+        const StringVector & getArgs() const;
+
         /** Return True if the argument 'arg' was provided. */
         bool checkArg(const std::string &arg) const;
 
