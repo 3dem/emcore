@@ -28,9 +28,9 @@ set(PROJECT_PATH  "${CMAKE_CURRENT_SOURCE_DIR}")
 set(INCLUDE_PATH  "${PROJECT_PATH}/include")
 set(SRC_PATH      "${PROJECT_PATH}/src")
 set(BUILD_PATH    "${PROJECT_PATH}/build")
-set(TEST_SRC_PATH "${PROJECT_PATH}/test")
+set(TEST_SRC_PATH "${PROJECT_PATH}/tests")
 set(EXAMPLE_PATH "${PROJECT_PATH}/examples")
-set(DOC_PATH      "${PROJECT_PATH}/doc")
+set(DOC_PATH      "${PROJECT_PATH}/docs")
 set(EXT_PATH      "${PROJECT_PATH}/libs")
 
 include_directories(AFTER "${INCLUDE_PATH}")
@@ -130,7 +130,7 @@ if (BUILD_TESTS)
     ##############
     # Unit Tests
     ##############
-    file(GLOB TEST_FILES "${CMAKE_SOURCE_DIR}/test/*.cpp")
+    file(GLOB TEST_FILES "${CMAKE_SOURCE_DIR}/tests/*.cpp")
 
     message(STATUS "Found tests:")
 
