@@ -54,6 +54,13 @@ bool ArrayDim::operator!=(const ArrayDim &other) const
     return !(*this == other);
 }
 
+std::string ArrayDim::toString() const
+{
+    std::stringstream ss;
+    ss << *this;
+    return ss.str();
+} // function ArrayDim.toString
+
 std::ostream& em::operator<< (std::ostream &ostream, const ArrayDim &adim)
 {
     ostream << "(" << adim.x << " x " << adim.y << " x "

@@ -8,6 +8,8 @@
 #include <cstddef>
 #include <string>
 
+#include "em/base/type.h"
+
 
 class ArrayImpl;
 class ArrayViewImpl;
@@ -62,6 +64,9 @@ namespace em
          */
          bool isValidIndex(size_t xi, size_t yi=0, size_t zi=0,
                            size_t ni=1);
+
+        /** Simple string representation */
+        std::string toString() const;
 
     }; // class ArrayDim
 
