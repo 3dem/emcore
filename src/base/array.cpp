@@ -46,7 +46,7 @@ bool ArrayDim::isValidIndex(size_t xi, size_t yi, size_t zi, size_t ni)
 
 bool ArrayDim::operator==(const ArrayDim &other) const
 {
-    return (x == other.x and y == other.y and z == other.z and n == other.n);
+    return (x == other.x && y == other.y && z == other.z && n == other.n);
 }
 
 bool ArrayDim::operator!=(const ArrayDim &other) const
@@ -184,7 +184,7 @@ void Array::copy(const Array &other, ConstTypePtr type)
 Array Array::getAlias(size_t index)
 {
     auto adim = getDim();
-    ASSERT_ERROR((index < 0 or index > adim.n),
+    ASSERT_ERROR((index < 0 || index > adim.n),
                  "Index should be betweeen zero and the number of elements.")
 
     void * data = getDataPointer();

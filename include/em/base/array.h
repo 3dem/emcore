@@ -93,8 +93,8 @@ namespace em
          * points to a place allocated for the given number of elements and
          * size specified by ArrayDim and Type.
          *
-         * When using this function, the created array could be seen as an
-         * "alias" of another array of a portion of it. In this case, the
+         * When providing the memory location, the created array could be seen
+         * as an "alias" of another array of a portion of it. In this case, the
          * memory is considered not owned by this Array and it will not be freed.
          */
         Array(const ArrayDim &adim, ConstTypePtr type, void * memory = nullptr);
@@ -105,7 +105,6 @@ namespace em
          * @param other Other Array to be copied
          */
         Array(const Array &other);
-
 
         // Destructor
         virtual ~Array();
@@ -138,8 +137,13 @@ namespace em
          */
         Array getAlias(size_t index = 0);
 
-        // Dimensions
+        /** Change the dimensions of the current Array.
+         * This operation usually imply a new allocation of memory.
+         * Optionally, a new type can be passed.
+         */
         virtual void resize(const ArrayDim &adim, ConstTypePtr type=nullptr);
+
+        /** Return the current dimensions of the Array */
         ArrayDim getDim() const;
 
         /** Return a constant pointer to underlying Type object. */
