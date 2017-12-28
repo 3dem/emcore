@@ -14,74 +14,104 @@
 
 namespace em {
 
+
     /**
-     * Class defining the properties of a given column in a Row or Table.
-     * Each column should have an integer ID and a string NAME (both of which
-     * should be unique among a given set of Columns). Additionally, a Column
-     * should have a Type and could have a description of its meaning.
+     * List of Columns that can be accessed by ID or NAME.
+     * Indexes start at 0.
      */
-    class Column
+    class ColumnMap
     {
     public:
         static const size_t NO_ID;
-
-        /**
-         * Constructor of a Column.
-         */
-         Column(size_t id, const std::string &name, ConstTypePtr type,
-                const std::string &description="");
-
-        /** Return the ID of this Column */
-        size_t getId() const;
-
-        /** Return the NAME of this Column */
-        std::string getName() const;
-
-        /** Return the Type of this Column */
-        ConstTypePtr getType() const;
-
-        /** Return the description of this Column */
-        std::string getDescription() const;
-
-    private:
-        size_t id;
-        std::string name;
-        ConstTypePtr type;
-        std::string descr = "";
-
-    }; // class Column
-
-    using ColumnVector = std::vector<Column>;
-
-    /**
-     * Map between column IDs and NAMEs to a given INDEX of the column.
-     * Indexes start at 0.
-     */
-    class ColumnIndex
-    {
-    public:
         static const size_t NO_INDEX;
 
-        /** Add a new column, return the column index. */
+        /**
+         * Class defining the properties of a given column in a Row or Table.
+         * Each column should have an integer ID and a string NAME (both of which
+         * should be unique among a given set of Columns). Additionally, a Column
+         * should have a Type and could have a description of its meaning.
+        */
+        class Column
+        {
+        public:
+            /** Constructor of a Column given the ID */
+            Column(size_t id, const std::string &name, ConstTypePtr type,
+                   const std::string &description="");
+            /** Constructor of a Column without ID */
+            Column(const std::string &name, ConstTypePtr type,
+                   const std::string &description="");
+
+            /** Return the ID of this Column */
+            size_t getId() const;
+
+            /** Return the NAME of this Column */
+            std::string getName() const;
+
+            /** Return the Type of this Column */
+            ConstTypePtr getType() const;
+
+            /** Return the description of this Column */
+            std::string getDescription() const;
+
+            private:
+                size_t id;
+                std::string name;
+                ConstTypePtr type;
+                std::string descr = "";
+
+            friend class ColumnMap;
+
+            }; // class Column
+
+        using ColumnVector = std::vector<Column>;
+
+        /** Default empty constructor */
+        ColumnMap();
+
+        /** Construct a ColumnMap from a list of Columns */
+        ColumnMap(std::initializer_list<Column> list);
+
+        /** Destructor */
+        ~ColumnMap();
+
+        /** Add a new column, return the column index.
+         * If the given column has no ID, it will be set.
+        */
         size_t addColumn(const Column &column);
 
-        /** Return the index of the column specified by columnId. */
-        size_t operator[](size_t columnId);
+        /** Return the column with this column ID. */
+        const Column& getColumn(size_t columnId);
 
-        /** Return the index of the column specified by columnName. */
-        size_t operator[](const std::string &columnName);
+        /** Return the column with this NAME */
+        const Column& getColumn(const std::string &columnName);
 
-        /** Return how many columns there are in the Index. */
+        /** Return the index of the column with this ID */
+        size_t getIndex(size_t columnId);
+
+        /** Return the index of the column with this NAME. */
+        size_t getIndex(const std::string &columnName);
+
+        /** Return the column at this index */
+        const Column& operator[](size_t index);
+
+        /** Return how many columns are in the Index. */
         size_t size() const;
 
-        const ColumnVector& getColumns() const;
+        using iterator = ColumnVector::iterator;
+        using const_iterator = ColumnVector::const_iterator;
+
+        iterator begin();
+        iterator end();
 
     private:
-        ColumnVector columns;
-        std::map<size_t, size_t> colIntMap;
-        std::map<std::string, size_t> colStrMap;
+        class Impl;
+        Impl * impl;
 
-    }; // class ColumnIndex
+        // JMRT: For now disallow assignment between ColumnMap
+        // If needed, we should implement the copy constructor and = operator
+        ColumnMap &operator=(const ColumnMap& other) = default;
+
+    }; // class ColumnMap
 
 
     /**
@@ -92,7 +122,7 @@ namespace em {
     class Table
     {
     private:
-        /** Implementation class for Row adn Table to use the PIMPL idiom */
+        /** Implementation class for Row and Table to use the PIMPL idiom */
         class RowImpl;
         class TableImpl;
         TableImpl * impl = nullptr;
@@ -134,7 +164,8 @@ namespace em {
         using RowVector = std::vector<Row>;
 
         /** Constructor of Table base of input Columns */
-        Table(const ColumnVector &columns);
+        Table(std::initializer_list<ColumnMap::Column> list);
+        //Table(ColumnMap::ColumnVector &columns);
 
         /** Destructor for Table */
         virtual ~Table();

@@ -9,50 +9,118 @@ using namespace em;
 
 // ========================== Column Implementation ============================
 
-const size_t Column::NO_ID = -1;
+const size_t ColumnMap::NO_ID = 0;
+const size_t ColumnMap::NO_INDEX = -1;
 
-Column::Column(size_t id, const std::string &name, ConstTypePtr type,
+ColumnMap::Column::Column(size_t id, const std::string &name, ConstTypePtr type,
                    const std::string &description):
-                   id(id), name(name), type(type), descr(description)
+                   id(id), name(name), type(type), descr(description) {}
+
+ColumnMap::Column::Column(const std::string &name, ConstTypePtr type,
+                          const std::string &description):
+                    Column(NO_ID, name, type, description) {}
+
+size_t ColumnMap::Column::getId() const { return id; }
+
+std::string ColumnMap::Column::getName() const { return name; }
+
+ConstTypePtr ColumnMap::Column::getType() const { return type; }
+
+std::string ColumnMap::Column::getDescription() const { return descr; }
+
+
+// ======================= ColumnMap Implementation ==========================
+
+class ColumnMap::Impl
 {
+public:
+    ColumnVector columns;
+    std::map<size_t, size_t> colIntMap;
+    std::map<std::string, size_t> colStrMap;
+    size_t maxId = ColumnMap::NO_ID; // Keep track of the biggest ID
 
-} // Ctor Column
+    inline size_t getIndex(size_t columnId) const
+    {
+        return colIntMap.find(columnId) != colIntMap.end() ?
+               colIntMap.at(columnId) : NO_INDEX;
+    }
 
-size_t Column::getId() const { return id; }
+    inline size_t getIndex(const std::string &columnName) const
+    {
+        return colStrMap.find(columnName) != colStrMap.end() ?
+               colStrMap.at(columnName) : NO_INDEX;
+    }
 
-std::string Column::getName() const { return name; }
+    inline const ColumnMap::Column& getColumn(size_t index) const
+    {
+        return columns[index];
+    }
+}; // class ColumnMap::Impl
 
-ConstTypePtr Column::getType() const { return type; }
+ColumnMap::ColumnMap() { impl = new Impl(); }
 
-std::string Column::getDescription() const { return descr; }
-
-
-// ======================= ColumnIndex Implementation ==========================
-
-const size_t ColumnIndex::NO_INDEX = -1;
-
-size_t ColumnIndex::addColumn(const Column &column)
+ColumnMap::ColumnMap(std::initializer_list<Column> list): ColumnMap()
 {
-    size_t index = columns.size();
-    columns.push_back(column);
-    return colStrMap[column.getName()] = colIntMap[column.getId()] = index;
-} // function ColumnIndex.addColumn
+    for (auto& column: list)
+        addColumn(column);
+} // Ctor from list of Columns
 
-size_t ColumnIndex::operator[](size_t columnId)
+ColumnMap::~ColumnMap() { delete impl; }
+
+size_t ColumnMap::addColumn(const Column &column)
 {
-    auto it = colIntMap.find(columnId);
-    return it != colIntMap.end() ? colIntMap[columnId] : NO_INDEX;
-} // function ColumnIndex.operator[string]
+    size_t index = impl->columns.size();
 
-size_t ColumnIndex::operator[](const std::string &columnName)
+    auto colId = column.getId();
+    auto colName = column.getName();
+
+    if (colId == NO_ID) // Find a new ID
+        colId = ++(impl->maxId); // increment maxId and assign it to colId
+    else
+        impl->maxId = std::max(impl->maxId, colId);
+
+    impl->columns.emplace_back(colId, colName, column.getType(),
+                               column.getDescription());
+
+    return impl->colStrMap[colName] = impl->colIntMap[colId] = index;
+} // function ColumnMap.addColumn
+
+const ColumnMap::Column& ColumnMap::getColumn(size_t columnId)
 {
-    auto it = colStrMap.find(columnName);
-    return it != colStrMap.end() ? colStrMap[columnName] : NO_INDEX;
-} // function ColumnIndex.operator[string]
+    return impl->getColumn(impl->getIndex(columnId));
+} // function ColumnMap.getColumn(size_t)
 
-size_t ColumnIndex::size() const { return columns.size(); }
+const ColumnMap::Column& ColumnMap::getColumn(const std::string &columnName)
+{
+    return impl->getColumn(impl->getIndex(columnName));
+} // function ColumnMap.getColumn(std::string)
 
-const ColumnVector& ColumnIndex::getColumns() const { return columns; }
+size_t ColumnMap::getIndex(size_t columnId)
+{
+    return impl->getIndex(columnId);
+} // function ColumnMap.getColumn(size_t)
+
+size_t ColumnMap::getIndex(const std::string &columnName)
+{
+    return impl->getIndex(columnName);
+} // function ColumnMap.getColumn(std::string)
+
+const ColumnMap::Column& ColumnMap::operator[](size_t index)
+{
+    return impl->getColumn(index);
+} // function ColumnMap.operator[string]
+
+size_t ColumnMap::size() const { return impl->columns.size(); }
+
+ColumnMap::iterator ColumnMap::begin()
+{
+    return impl->columns.begin();
+}
+
+ColumnMap::iterator ColumnMap::end()
+{
+    return impl->columns.end();
+}
 
 
 // ========================== Table Implementation =============================
@@ -81,14 +149,12 @@ public:
 class Table::TableImpl
 {
 public:
-    ColumnIndex colIndex;
+    ColumnMap colIndex;
 
     std::vector<Table::Row> rows;
 }; // class Table::TableImpl
 
-Table::Row::Row(RowImpl *rowImpl): impl(rowImpl)
-{
-} // Ctor
+Table::Row::Row(RowImpl *rowImpl): impl(rowImpl) {}
 
 Table::Row::Row(const Row &other)
 {
@@ -98,38 +164,31 @@ Table::Row::Row(const Row &other)
 
 Table::Row& Table::Row::operator=(const Row &other)
 {
-    std::cerr << "Assigning Row: " << this << std::endl;
     *impl = *(other.impl);
     return *this;
 } // Copy Ctor Table::Row
 
-Table::Row::~Row()
-{
-//    std::cerr << "Destroying Row: " << std::endl <<
-//              "   this: " << this << std::endl <<
-//              "   impl: " << impl << std::endl;
-    delete impl;
-} // Dtor Table::Row
+Table::Row::~Row() { delete impl; }
 
 Object& Table::Row::operator[](size_t columnId)
 {
-    size_t index = impl->parent->impl->colIndex[columnId];
+    size_t index = impl->parent->impl->colIndex.getIndex(columnId);
     return impl->objects[index];
 } // function Table::Row.operator[size_t]
 
 Object& Table::Row::operator[](const std::string &columnName)
 {
-    size_t index = impl->parent->impl->colIndex[columnName];
+    size_t index = impl->parent->impl->colIndex.getIndex(columnName);
     return impl->objects[index];
 } // function Table::Row.operator[string]
 
 void Table::Row::toStream(std::ostream &ostream) const
 {
-    auto& columns = impl->parent->impl->colIndex.getColumns();
-    for (size_t i = 0; i < columns.size(); ++i)
+    size_t i = 0;
+    for (auto& column: impl->parent->impl->colIndex)
     {
-        ostream << columns[i].getName() << ": ";
-        impl->objects[i].toStream(ostream);
+        ostream << column.getName() << ": ";
+        impl->objects[i++].toStream(ostream);
         ostream << "\t";
     }
 } // function Table::Row.toStream
@@ -140,7 +199,7 @@ std::ostream& operator<< (std::ostream &ostream, const Table::Row &row)
     return ostream;
 }
 
-Table::Table(const ColumnVector &columns)
+Table::Table(std::initializer_list<ColumnMap::Column> columns)
 {
     impl = new TableImpl();
 
