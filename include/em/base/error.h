@@ -20,7 +20,7 @@ namespace em {
         int errorCode; ///< Error code
         std::string msg; ///< Message of this error
         std::string fileName; ///< Filename where the error was produced in the code
-        std::string fuctionName; ///< Name of the function where the error was produced
+        std::string functionName; ///< Name of the function where the error was produced
         long line; ///< Line number where the error was produced
 
         Error(const std::string &msg, const std::string &filename, const long line,

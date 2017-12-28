@@ -53,6 +53,7 @@ namespace em
         Image();
 
         // Constructor from dimensions and type
+        // TODO: In C++ 11 the base constructor can be generated
         Image(const ArrayDim &adim, ConstTypePtr type);
 
         /** Copy constructor from another Array.

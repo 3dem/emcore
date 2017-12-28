@@ -15,15 +15,15 @@ Error::Error(const std::string &msg, const std::string &filename, const long lin
     this->fileName = filename;
     this->line = line;
     this->errorCode = errorCode;
-    this->fuctionName = func;
+    this->functionName = func;
 }
 
 std::ostream& em::operator<< (std::ostream &ostream, const Error &err)
 {
     ostream << "ERROR: " << err.msg << std::endl;
 
-    if (!err.fuctionName.empty())
-        ostream << "   Function: " << err.fuctionName << std::endl;
+    if (!err.functionName.empty())
+        ostream << "   Function: " << err.functionName << std::endl;
 
     if (err.errorCode != 0)
         ostream << "   Code: " << err.errorCode

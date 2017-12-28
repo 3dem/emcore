@@ -91,7 +91,8 @@ public:
         this->adim = adim;
         this->typePtr = type;
         msize = adim.getSize() * typePtr->getSize();
-        // Asign ownsMemory flag and dataPtr in the same statement
+        // Assign ownsMemory flag and dataPtr in the same statement
+        // TODO: Check if the memory allocation can be done through Type
         dataPtr = (ownsMemory = (memory == nullptr)) ? malloc(msize) : memory;
     }
 
