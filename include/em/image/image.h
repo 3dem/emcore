@@ -15,9 +15,6 @@
 
 namespace em
 {
-
-    class ImageIO;
-
     /** @ingroup image
      * This class represent the location of one or several images in disk.
      * It contains a path to a physical file on disk, and a given index.
