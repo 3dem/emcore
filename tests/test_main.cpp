@@ -7,13 +7,13 @@
 
 #include "em/base/object.h"
 #include "em/base/array.h"
-#include "em/os/timer.h"
+#include "em/base/timer.h"
 
 using namespace em;
 
 
 // IndependentMethod is a test case - here, we have 2 tests for this 1 test case
-TEST(IndependentMethod, ResetsToZero) {
+TEST(Main, ObjectLoop) {
     std::cout << std::endl << "Hello, World!" << std::endl;
 
     em::Timer t;

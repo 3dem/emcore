@@ -9,6 +9,7 @@
 #include "em/base/object.h"
 #include "em/base/array.h"
 #include "em/image/image.h"
+#include "em/base/timer.h"
 
 
 
@@ -189,3 +190,15 @@ TEST(Error, Basics) {
     }
 } // TEST(ArrayTest, Constructor)
 
+
+TEST(Timer, Basics)
+{
+
+    Timer t;
+    t.tic();
+
+    for (int i=1; i < 1000000; ++i);
+
+    t.toc();
+
+} // TEST(ArrayTest, Constructor)
