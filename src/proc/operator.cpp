@@ -16,12 +16,12 @@ void processImage(Image &image, const Object &object, ImageMathProc::Operation o
     ArrayDim adim = image.getDim();
     size_t size = adim.getSize(), i = 0;
 
-    T * data = static_cast<T*>(image.getDataPointer());
+    T * data = static_cast<T*>(image.getPointer());
 
     if (object.getType() == Type::get<Image>())
     {
         Image image2 = (Image) object;
-        T * data2 = static_cast<T*>(image2.getDataPointer());
+        T * data2 = static_cast<T*>(image2.getPointer());
 
         switch (op)
         {

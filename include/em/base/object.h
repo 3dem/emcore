@@ -69,7 +69,7 @@ namespace em
 
         /** Return a pointer to the memory where this object data is stored. */
         inline void * getPointer();
-        inline const void * getConstPointer() const;
+        inline const void * getPointer() const;
 
     private:
         void * valuePtr = nullptr;

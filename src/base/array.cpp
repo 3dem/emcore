@@ -165,7 +165,7 @@ bool Array::operator==(const Array &other) const
     if (type != other.getType() || type == nullptr || dim != other.getDim())
         return false;
 
-    return type->equals(getDataPointer(), other.getDataPointer(), dim.getSize());
+    return type->equals(getPointer(), other.getPointer(), dim.getSize());
 
 } // function Array.operator==
 
@@ -188,7 +188,7 @@ Array Array::getAlias(size_t index)
     ASSERT_ERROR((index < 0 || index > adim.n),
                  "Index should be betweeen zero and the number of elements.")
 
-    void * data = getDataPointer();
+    void * data = getPointer();
 
     if (index > 0)
     {
@@ -248,15 +248,15 @@ ConstTypePtr Array::getType() const
     return implPtr->typePtr;
 } // function Array.getType
 
-void * Array::getDataPointer()
+void * Array::getPointer()
 {
     return implPtr->dataPtr;
-} // function Array.getDataPointer
+} // function Array.getPointer
 
-const void * Array::getDataPointer() const
+const void * Array::getPointer() const
 {
     return implPtr->dataPtr;
-} // function Array.getDataPointer
+} // function Array.getPointer
 
 template <class T>
 ArrayView<T> Array::getView()
@@ -350,10 +350,10 @@ std::string ArrayView<T>::toString() const
 } // function ArrayView.toString
 
 template <class T>
-T* ArrayView<T>::getDataPointer()
+T* ArrayView<T>::getPointer()
 {
     return GET_DATA();
-} // function ArrayView.getDataPointer
+} // function ArrayView.getPointer
 
 template <class T>
 ArrayDim ArrayView<T>::getDim() const
@@ -362,7 +362,7 @@ ArrayDim ArrayView<T>::getDim() const
 } // getDim
 
 
-// ================ Explicit instantiations of Templates ==============================
+// ================ Explicit instantiations of Templates =======================
 // This allows to implement template code in the .cpp
 
 template em::ArrayView<int> em::Array::getView();

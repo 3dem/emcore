@@ -72,7 +72,7 @@ bool Object::operator==(const Object &other) const
     if (typePtr != other.typePtr || typePtr == nullptr)
         return false;
 
-    return typePtr->equals(getConstPointer(), other.getConstPointer(), 1);
+    return typePtr->equals(getPointer(), other.getPointer(), 1);
 } // function Object.operator==
 
 bool Object::operator!=(const Object &other) const
@@ -89,6 +89,6 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::Object &object)
 Object& Object::operator=(const Object &other)
 {
     setType(other.getType());
-    typePtr->copy(other.getConstPointer(), getPointer(), 1);
+    typePtr->copy(other.getPointer(), getPointer(), 1);
     return *this;
 }

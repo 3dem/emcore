@@ -85,7 +85,7 @@ int main()
     A(3, 3) = 20;
     A(4, 4) = 20;
     A(5, 5) = 20;
-    int * ptr = A.getDataPointer<int>();
+    int * ptr = A.getPointer<int>();
     ptr[10] = 15;
 
     std::cout << A.toString() << std::endl;

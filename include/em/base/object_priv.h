@@ -19,7 +19,7 @@ void * Object::getPointer()
     return isPointer ? valuePtr : reinterpret_cast<void *>(&valuePtr);
 }
 
-const void * Object::getConstPointer() const
+const void * Object::getPointer() const
 {
     return isPointer ? valuePtr : reinterpret_cast<const void *>(&valuePtr);
 }
