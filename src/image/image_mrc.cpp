@@ -82,10 +82,10 @@ struct MrcHeader
 
 
 /**
- * Inherit properties from base ImageIOImpl and add information
+ * Inherit properties from base ImageIO::Impl and add information
  * specific for MRC format (e.g, the MrcHeader struct)
  */
-class ImageIOMrc: public em::ImageIOImpl
+class ImageIOMrc: public em::ImageIO::Impl
 {
 public:
     MrcHeader header;

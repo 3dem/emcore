@@ -22,7 +22,7 @@ using namespace em;
 
 // ===================== ImageImpl Implementation =======================
 
-class ImageImpl
+class Image::Impl
 {
 public:
     // headers[0] will be the main header and
@@ -31,12 +31,12 @@ public:
 
     //static std::map<std::string, ImageWriter*> writers;
 
-    ImageImpl()
+    Impl()
     {
         // Create at least one map to store the header of the main image
         headers.push_back(ObjectDict());
     }
-};
+}; // class Image::Impl
 
 
 // ===================== Image Implementation =======================
@@ -47,12 +47,12 @@ index(index), path(path)
 
 Image::Image(): Array()
 {
-    implPtr = new ImageImpl();
+    impl = new Impl();
 } // empty Ctor
 
 Image::Image(const ArrayDim &adim, ConstTypePtr type): Array(adim, type)
 {
-    implPtr = new ImageImpl();
+    impl = new Impl();
     // Type should be not null
     // (another option could be assume float or double by default)
     assert(type != nullptr);
@@ -60,25 +60,25 @@ Image::Image(const ArrayDim &adim, ConstTypePtr type): Array(adim, type)
 
 Image::Image(const Image &other): Array(other)
 {
-    implPtr = new ImageImpl();
+    impl = new Impl();
     *this = other;
 } // Copy ctor Image
 
 Image& Image::operator=(const Image &other)
 {
     Array::operator=(other);
-    implPtr->headers = other.implPtr->headers;
+    impl->headers = other.impl->headers;
     return *this;
 } //operator=
 
 Image::~Image()
 {
-    delete implPtr;
+    delete impl;
 } // Dtor
 
 ObjectDict& Image::getHeader(size_t index)
 {
-    return implPtr->headers[index];
+    return impl->headers[index];
 }
 
 void Image::toStream(std::ostream &ostream) const
@@ -87,7 +87,7 @@ void Image::toStream(std::ostream &ostream) const
     ostream << "Dimensions: " << getDim() << std::endl;
     ostream << "Type: " << *getType() << std::endl;
     ostream << "Header: " << std::endl;
-    for (auto& x: implPtr->headers[0]) {
+    for (auto& x: impl->headers[0]) {
         std::cout << x.first << ": " << x.second << std::endl;
     }
     // Array::toStream(ostream);
@@ -126,7 +126,7 @@ void Image::write(const ImageLocation &location) const
 
 // ===================== ImageIO Implementation =======================
 
-using ImageIOImplRegistry = ImplRegistry<ImageIOImpl>;
+using ImageIOImplRegistry = ImplRegistry<ImageIO::Impl>;
 
 ImageIOImplRegistry * getRegistry()
 {
@@ -170,7 +170,7 @@ ImageIO::~ImageIO()
 }// ImageIO ctor
 
 
-ImageIOImpl::~ImageIOImpl()
+ImageIO::Impl::~Impl()
 {
 
 }
@@ -316,17 +316,17 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::ImageIO &imageIO)
     return ostream;
 }
 
-size_t ImageIOImpl::getPadSize() const
+size_t ImageIO::Impl::getPadSize() const
 {
     return pad;
-} // function ImageIOImpl::getPadSize
+} // function ImageIO::Impl::getPadSize
 
-size_t ImageIOImpl::getImageSize() const
+size_t ImageIO::Impl::getImageSize() const
 {
     return dim.getItemSize() * type->getSize() + getPadSize();
-} // function ImageIOImpl::getImageSize
+} // function ImageIO::Impl::getImageSize
 
-const char * ImageIOImpl::getOpenMode(FileMode mode) const
+const char * ImageIO::Impl::getOpenMode(FileMode mode) const
 {
     const char * openMode = "r";
 
@@ -339,26 +339,26 @@ const char * ImageIOImpl::getOpenMode(FileMode mode) const
     }
 
     return openMode;
-} // function ImageIOImpl::getOpenMode
+} // function ImageIO::Impl::getOpenMode
 
 
-void ImageIOImpl::openFile()
+void ImageIO::Impl::openFile()
 {
-    std::cout << "ImageIOImpl::openFile: mode: " << getOpenMode(fileMode) <<
+    std::cout << "ImageIO::Impl::openFile: mode: " << getOpenMode(fileMode) <<
               "file: " << path << std::endl;
 
     file = fopen(path.c_str(), getOpenMode(fileMode));
 
     if (file == nullptr)
         THROW_SYS_ERROR(std::string("Error opening file: ") + path);
-} // function ImageIOImpl::openFile
+} // function ImageIO::Impl::openFile
 
-void ImageIOImpl::closeFile()
+void ImageIO::Impl::closeFile()
 {
     fclose(file);
-} // function ImageIOImpl::closeFile
+} // function ImageIO::Impl::closeFile
 
-void ImageIOImpl::expandFile()
+void ImageIO::Impl::expandFile()
 {
     // Compute the size of one item, taking into account its x, y, z dimensions
     // and the size of the type that will be used
@@ -376,19 +376,19 @@ void ImageIOImpl::expandFile()
     File::resize(file, fileSize);
     fflush(file);
 
-} // function ImageIOImpl::expandFile
+} // function ImageIO::Impl::expandFile
 
-void ImageIOImpl::readImageHeader(const size_t index, Image &image)
+void ImageIO::Impl::readImageHeader(const size_t index, Image &image)
 {
 
 }
 
-void ImageIOImpl::writeImageHeader(const size_t index, const Image &image)
+void ImageIO::Impl::writeImageHeader(const size_t index, const Image &image)
 {
 
 }
 
-void ImageIOImpl::readImageData(const size_t index, Image &image)
+void ImageIO::Impl::readImageData(const size_t index, Image &image)
 {
     size_t itemSize = getImageSize(); // Size of an item containing the padSize
     size_t padSize = getPadSize();
@@ -396,7 +396,7 @@ void ImageIOImpl::readImageData(const size_t index, Image &image)
     // Compute the position of the item data in the file given its size
     size_t itemPos = getHeaderSize() + itemSize * (index - 1) + padSize;
 
-    std::cerr << "ImageIOImpl::readImageData: getPadSize() " << padSize << std::endl;
+    std::cerr << "ImageIO::Impl::readImageData: getPadSize() " << padSize << std::endl;
     std::cerr << "DEBUG: fseeking to " << itemPos << std::endl;
 
     if (fseek(file, itemPos, SEEK_SET) != 0)
@@ -414,30 +414,30 @@ void ImageIOImpl::readImageData(const size_t index, Image &image)
                   image.getType()->getSize());
 }
 
-void ImageIOImpl::writeImageData(const size_t index, const Image &image)
+void ImageIO::Impl::writeImageData(const size_t index, const Image &image)
 {
     size_t itemSize = getImageSize();
     size_t padSize = getPadSize();
     size_t writeSize = itemSize - padSize;
     size_t itemPos = getHeaderSize() + itemSize * (index - 1) + padSize;
 
-    std::cerr << "ImageIOImpl::write: itemPos: " << itemPos << std::endl;
-    std::cerr << "ImageIOImpl::write: itemSize: " << itemSize << std::endl;
+    std::cerr << "ImageIO::Impl::write: itemPos: " << itemPos << std::endl;
+    std::cerr << "ImageIO::Impl::write: itemSize: " << itemSize << std::endl;
 
     if (fseek(file, itemPos, SEEK_SET) != 0)
         THROW_SYS_ERROR("Could not 'fseek' in file. ");
 
     fwrite(image.getPointer(), writeSize, 1, file);
 
-} // function ImageIOImpl::write
+} // function ImageIO::Impl::write
 
-ConstTypePtr ImageIOImpl::getTypeFromMode(int mode) const
+ConstTypePtr ImageIO::Impl::getTypeFromMode(int mode) const
 {
     auto tm = getTypeMap();
     return tm.find(mode) != tm.end() ? tm[mode] : nullptr;
-} // function ImageIOImpl.getTypeFromMode
+} // function ImageIO::Impl.getTypeFromMode
 
-int ImageIOImpl::getModeFromType(ConstTypePtr type) const
+int ImageIO::Impl::getModeFromType(ConstTypePtr type) const
 {
     for (auto &pair: getTypeMap())
     {
@@ -446,15 +446,15 @@ int ImageIOImpl::getModeFromType(ConstTypePtr type) const
     }
 
     return -999;
-} // function ImageIOImpl.getTypeFromMode
+} // function ImageIO::Impl.getTypeFromMode
 
-bool ImageIOImpl::isLittleEndian()
+bool ImageIO::Impl::isLittleEndian()
 {
     static const unsigned long ul = 0x00000001;
     return ((int)(*((unsigned char *) &ul)))!=0;
 }
 
-void ImageIOImpl::swapBytes(void *data, size_t dataSize, size_t typeSize)
+void ImageIO::Impl::swapBytes(void *data, size_t dataSize, size_t typeSize)
 {
 
     size_t i = 0;

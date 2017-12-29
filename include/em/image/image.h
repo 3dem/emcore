@@ -13,14 +13,10 @@
 #include "em/base/array.h"
 
 
-class ImageImpl;
-
-
 namespace em
 {
 
     class ImageIO;
-    class ImageIOImpl;
 
     /** @ingroup image
      * This class represent the location of one or several images in disk.
@@ -97,7 +93,8 @@ namespace em
 
     private:
         // Pointer to implementation class, PIMPL idiom
-        ImageImpl * implPtr;
+        class Impl;
+        Impl * impl;
     }; // class Image
 
     std::ostream& operator<< (std::ostream &ostream, const em::Image &t);
@@ -107,15 +104,19 @@ namespace em
     /** @ingroup image
      * Class that will take care of read/write images from/to file.
      *
-     * Internally, the ImageIO class holds a pointer to ImageIOImpl class,
+     * Internally, the ImageIO class holds a pointer to ImageIO::Impl class,
      * that contains the details about how to open files and read the images
      * data. This class contains some basic functionality that is shared
-     * among some formats. The ImageIOImpl class should be extended to provide
+     * among some formats. The ImageIO::Impl class should be extended to provide
      * support for other formats.
      */
     class ImageIO
     {
     public:
+        /** Implementation sub-class, it should be overriden to support other
+         * formats */
+        class Impl;
+
         /** Constants for open files. */
         static const FileMode READ_ONLY = 0;
         static const FileMode READ_WRITE = 1;
@@ -194,7 +195,7 @@ namespace em
 
     private:
         // Pointer to implementation class, PIMPL idiom
-        ImageIOImpl* impl = nullptr;
+        Impl* impl = nullptr;
 
     }; // class ImageIO
 

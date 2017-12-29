@@ -14,7 +14,7 @@ namespace em
     /** Helper class to store information about image file.
      * This class can only be used from ImageIO class.
      */
-    class ImageIOImpl
+    class ImageIO::Impl
     {
     public:
         // Store the name of the file that was read/written
@@ -62,7 +62,7 @@ namespace em
 
         friend class ImageIO;
 
-        virtual ~ImageIOImpl();
+        virtual ~Impl();
 
     protected:
         /** Read the main header of an image file */
@@ -128,11 +128,11 @@ namespace em
 
     private:
         // Store a mapping between format names (mrc, spider, etc)
-        // and a function that helps to build a new ImageIOImpl
+        // and a function that helps to build a new ImageIO::Impl
         static std::map<std::string, const ImageIO*> * implMap;
-    }; // class ImageIOImpl
+    }; // class ImageIO::Impl
 
-    using ImageIOImplBuilder = ImageIOImpl* (*)();
+    using ImageIOImplBuilder = ImageIO::Impl* (*)();
     bool registerImageIOImpl(const StringVector &sv, ImageIOImplBuilder builder);
 
 } // em namespace
@@ -140,7 +140,7 @@ namespace em
 
 // The following macro can be used as a shortcut to register new ImageIO subclasses
 #define REGISTER_IMAGE_IO(extensions, ioClassName) \
-    ImageIOImpl * new___##ioClassName(){ return new ioClassName(); } \
+    ImageIO::Impl * new___##ioClassName(){ return new ioClassName(); } \
     bool reg___##ioClassName = em::registerImageIOImpl(extensions, new___##ioClassName)
 
 #endif //EM_CORE_IMAGE_PRIV_H
