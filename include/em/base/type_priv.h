@@ -24,6 +24,8 @@ public:
                       ConstTypePtr inputType) const = 0;
     virtual void toStream(const void * inputMem,
                           std::ostream &stream, size_t count) const = 0;
+    virtual void fromStream(std::istream &stream, void *outputMem,
+                            size_t count) const = 0;
     virtual bool equals(const void *inputMem1,
                         const void *inputMem2, size_t count) const = 0;
 
@@ -146,6 +148,17 @@ public:
             ++inPtr;
         }
     } // function toStream
+
+    virtual void fromStream(std::istream &stream, void *outputMem,
+                            size_t count) const override
+    {
+        auto outputMemT = static_cast<T *>(outputMem);
+        for (size_t i = 0; i < count; ++i)
+        {
+            stream >> *outputMemT;
+            ++outputMemT;
+        }
+    } // function fromStream
 
     virtual bool equals(const void *inputMem1, const void *inputMem2,
                         size_t count) const override

@@ -63,6 +63,11 @@ void Type::toStream(const void * inputMem, std::ostream &stream,
     implPtr->typeInfoPtr->toStream(inputMem, stream, count);
 } // function Type.toStream
 
+void Type::fromStream(std::istream &stream, void *outputMem, size_t count) const
+{
+    implPtr->typeInfoPtr->fromStream(stream, outputMem, count);
+} // function Type.fromStream
+
 bool Type::equals(const void *inputMem1, const void *inputMem2,
                   size_t count) const
 {

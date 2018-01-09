@@ -77,9 +77,28 @@ TEST(Type, General) {
     TypeInt32->toStream(arrayInt, std::cout, n);
     std::cout << std::endl;
 
+    int32_t * arrayInt2 = new int32_t[n];
+    std::string arrayValues("0 1 2 3 4 50 60 70 80 90 123.45 123.45 123.45");
+    std::stringstream ss(arrayValues);
+    TypeInt32->fromStream(ss, arrayInt2, n);
+
+    double refValue = 123.45;
+    double d1 = 0.0;
+    Object o1 = 0.0;
+    // Parse from stream into a single double
+    TypeDouble->fromStream(ss, &d1, 1);
+    ASSERT_FLOAT_EQ(refValue, d1);
+    // Parse from stream into an Object (initialized to double)
+    TypeDouble->fromStream(ss, o1.getPointer(), 1);
+    ASSERT_FLOAT_EQ(refValue, (double)o1);
+
+    for (size_t i = 0; i < n; i++)
+        ASSERT_EQ(arrayInt[i], arrayInt2[i]);
+
     delete [] array;
     delete [] array2;
     delete [] arrayInt;
+    delete [] arrayInt2;
 
     std::cout << "sizeof int8_t: " << sizeof(int8_t) << std::endl;
     std::cout << "Signed Int8: " << *em::TypeInt8 << std::endl;

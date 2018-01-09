@@ -34,8 +34,10 @@ namespace em
     public:
         /** Return the name of the type */
         std::string getName() const;
+
         /** Return the size in bytes of this type */
         std::size_t getSize() const;
+
         /** Return True if this type is a plain old type (POD) */
         bool isPod() const;
 
@@ -50,7 +52,7 @@ namespace em
             return &t;
         }
 
-        /** Copy n elements from inputMem to outputMem assuming both
+        /** Copy N elements from inputMem to outputMem assuming both
          * memory locations point to data of this Type.
          *
          * This function is useful for memory manipulation from generic
@@ -64,7 +66,7 @@ namespace em
         void copy(const void * inputMem, void * outputMem, size_t count) const;
 
         /**
-         * Cast n elements from inputMem (of type inputType) into outputMem
+         * Cast N elements from inputMem (of type inputType) into outputMem
          * (of type of the caller type object).
          * @param inputMem Memory location of the input data
          * @param outputMem Memory where cast elements will be put
@@ -74,11 +76,37 @@ namespace em
         void cast(const void * inputMem, void * outputMem, size_t count,
                   ConstTypePtr inputType) const;
 
+        /**
+         * Allocate memory for N elements of this Type.
+         * @param count Number of elements to be allocated
+         * @return The pointer to the allocated memory
+         */
         void * allocate(size_t count) const;
+
+        /**
+         * Release the memory allocated for N elements of this Type.
+         * @param inputMem Pointer to allocated memory location.
+         * @param count Number of elements that were allocated.
+         */
         void deallocate(void * inputMem, size_t count) const;
 
-        void toStream(const void * inputMem,
-                      std::ostream &stream, size_t count) const;
+        /**
+         * Push N elements of this Type to an output stream.
+         * @param inputMem Pointer to the memory location of the elements.
+         * @param stream Output stream.
+         * @param count Number of elements.
+         */
+        void toStream(const void * inputMem, std::ostream &stream,
+                      size_t count) const;
+
+        /**
+         * Read N elements of this Type from an input stream.
+         * @param stream Input stream.
+         * @param outputMem Memory location where to put read elements.
+         * @param count Number of elements to read from the stream.
+         */
+        void fromStream(std::istream &stream, void *outputMem,
+                        size_t count) const;
 
         bool equals(const void *inputMem1, const void *inputMem2,
                     size_t count) const;
