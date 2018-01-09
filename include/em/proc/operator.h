@@ -22,7 +22,14 @@ namespace em
         static const std::string OPERATION;
         static const std::string OPERAND;
 
-        enum Operation {ADD, SUB, MUL, DIV};
+        // FIXME: Using ENUM provoke a compilation error due to instantiation
+        // FIXME: of Type::get<Operation> and it does not have operator>> used in Type
+        // enum Operation {ADD, SUB, MUL, DIV};
+        using Operation = int8_t ;
+        static const Operation ADD;
+        static const Operation SUB;
+        static const Operation MUL;
+        static const Operation DIV;
 
         ImageMathProc();
 

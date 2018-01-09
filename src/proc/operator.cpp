@@ -9,6 +9,11 @@ using namespace em;
 const std::string ImageMathProc::OPERATION = "operation";
 const std::string ImageMathProc::OPERAND = "operand";
 
+const ImageMathProc::Operation ImageMathProc::ADD = 0;
+const ImageMathProc::Operation ImageMathProc::SUB = 1;
+const ImageMathProc::Operation ImageMathProc::MUL = 2;
+const ImageMathProc::Operation ImageMathProc::DIV = 3;
+
 
 template <class T>
 void processImage(Image &image, const Object &object, ImageMathProc::Operation op)
@@ -89,7 +94,7 @@ void ImageMathProc::process(Image &image)
     ProcessFunc f = map[image.getType()];
 
     if (f != nullptr)
-        f(image, (*this)[OPERAND], (*this)[OPERATION]); return;
+        return f(image, (*this)[OPERAND], (*this)[OPERATION]);
 
     THROW_ERROR("Unsupported type.");
 }
