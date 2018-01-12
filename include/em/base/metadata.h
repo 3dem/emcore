@@ -184,6 +184,81 @@ namespace em {
 
     }; // class Table
 
+    /** @ingroup image
+     * Read and write metadata (as table) from/to files.
+     *
+     * Internally, the TableIO class holds a pointer to TableIOImpl class,
+     * that contains the details about how to open files and read the metadata.
+     * The TableIOImpl class should be extended to provide support for other
+     * formats.
+     */
+    class TableIO
+    {
+    public:
+        class Impl;
+
+        /** Constants for open files. */
+        static const int READ_ONLY = 0;
+        static const int READ_WRITE = 1;
+        static const int TRUNCATE = 2;
+
+        /**
+         * Empty constructor for TableIO.
+         * In this case the newly created instance will have no format
+         * implementation associated to read/write formats. Then, when the
+         * open() method is called to open a file, the format implementation
+         * will be inferred from the filename extension. Some functions will
+         * raise an exception if called without having opened a file and,
+         * therefore, without having an underlying format implementation.
+         */
+        TableIO();
+
+        /**
+         * Constructor to build a new TableIO instance given its name or
+         * an extension related to the format implementation. The provided
+         * input string should be the key associated to a know format
+         * implementation. If not, an exception will be thrown. If the format
+         * implementation is associated to the TableIO instance, it will not
+         * change when calling the open() method. This allow to read/write
+         * metadata with unknown (or non-standard) file extensions.
+         *
+         * @param extOrName Input string representing either the TableIO name
+         * or one of the extensions registered for it.
+         */
+        TableIO(const std::string &extOrName);
+
+        ~TableIO();
+
+        /**
+         * Check if some TableIO implementation is registered for a given name
+         * or extension.
+         *
+         * @param extOrName Input string representing either the implementation
+         * name or one of the extensions registered.
+         * @return Return True if there is any implementation registered.
+         */
+        static bool hasImpl(const std::string &extOrName);
+
+        // TODO: DOCUMENT
+        void open(const std::string &path); //, const FileMode mode=READ_ONLY);
+        // TODO: DOCUMENT
+        void close();
+
+        // TODO: DOCUMENT
+        void read(const std::string &tableName, Table &table);
+
+        // TODO: DOCUMENT
+        void write(const std::string &tableName, const Table &table);
+
+        // String representation
+        void toStream(std::ostream &ostream) const;
+
+    private:
+        // Pointer to implementation class, PIMPL idiom
+        Impl* impl = nullptr;
+    }; // class TableIO
+
+
 } // namespace em
 
 std::ostream& operator<< (std::ostream &ostream, const em::Table::Row &row);
