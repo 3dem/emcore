@@ -99,6 +99,11 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::Image &image)
     return ostream;
 }
 
+std::istream& em::operator>>(std::istream &istream, em::Image &image)
+{
+    THROW_ERROR("Reading Image from std::istream is NOT IMPLEMENTED.");
+}
+
 void Image::read(const ImageLocation &location)
 {
     ImageIO imgio;

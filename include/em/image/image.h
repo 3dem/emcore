@@ -94,7 +94,8 @@ namespace em
         Impl * impl;
     }; // class Image
 
-    std::ostream& operator<< (std::ostream &ostream, const em::Image &t);
+    std::ostream& operator<< (std::ostream &ostream, const em::Image &image);
+    std::istream& operator>> (std::istream &istream, em::Image &image);
 
     using FileMode = uint8_t;
 
