@@ -118,3 +118,40 @@ TEST(Row, Basic)
     printTable(table);
 
 } // TEST Row.Basic
+
+TEST(Table, Read)
+{
+    auto testDataPath = getenv("EM_TEST_DATA");
+
+    if (testDataPath != nullptr)
+    {
+        std::string root(testDataPath);
+        root += "relion_tutorial/import/";
+
+        std::string fn1 = root + "case1/classify3d_small_it038_data.star";
+        std::cout << "Reading star: " << fn1 << std::endl;
+
+        Table t({Column(1, "col1", TypeFloat),
+                 Column(2, "col2", TypeInt16),
+                 Column(3, "col3", TypeString)
+                });
+        TableIO tio;
+        tio.open(fn1);
+        tio.read("images", t);
+
+    }
+/*
+ * relion_tutorial/import/case1/classify3d_small_it038_data.star
+relion_tutorial/import/case1/classify3d_small_it038_model.star
+relion_tutorial/import/case1/classify3d_small_it038_optimiser.star
+relion_tutorial/import/case1/classify3d_small_it038_sampling.star
+relion_tutorial/import/case2/relion_it015_data.star
+relion_tutorial/import/case2/relion_it015_model.star
+relion_tutorial/import/case2/relion_it015_optimiser.star
+relion_tutorial/import/case2/relion_it015_sampling.star
+relion_tutorial/import/classify2d/extra/relion_it015_data.star
+relion_tutorial/import/classify2d/extra/relion_it015_model.star
+relion_tutorial/import/classify2d/extra/relion_it015_optimiser.star
+relion_tutorial/import/classify2d/extra/relion_it015_sampling.star
+ */
+} // TEST Table.Read

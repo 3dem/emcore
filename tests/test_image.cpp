@@ -152,7 +152,8 @@ TEST(ImageSpiderIO, Read)
     }
     else
     {
-        std::cout << "Skipping image format tests, EM_TEST_DATA not defined in environment. " << std::endl;
+        std::cout << "Skipping image format tests, EM_TEST_DATA not defined "
+                     "in environment. " << std::endl;
     }
 
 } // TEST(ImageSpiderIO, Read)

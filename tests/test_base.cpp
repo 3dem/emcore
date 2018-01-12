@@ -175,9 +175,23 @@ TEST(Object, Basic)
     //ASSERT_EQ((std::string) o2, (std::string) o3);
     Object o5(o2);
     ASSERT_EQ(o2, o5);
-
 } // TEST Object.Basic
 
+TEST(Object, Parsing)
+{
+    // Test the parsing methods
+    Object o1 = 0.0, o2 = 1.0;
+    std::string pi("3.14159");
+    std::stringstream ss(pi);
+    o1.fromStream(ss);
+    o2.fromString(pi);
+    ASSERT_FLOAT_EQ((double)o1, 3.14159);
+    ASSERT_FLOAT_EQ((double)o2, 3.14159);
+    ASSERT_EQ(o1.toString(), pi);
+    // FIXME: The following Object comparision throws an exception
+    // ASSERT_FLOAT_EQ(o1, o2);
+    std::cout << o1.toString() << std::endl;
+} // TEST Object.Parsing
 
 TEST(Error, Basics) {
 
