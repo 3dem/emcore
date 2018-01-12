@@ -36,6 +36,35 @@ bool Type::isPod() const
     return implPtr->isPod;
 } // function Type.isPod
 
+ConstTypePtr Type::inferFromString(const std::string &str)
+{
+    return inferFromString(str.data(), str.size());
+} // function Type::inferFromString
+
+ConstTypePtr Type::inferFromString(const char * str, size_t n)
+{
+    size_t dotCount = 0;
+    char c;
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        c = str[i];
+        if (!std::isdigit(c) && c != '.')
+            return TypeString;
+
+        if (c == '.')
+            ++dotCount;
+    }
+    // At this point is should be true that the string one have digits
+    // and (maybe) a dot
+    if (dotCount > 1)
+        return TypeString;
+    else if (dotCount == 1)
+        return TypeFloat; // TODO: Allow another precision by default?
+    else // dotCount == 0
+        return TypeInt32; //  TODO: Allow another Integer by default?
+} // function Type::inferFromString
+
 void Type::copy(const void *inputMem, void *outputMem, size_t count) const
 {
     implPtr->typeInfoPtr->copy(inputMem, outputMem, count);

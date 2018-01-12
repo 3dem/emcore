@@ -105,6 +105,18 @@ TEST(Type, General) {
     std::cout << "Unsigned short: " <<  *em::TypeUInt16 << std::endl;
     std::cout << "Int: " <<  *em::TypeInt32 << std::endl;
 
+    ASSERT_EQ(Type::inferFromString("100"), TypeInt32);
+    ASSERT_EQ(Type::inferFromString("100.00"), TypeFloat);
+    ASSERT_EQ(Type::inferFromString("192.168.100.1"), TypeString);
+    ASSERT_EQ(Type::inferFromString("/this/is/a/path"), TypeString);
+    std::string line("100 3.4 4.5 abc");
+    const char * ptr = line.data();
+    ASSERT_EQ(Type::inferFromString(line), TypeString);
+    ASSERT_EQ(Type::inferFromString(ptr, 3), TypeInt32);
+    ASSERT_EQ(Type::inferFromString(ptr+4, 3), TypeFloat);
+    ASSERT_EQ(Type::inferFromString(ptr+8, 3), TypeFloat);
+    ASSERT_EQ(Type::inferFromString(ptr+12, 3), TypeString);
+
 } // TEST(Type, General)
 
 

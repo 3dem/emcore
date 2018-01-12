@@ -52,6 +52,24 @@ namespace em
             return &t;
         }
 
+        /** Infer a Type from a string literal.
+         * It will check first if it has non-numeric characters in which
+         * case the type will be TypeString. If it is numeric, it will be
+         * differentiated between Integer and Double.
+         *
+         * @return The inferred Type from the string literal
+         */
+        static ConstTypePtr inferFromString(const std::string &str);
+
+        /** Infer a Type from a char * taking into account n first characters.
+         * This function is useful when parsing multiple values from a string.
+         *
+         * @param str Input string as char *
+         * @param n Number of characters to take into account
+         * @return The inferred Type from the string literal
+         */
+        static ConstTypePtr inferFromString(const char * str, size_t n);
+
         /** Copy N elements from inputMem to outputMem assuming both
          * memory locations point to data of this Type.
          *
