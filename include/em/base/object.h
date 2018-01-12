@@ -55,7 +55,6 @@ namespace em
         template <class T> Object& operator=(const T &valueIn);
         Object& operator=(const Object &other);
 
-
         bool operator==(const Object &other) const;
         bool operator!=(const Object &other) const;
 
@@ -65,7 +64,17 @@ namespace em
         /** Return the Type singleton instance of this object. */
         ConstTypePtr getType() const;
 
+        /** Push the value of the Object to the output stream */
         void toStream(std::ostream &ostream) const;
+
+        /** Parse the value of the Object from the input stream */
+        void fromStream(std::istream &istream);
+
+        /** Get a string representation of the Object value */
+        std::string toString() const;
+
+        /** Parse the value of the Object from string */
+        void fromString(const std::string &str);
 
         /** Return a pointer to the memory where this object data is stored. */
         inline void * getPointer();

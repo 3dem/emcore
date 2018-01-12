@@ -142,10 +142,16 @@ public:
                           size_t count) const override
     {
         auto inPtr = static_cast<const T *>(inputMem);
-        for (size_t i = 0; i < count; ++i)
+
+        if (count == 1)
+            stream << *inPtr;
+        else
         {
-            stream << *inPtr << " ";
-            ++inPtr;
+            for (size_t i = 0; i < count; ++i)
+            {
+                stream << *inPtr << " ";
+                ++inPtr;
+            }
         }
     } // function toStream
 

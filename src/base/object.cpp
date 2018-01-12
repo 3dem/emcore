@@ -2,6 +2,7 @@
 // Created by josem on 12/4/16.
 //
 
+#include <sstream>
 #include "em/base/object.h"
 
 using namespace em;
@@ -53,19 +54,30 @@ void Object::setType(ConstTypePtr newType)
 
 void Object::toStream(std::ostream &ostream) const
 {
-    if (typePtr == nullptr)
-    {
-        ostream << "None";
-        return;
-    }
-    if (typePtr->isPod())
-    {
-        auto valueRef = static_cast<const void *>(&valuePtr);
-        typePtr->toStream(valueRef, ostream, 1);
-    }
-    else
-        typePtr->toStream(valuePtr, ostream, 1);
+    if (typePtr != nullptr)
+        typePtr->toStream(getPointer(), ostream, 1);
 } // function Object.toStream
+
+void Object::fromStream(std::istream &istream)
+{
+    ASSERT_ERROR(typePtr == nullptr, "Null type object can not be parsed. ");
+
+    typePtr->fromStream(istream, getPointer(), 1);
+} // function Object.fromStream
+
+std::string Object::toString() const
+{
+    std::stringstream ss;
+    toStream(ss);
+
+    return ss.str();
+} // function Object.toString
+
+void Object::fromString(const std::string &str)
+{
+    std::stringstream ss(str);
+    fromStream(ss);
+} // function Object.fromString
 
 bool Object::operator==(const Object &other) const
 {
