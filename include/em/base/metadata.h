@@ -100,8 +100,8 @@ namespace em {
         using iterator = ColumnVector::iterator;
         using const_iterator = ColumnVector::const_iterator;
 
-        iterator begin();
-        iterator end();
+        const_iterator begin() const;
+        const_iterator end() const;
 
     private:
         class Impl;
@@ -149,7 +149,12 @@ namespace em {
             Row(const Row& other);
             Row& operator=(const Row& other);
 
+            // FIXME: Not sure if this method should be placed here
+            // there is not a single way to push to stream a Row
             void toStream(std::ostream &ostream) const;
+
+            // TODO: Add an iterator for the Objects in the Row
+            // Maybe with a pair of <ColumnName(string), Object>
 
         private:
             RowImpl * impl = nullptr;
@@ -160,8 +165,6 @@ namespace em {
 
             friend class Table;
         }; // class Row
-
-        using RowVector = std::vector<Row>;
 
         /** Constructor of Table base of input Columns */
         Table(std::initializer_list<ColumnMap::Column> list);
@@ -176,6 +179,11 @@ namespace em {
         /** Add a new row to the set */
         bool addRow(const Row &row);
 
+        // TODO: Think more carefully all operations that a Table will
+        // provide related to columns
+        const ColumnMap& getColumnMap() const;
+
+        using RowVector = std::vector<Row>;
         using iterator = RowVector::iterator;
         using const_iterator = RowVector::const_iterator;
 

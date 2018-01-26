@@ -117,12 +117,12 @@ const ColumnMap::Column& ColumnMap::operator[](size_t index)
 
 size_t ColumnMap::size() const { return impl->columns.size(); }
 
-ColumnMap::iterator ColumnMap::begin()
+ColumnMap::const_iterator ColumnMap::begin() const
 {
     return impl->columns.begin();
 }
 
-ColumnMap::iterator ColumnMap::end()
+ColumnMap::const_iterator ColumnMap::end() const
 {
     return impl->columns.end();
 }
@@ -232,6 +232,11 @@ bool Table::addRow(const Row &row)
 
     return true;
 } // function Table.addRow
+
+const ColumnMap& Table::getColumnMap() const
+{
+    return impl->colIndex;
+} // function Table.getColumnMap
 
 Table::iterator Table::begin()
 {
@@ -350,9 +355,15 @@ void TableIO::Impl::readLoopColumns(std::ifstream &ifs, ColumnMap &colMap)
 void TableIO::Impl::parseLine(const std::string &line, Table &table)
 {
     auto row = table.createRow();
+    auto& colMap = table.getColumnMap();
 
+    std::stringstream ss(line);
+
+    // FIXME: Change the following with a way to iterate over a Row
+    // <ColumnName, Object> pairs
+    for (auto& col: colMap)
+        row[col.getName()].fromStream(ss);
 } // function TableIO::Impl.parseLine
-
 
 TableIO::TableIO()
 {
