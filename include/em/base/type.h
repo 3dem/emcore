@@ -13,7 +13,7 @@
 
 namespace em
 {
-    template <class T> class TypeInfoT;
+    template <class T> class TypeImplT;
 
     /**
      *  \ingroup base
@@ -53,7 +53,7 @@ namespace em
         template <class T>
         static const Type& get()
         {
-            static TypeInfoT<T> ti;
+            static TypeImplT<T> ti;
             static Type t(&ti);
             return t;
         }

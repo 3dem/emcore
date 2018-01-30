@@ -61,10 +61,10 @@ TYPE_CAST_FUNC(double);
 
 
 template <class T>
-class TypeInfoBase: public Type::Impl
+class TypeImplBaseT: public Type::Impl
 {
 public:
-    TypeInfoBase() = default;
+    TypeImplBaseT() = default;
 
     virtual std::string getName() const override
     {
@@ -97,7 +97,7 @@ public:
                 ++outPtr;
             }
         }
-    } // function TypeInfoBase.copy
+    } // function TypeImplBaseT.copy
 
     virtual void * allocate(size_t count) const override
     {
@@ -105,7 +105,7 @@ public:
             return new T[count];
         else
             return new T;
-    } // function TypeInfoBase.destroy
+    } // function TypeImplBaseT.destroy
 
     virtual void deallocate(void *mem, size_t count) const override
     {
@@ -114,7 +114,7 @@ public:
             delete [] ptr;
         else
             delete ptr;
-    } // function TypeInfoBase.destroy
+    } // function TypeImplBaseT.destroy
 
     virtual void cast(const void * inputMem, void * outputMem, size_t count,
                       const Type &inputType) const override
@@ -131,7 +131,7 @@ public:
         CAST_IF_TYPE(uint32_t);
         CAST_IF_TYPE(float);
         CAST_IF_TYPE(double);
-    } // function TypeInfoBase.cast
+    } // function TypeImplBaseT.cast
 
     virtual void toStream(const void * inputMem, std::ostream &stream,
                           size_t count) const override
@@ -177,13 +177,13 @@ public:
 
 
 template <class T>
-class TypeInfoT: public TypeInfoBase<T>
+class TypeImplT: public TypeImplBaseT<T>
 {
 
 };
 
 #define DEFINE_TYPENAME(type, name) \
-template <> class TypeInfoT<type>: public TypeInfoBase<type> { \
+template <> class TypeImplT<type>: public TypeImplBaseT<type> { \
 public: \
     virtual std::string getName() const override { return name; } \
 }
