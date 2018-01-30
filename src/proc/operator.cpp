@@ -76,7 +76,7 @@ void processImage(Image &image, const Object &object, ImageMathProc::Operation o
 
 ImageMathProc::ImageMathProc()
 {
-#define REGISTER_TYPE(type) map[Type::get<type>()] = processImage<type>;
+#define REGISTER_TYPE(type) map[&Type::get<type>()] = processImage<type>;
 
     REGISTER_TYPE(float);
     REGISTER_TYPE(uint8_t);
@@ -91,7 +91,7 @@ void ImageMathProc::process(const Image &input, Image &output)
 
 void ImageMathProc::process(Image &image)
 {
-    ProcessFunc f = map[image.getType()];
+    ProcessFunc f = map[&image.getType()];
 
     if (f != nullptr)
         return f(image, (*this)[OPERAND], (*this)[OPERATION]);

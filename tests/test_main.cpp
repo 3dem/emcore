@@ -44,13 +44,13 @@ TEST(Main, ObjectLoop) {
 
     //std::cout << "T0: " << *em::Type::get<em::Object>() << std::endl;
 
-    em::ConstTypePtr type1 = em::Type::get<double>();
+    auto type1 = em::Type::get<double>();
     o2 = 1.1; // o2 should be float
     assert(o2.getType() == type1);
-    std::cout << "T1: " << *type1 << std::endl;
+    std::cout << "T1: " << type1 << std::endl;
 
-    em::ConstTypePtr  type2 = em::Type::get<float>();
-    std::cout << "T2: " << *type2 << std::endl;
+    auto  type2 = em::Type::get<float>();
+    std::cout << "T2: " << type2 << std::endl;
 
     t.toc("Nothing");
 

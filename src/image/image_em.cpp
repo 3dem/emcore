@@ -120,8 +120,8 @@ public:
 
         if (swap)
         {
-            swapBytes((char *) &(this->header.xdim), 3, TypeUInt32->getSize());
-            swapBytes((char *) &(this->header.params), 40, TypeUInt32->getSize());
+            swapBytes((char *) &(this->header.xdim), 3, TypeUInt32.getSize());
+            swapBytes((char *) &(this->header.params), 40, TypeUInt32.getSize());
         }
 
         // Check dimensions of the data taking into account
@@ -131,7 +131,7 @@ public:
         dim.z = (size_t) header.zdim;
 
         type = getTypeFromMode((char) header.datatype);
-        ASSERT_ERROR(type == nullptr, "Unknown EM type mode.");
+        ASSERT_ERROR(type.isNull(), "Unknown EM type mode.");
 
     } // function readHeader
 
@@ -149,12 +149,12 @@ public:
 
     virtual const TypeMap & getTypeMap() const override
     {
-        static const TypeMap tm = {{1, TypeInt8},
-                                   {2, TypeInt16},
-                                   {4, TypeInt32},
-                                   {5, TypeFloat},
-                // TODO:         //{8, TypeComplex},
-                                   {9, TypeDouble}};
+        static const TypeMap tm = {{1, &TypeInt8},
+                                   {2, &TypeInt16},
+                                   {4, &TypeInt32},
+                                   {5, &TypeFloat},
+                // TODO:         //{8, &TypeComplex},
+                                   {9, &TypeDouble}};
         return tm;
     } // function getTypeMap
 

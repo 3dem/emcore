@@ -6,6 +6,8 @@
 #define EM_CORE_PROGRAM_H
 
 #include <string>
+#include "em/base/string.h"
+
 
 namespace em
 {

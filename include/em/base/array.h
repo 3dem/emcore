@@ -97,7 +97,7 @@ namespace em
          * as an "alias" of another array of a portion of it. In this case, the
          * memory is considered not owned by this Array and it will not be freed.
          */
-        Array(const ArrayDim &adim, ConstTypePtr type, void * memory = nullptr);
+        Array(const ArrayDim &adim, const Type & type, void * memory = nullptr);
 
         /** Copy constructor from another Array.
          * This Array will have the same dimensions, data type
@@ -125,7 +125,7 @@ namespace em
          * @param type Type to be used for resulting elements, if null, use the
          * current type of the array.
          */
-        void copy(const Array &other, ConstTypePtr type=nullptr);
+        void copy(const Array &other, const Type & type=TypeNull);
 
         /** Return an "aliased" Array that share the memory with this one.
          * If index is 0, the new Array will have exactly the same dimensions.
@@ -141,13 +141,13 @@ namespace em
          * This operation usually imply a new allocation of memory.
          * Optionally, a new type can be passed.
          */
-        virtual void resize(const ArrayDim &adim, ConstTypePtr type=nullptr);
+        virtual void resize(const ArrayDim &adim, const Type & type=TypeNull);
 
         /** Return the current dimensions of the Array */
         ArrayDim getDim() const;
 
         /** Return a constant pointer to underlying Type object. */
-        ConstTypePtr getType() const;
+        const Type & getType() const;
 
         /** Return a pointer to the internal data.
          * Use this function with care. It is intended to be used by

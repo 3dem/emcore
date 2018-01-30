@@ -16,8 +16,8 @@ Object::Object(const Object &other)
     *this = other;
 } // Ctor Object
 
-Object::Object(ConstTypePtr type, void *memory):
-        typePtr(type), valuePtr(memory), isPointer(true), isOwner(false)
+Object::Object(const Type & type, void *memory):
+        type(type), valuePtr(memory), isPointer(true), isOwner(false)
 {
 
 } // Ctor from type and memory
@@ -28,41 +28,42 @@ Object::~Object()
 //              "      Type: " << (typePtr == nullptr ? "null" : typePtr->getName()) << std::endl <<
 //              "     Value: " << *this << std::endl;
     // Release old memory if necessary
-    if (isPointer and isOwner and typePtr != nullptr)
+    if (isPointer && isOwner && !type.isNull())
     {
 //        std::cerr << "    Memory: " << valuePtr << std::endl;
-        typePtr->deallocate(valuePtr, 1);
+        type.deallocate(valuePtr, 1);
     }
 } // Dtor Object
 
-ConstTypePtr Object::getType() const
+const Type & Object::getType() const
 {
-    return typePtr;
+    return type;
 } // function Object.getType
 
-void Object::setType(ConstTypePtr newType)
+void Object::setType(const Type & newType)
 {
+    //TODO: Check what happens when newType.isNull() == True
     // Release old memory if necessary
-    if (isPointer and isOwner and typePtr != nullptr)
-        typePtr->deallocate(valuePtr, 1);
+    if (isPointer && isOwner && !type.isNull())
+        type.deallocate(valuePtr, 1);
 
-    typePtr = newType;
+    type = newType;
     // Set a pointer and allocated memory if new type is not POD
-    if ((isPointer = isOwner = !typePtr->isPod()))
-        valuePtr = typePtr->allocate(1);
+    if ((isPointer = isOwner = !type.isPod()))
+        valuePtr = type.allocate(1);
 }
 
 void Object::toStream(std::ostream &ostream) const
 {
-    if (typePtr != nullptr)
-        typePtr->toStream(getPointer(), ostream, 1);
+    if (!type.isNull())
+        type.toStream(getPointer(), ostream, 1);
 } // function Object.toStream
 
 void Object::fromStream(std::istream &istream)
 {
-    ASSERT_ERROR(typePtr == nullptr, "Null type object can not be parsed. ");
+    ASSERT_ERROR(type.isNull(), "Null type object can not be parsed. ");
 
-    typePtr->fromStream(istream, getPointer(), 1);
+    type.fromStream(istream, getPointer(), 1);
 } // function Object.fromStream
 
 std::string Object::toString() const
@@ -81,10 +82,10 @@ void Object::fromString(const std::string &str)
 
 bool Object::operator==(const Object &other) const
 {
-    if (typePtr != other.typePtr || typePtr == nullptr)
+    if (type != other.type || type.isNull())
         return false;
 
-    return typePtr->equals(getPointer(), other.getPointer(), 1);
+    return type.equals(getPointer(), other.getPointer(), 1);
 } // function Object.operator==
 
 bool Object::operator!=(const Object &other) const
@@ -101,6 +102,6 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::Object &object)
 Object& Object::operator=(const Object &other)
 {
     setType(other.getType());
-    typePtr->copy(other.getPointer(), getPointer(), 1);
+    type.copy(other.getPointer(), getPointer(), 1);
     return *this;
 }

@@ -18,29 +18,31 @@ using namespace em;
 
 TEST(Type, Basic) {
     // Test basic properties of Type singleton instances
-    ConstTypePtr i = em::TypeInt32;
-    ASSERT_EQ(i->getName(), "int32");
-    ASSERT_TRUE(i->isPod());
-    ASSERT_EQ(i->getSize(), sizeof(int));
-    std::cout << std::endl << *i << std::endl;
+    auto i = em::TypeInt32;
+    auto ii = Type::get<uint32_t>();
+    auto iii = ii;
+    ASSERT_EQ(i.getName(), "int32");
+    ASSERT_TRUE(i.isPod());
+    ASSERT_EQ(i.getSize(), sizeof(int));
+    std::cout << std::endl << i << std::endl;
 
-    ConstTypePtr f = em::TypeFloat;
-    ASSERT_EQ(f->getName(), "float");
-    ASSERT_TRUE(f->isPod());
-    ASSERT_EQ(f->getSize(), sizeof(float));
-    std::cout << *f << std::endl;
+    auto f = em::TypeFloat;
+    ASSERT_EQ(f.getName(), "float");
+    ASSERT_TRUE(f.isPod());
+    ASSERT_EQ(f.getSize(), sizeof(float));
+    std::cout << f << std::endl;
 
-    ConstTypePtr d = em::TypeDouble;
-    ASSERT_EQ(d->getName(), "double");
-    ASSERT_TRUE(d->isPod());
-    ASSERT_EQ(d->getSize(), sizeof(double));
-    std::cout << *d << std::endl;
+    auto d = em::TypeDouble;
+    ASSERT_EQ(d.getName(), "double");
+    ASSERT_TRUE(d.isPod());
+    ASSERT_EQ(d.getSize(), sizeof(double));
+    std::cout << d << std::endl;
 
-    ConstTypePtr i8 = em::TypeInt8;
-    ASSERT_EQ(i8->getName(), "int8");
-    ASSERT_TRUE(i8->isPod());
-    ASSERT_EQ(i8->getSize(), sizeof(int8_t));
-    std::cout << *i8 << std::endl;
+    auto i8 = em::TypeInt8;
+    ASSERT_EQ(i8.getName(), "int8");
+    ASSERT_TRUE(i8.isPod());
+    ASSERT_EQ(i8.getSize(), sizeof(int8_t));
+    std::cout << i8 << std::endl;
 
 }
 
@@ -50,7 +52,7 @@ TEST(Type, General) {
     for (size_t i = 0; i < n; i++)
         array[i] = i * 10;
 
-    TypeFloat->toStream(array, std::cout, n);
+    TypeFloat.toStream(array, std::cout, n);
     std::cout << std::endl;
 
     float * array2 = new float[n/2];
@@ -58,38 +60,38 @@ TEST(Type, General) {
         array2[i] = i;
 
     // Test copy of some elements
-    TypeFloat->copy(array2, array, n/2);
+    TypeFloat.copy(array2, array, n/2);
     for (size_t i = 0; i < n/2; i++)
         ASSERT_EQ(array[i], array2[i]);
 
     std::cout << "Float array: " << std::endl;
-    TypeFloat->toStream(array, std::cout, n);
+    TypeFloat.toStream(array, std::cout, n);
     std::cout << std::endl;
 
     // Test type casting
     int32_t * arrayInt = new int32_t[n];
-    TypeInt32->cast(array, arrayInt, n, TypeFloat);
+    TypeInt32.cast(array, arrayInt, n, TypeFloat);
 
     for (size_t i = 0; i < n; ++i)
         ASSERT_FLOAT_EQ(array[i], (float)arrayInt[i]);
 
     std::cout << "Int32 array: " << std::endl;
-    TypeInt32->toStream(arrayInt, std::cout, n);
+    TypeInt32.toStream(arrayInt, std::cout, n);
     std::cout << std::endl;
 
     int32_t * arrayInt2 = new int32_t[n];
     std::string arrayValues("0 1 2 3 4 50 60 70 80 90 123.45 123.45 123.45");
     std::stringstream ss(arrayValues);
-    TypeInt32->fromStream(ss, arrayInt2, n);
+    TypeInt32.fromStream(ss, arrayInt2, n);
 
     double refValue = 123.45;
     double d1 = 0.0;
     Object o1 = 0.0;
     // Parse from stream into a single double
-    TypeDouble->fromStream(ss, &d1, 1);
+    TypeDouble.fromStream(ss, &d1, 1);
     ASSERT_FLOAT_EQ(refValue, d1);
     // Parse from stream into an Object (initialized to double)
-    TypeDouble->fromStream(ss, o1.getPointer(), 1);
+    TypeDouble.fromStream(ss, o1.getPointer(), 1);
     ASSERT_FLOAT_EQ(refValue, (double)o1);
 
     for (size_t i = 0; i < n; i++)
@@ -101,9 +103,9 @@ TEST(Type, General) {
     delete [] arrayInt2;
 
     std::cout << "sizeof int8_t: " << sizeof(int8_t) << std::endl;
-    std::cout << "Signed Int8: " << *em::TypeInt8 << std::endl;
-    std::cout << "Unsigned short: " <<  *em::TypeUInt16 << std::endl;
-    std::cout << "Int: " <<  *em::TypeInt32 << std::endl;
+    std::cout << "Signed Int8: " << em::TypeInt8 << std::endl;
+    std::cout << "Unsigned short: " <<  em::TypeUInt16 << std::endl;
+    std::cout << "Int: " <<  em::TypeInt32 << std::endl;
 
     ASSERT_EQ(Type::inferFromString("100"), TypeInt32);
     ASSERT_EQ(Type::inferFromString("100.00"), TypeFloat);

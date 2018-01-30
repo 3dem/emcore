@@ -26,6 +26,8 @@ namespace em
 
     }; // class String
 
+    using StringVector = std::vector<std::string>;
+
 } // namespace em
 
 #endif //EM_CORE_STRING_H

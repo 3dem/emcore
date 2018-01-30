@@ -9,7 +9,7 @@
 //-------------- Auxiliary Type classes -----------------------
 
 
-class TypeInfo
+class Type::Impl
 {
 public:
     virtual std::string getName() const = 0;
@@ -21,7 +21,7 @@ public:
     virtual void * allocate(size_t count) const = 0;
     virtual void deallocate(void *mem, size_t count) const = 0;
     virtual void cast(const void * inputMem, void * outputMem, size_t count,
-                      ConstTypePtr inputType) const = 0;
+                      const Type &inputType) const = 0;
     virtual void toStream(const void * inputMem,
                           std::ostream &stream, size_t count) const = 0;
     virtual void fromStream(std::istream &stream, void *outputMem,
@@ -29,6 +29,9 @@ public:
     virtual bool equals(const void *inputMem1,
                         const void *inputMem2, size_t count) const = 0;
 
+    size_t size;
+    std::string name;
+    bool ispod;
 };
 
 
@@ -56,17 +59,9 @@ TYPE_CAST_FUNC(double);
 
 #undef TYPE_CAST_FUNC
 
-class TypeImpl
-{
-public:
-    size_t size;
-    std::string name;
-    bool isPod;
-    TypeInfo *typeInfoPtr;
-};
 
 template <class T>
-class TypeInfoBase: public TypeInfo
+class TypeInfoBase: public Type::Impl
 {
 public:
     TypeInfoBase() = default;
@@ -122,7 +117,7 @@ public:
     } // function TypeInfoBase.destroy
 
     virtual void cast(const void * inputMem, void * outputMem, size_t count,
-                      ConstTypePtr inputType) const override
+                      const Type &inputType) const override
     {
         auto outputMemT = static_cast<T *>(outputMem);
 

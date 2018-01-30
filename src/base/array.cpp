@@ -75,7 +75,7 @@ class ArrayImpl
 public:
     ArrayDim adim;
     size_t msize = 0; // allocated memory getSize
-    ConstTypePtr typePtr = nullptr;
+    Type type;
     void * dataPtr = nullptr;
     // Flag to know when the memory is "owned" by this array and when it should
     // take care of freeing it.
@@ -84,13 +84,13 @@ public:
     // If the memory pointer is nullptr, allocate enough memory to store all
     // elements. If not, point data to there and mark as memory not owned
     // by this array
-    void allocate(const ArrayDim &adim, ConstTypePtr type,
+    void allocate(const ArrayDim &adim, const Type & type,
                   void * memory= nullptr)
     {
         deallocate(); // Release memory if necessary
         this->adim = adim;
-        this->typePtr = type;
-        msize = adim.getSize() * typePtr->getSize();
+        this->type = type;
+        msize = adim.getSize() * type.getSize();
         // Assign ownsMemory flag and dataPtr in the same statement
         // TODO: Check if the memory allocation can be done through Type
         dataPtr = (ownsMemory = (memory == nullptr)) ? malloc(msize) : memory;
@@ -106,15 +106,15 @@ public:
         }
     }
 
-    void copy(const ArrayDim &adim, ConstTypePtr type,
+    void copy(const ArrayDim &adim, const Type & type,
               const ArrayImpl *other)
     {
         allocate(adim, type);
 
-        if (type == other->typePtr)
-            type->copy(other->dataPtr, dataPtr, adim.getSize());
+        if (type == other->type)
+            type.copy(other->dataPtr, dataPtr, adim.getSize());
         else
-            type->cast(other->dataPtr, dataPtr, adim.getSize(), other->typePtr);
+            type.cast(other->dataPtr, dataPtr, adim.getSize(), other->type);
     }
 
     ~ArrayImpl()
@@ -131,14 +131,14 @@ Array::Array()
     implPtr = new ArrayImpl();
 } // empty Ctor
 
-Array::Array(const ArrayDim &adim, ConstTypePtr type, void * memory)
+Array::Array(const ArrayDim &adim, const Type & type, void * memory)
 {
     implPtr = new ArrayImpl();
     // Type should be not null (another option could be assume float
     // or double by default)
-    assert(type != nullptr);
+    assert(!type.isNull());
     implPtr->allocate(adim, type, memory);
-} // Ctor for ArrayDim and ConstTypePtr
+} // Ctor for ArrayDim and const Type &
 
 Array::Array(const Array &other)
 {
@@ -162,10 +162,10 @@ bool Array::operator==(const Array &other) const
     auto type = getType();
     auto dim = getDim();
 
-    if (type != other.getType() || type == nullptr || dim != other.getDim())
+    if (type != other.getType() || type.isNull() || dim != other.getDim())
         return false;
 
-    return type->equals(getPointer(), other.getPointer(), dim.getSize());
+    return type.equals(getPointer(), other.getPointer(), dim.getSize());
 
 } // function Array.operator==
 
@@ -174,11 +174,10 @@ bool Array::operator!=(const Array &other) const
     return !(*this == other);
 } // function Array.operator!=
 
-void Array::copy(const Array &other, ConstTypePtr type)
+void Array::copy(const Array &other, const Type & type)
 {
-    auto finalType = type != nullptr ? type :
-                     implPtr->typePtr == nullptr ? other.getType() :
-                     implPtr->typePtr;
+    auto finalType = !type.isNull() ? type :
+                     getType().isNull() ? other.getType() : getType();
     implPtr->copy(other.getDim(), finalType, other.implPtr);
 } // function Array.copy
 
@@ -194,7 +193,7 @@ Array Array::getAlias(size_t index)
     {
         adim.n = 1; // Alias to a single item of this array
         data = (static_cast<uint8_t *>(data) +
-                (index - 1) * adim.getItemSize() * getType()->getSize());
+                (index - 1) * adim.getItemSize() * getType().getSize());
     }
     //TODO: Consider aliasing to a single slice within a volume
 
@@ -206,10 +205,10 @@ ArrayDim Array::getDim() const
     return implPtr->adim;
 } // function Array.getDim
 
-void Array::resize(const ArrayDim &adim, ConstTypePtr type)
+void Array::resize(const ArrayDim &adim, const Type & type)
 {
     // Use type if not none, the current type if not
-    implPtr->allocate(adim, type == nullptr ? implPtr->typePtr : type);
+    implPtr->allocate(adim, type.isNull() ? getType() : type);
 } // function Array.resize
 
 void Array::toStream(std::ostream &ostream) const
@@ -218,14 +217,16 @@ void Array::toStream(std::ostream &ostream) const
     size_t n = implPtr->adim.getSize();
     size_t xdim = implPtr->adim.x;
     size_t ydim = implPtr->adim.y;
-    size_t typeSize = implPtr->typePtr->getSize();
+    auto type = getType();
+    size_t typeSize = type.getSize();
 
     ostream << '[';
 
     for (size_t i = 0; i < ydim; ++i)
     {
         ostream << '[';
-        implPtr->typePtr->toStream(data, ostream, xdim);
+        type.toStream(data, ostream, xdim);
+
         if (i < ydim-1)
             ostream << ']' << std::endl;
         else
@@ -243,9 +244,9 @@ std::string Array::toString() const
     return ss.str();
 } // function Array.toString
 
-ConstTypePtr Array::getType() const
+const Type & Array::getType() const
 {
-    return implPtr->typePtr;
+    return implPtr->type;
 } // function Array.getType
 
 void * Array::getPointer()
@@ -261,9 +262,8 @@ const void * Array::getPointer() const
 template <class T>
 ArrayView<T> Array::getView()
 {
-    ConstTypePtr valueTypePtr = Type::get<T>();
     // Check the type is the same of the object
-    assert(implPtr->typePtr == valueTypePtr);
+    assert(getType() == Type::get<T>());
 
     return ArrayView<T>(implPtr->adim, implPtr->dataPtr);
 } // function Array.getView

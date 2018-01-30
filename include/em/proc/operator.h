@@ -48,7 +48,7 @@ namespace em
         /** Define a function pointer type to process images */
         using ProcessFunc = void (*)(Image &, const Object&, Operation);
 
-        std::map<ConstTypePtr, ProcessFunc> map;
+        std::map<const Type *, ProcessFunc> map;
     }; // class ImageMathProc
 
 } // namespace em

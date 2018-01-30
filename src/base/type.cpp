@@ -6,42 +6,54 @@
 
 using namespace em;
 
-
-Type::Type(TypeInfo *typeInfoPtr)
+Type::Type()
 {
-    implPtr = new TypeImpl();
-    implPtr->typeInfoPtr = typeInfoPtr;
-    implPtr->size = typeInfoPtr->getSize();
-    implPtr->name = typeInfoPtr->getName();
-    implPtr->isPod = typeInfoPtr->isPod();
+} // Null type constructor
+
+Type::Type(Impl *impl)
+{
+    this->impl = impl;
+    impl->size = impl->getSize();
+    impl->name = impl->getName();
+    impl->ispod = impl->isPod();
+} // Type ctor based on impl
+
+bool Type::operator==(const Type &other) const
+{
+    return impl == other.impl;
 }
 
-Type::~Type()
+bool Type::operator!=(const Type &other) const
 {
-    delete implPtr;
-} // Dtor Type
+    return impl != other.impl;
+}
 
 std::string Type::getName() const
 {
-    return implPtr->name;
+    return impl->name;
 } // function Type.getName
 
 std::size_t Type::getSize() const
 {
-    return implPtr->size;
+    return impl->size;
 } // function Type.getSize
 
 bool Type::isPod() const
 {
-    return implPtr->isPod;
+    return impl->ispod;
 } // function Type.isPod
 
-ConstTypePtr Type::inferFromString(const std::string &str)
+bool Type::isNull() const
+{
+    return impl == nullptr;
+} // function Type.isNull
+
+Type Type::inferFromString(const std::string &str)
 {
     return inferFromString(str.data(), str.size());
 } // function Type::inferFromString
 
-ConstTypePtr Type::inferFromString(const char * str, size_t n)
+Type Type::inferFromString(const char * str, size_t n)
 {
     size_t dotCount = 0;
     char c;
@@ -67,40 +79,40 @@ ConstTypePtr Type::inferFromString(const char * str, size_t n)
 
 void Type::copy(const void *inputMem, void *outputMem, size_t count) const
 {
-    implPtr->typeInfoPtr->copy(inputMem, outputMem, count);
+    impl->copy(inputMem, outputMem, count);
 } // function Type.copy
 
 void Type::cast(const void *inputMem, void *outputMem, size_t count,
-                ConstTypePtr inputType) const
+                const Type &inputType) const
 {
-    implPtr->typeInfoPtr->cast(inputMem, outputMem, count, inputType);
+    impl->cast(inputMem, outputMem, count, inputType);
 } // function Type.cast
 
 void* Type::allocate(size_t count) const
 {
-    return implPtr->typeInfoPtr->allocate(count);
+    return impl->allocate(count);
 } // function Type.destroy
 
 void Type::deallocate(void *inputMem, size_t count) const
 {
-    implPtr->typeInfoPtr->deallocate(inputMem, count);
+    impl->deallocate(inputMem, count);
 } // function Type.destroy
 
 void Type::toStream(const void * inputMem, std::ostream &stream,
                     size_t count) const
 {
-    implPtr->typeInfoPtr->toStream(inputMem, stream, count);
+    impl->toStream(inputMem, stream, count);
 } // function Type.toStream
 
 void Type::fromStream(std::istream &stream, void *outputMem, size_t count) const
 {
-    implPtr->typeInfoPtr->fromStream(stream, outputMem, count);
+    impl->fromStream(stream, outputMem, count);
 } // function Type.fromStream
 
 bool Type::equals(const void *inputMem1, const void *inputMem2,
                   size_t count) const
 {
-    return implPtr->typeInfoPtr->equals(inputMem1, inputMem2, count);
+    return impl->equals(inputMem1, inputMem2, count);
 } // function Type.equals
 
 std::ostream& em::operator<< (std::ostream &ostrm, const Type &t)

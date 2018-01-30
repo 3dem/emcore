@@ -33,7 +33,7 @@ Object& Object::operator=(const T& valueIn)
     const void * inputMem = &valueIn;
 
     setType(newType);
-    typePtr->copy(inputMem, getPointer(), 1);
+    type.copy(inputMem, getPointer(), 1);
     return *this;
 }
 
@@ -41,13 +41,11 @@ Object& Object::operator=(const T& valueIn)
 template <class T>
 Object::operator T() const
 {
-    auto valueTypePtr = Type::get<T>();
-
     // Check the type is the same of the object
-    ASSERT_ERROR(typePtr != valueTypePtr, "Types are not the same");
+    ASSERT_ERROR(type != Type::get<T>(), "Types are not the same");
 
     // Cast the void* to the specific pointer type
-    auto ptr = typePtr->isPod() ? reinterpret_cast<const T*>(&valuePtr) :
+    auto ptr = type.isPod() ? reinterpret_cast<const T*>(&valuePtr) :
                static_cast<const T*>(valuePtr);
     // Extract the value
     return *ptr;

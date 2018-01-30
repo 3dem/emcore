@@ -16,7 +16,6 @@
 #include "em/image/image_priv.h"
 
 
-
 using namespace em;
 
 
@@ -50,13 +49,13 @@ Image::Image(): Array()
     impl = new Impl();
 } // empty Ctor
 
-Image::Image(const ArrayDim &adim, ConstTypePtr type): Array(adim, type)
+Image::Image(const ArrayDim &adim, const Type & type): Array(adim, type)
 {
     impl = new Impl();
     // Type should be not null
     // (another option could be assume float or double by default)
-    assert(type != nullptr);
-} // Ctor for ArrayDim and ConstTypePtr
+    ASSERT_ERROR(type.isNull(), "Image type can not be null. ");
+} // Ctor for ArrayDim and const Type &
 
 Image::Image(const Image &other): Array(other)
 {
@@ -85,7 +84,7 @@ void Image::toStream(std::ostream &ostream) const
 {
     ostream << " -- Image info --" << std::endl;
     ostream << "Dimensions: " << getDim() << std::endl;
-    ostream << "Type: " << *getType() << std::endl;
+    ostream << "Type: " << getType() << std::endl;
     ostream << "Header: " << std::endl;
     for (auto& x: impl->headers[0]) {
         std::cout << x.first << ": " << x.second << std::endl;
@@ -215,22 +214,19 @@ void ImageIO::close()
         fclose(impl->file);
         impl->file = nullptr;
     }
-}
+} // function ImageIO.close
 
-void ImageIO::createFile(const ArrayDim &adim, ConstTypePtr type)
+void ImageIO::createFile(const ArrayDim &adim, const Type & type)
 {
-    ASSERT_ERROR(type == nullptr, "Input type can not be null. ");
+    ASSERT_ERROR(type.isNull(), "Input type can not be null. ");
     ASSERT_ERROR(impl->fileMode != TRUNCATE,
                  "ImageIO::createFile can only be used with TRUNCATE mode.");
-
     // TODO: Check that the format supports this Type
-
     impl->dim = adim;
     impl->type = type;
-
     impl->writeHeader(); // write the main header of the file
     impl->expandFile();
-}
+} // function ImageIO.createFile
 
 
 void ImageIO::expandFile(const size_t ndim)
@@ -252,13 +248,13 @@ void ImageIO::read(const size_t index, Image &image)
     ArrayDim adim = impl->dim;
     adim.n = 1; // Allocate for just one element
 
-    ConstTypePtr imageType = image.getType();
-    ConstTypePtr fileType = impl->type;
+    auto imageType = image.getType();
+    auto fileType = impl->type;
 
     // If the image already has a defined Type, we should respect that
     // one and then convert from the data read from disk.
     // If the image
-    if (imageType == nullptr)
+    if (imageType.isNull())
     {
         image.resize(adim, fileType);
         imageType = fileType;
@@ -269,8 +265,8 @@ void ImageIO::read(const size_t index, Image &image)
     bool sameType = (imageType == fileType);
     void * data = nullptr;
 
-    std::cout << "DEBUG:ImageIO::read: imageType: " << *imageType << std::endl;
-    std::cout << "DEBUG:ImageIO::read: fileType: " << *fileType << std::endl;
+    std::cout << "DEBUG:ImageIO::read: imageType: " << imageType << std::endl;
+    std::cout << "DEBUG:ImageIO::read: fileType: " << fileType << std::endl;
 
     // If the image has the same Type as the file
     // we do not need an intermediate buffer, we can read data
@@ -308,7 +304,7 @@ void ImageIO::toStream(std::ostream &ostream) const
 {
     ostream << " -- File info --" << std::endl;
     ostream << "Dimensions: " << impl->dim << std::endl;
-    ostream << "Type: " << * impl->type << std::endl;
+    ostream << "Type: " << impl->type << std::endl;
     ostream << "Header size: " << impl->getHeaderSize() << std::endl;
     ostream << "Pad size: " << impl->getPadSize() << std::endl;
     ostream << "Swap: " << impl->swap << std::endl;
@@ -328,7 +324,7 @@ size_t ImageIO::Impl::getPadSize() const
 
 size_t ImageIO::Impl::getImageSize() const
 {
-    return dim.getItemSize() * type->getSize() + getPadSize();
+    return dim.getItemSize() * type.getSize() + getPadSize();
 } // function ImageIO::Impl::getImageSize
 
 const char * ImageIO::Impl::getOpenMode(FileMode mode) const
@@ -416,7 +412,7 @@ void ImageIO::Impl::readImageData(const size_t index, Image &image)
 
     if (swap)
         swapBytes(image.getPointer(), image.getDim().getItemSize(),
-                  image.getType()->getSize());
+                  image.getType().getSize());
 }
 
 void ImageIO::Impl::writeImageData(const size_t index, const Image &image)
@@ -436,17 +432,17 @@ void ImageIO::Impl::writeImageData(const size_t index, const Image &image)
 
 } // function ImageIO::Impl::write
 
-ConstTypePtr ImageIO::Impl::getTypeFromMode(int mode) const
+const Type & ImageIO::Impl::getTypeFromMode(int mode) const
 {
     auto tm = getTypeMap();
-    return tm.find(mode) != tm.end() ? tm[mode] : nullptr;
+    return tm.find(mode) != tm.end() ? *tm[mode] : TypeNull;
 } // function ImageIO::Impl.getTypeFromMode
 
-int ImageIO::Impl::getModeFromType(ConstTypePtr type) const
+int ImageIO::Impl::getModeFromType(const Type &type) const
 {
     for (auto &pair: getTypeMap())
     {
-        if (type == pair.second)
+        if (type == *pair.second)
             return pair.first;
     }
 

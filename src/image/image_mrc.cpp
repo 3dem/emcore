@@ -124,7 +124,7 @@ public:
         }
 
         type = getTypeFromMode(header.mode);
-        ASSERT_ERROR(type == nullptr, "Unknown MRC type mode.");
+        ASSERT_ERROR(type.isNull(), "Unknown MRC type mode.");
 
         // TODO: Check special cases where image is a transform
         // TODO: Determine swap order (little vs big endian)
@@ -137,7 +137,7 @@ public:
 
         // FIXME: Implement more general mechanism of Type matching
         if (type == em::TypeDouble || type == em::TypeFloat ||
-            type == em::TypeInt32 || em::TypeUInt32)
+            type == em::TypeInt32 || type == em::TypeUInt32)
             header.mode = 2;
         else if (type == em::TypeInt16)
             header.mode = 1;
@@ -214,8 +214,8 @@ public:
 
     virtual const TypeMap & getTypeMap() const override
     {
-        static const TypeMap tm = {{0, TypeInt8}, {1, TypeInt16},
-                                   {2, TypeFloat}, {6, TypeUInt16}};
+        static const TypeMap tm = {{0, &TypeInt8}, {1, &TypeInt16},
+                                   {2, &TypeFloat}, {6, &TypeUInt16}};
         // TODO:
         // 3: Complex short
         // 4: Complex float
