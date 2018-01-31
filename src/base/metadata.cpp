@@ -17,11 +17,11 @@ using namespace em;
 const size_t ColumnMap::NO_ID = 0;
 const size_t ColumnMap::NO_INDEX = -1;
 
-ColumnMap::Column::Column(size_t id, const std::string &name, ConstTypePtr type,
+ColumnMap::Column::Column(size_t id, const std::string &name, const Type & type,
                    const std::string &description):
                    id(id), name(name), type(type), descr(description) {}
 
-ColumnMap::Column::Column(const std::string &name, ConstTypePtr type,
+ColumnMap::Column::Column(const std::string &name, const Type & type,
                           const std::string &description):
                     Column(NO_ID, name, type, description) {}
 
@@ -29,7 +29,7 @@ size_t ColumnMap::Column::getId() const { return id; }
 
 std::string ColumnMap::Column::getName() const { return name; }
 
-ConstTypePtr ColumnMap::Column::getType() const { return type; }
+const Type & ColumnMap::Column::getType() const { return type; }
 
 std::string ColumnMap::Column::getDescription() const { return descr; }
 
@@ -324,7 +324,7 @@ void TableIO::Impl::readTable(std::ifstream &ifs, Table &table)
 
         // TODO: Infer the Column types from the first data line
         for (auto& col: colNames)
-            colMap.addColumn(ColumnMap::Column(col, TypeString));
+            colMap.addColumn(ColumnMap::Column(col, typeString));
 
         bool moreColumns = true;
 

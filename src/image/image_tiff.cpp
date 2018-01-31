@@ -317,13 +317,13 @@ public:
 
     const TypeMap &getTypeMap() const override
     {
-        static const TypeMap tm = {{8+SAMPLEFORMAT_UINT, TypeUInt8},
-                                   {8+SAMPLEFORMAT_INT,  TypeInt8},
-                                   {16+SAMPLEFORMAT_UINT, TypeUInt16},
-                                   {16+SAMPLEFORMAT_INT, TypeInt16},
-                                   {32+SAMPLEFORMAT_UINT, TypeUInt32},
-                                   {32+SAMPLEFORMAT_INT, TypeInt32},
-                                   {32+SAMPLEFORMAT_IEEEFP, TypeFloat}};
+        static const TypeMap tm = {{8+SAMPLEFORMAT_UINT, &typeUInt8},
+                                   {8+SAMPLEFORMAT_INT,  &typeInt8},
+                                   {16+SAMPLEFORMAT_UINT, &typeUInt16},
+                                   {16+SAMPLEFORMAT_INT, &typeInt16},
+                                   {32+SAMPLEFORMAT_UINT, &typeUInt32},
+                                   {32+SAMPLEFORMAT_INT, &typeInt32},
+                                   {32+SAMPLEFORMAT_IEEEFP, &typeFloat}};
         return tm;
     }
 

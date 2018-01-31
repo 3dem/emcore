@@ -6,7 +6,6 @@
 #define EM_CORE_IMAGE_PRIV_H
 
 #include "em/image/image.h"
-#include "em/base/object.h"
 
 
 namespace em
@@ -30,7 +29,7 @@ namespace em
         ArrayDim dim;
 
         // Detected datatype in the file
-        ConstTypePtr type = nullptr;
+        Type type;
 
         // Swap bytes in case file Endian differs from local Endian
         bool swap = false;
@@ -112,8 +111,8 @@ namespace em
          */
         virtual const TypeMap& getTypeMap() const = 0;
 
-        ConstTypePtr getTypeFromMode(int mode) const;
-        int getModeFromType(ConstTypePtr type) const;
+        const Type& getTypeFromMode(int mode) const;
+        int getModeFromType(const Type &type) const;
 
         /** Returns true if machine is little endian else false */
         bool isLittleEndian();

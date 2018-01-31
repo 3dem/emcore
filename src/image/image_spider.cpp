@@ -117,7 +117,7 @@ public:
 
         std::cout << "DEBUG: Spider Dimensions: " << dim << std::endl;
 
-        type = em::TypeFloat;
+        type = em::typeFloat;
         pad = (size_t) header.labbyt;
 
         // TODO: Store extra information from file header
@@ -125,10 +125,10 @@ public:
 
     virtual void writeHeader() override
     {
-        size_t datasize = dim.getItemSize() * type->getSize();
+        size_t datasize = dim.getItemSize() * type.getSize();
 
         // Filling the main header
-        float  lenbyt = type->getSize()*dim.x;  // Record length (in bytes)
+        float  lenbyt = type.getSize()*dim.x;  // Record length (in bytes)
         float  labrec = floor(SPIDER_HEADER_SIZE/lenbyt); // # header records
         if ( fmod(SPIDER_HEADER_SIZE,lenbyt) != 0 )
             labrec++;
@@ -226,7 +226,7 @@ public:
 
     virtual const TypeMap & getTypeMap() const override
     {
-        static const TypeMap tm = {{0, TypeFloat}};
+        static const TypeMap tm = {{0, &typeFloat}};
         return tm;
     } // function getTypeMap
 

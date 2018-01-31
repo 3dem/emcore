@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <string>
 
+#include "em/base/string.h"
 #include "em/base/object.h"
 #include "em/base/array.h"
 
@@ -47,7 +48,7 @@ namespace em
 
         // Constructor from dimensions and type
         // TODO: In C++ 11 the base constructor can be generated
-        Image(const ArrayDim &adim, ConstTypePtr type);
+        Image(const ArrayDim &adim, const Type & type);
 
         /** Copy constructor from another Array.
          * This Array will have the same dimensions, data type
@@ -169,7 +170,7 @@ namespace em
          * @param adim The dimensions of the new file to be created.
          * @param type The data type of the elements that will be in the file.
          */
-        void createFile(const ArrayDim &adim, ConstTypePtr type);
+        void createFile(const ArrayDim &adim, const Type & type);
 
         /**
          * Expand the current file for adding more elements.

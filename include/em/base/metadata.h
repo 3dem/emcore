@@ -35,10 +35,10 @@ namespace em {
         {
         public:
             /** Constructor of a Column given the ID */
-            Column(size_t id, const std::string &name, ConstTypePtr type,
+            Column(size_t id, const std::string &name, const Type & type,
                    const std::string &description="");
             /** Constructor of a Column without ID */
-            Column(const std::string &name, ConstTypePtr type,
+            Column(const std::string &name, const Type & type,
                    const std::string &description="");
 
             /** Return the ID of this Column */
@@ -48,7 +48,7 @@ namespace em {
             std::string getName() const;
 
             /** Return the Type of this Column */
-            ConstTypePtr getType() const;
+            const Type & getType() const;
 
             /** Return the description of this Column */
             std::string getDescription() const;
@@ -56,7 +56,7 @@ namespace em {
             private:
                 size_t id;
                 std::string name;
-                ConstTypePtr type;
+                Type type;
                 std::string descr = "";
 
             friend class ColumnMap;

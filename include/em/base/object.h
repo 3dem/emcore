@@ -35,7 +35,7 @@ namespace em
          * In this case the Object will not be the "owner" of the memory
          * and should not free it when it is destroyed.
          */
-         Object(ConstTypePtr type, void *memory);
+         Object(const Type & type, void *memory);
 
         /** Standard copy constructor */
         Object(const Object &other);
@@ -62,7 +62,7 @@ namespace em
         template<class T> operator T() const;
 
         /** Return the Type singleton instance of this object. */
-        ConstTypePtr getType() const;
+        const Type & getType() const;
 
         /** Push the value of the Object to the output stream */
         void toStream(std::ostream &ostream) const;
@@ -82,14 +82,14 @@ namespace em
 
     private:
         void * valuePtr = nullptr;
-        ConstTypePtr typePtr = nullptr;
+        Type type;
         bool isPointer = true; // Flag to store where the valuePtr points to the data
         bool isOwner = false; // Flag to know whether this object owns the memory
 
         /** Set a new type to this object.
          * Release current memory if needed and allocate new one if needed as well.
          */
-        void setType(ConstTypePtr newType);
+        void setType(const Type &newType);
     };
 
     std::ostream& operator<< (std::ostream &ostream, const em::Object &object);

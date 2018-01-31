@@ -15,7 +15,7 @@ using namespace em;
 TEST(Image, Constructor)
 {
     //Image
-    Image img(ArrayDim(10, 10), em::TypeDouble);
+    Image img(ArrayDim(10, 10), em::typeDouble);
     ObjectDict &header = img.getHeader();
     //header["x"] = 10;
     //header["y"] = 20.5;
@@ -52,23 +52,24 @@ TEST(ImageMrcIO, Read)
             fileDims["xmipp_tutorial/micrographs/BPV_1386.mrc"] = ArrayDim(9216, 9441, 1, 1);
             std::string stackFn = "emx/alignment/Test2/stack2D.mrc";
             ArrayDim stackDim(128, 128, 1, 100);
-            fileDims[stackFn] = stackDim;
+            // fileDims[stackFn] = stackDim;
 
             for (auto &pair: fileDims)
             {
                 Image img;
                 loc.index = 1;
                 loc.path = root + pair.first;
-                std::cout << "Before reading. " << std::endl;
-                mrcIO.open(loc.path);
+                std::cout << ">>> Before reading. " << std::endl;
+                // mrcIO.open(loc.path);
 
                 img.read(loc);
                 std::cout << img << std::endl;
                 ArrayDim imgDim(pair.second);
                 imgDim.n = 1;
                 ASSERT_TRUE(img.getDim() == imgDim);
-                ASSERT_TRUE(mrcIO.getDim() == pair.second);
-                mrcIO.close();
+                // ASSERT_TRUE(mrcIO.getDim() == pair.second);
+                // mrcIO.close();
+                std::cout << "<<< After reading. Closed IO. " << std::endl;
             }
 
             // Use mrcIO2 for writing individual images
@@ -92,6 +93,7 @@ TEST(ImageMrcIO, Read)
                 mrcIO2.close();
 
             }
+            mrcIO.close();
         }
         catch (Error &err)
         {
@@ -174,15 +176,15 @@ TEST(ImageIO, Create)
         // Write a single image
         fn = "image-single." + ext;
         imgio.open(fn.c_str(), ImageIO::TRUNCATE);
-        imgio.createFile(ArrayDim(DIM, DIM, 1, 1), em::TypeFloat);
+        imgio.createFile(ArrayDim(DIM, DIM, 1, 1), em::typeFloat);
         imgio.close();
 
         // Write a stack of images
         fn = "image-stack." + ext;
         imgio.open(fn.c_str(), ImageIO::TRUNCATE);
-        imgio.createFile(ArrayDim(DIM, DIM, 1, 100), em::TypeFloat);
+        imgio.createFile(ArrayDim(DIM, DIM, 1, 100), em::typeFloat);
 
-        Image img(ArrayDim(DIM, DIM, 1, 1), em::TypeFloat);
+        Image img(ArrayDim(DIM, DIM, 1, 1), em::typeFloat);
         auto av = img.getView<float>();
         av.assign(200);
         imgio.write(1, img);

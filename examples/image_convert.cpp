@@ -31,7 +31,7 @@ int main (int argc, char *argv[])
 
             // Use mrcIO2 for writing individual images
             StringVector exts = {"mrc", "spi"};
-            std::vector<ConstTypePtr> types = {em::TypeFloat, em::TypeInt16};
+            std::vector<const Type *> types = {&em::typeFloat, &em::typeInt16};
 
             for (auto ext: exts)
             {
@@ -58,7 +58,7 @@ int main (int argc, char *argv[])
 
                     std::cout << ">>> Writing image: " << imgLoc.path << std::endl;
 //                    imgio2.open(imgLoc.path, ImageIO::TRUNCATE);
-//                    imgio2.createFile(imgDim, em::TypeFloat);
+//                    imgio2.createFile(imgDim, em::typeFloat);
 //                    imgio2.write(1, img);
 //                    imgio2.close();
                     img.write(imgLoc);
@@ -67,7 +67,7 @@ int main (int argc, char *argv[])
                 size_t count = 0;
                 imgio2.open(std::string("images-stack.") + ext, ImageIO::TRUNCATE);
                 imgDim.n = filenames.size();
-                imgio2.createFile(imgDim, types[0]);
+                imgio2.createFile(imgDim, *types[0]);
 
                 // Read the images previously written and make a single stack
                 for (auto fn: filenames)

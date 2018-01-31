@@ -8,27 +8,42 @@
 
 //-------------- Auxiliary Type classes -----------------------
 
-
-class TypeInfo
+/** Base class for internal Type implementation.
+ * By default, this class will correspond to the Null type instance
+ * and will raise an error on most operations. These methods
+ * should be overriden in subclasses of real types.
+ */
+class Type::Impl
 {
+#define NOT_IMPLEMENTED { THROW_ERROR("Operation not valid for Null type."); }
+
 public:
-    virtual std::string getName() const = 0;
-    virtual std::size_t getSize() const = 0;
-    virtual bool isPod() const = 0;
+    virtual std::string getName() const { return "null"; }
+    virtual std::size_t getSize() const {return 0;}
+    virtual bool isPod() const {return false; }
 
     virtual void copy(const void *inputMem, void *outputMem,
-                      size_t count) const = 0;
-    virtual void * allocate(size_t count) const = 0;
-    virtual void deallocate(void *mem, size_t count) const = 0;
+                      size_t count) const NOT_IMPLEMENTED;
+    virtual void * allocate(size_t count) const NOT_IMPLEMENTED;
+    virtual void deallocate(void *mem,
+                            size_t count) const NOT_IMPLEMENTED;
     virtual void cast(const void * inputMem, void * outputMem, size_t count,
-                      ConstTypePtr inputType) const = 0;
+                      const Type &inputType) const NOT_IMPLEMENTED;
     virtual void toStream(const void * inputMem,
-                          std::ostream &stream, size_t count) const = 0;
-    virtual void fromStream(std::istream &stream, void *outputMem,
-                            size_t count) const = 0;
+                          std::ostream &stream,
+                          size_t count) const NOT_IMPLEMENTED;
+    virtual void fromStream(std::istream &stream,
+                            void *outputMem,
+                            size_t count) const NOT_IMPLEMENTED;
     virtual bool equals(const void *inputMem1,
-                        const void *inputMem2, size_t count) const = 0;
+                        const void *inputMem2,
+                        size_t count) const NOT_IMPLEMENTED;
 
+    size_t size;
+    std::string name;
+    bool ispod;
+
+#undef NOT_IMPLEMENTED
 };
 
 
@@ -56,20 +71,12 @@ TYPE_CAST_FUNC(double);
 
 #undef TYPE_CAST_FUNC
 
-class TypeImpl
-{
-public:
-    size_t size;
-    std::string name;
-    bool isPod;
-    TypeInfo *typeInfoPtr;
-};
 
 template <class T>
-class TypeInfoBase: public TypeInfo
+class TypeImplBaseT: public Type::Impl
 {
 public:
-    TypeInfoBase() = default;
+    TypeImplBaseT() = default;
 
     virtual std::string getName() const override
     {
@@ -102,7 +109,7 @@ public:
                 ++outPtr;
             }
         }
-    } // function TypeInfoBase.copy
+    } // function TypeImplBaseT.copy
 
     virtual void * allocate(size_t count) const override
     {
@@ -110,7 +117,7 @@ public:
             return new T[count];
         else
             return new T;
-    } // function TypeInfoBase.destroy
+    } // function TypeImplBaseT.destroy
 
     virtual void deallocate(void *mem, size_t count) const override
     {
@@ -119,10 +126,10 @@ public:
             delete [] ptr;
         else
             delete ptr;
-    } // function TypeInfoBase.destroy
+    } // function TypeImplBaseT.destroy
 
     virtual void cast(const void * inputMem, void * outputMem, size_t count,
-                      ConstTypePtr inputType) const override
+                      const Type &inputType) const override
     {
         auto outputMemT = static_cast<T *>(outputMem);
 
@@ -136,7 +143,7 @@ public:
         CAST_IF_TYPE(uint32_t);
         CAST_IF_TYPE(float);
         CAST_IF_TYPE(double);
-    } // function TypeInfoBase.cast
+    } // function TypeImplBaseT.cast
 
     virtual void toStream(const void * inputMem, std::ostream &stream,
                           size_t count) const override
@@ -182,13 +189,13 @@ public:
 
 
 template <class T>
-class TypeInfoT: public TypeInfoBase<T>
+class TypeImplT: public TypeImplBaseT<T>
 {
 
 };
 
 #define DEFINE_TYPENAME(type, name) \
-template <> class TypeInfoT<type>: public TypeInfoBase<type> { \
+template <> class TypeImplT<type>: public TypeImplBaseT<type> { \
 public: \
     virtual std::string getName() const override { return name; } \
 }

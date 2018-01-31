@@ -13,25 +13,30 @@
 
 namespace em
 {
-    class TypeInfo;
-    template <class T> class TypeInfoT;
-    class TypeImpl;
-    class Type;
-
-    using ConstTypePtr = const Type *;
-    using StringVector = std::vector<std::string>;
-    using TypeMap = std::map<int, ConstTypePtr >;
+    template <class T> class TypeImplT;
 
     /**
      *  \ingroup base
-     *  The Type class provides extended information about system types.
-     *
-     *  This class can not be instantiated and only singleton instances
-     *
+     *  The Type class is one of the central pieces of the em-core library.
+     *  It encapsulates information about the underlying C++ datatypes
+     *  (e.g. float, int8_t, double, string, etc) that are internally managed
+     *  via templates. This class is implemented following some sort of
+     *  Singleton pattern and this means that each instance of the same type
+     *  will share the implementation and avoid data duplication. Moreover,
+     *  the Type class provides several functions to manipulate chunks of memory
+     *  in a generic way. This is the base for the implementation of a generic
+     *  value container (Object class) or multi-elements containers (Array
+     *  and Image classes).
      */
     class Type
     {
     public:
+        /** Empty constructor, Null type */
+        Type();
+
+        bool operator==(const Type &other) const;
+        bool operator!=(const Type &other) const;
+
         /** Return the name of the type */
         std::string getName() const;
 
@@ -41,15 +46,16 @@ namespace em
         /** Return True if this type is a plain old type (POD) */
         bool isPod() const;
 
-        /** Get instances of given types.
-         *
-         * @return Returns a pointer to the singleton Type instance.
-         */
-        template <class T> static ConstTypePtr get()
+        /** Return True if this type is the NullType */
+        bool isNull() const;
+
+        /** Get a reference to the requested Type instance. */
+        template <class T>
+        static const Type& get()
         {
-            static TypeInfoT<T> ti;
+            static TypeImplT<T> ti;
             static Type t(&ti);
-            return &t;
+            return t;
         }
 
         /** Infer a Type from a string literal.
@@ -59,7 +65,7 @@ namespace em
          *
          * @return The inferred Type from the string literal
          */
-        static ConstTypePtr inferFromString(const std::string &str);
+        static Type inferFromString(const std::string &str);
 
         /** Infer a Type from a char * taking into account n first characters.
          * This function is useful when parsing multiple values from a string.
@@ -68,7 +74,7 @@ namespace em
          * @param n Number of characters to take into account
          * @return The inferred Type from the string literal
          */
-        static ConstTypePtr inferFromString(const char * str, size_t n);
+        static Type inferFromString(const char * str, size_t n);
 
         /** Copy N elements from inputMem to outputMem assuming both
          * memory locations point to data of this Type.
@@ -92,7 +98,7 @@ namespace em
          * @param inputType The Type of the elements in inputMem
          */
         void cast(const void * inputMem, void * outputMem, size_t count,
-                  ConstTypePtr inputType) const;
+                  const Type &inputType) const;
 
         /**
          * Allocate memory for N elements of this Type.
@@ -129,26 +135,30 @@ namespace em
         bool equals(const void *inputMem1, const void *inputMem2,
                     size_t count) const;
 
+        class Impl; // Implementation class that will store type information
+
     private:
-        // Type can only be instantiated via the Type::get<T> static method
-        Type(TypeInfo *typeInfoPtr);
-        ~Type();
+        // Type can only be instantiated via the Type<T> static method
+        Type(Impl *impl);
         // Pointer to implementation
-        TypeImpl * implPtr;
+        Impl * impl;
     };// class Type
 
     std::ostream& operator<< (std::ostream &ostrm, const em::Type &t);
 
-    ConstTypePtr const TypeInt8 = Type::get<int8_t>();
-    ConstTypePtr const TypeUInt8 = Type::get<uint8_t>();
-    ConstTypePtr const TypeInt16 = Type::get<int16_t>();
-    ConstTypePtr const TypeUInt16 = Type::get<uint16_t>();
-    ConstTypePtr const TypeInt32 = Type::get<int32_t>();
-    ConstTypePtr const TypeUInt32 = Type::get<uint32_t>();
-    ConstTypePtr const TypeFloat = Type::get<float>();
-    ConstTypePtr const TypeDouble = Type::get<double>();
+    static const Type typeNull;
+    static const Type& typeInt8= Type::get<int8_t>();
+    static const Type& typeUInt8 = Type::get<uint8_t>();
+    static const Type& typeInt16 = Type::get<int16_t>();
+    static const Type& typeUInt16 = Type::get<uint16_t>();
+    static const Type& typeInt32 = Type::get<int32_t>();
+    static const Type& typeUInt32 = Type::get<uint32_t>();
+    static const Type& typeFloat = Type::get<float>();
+    static const Type& typeDouble = Type::get<double>();
 
-    ConstTypePtr const TypeString = Type::get<std::string>();
+    static const Type& typeString = Type::get<std::string>();
+
+    using TypeMap = std::map<int, const Type *>;
 
 
 #include "type_priv.h"
