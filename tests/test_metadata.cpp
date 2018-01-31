@@ -80,11 +80,11 @@ TEST(Row, Basic)
     auto row = table.createRow();
 
     row[1] = 3.1416f;
-    std::cerr << row << std::endl;
+    std::cerr << "Row (before set) >>> " << row << std::endl;
 
     row[2] = 300;
     row[3] = std::string("My name");
-    std::cerr << "Row: " << std::endl << row << std::endl;
+    std::cerr << "Row (after set) >>> " << row << std::endl;
 
     ASSERT_EQ(row[1], row["col1"]);
     ASSERT_EQ(row[2], row["col2"]);
@@ -101,7 +101,7 @@ TEST(Row, Basic)
     x = row3[2];
     ASSERT_EQ(x, 400);
 
-    std::cerr << "Row3: " << std::endl << row << std::endl;
+    std::cerr << "Row 3 >>>  " << row3 << std::endl;
     //row2 = row;
 
     table.addRow(row);

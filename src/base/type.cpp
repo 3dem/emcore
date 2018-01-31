@@ -8,6 +8,8 @@ using namespace em;
 
 Type::Type()
 {
+    static Impl nullImp;
+    impl = &nullImp;
 } // Null type constructor
 
 Type::Type(Impl *impl)
@@ -45,7 +47,7 @@ bool Type::isPod() const
 
 bool Type::isNull() const
 {
-    return impl == nullptr;
+    return impl->size == 0; // The only 0-size Type is Null type
 } // function Type.isNull
 
 Type Type::inferFromString(const std::string &str)

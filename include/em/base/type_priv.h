@@ -8,30 +8,42 @@
 
 //-------------- Auxiliary Type classes -----------------------
 
-
+/** Base class for internal Type implementation.
+ * By default, this class will correspond to the Null type instance
+ * and will raise an error on most operations. These methods
+ * should be overriden in subclasses of real types.
+ */
 class Type::Impl
 {
+#define NOT_IMPLEMENTED { THROW_ERROR("Operation not valid for Null type."); }
+
 public:
-    virtual std::string getName() const = 0;
-    virtual std::size_t getSize() const = 0;
-    virtual bool isPod() const = 0;
+    virtual std::string getName() const { return "null"; }
+    virtual std::size_t getSize() const {return 0;}
+    virtual bool isPod() const {return false; }
 
     virtual void copy(const void *inputMem, void *outputMem,
-                      size_t count) const = 0;
-    virtual void * allocate(size_t count) const = 0;
-    virtual void deallocate(void *mem, size_t count) const = 0;
+                      size_t count) const NOT_IMPLEMENTED;
+    virtual void * allocate(size_t count) const NOT_IMPLEMENTED;
+    virtual void deallocate(void *mem,
+                            size_t count) const NOT_IMPLEMENTED;
     virtual void cast(const void * inputMem, void * outputMem, size_t count,
-                      const Type &inputType) const = 0;
+                      const Type &inputType) const NOT_IMPLEMENTED;
     virtual void toStream(const void * inputMem,
-                          std::ostream &stream, size_t count) const = 0;
-    virtual void fromStream(std::istream &stream, void *outputMem,
-                            size_t count) const = 0;
+                          std::ostream &stream,
+                          size_t count) const NOT_IMPLEMENTED;
+    virtual void fromStream(std::istream &stream,
+                            void *outputMem,
+                            size_t count) const NOT_IMPLEMENTED;
     virtual bool equals(const void *inputMem1,
-                        const void *inputMem2, size_t count) const = 0;
+                        const void *inputMem2,
+                        size_t count) const NOT_IMPLEMENTED;
 
     size_t size;
     std::string name;
     bool ispod;
+
+#undef NOT_IMPLEMENTED
 };
 
 
