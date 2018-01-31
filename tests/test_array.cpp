@@ -44,7 +44,7 @@ TEST(ArrayDim, Defaults) {
 TEST(Array, Basic) {
 
     ArrayDim adim(10, 10);
-    Array A(adim, TypeInt32);
+    Array A(adim, typeInt32);
     ArrayView<int> Av = A.getView<int>();
 
     Av.assign(11);
@@ -62,22 +62,22 @@ TEST(Array, Basic) {
     for (size_t i = 0; i < adim.getSize(); ++i)
         ASSERT_EQ(data2[i], ptr[i]);
 
-    Array A3(adim, TypeFloat);
+    Array A3(adim, typeFloat);
     A3.copy(A);
-    ASSERT_EQ(A3.getType(), TypeFloat);
+    ASSERT_EQ(A3.getType(), typeFloat);
     auto data3f = static_cast<const float *>(A3.getPointer());
     for (size_t i = 0; i < adim.getSize(); ++i)
         ASSERT_FLOAT_EQ(data3f[i], (float)ptr[i]);
 
-    A3.copy(A, TypeUInt32);
-    ASSERT_EQ(A3.getType(), TypeUInt32);
+    A3.copy(A, typeUInt32);
+    ASSERT_EQ(A3.getType(), typeUInt32);
     auto data3ui = static_cast<const uint32_t *>(A3.getPointer());
     for (size_t i = 0; i < adim.getSize(); ++i)
         ASSERT_EQ(data3ui[i], (uint32_t)ptr[i]);
 
     Array A4;
     A4.copy(A);
-    ASSERT_EQ(A4.getType(), TypeInt32);
+    ASSERT_EQ(A4.getType(), typeInt32);
     auto data3i = static_cast<const int32_t *>(A3.getPointer());
     for (size_t i = 0; i < adim.getSize(); ++i)
         ASSERT_FLOAT_EQ(data3i[i], (int32_t)ptr[i]);
@@ -107,7 +107,7 @@ TEST(Array, IndexingAlias)
     ASSERT_FALSE(adim.isValidIndex(0, 0, 0, -1));
     ASSERT_FALSE(adim.isValidIndex(DIM, DIM, 0, N)); // First pixel of first image
 
-    Array array(adim, TypeFloat);
+    Array array(adim, typeFloat);
 
     ArrayDim asdim(adim);
     asdim.n = 1;

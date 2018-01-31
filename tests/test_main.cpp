@@ -84,7 +84,7 @@ TEST(Main, ObjectLoop) {
     std::cout << "Creating an Array: " << std::endl;
 
     ArrayDim adim(10, 10);
-    Array A(adim, em::TypeInt32);
+    Array A(adim, em::typeInt32);
     ArrayView<int> Av = A.getView<int>();
 
     Av.assign(11);

@@ -15,7 +15,7 @@ using namespace em;
 TEST(Image, Constructor)
 {
     //Image
-    Image img(ArrayDim(10, 10), em::TypeDouble);
+    Image img(ArrayDim(10, 10), em::typeDouble);
     ObjectDict &header = img.getHeader();
     //header["x"] = 10;
     //header["y"] = 20.5;
@@ -176,15 +176,15 @@ TEST(ImageIO, Create)
         // Write a single image
         fn = "image-single." + ext;
         imgio.open(fn.c_str(), ImageIO::TRUNCATE);
-        imgio.createFile(ArrayDim(DIM, DIM, 1, 1), em::TypeFloat);
+        imgio.createFile(ArrayDim(DIM, DIM, 1, 1), em::typeFloat);
         imgio.close();
 
         // Write a stack of images
         fn = "image-stack." + ext;
         imgio.open(fn.c_str(), ImageIO::TRUNCATE);
-        imgio.createFile(ArrayDim(DIM, DIM, 1, 100), em::TypeFloat);
+        imgio.createFile(ArrayDim(DIM, DIM, 1, 100), em::typeFloat);
 
-        Image img(ArrayDim(DIM, DIM, 1, 1), em::TypeFloat);
+        Image img(ArrayDim(DIM, DIM, 1, 1), em::typeFloat);
         auto av = img.getView<float>();
         av.assign(200);
         imgio.write(1, img);

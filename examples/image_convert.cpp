@@ -31,7 +31,7 @@ int main (int argc, char *argv[])
 
             // Use mrcIO2 for writing individual images
             StringVector exts = {"mrc", "spi"};
-            std::vector<const Type *> types = {&em::TypeFloat, &em::TypeInt16};
+            std::vector<const Type *> types = {&em::typeFloat, &em::typeInt16};
 
             for (auto ext: exts)
             {
@@ -58,7 +58,7 @@ int main (int argc, char *argv[])
 
                     std::cout << ">>> Writing image: " << imgLoc.path << std::endl;
 //                    imgio2.open(imgLoc.path, ImageIO::TRUNCATE);
-//                    imgio2.createFile(imgDim, em::TypeFloat);
+//                    imgio2.createFile(imgDim, em::typeFloat);
 //                    imgio2.write(1, img);
 //                    imgio2.close();
                     img.write(imgLoc);

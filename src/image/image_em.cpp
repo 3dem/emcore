@@ -120,8 +120,8 @@ public:
 
         if (swap)
         {
-            swapBytes((char *) &(this->header.xdim), 3, TypeUInt32.getSize());
-            swapBytes((char *) &(this->header.params), 40, TypeUInt32.getSize());
+            swapBytes((char *) &(this->header.xdim), 3, typeUInt32.getSize());
+            swapBytes((char *) &(this->header.params), 40, typeUInt32.getSize());
         }
 
         // Check dimensions of the data taking into account
@@ -149,12 +149,12 @@ public:
 
     virtual const TypeMap & getTypeMap() const override
     {
-        static const TypeMap tm = {{1, &TypeInt8},
-                                   {2, &TypeInt16},
-                                   {4, &TypeInt32},
-                                   {5, &TypeFloat},
+        static const TypeMap tm = {{1, &typeInt8},
+                                   {2, &typeInt16},
+                                   {4, &typeInt32},
+                                   {5, &typeFloat},
                 // TODO:         //{8, &TypeComplex},
-                                   {9, &TypeDouble}};
+                                   {9, &typeDouble}};
         return tm;
     } // function getTypeMap
 

@@ -121,7 +121,7 @@ namespace em
          * @param type Type to be used for resulting elements, if null, use the
          * current type of the array.
          */
-        void copy(const Array &other, const Type & type=TypeNull);
+        void copy(const Array &other, const Type & type=typeNull);
 
         /** Return an "aliased" Array that share the memory with this one.
          * If index is 0, the new Array will have exactly the same dimensions.
@@ -137,7 +137,7 @@ namespace em
          * This operation usually imply a new allocation of memory.
          * Optionally, a new type can be passed.
          */
-        virtual void resize(const ArrayDim &adim, const Type & type=TypeNull);
+        virtual void resize(const ArrayDim &adim, const Type & type=typeNull);
 
         /** Return the current dimensions of the Array */
         ArrayDim getDim() const;

@@ -146,17 +146,17 @@ namespace em
 
     std::ostream& operator<< (std::ostream &ostrm, const em::Type &t);
 
-    static const Type TypeNull; 
-    static const Type& TypeInt8= Type::get<int8_t>();
-    static const Type& TypeUInt8 = Type::get<uint8_t>();
-    static const Type& TypeInt16 = Type::get<int16_t>();
-    static const Type& TypeUInt16 = Type::get<uint16_t>();
-    static const Type& TypeInt32 = Type::get<int32_t>();
-    static const Type& TypeUInt32 = Type::get<uint32_t>();
-    static const Type& TypeFloat = Type::get<float>();
-    static const Type& TypeDouble = Type::get<double>();
+    static const Type typeNull;
+    static const Type& typeInt8= Type::get<int8_t>();
+    static const Type& typeUInt8 = Type::get<uint8_t>();
+    static const Type& typeInt16 = Type::get<int16_t>();
+    static const Type& typeUInt16 = Type::get<uint16_t>();
+    static const Type& typeInt32 = Type::get<int32_t>();
+    static const Type& typeUInt32 = Type::get<uint32_t>();
+    static const Type& typeFloat = Type::get<float>();
+    static const Type& typeDouble = Type::get<double>();
 
-    static const Type& TypeString = Type::get<std::string>();
+    static const Type& typeString = Type::get<std::string>();
 
     using TypeMap = std::map<int, const Type *>;
 

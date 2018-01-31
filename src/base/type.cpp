@@ -62,7 +62,7 @@ Type Type::inferFromString(const char * str, size_t n)
     {
         c = str[i];
         if (!std::isdigit(c) && c != '.')
-            return TypeString;
+            return typeString;
 
         if (c == '.')
             ++dotCount;
@@ -70,11 +70,11 @@ Type Type::inferFromString(const char * str, size_t n)
     // At this point is should be true that the string one have digits
     // and (maybe) a dot
     if (dotCount > 1)
-        return TypeString;
+        return typeString;
     else if (dotCount == 1)
-        return TypeFloat; // TODO: Allow another precision by default?
+        return typeFloat; // TODO: Allow another precision by default?
     else // dotCount == 0
-        return TypeInt32; //  TODO: Allow another Integer by default?
+        return typeInt32; //  TODO: Allow another Integer by default?
 } // function Type::inferFromString
 
 void Type::copy(const void *inputMem, void *outputMem, size_t count) const

@@ -324,7 +324,7 @@ void TableIO::Impl::readTable(std::ifstream &ifs, Table &table)
 
         // TODO: Infer the Column types from the first data line
         for (auto& col: colNames)
-            colMap.addColumn(ColumnMap::Column(col, TypeString));
+            colMap.addColumn(ColumnMap::Column(col, typeString));
 
         bool moreColumns = true;
 
