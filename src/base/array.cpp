@@ -68,9 +68,9 @@ std::ostream& em::operator<< (std::ostream &ostream, const ArrayDim &adim)
     return ostream;
 }
 
-// ===================== ArrayImpl Implementation =======================
+// ===================== Array::Impl Implementation =======================
 
-class ArrayImpl
+class Array::Impl
 {
 public:
     ArrayDim adim;
@@ -107,7 +107,7 @@ public:
     }
 
     void copy(const ArrayDim &adim, const Type & type,
-              const ArrayImpl *other)
+              const Impl *other)
     {
         allocate(adim, type);
 
@@ -117,7 +117,7 @@ public:
             type.cast(other->dataPtr, dataPtr, adim.getSize(), other->type);
     }
 
-    ~ArrayImpl()
+    ~Impl()
     {
         deallocate();
     }
@@ -128,32 +128,32 @@ public:
 
 Array::Array()
 {
-    implPtr = new ArrayImpl();
+    impl = new Impl();
 } // empty Ctor
 
 Array::Array(const ArrayDim &adim, const Type & type, void * memory)
 {
-    implPtr = new ArrayImpl();
+    impl = new Impl();
     // Type should be not null (another option could be assume float
     // or double by default)
     assert(!type.isNull());
-    implPtr->allocate(adim, type, memory);
+    impl->allocate(adim, type, memory);
 } // Ctor for ArrayDim and const Type &
 
 Array::Array(const Array &other)
 {
-    implPtr = new ArrayImpl();
+    impl = new Impl();
     *this = other;
 } // Copy ctor Array
 
 Array::~Array()
 {
-    delete implPtr;
+    delete impl;
 } // Dtor Array
 
 Array& Array::operator=(const Array &other)
 {
-    implPtr->copy(other.getDim(), other.getType(), other.implPtr);
+    impl->copy(other.getDim(), other.getType(), other.impl);
     return *this;
 } // function Array.operator=
 
@@ -178,7 +178,7 @@ void Array::copy(const Array &other, const Type & type)
 {
     auto finalType = !type.isNull() ? type :
                      getType().isNull() ? other.getType() : getType();
-    implPtr->copy(other.getDim(), finalType, other.implPtr);
+    impl->copy(other.getDim(), finalType, other.impl);
 } // function Array.copy
 
 Array Array::getAlias(size_t index)
@@ -202,21 +202,21 @@ Array Array::getAlias(size_t index)
 
 ArrayDim Array::getDim() const
 {
-    return implPtr->adim;
+    return impl->adim;
 } // function Array.getDim
 
 void Array::resize(const ArrayDim &adim, const Type & type)
 {
     // Use type if not none, the current type if not
-    implPtr->allocate(adim, type.isNull() ? getType() : type);
+    impl->allocate(adim, type.isNull() ? getType() : type);
 } // function Array.resize
 
 void Array::toStream(std::ostream &ostream) const
 {
-    char * data = static_cast<char*>(implPtr->dataPtr);
-    size_t n = implPtr->adim.getSize();
-    size_t xdim = implPtr->adim.x;
-    size_t ydim = implPtr->adim.y;
+    char * data = static_cast<char*>(impl->dataPtr);
+    size_t n = impl->adim.getSize();
+    size_t xdim = impl->adim.x;
+    size_t ydim = impl->adim.y;
     auto type = getType();
     size_t typeSize = type.getSize();
 
@@ -246,17 +246,17 @@ std::string Array::toString() const
 
 const Type & Array::getType() const
 {
-    return implPtr->type;
+    return impl->type;
 } // function Array.getType
 
 void * Array::getPointer()
 {
-    return implPtr->dataPtr;
+    return impl->dataPtr;
 } // function Array.getPointer
 
 const void * Array::getPointer() const
 {
-    return implPtr->dataPtr;
+    return impl->dataPtr;
 } // function Array.getPointer
 
 template <class T>
@@ -265,7 +265,7 @@ ArrayView<T> Array::getView()
     // Check the type is the same of the object
     assert(getType() == Type::get<T>());
 
-    return ArrayView<T>(implPtr->adim, implPtr->dataPtr);
+    return ArrayView<T>(impl->adim, impl->dataPtr);
 } // function Array.getView
 
 std::ostream& em::operator<< (std::ostream &ostream, const Array &array)
@@ -275,28 +275,29 @@ std::ostream& em::operator<< (std::ostream &ostream, const Array &array)
 }
 
 // ===================== ArrayView Implementation =======================
-class ArrayViewImpl
+template <class T>
+class ArrayView<T>::Impl
 {
 public:
-    void * data;
+    T * data;
     ArrayDim adim;
     size_t xy, xyz; // Cached values to speed-up indexing
 
-    ArrayViewImpl(const ArrayDim &adim, void * rawMemory)
+    Impl(const ArrayDim &adim, void * rawMemory)
     {
-        data = rawMemory;
+        data = static_cast<T*>(rawMemory);
         this->adim = adim;
         xy = adim.getSliceSize();
         xyz = adim.getItemSize();
     }
-}; // class ArrayViewImpl
+}; // class ArrayView::Impl
 
-#define GET_DATA() static_cast<T*>(impl->data)
+#define GET_DATA() impl->data
 
 template <class T>
 ArrayView<T>::ArrayView(const ArrayDim &adim, void * rawMemory)
 {
-    impl = new ArrayViewImpl(adim, rawMemory);
+    impl = new Impl(adim, rawMemory);
 } // Ctor ArrayView
 
 template <class T>

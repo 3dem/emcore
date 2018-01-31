@@ -17,16 +17,19 @@ namespace em
 
     /**
      *  \ingroup base
-     *  The Type class provides extended information about system types.
-     *
-     *  This class can not be instantiated and only singleton instances
-     *
+     *  The Type class is one of the central pieces of the em-core library.
+     *  It encapsulates information about the underlying C++ datatypes
+     *  (e.g. float, int8_t, double, string, etc) that are internally managed
+     *  via templates. This class is implemented following some sort of
+     *  Singleton pattern and this means that each instance of the same type
+     *  will share the implementation and avoid data duplication. Moreover,
+     *  the Type class provides several functions to manipulate chunks of memory
+     *  in a generic way. This is the base for the implementation of a generic
+     *  value container (Object class) or multi-elements containers (Array
+     *  and Image classes).
      */
     class Type
     {
-    public:
-        class Impl; // Implementation class that will store type information
-
     public:
         /** Empty constructor, Null type */
         Type();
@@ -46,10 +49,7 @@ namespace em
         /** Return True if this type is the NullType */
         bool isNull() const;
 
-        /** Get instances of given types.
-         *
-         * @return Returns a pointer to the singleton Type instance.
-         */
+        /** Get a reference to the requested Type instance. */
         template <class T>
         static const Type& get()
         {
@@ -134,6 +134,8 @@ namespace em
 
         bool equals(const void *inputMem1, const void *inputMem2,
                     size_t count) const;
+
+        class Impl; // Implementation class that will store type information
 
     private:
         // Type can only be instantiated via the Type<T> static method

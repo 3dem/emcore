@@ -11,10 +11,6 @@
 #include "em/base/type.h"
 
 
-class ArrayImpl;
-class ArrayViewImpl;
-
-
 namespace em
 {
     class Type;
@@ -171,7 +167,8 @@ namespace em
 
     protected:
         // Pointer to implementation class, PIMPL idiom
-        ArrayImpl * implPtr;
+        class Impl;
+        Impl * impl;
 
     }; // class Array
 
@@ -198,8 +195,8 @@ namespace em
     private:
         // Only friend class Array can create ArrayView objects
         ArrayView(const ArrayDim &adim, void * rawMemory);
-
-        ArrayViewImpl * impl;
+        class Impl;
+        Impl * impl;
 
     friend class Array;
     }; // class ArrayView<T>
