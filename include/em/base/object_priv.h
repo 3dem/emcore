@@ -21,7 +21,8 @@ Object& Object::operator=(const T& valueIn)
 
     //FIXME: Check the logic if we want always that this adopt the other
     // type or cast its value
-    allocate(newType, 1);
+    if (getType() != newType)
+        allocate(newType, 1);
     const void * inputMem = &valueIn;
     auto outputMem = getPointer();
     newType.copy(inputMem, outputMem, 1);
