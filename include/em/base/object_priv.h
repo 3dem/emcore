@@ -8,6 +8,8 @@
 // ----------------- Object implementation --------------------------
 
 
+
+
 template <class T>
 Object::Object(const T& value)
 {

@@ -27,7 +27,7 @@ namespace em
         /** Default empty constructor for an Object.
          *
          * After an Object instance is created through this constructor,
-         * both the data type and the internal data are void.
+         * its Type will be the nullType and it will not contain any data.
          */
         Object();
 
@@ -35,15 +35,24 @@ namespace em
          * In this case the Object will not be the "owner" of the memory
          * and should not free it when it is destroyed.
          */
-         Object(const Type & type, void *memory);
+        Object(const Type & type, void *memory);
 
-        /** Standard copy constructor */
+        /** Standard copy constructor.
+         *
+         * The newly created object will have the same data Type than the
+         * other object. The underlying data will be a copy of the other's
+         * data.
+         */
         Object(const Object &other);
 
         /** Object class destructor. */
         ~Object();
 
-        /** Copy construct from an existing Object. */
+        /** Copy construct from an existing Object.
+         *
+         * The new object will take the Type inferred from the type of
+         * the argument and the data will contain a copy of it.
+         */
         template <class T> Object(const T &valueIn);
 
         /** Assign operator to store an given value.
@@ -81,6 +90,9 @@ namespace em
         inline const void * getPointer() const;
 
     private:
+        class Impl;
+        Impl * impl;
+
         void * valuePtr = nullptr;
         Type type;
         bool isPointer = true; // Flag to store where the valuePtr points to the data
@@ -98,10 +110,18 @@ namespace em
     using ObjectDict = std::map<std::string, Object>;
     using ObjectVector = std::vector<Object>;
 
+
+
+    class Object::Impl
+    {
+    public:
+        void * data;
+        Type type;
+    }; // class Object::Impl
+
+
 #include "object_priv.h"
-}
-
-
+} // namespace em
 
 
 #endif //EM_CORE_OBJECT_H
