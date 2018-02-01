@@ -6,7 +6,6 @@
 #include <sstream>
 #include <cassert>
 
-#include "em/base/type.h"
 #include "em/base/array.h"
 
 using namespace em;
@@ -70,57 +69,10 @@ std::ostream& em::operator<< (std::ostream &ostream, const ArrayDim &adim)
 
 // ===================== Array::Impl Implementation =======================
 
-class Array::Impl
+class Array::Impl: public Type::Container
 {
 public:
     ArrayDim adim;
-    size_t msize = 0; // allocated memory getSize
-    Type type;
-    void * dataPtr = nullptr;
-    // Flag to know when the memory is "owned" by this array and when it should
-    // take care of freeing it.
-    bool ownsMemory = true;
-
-    // If the memory pointer is nullptr, allocate enough memory to store all
-    // elements. If not, point data to there and mark as memory not owned
-    // by this array
-    void allocate(const ArrayDim &adim, const Type & type,
-                  void * memory= nullptr)
-    {
-        deallocate(); // Release memory if necessary
-        this->adim = adim;
-        this->type = type;
-        msize = adim.getSize() * type.getSize();
-        // Assign ownsMemory flag and dataPtr in the same statement
-        // TODO: Check if the memory allocation can be done through Type
-        dataPtr = (ownsMemory = (memory == nullptr)) ? malloc(msize) : memory;
-    }
-
-    // Deallocate memory
-    void deallocate()
-    {
-        if (ownsMemory && msize > 0)
-        {
-            free(dataPtr);
-            msize = 0;
-        }
-    }
-
-    void copy(const ArrayDim &adim, const Type & type,
-              const Impl *other)
-    {
-        allocate(adim, type);
-
-        if (type == other->type)
-            type.copy(other->dataPtr, dataPtr, adim.getSize());
-        else
-            type.cast(other->dataPtr, dataPtr, adim.getSize(), other->type);
-    }
-
-    ~Impl()
-    {
-        deallocate();
-    }
 };// class ArrayImpl
 
 
@@ -131,18 +83,17 @@ Array::Array()
     impl = new Impl();
 } // empty Ctor
 
-Array::Array(const ArrayDim &adim, const Type & type, void * memory)
+Array::Array(const ArrayDim &adim, const Type & type, void * memory): Array()
 {
-    impl = new Impl();
     // Type should be not null (another option could be assume float
     // or double by default)
     assert(!type.isNull());
-    impl->allocate(adim, type, memory);
+    impl->adim = adim;
+    allocate(type, adim.getSize(), memory);
 } // Ctor for ArrayDim and const Type &
 
-Array::Array(const Array &other)
+Array::Array(const Array &other): Array()
 {
-    impl = new Impl();
     *this = other;
 } // Copy ctor Array
 
@@ -153,13 +104,14 @@ Array::~Array()
 
 Array& Array::operator=(const Array &other)
 {
-    impl->copy(other.getDim(), other.getType(), other.impl);
+    impl->adim = other.getDim();
+    copyOrCast(other.getType(), impl->adim.getSize(), other);
     return *this;
 } // function Array.operator=
 
 bool Array::operator==(const Array &other) const
 {
-    auto type = getType();
+    auto& type = getType();
     auto dim = getDim();
 
     if (type != other.getType() || type.isNull() || dim != other.getDim())
@@ -178,7 +130,8 @@ void Array::copy(const Array &other, const Type & type)
 {
     auto finalType = !type.isNull() ? type :
                      getType().isNull() ? other.getType() : getType();
-    impl->copy(other.getDim(), finalType, other.impl);
+    impl->adim = other.getDim();
+    copyOrCast(finalType, impl->adim.getSize(), other);
 } // function Array.copy
 
 Array Array::getAlias(size_t index)
@@ -208,12 +161,14 @@ ArrayDim Array::getDim() const
 void Array::resize(const ArrayDim &adim, const Type & type)
 {
     // Use type if not none, the current type if not
-    impl->allocate(adim, type.isNull() ? getType() : type);
+    impl->adim = adim;
+    auto& finalType = type.isNull() ? getType() : type;
+    allocate(finalType, adim.getSize());
 } // function Array.resize
 
 void Array::toStream(std::ostream &ostream) const
 {
-    char * data = static_cast<char*>(impl->dataPtr);
+    auto data = static_cast<const char *>(getPointer());
     size_t n = impl->adim.getSize();
     size_t xdim = impl->adim.x;
     size_t ydim = impl->adim.y;
@@ -244,28 +199,13 @@ std::string Array::toString() const
     return ss.str();
 } // function Array.toString
 
-const Type & Array::getType() const
-{
-    return impl->type;
-} // function Array.getType
-
-void * Array::getPointer()
-{
-    return impl->dataPtr;
-} // function Array.getPointer
-
-const void * Array::getPointer() const
-{
-    return impl->dataPtr;
-} // function Array.getPointer
-
 template <class T>
 ArrayView<T> Array::getView()
 {
     // Check the type is the same of the object
     assert(getType() == Type::get<T>());
 
-    return ArrayView<T>(impl->adim, impl->dataPtr);
+    return ArrayView<T>(impl->adim, getPointer());
 } // function Array.getView
 
 std::ostream& em::operator<< (std::ostream &ostream, const Array &array)

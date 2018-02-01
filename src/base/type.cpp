@@ -185,7 +185,8 @@ void Type::Container::deallocate()
 void Type::Container::copyOrCast(const Type &type, const size_t n,
                                   const Type::Container &other)
 {
-    allocate(type, n);
+    if (type != getType())
+        allocate(type, n);
 
     if (type == other.getType())
         type.copy(other.getPointer(), impl->data, n);
