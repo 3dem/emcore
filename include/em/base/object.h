@@ -21,7 +21,7 @@ namespace em
      *
      * An object could contains any type inside.
      */
-    class Object
+    class Object: public Type::Container
     {
     public:
         /** Default empty constructor for an Object.
@@ -29,7 +29,7 @@ namespace em
          * After an Object instance is created through this constructor,
          * its Type will be the nullType and it will not contain any data.
          */
-        Object();
+        Object() = default;
 
         /** Object constructor where the memory and type are provided.
          * In this case the Object will not be the "owner" of the memory
@@ -46,7 +46,7 @@ namespace em
         Object(const Object &other);
 
         /** Object class destructor. */
-        ~Object();
+        // ~Object();
 
         /** Copy construct from an existing Object.
          *
@@ -70,9 +70,6 @@ namespace em
         // Extract the value
         template<class T> operator T() const;
 
-        /** Return the Type singleton instance of this object. */
-        const Type & getType() const;
-
         /** Push the value of the Object to the output stream */
         void toStream(std::ostream &ostream) const;
 
@@ -85,19 +82,7 @@ namespace em
         /** Parse the value of the Object from string */
         void fromString(const std::string &str);
 
-        /** Return a pointer to the memory where this object data is stored. */
-        inline void * getPointer();
-        inline const void * getPointer() const;
-
     private:
-        class Impl;
-        Impl * impl;
-
-        void * valuePtr = nullptr;
-        Type type;
-        bool isPointer = true; // Flag to store where the valuePtr points to the data
-        bool isOwner = false; // Flag to know whether this object owns the memory
-
         /** Set a new type to this object.
          * Release current memory if needed and allocate new one if needed as well.
          */
@@ -109,15 +94,6 @@ namespace em
     // Some class name definitions for ease of use
     using ObjectDict = std::map<std::string, Object>;
     using ObjectVector = std::vector<Object>;
-
-
-
-    class Object::Impl
-    {
-    public:
-        void * data;
-        Type type;
-    }; // class Object::Impl
 
 
 #include "object_priv.h"

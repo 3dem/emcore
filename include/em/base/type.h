@@ -158,14 +158,6 @@ namespace em
              */
             Container(const Type &type, const size_t n, void *memory=nullptr);
 
-            /** Standard copy constructor.
-             *
-             * The newly created object will have the same data Type than the
-             * other object. The underlying data will be a copy of the other's
-             * data.
-             */
-            Container(const Container &other);
-
             /** Object class destructor. */
             virtual ~Container();
 

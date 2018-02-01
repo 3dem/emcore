@@ -146,11 +146,6 @@ Type::Container::Container(const Type &type, const size_t n,
     allocate(type, n, memory);
 } // Container Ctor
 
-Type::Container::Container(const Container &other)
-{
-    THROW_ERROR("NOT IMPLEMENTED.");
-} // Container Copy Ctor
-
 Type::Container::~Container()
 {
     deallocate();
