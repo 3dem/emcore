@@ -17,6 +17,20 @@ using namespace em;
 
 TEST(Object, Basic)
 {
+    // Empty object constructor
+    Object eo;
+    // After this, the object type should be Null
+    ASSERT_EQ(eo.getType(), typeNull);
+    ASSERT_TRUE(eo.getType().isNull());
+
+    eo = 1; // Now this object should change its type to typeInt32
+    ASSERT_EQ(eo.getType(), typeInt32);
+    // When the object type is not null, it should not
+    // change its type and just try to convert to the underlying type.
+    eo = 2.2f;
+    ASSERT_EQ(eo.getType(), typeInt32);
+    ASSERT_EQ((int)eo, (int)2.2f);
+
     // Copy constructor
     em::Object o(1);
     int x = o;
@@ -27,8 +41,11 @@ TEST(Object, Basic)
 
     em::Object o2(3.5); // Type should be double
     ASSERT_EQ(o2.getType(), em::typeDouble);
-    o2 = 1.3f; // Now type should change to float
-    ASSERT_EQ(o2.getType(), em::typeFloat);
+    // We can explicitly change the type of a given object
+    o2.setType(typeFloat);
+    ASSERT_EQ(o2.getType(), typeFloat);
+    o2 = 1.3; // Still the type should be float and not double
+    ASSERT_EQ(o2.getType(), typeFloat);
     float f = o2;
     ASSERT_FLOAT_EQ(f, 1.3f);
 
@@ -61,27 +78,29 @@ TEST(Object, Basic)
     ASSERT_EQ(s2, str);
 
     Image img(ArrayDim(10, 10), typeFloat);
+    auto& typeImage = Type::get<Image>();
+    o3.setType(typeImage);
     o3 = img;
-    ASSERT_EQ(o3.getType(), Type::get<Image>());
+    ASSERT_EQ(o3.getType(), typeImage);
     Image img2 = o3;
 
     // Test copy and equality
-    o3 = std::string("One string");
-    o2 = o3;
-    ASSERT_EQ(o2, o3);
+    Object oo3 = std::string("One string");
+    Object oo2 = oo3;
+    ASSERT_EQ(oo2, oo3);
 
-    Object o4(o3);
-    ASSERT_EQ(o4, o3);
+    Object o4(oo3);
+    ASSERT_EQ(o4, oo3);
 
     ObjectVector ov;
     ov.resize(3);
 
-    ov[0] = o3;
-    ASSERT_EQ(ov[0], o3);
-    ASSERT_EQ(ov[0], o2);
+    ov[0] = oo3;
+    ASSERT_EQ(ov[0], oo3);
+    ASSERT_EQ(ov[0], oo2);
     //ASSERT_EQ((std::string) o2, (std::string) o3);
-    Object o5(o2);
-    ASSERT_EQ(o2, o5);
+    Object o5(oo2);
+    ASSERT_EQ(oo2, o5);
 } // TEST Object.Basic
 
 TEST(Object, Parsing)

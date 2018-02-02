@@ -17,15 +17,19 @@ template <class T>
 Object& Object::operator=(const T& valueIn)
 {
     // Set the new type from the input value
-    auto& newType = Type::get<T>();
-
-    //FIXME: Check the logic if we want always that this adopt the other
-    // type or cast its value
-    if (getType() != newType)
-        allocate(newType, 1);
+    auto& valueType = Type::get<T>();
+    // Only change to the new type when the current type is null
+    if (getType().isNull())
+    {
+        allocate(valueType, 1);
+    }
+    auto& type = getType();
     const void * inputMem = &valueIn;
     auto outputMem = getPointer();
-    newType.copy(inputMem, outputMem, 1);
+    if (type == valueType)
+        type.copy(inputMem, outputMem, 1);
+    else
+        type.cast(inputMem, outputMem, 1, valueType);
     return *this;
 }
 

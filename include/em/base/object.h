@@ -82,12 +82,12 @@ namespace em
         /** Parse the value of the Object from string */
         void fromString(const std::string &str);
 
-    private:
         /** Set a new type to this object.
          * Release current memory if needed and allocate new one if needed as well.
          */
         void setType(const Type &newType);
-    };
+
+    }; // class Object
 
     std::ostream& operator<< (std::ostream &ostream, const em::Object &object);
 
@@ -97,6 +97,7 @@ namespace em
 
 
 #include "object_priv.h"
+
 } // namespace em
 
 

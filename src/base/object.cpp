@@ -23,17 +23,9 @@ Object::Object(const Type & type, void *memory):
 
 void Object::setType(const Type & newType)
 {
-//    //TODO: Check what happens when newType.isNull() == True
-//    // Release old memory if necessary
-//    if (isPointer && isOwner && !type.isNull())
-//        type.deallocate(valuePtr, 1);
-//
-//    type = newType;
-//    // Set a pointer and allocated memory if new type is not POD
-//    if ((isPointer = isOwner = !type.isPod()))
-//        valuePtr = type.allocate(1);
-    THROW_ERROR("NOT IMPLEMENTED");
-}
+    if (newType != getType())
+        allocate(newType, 1);
+} // function Object.setType
 
 void Object::toStream(std::ostream &ostream) const
 {

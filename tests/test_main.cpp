@@ -18,41 +18,14 @@ TEST(Main, ObjectLoop) {
 
     em::Timer t;
 
-    t.tic();
-
-    em::Object o(1);
-    o = 2;
-
-    int x = o;
-
-    std::cout << "x = " << x << std::endl;
-
-    em::Object o2(3.5);
-
-    o2 = 1.3f;
-
-    float d = o2;
-
-    std::cout << "d = " << d << std::endl;
-
-    o2 = 5.6f;
+    float d = 1;
+    Object o2(d);
+    ASSERT_EQ(o2.getType(), typeFloat);
 
     float d2 = 5.6 + float(o2);
     float d3;
 
     std::cout << "d2 = " << d2 << std::endl;
-
-    //std::cout << "T0: " << *em::Type::get<em::Object>() << std::endl;
-
-    auto type1 = em::Type::get<double>();
-    o2 = 1.1; // o2 should be float
-    assert(o2.getType() == type1);
-    std::cout << "T1: " << type1 << std::endl;
-
-    auto  type2 = em::Type::get<float>();
-    std::cout << "T2: " << type2 << std::endl;
-
-    t.toc("Nothing");
 
     t.tic();
 
