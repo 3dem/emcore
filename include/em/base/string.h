@@ -6,6 +6,7 @@
 #define EM_CORE_STRING_H
 
 #include <string>
+#include <vector>
 
 namespace em
 {

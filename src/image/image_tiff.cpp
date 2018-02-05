@@ -180,7 +180,7 @@ public:
                 TIFFSetField(tif, TIFFTAG_PAGENUMBER, (uint16) i, (uint16) dim.n);
             }
 
-            size_t writeBuffer = header.imageWidth * type->getSize();
+            size_t writeBuffer = header.imageWidth * type.getSize();
 
             char*  tif_buf = nullptr;
             tif_buf = (char*)_TIFFmalloc(writeBuffer);
@@ -262,7 +262,7 @@ public:
            */        }
         else
         {
-            size_t readSize = header.imageWidth * type->getSize();
+            size_t readSize = header.imageWidth * type.getSize();
 
             for (y = 0; y < header.imageLength; y++)
             {
@@ -283,7 +283,7 @@ public:
         TIFFSetDirectory(tif,(tdir_t) idx);
 
         char*  tif_buf = nullptr;
-        size_t writeBuffer = header.imageWidth * type->getSize();
+        size_t writeBuffer = header.imageWidth * type.getSize();
         tif_buf = (char*)_TIFFmalloc(writeBuffer);
 
         if (tif_buf == 0)
