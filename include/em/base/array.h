@@ -173,7 +173,7 @@ namespace em
         T& operator()(const int x, const int y=0, const int z=0,
                       const size_t n=1);
         void assign(const T &value);
-        T * getPointer();
+        T * getData();
         ArrayDim getDim() const;
 
     private:

@@ -154,9 +154,9 @@ Type::Container::~Container()
 
 const Type& Type::Container::getType() const { return impl->type; }
 
-const void* Type::Container::getPointer() const { return impl->data; }
+const void* Type::Container::getData() const { return impl->data; }
 
-void* Type::Container::getPointer() { return impl->data; }
+void* Type::Container::getData() { return impl->data; }
 
 void Type::Container::allocate(const Type &type, const size_t n, void *memory)
 {
@@ -189,7 +189,7 @@ void Type::Container::copyOrCast(const Type &type, const size_t n,
         allocate(type, n);
 
     if (type == other.getType())
-        type.copy(other.getPointer(), impl->data, n);
+        type.copy(other.getData(), impl->data, n);
     else
-        type.cast(other.getPointer(), impl->data, n, other.getType());
+        type.cast(other.getData(), impl->data, n, other.getType());
 } // function Container.copyOrCast

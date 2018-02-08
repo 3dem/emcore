@@ -32,14 +32,14 @@ void Object::toStream(std::ostream &ostream) const
     auto& type = getType();
 
     if (!type.isNull())
-        type.toStream(getPointer(), ostream, 1);
+        type.toStream(getData(), ostream, 1);
 } // function Object.toStream
 
 void Object::fromStream(std::istream &istream)
 {
     auto& type = getType();
     ASSERT_ERROR(type.isNull(), "Null type object can not be parsed. ");
-    type.fromStream(istream, getPointer(), 1);
+    type.fromStream(istream, getData(), 1);
 } // function Object.fromStream
 
 std::string Object::toString() const
@@ -61,7 +61,7 @@ bool Object::operator==(const Object &other) const
     if (type != other.getType() || type.isNull())
         return false;
 
-    return type.equals(getPointer(), other.getPointer(), 1);
+    return type.equals(getData(), other.getData(), 1);
 } // function Object.operator==
 
 bool Object::operator!=(const Object &other) const

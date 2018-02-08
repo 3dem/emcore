@@ -91,7 +91,7 @@ TEST(Type, General) {
     typeDouble.fromStream(ss, &d1, 1);
     ASSERT_FLOAT_EQ(refValue, d1);
     // Parse from stream into an Object (initialized to double)
-    typeDouble.fromStream(ss, o1.getPointer(), 1);
+    typeDouble.fromStream(ss, o1.getData(), 1);
     ASSERT_FLOAT_EQ(refValue, (double)o1);
 
     for (size_t i = 0; i < n; i++)
@@ -128,7 +128,7 @@ TEST(TypeContainer, Basic)
     Type::Container gc;
     ASSERT_TRUE(gc.getType().isNull());
     ASSERT_EQ(gc.getType(), em::typeNull);
-    ASSERT_EQ(gc.getPointer(), nullptr);
+    ASSERT_EQ(gc.getData(), nullptr);
 
     // Let's check memory is not deleted after container dtor
     size_t n = 10;
@@ -140,8 +140,8 @@ TEST(TypeContainer, Basic)
         auto& t = Type::get<int>();
         Type::Container gc2(t, n, array);
         Type::Container gc3(t, n); // should allocate its memory
-        int * array2 = static_cast<int*>(gc3.getPointer());
-        t.copy(gc2.getPointer(), gc3.getPointer(), n);
+        int * array2 = static_cast<int*>(gc3.getData());
+        t.copy(gc2.getData(), gc3.getData(), n);
         for (size_t i = 0; i < n; ++i)
             ASSERT_EQ(array2[i], i);
     } // Here gc2 should be destroyed, but not the memory

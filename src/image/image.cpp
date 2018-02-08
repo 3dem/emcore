@@ -407,11 +407,11 @@ void ImageIO::Impl::readImageData(const size_t index, Image &image)
     // approach, right now only read a big chunk of one item size
     std::cerr << "DEBUG: reading " << readSize << " bytes." << std::endl;
 
-    if (fread(image.getPointer(), readSize, 1, file) != 1)
+    if (fread(image.getData(), readSize, 1, file) != 1)
         THROW_SYS_ERROR("Could not 'fread' data from file. ");
 
     if (swap)
-        swapBytes(image.getPointer(), image.getDim().getItemSize(),
+        swapBytes(image.getData(), image.getDim().getItemSize(),
                   image.getType().getSize());
 }
 
@@ -428,7 +428,7 @@ void ImageIO::Impl::writeImageData(const size_t index, const Image &image)
     if (fseek(file, itemPos, SEEK_SET) != 0)
         THROW_SYS_ERROR("Could not 'fseek' in file. ");
 
-    fwrite(image.getPointer(), writeSize, 1, file);
+    fwrite(image.getData(), writeSize, 1, file);
 
 } // function ImageIO::Impl::write
 

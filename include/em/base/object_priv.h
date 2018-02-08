@@ -25,7 +25,7 @@ Object& Object::operator=(const T& valueIn)
     }
     auto& type = getType();
     const void * inputMem = &valueIn;
-    auto outputMem = getPointer();
+    auto outputMem = getData();
     if (type == valueType)
         type.copy(inputMem, outputMem, 1);
     else
@@ -40,7 +40,7 @@ Object::operator T() const
     auto& type = getType();
     ASSERT_ERROR(type != Type::get<T>(), "Types are not the same");
     // Extract the value
-    return *static_cast<const T *>(getPointer());
+    return *static_cast<const T *>(getData());
 }
 
 

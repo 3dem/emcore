@@ -117,7 +117,7 @@ bool Array::operator==(const Array &other) const
     if (type != other.getType() || type.isNull() || dim != other.getDim())
         return false;
 
-    return type.equals(getPointer(), other.getPointer(), dim.getSize());
+    return type.equals(getData(), other.getData(), dim.getSize());
 
 } // function Array.operator==
 
@@ -140,7 +140,7 @@ Array Array::getAlias(size_t index)
     ASSERT_ERROR((index < 0 || index > adim.n),
                  "Index should be betweeen zero and the number of elements.")
 
-    void * data = getPointer();
+    void * data = getData();
 
     if (index > 0)
     {
@@ -168,7 +168,7 @@ void Array::resize(const ArrayDim &adim, const Type & type)
 
 void Array::toStream(std::ostream &ostream) const
 {
-    auto data = static_cast<const char *>(getPointer());
+    auto data = static_cast<const char *>(getData());
     size_t n = impl->adim.getSize();
     size_t xdim = impl->adim.x;
     size_t ydim = impl->adim.y;
@@ -205,7 +205,7 @@ ArrayView<T> Array::getView()
     // Check the type is the same of the object
     assert(getType() == Type::get<T>());
 
-    return ArrayView<T>(impl->adim, getPointer());
+    return ArrayView<T>(impl->adim, getData());
 } // function Array.getView
 
 std::ostream& em::operator<< (std::ostream &ostream, const Array &array)
@@ -291,10 +291,10 @@ std::string ArrayView<T>::toString() const
 } // function ArrayView.toString
 
 template <class T>
-T* ArrayView<T>::getPointer()
+T* ArrayView<T>::getData()
 {
     return GET_DATA();
-} // function ArrayView.getPointer
+} // function ArrayView.getData
 
 template <class T>
 ArrayDim ArrayView<T>::getDim() const

@@ -64,7 +64,7 @@ TEST(Main, ObjectLoop) {
     Av(3, 3) = 20;
     Av(4, 4) = 20;
     Av(5, 5) = 20;
-    int * ptr = Av.getPointer();
+    int * ptr = Av.getData();
     ptr[10] = 15;
 
     //std::cout << Av.toString() << std::endl;

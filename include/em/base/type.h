@@ -165,8 +165,8 @@ namespace em
             const Type & getType() const;
 
             /** Return a pointer to the memory where this object data is stored. */
-            void * getPointer();
-            const void * getPointer() const;
+            void * getData();
+            const void * getData() const;
 
         protected:
             void allocate(const Type &type, const size_t n, void *memory=nullptr);
