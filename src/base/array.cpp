@@ -65,7 +65,7 @@ std::ostream& em::operator<< (std::ostream &ostream, const ArrayDim &adim)
     ostream << "(" << adim.x << " x " << adim.y << " x "
             << adim.z << " x " << adim.n << ")";
     return ostream;
-}
+} // operator >> for ArrayDim
 
 // ===================== Array::Impl Implementation =======================
 

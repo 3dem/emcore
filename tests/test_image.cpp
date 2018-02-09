@@ -13,10 +13,6 @@ using namespace em;
 
 TEST(ImageLocation, Basic)
 {
-    // The empty constructor should left index UNDEFINED
-    ImageLocation loc1;
-    ASSERT_EQ(loc1.index, ImageLocation::UNDEFINED);
-
     // Image Location can be constructed from string and index is ALL
     std::string path("/path/to/image");
     ImageLocation loc2("/path/to/image");
@@ -28,7 +24,22 @@ TEST(ImageLocation, Basic)
     ASSERT_NE(loc2, loc3);
     loc3.index = 0;
     ASSERT_EQ(loc2, loc3);
+
+    ASSERT_EQ(loc2.toString(), std::string("(/path/to/image, ALL)"));
 } // TEST(ImageLocation, Basic)
+
+
+TEST(ImageIO, Impl)
+{
+    ASSERT_TRUE(ImageIO::hasImpl("spi"));
+    ASSERT_TRUE(ImageIO::hasImpl("spider"));
+    ImageIO spiderIO = ImageIO("spi");
+
+    ASSERT_TRUE(ImageIO::hasImpl("mrc"));
+    ASSERT_TRUE(ImageIO::hasImpl("mrcs"));
+    ImageIO mrcIO = ImageIO("mrc");
+} // TEST(ImageIO, Impl)
+
 
 TEST(Image, Constructor)
 {
@@ -39,20 +50,11 @@ TEST(Image, Constructor)
     header["y"] = 20.5;
     header["filename"] = std::string("/path/to/image/");
     std::cout << img << std::endl;
-
-    ASSERT_TRUE(ImageIO::hasImpl("spi"));
-    ASSERT_TRUE(ImageIO::hasImpl("spider"));
-    ImageIO spiderIO = ImageIO("spi");
-    // ASSERT_EQ(spiderIO->getName(), "spider");
-
 } // TEST(Image, Constructor)
 
 
 TEST(ImageMrcIO, Read)
 {
-
-    ASSERT_TRUE(ImageIO::hasImpl("mrc"));
-    ASSERT_TRUE(ImageIO::hasImpl("mrcs"));
     ImageIO mrcIO = ImageIO("mrc");
     // ASSERT_EQ(mrcIO.getName(), "mrc");
 
@@ -76,17 +78,13 @@ TEST(ImageMrcIO, Read)
                 Image img;
                 loc.index = 1;
                 loc.path = root + pair.first;
-                std::cout << ">>> Before reading. " << std::endl;
-                // mrcIO.open(loc.path);
+                std::cout << ">>> Reading image: " << loc << std::endl;
 
                 img.read(loc);
                 std::cout << img << std::endl;
                 ArrayDim imgDim(pair.second);
                 imgDim.n = 1;
-                ASSERT_TRUE(img.getDim() == imgDim);
-                // ASSERT_TRUE(mrcIO.getDim() == pair.second);
-                // mrcIO.close();
-                std::cout << "<<< After reading. Closed IO. " << std::endl;
+                ASSERT_EQ(img.getDim(), imgDim);
             }
 
             // Use mrcIO2 for writing individual images

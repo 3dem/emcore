@@ -38,11 +38,11 @@ public:
 }; // class Image::Impl
 
 
-// ===================== Image Implementation =======================
+// ================== ImageLocation Implementation ====================
 
-const int8_t ImageLocation::UNDEFINED = -1;
 const int8_t ImageLocation::FIRST = 1;
 const int8_t ImageLocation::ALL = 0;
+
 
 ImageLocation::ImageLocation(const std::string &path, size_t index):
 index(index), path(path)
@@ -57,6 +57,28 @@ bool ImageLocation::operator!=(const ImageLocation &other) const
 {
     return !(*this == other);
 }
+
+std::string ImageLocation::toString() const
+{
+    std::stringstream ss;
+    ss << *this;
+    return ss.str();
+} // function ArrayDim.toString
+
+std::ostream& em::operator<< (std::ostream &ostream, const ImageLocation &loc)
+{
+    ostream << "(" << loc.path << ", ";
+
+    if (loc.index == ImageLocation::ALL)
+        ostream << "ALL" << ")";
+    else
+        ostream << loc.index << ")";
+
+    return ostream;
+} // operator >> for ArrayDim
+
+
+// ===================== Image Implementation =======================
 
 Image::Image(): Array()
 {
