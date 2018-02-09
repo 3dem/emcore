@@ -197,7 +197,7 @@ public:
     void readImageData(const size_t index, Image &image) override
     {
         char * data;
-        data = static_cast<char*> (image.getPointer());
+        data = static_cast<char*> (image.getData());
 
         char*  tif_buf = nullptr;
         size_t x, y;
@@ -293,7 +293,7 @@ public:
         }
 
         char * data;
-        data = const_cast<char*>(static_cast<const char*> (image.getPointer()));
+        data = const_cast<char*>(static_cast<const char*> (image.getData()));
 
         for (size_t y = 0; y < header.imageLength; ++y)
         {

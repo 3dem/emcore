@@ -71,7 +71,7 @@ namespace em
     /** @ingroup base
      * Four dimensional Array class to manage internal memory and data type.
      */
-    class Array
+    class Array: public Type::Container
     {
     public:
         /** Default constructor.
@@ -121,7 +121,7 @@ namespace em
          * @param type Type to be used for resulting elements, if null, use the
          * current type of the array.
          */
-        void copy(const Array &other, const Type & type=typeNull);
+        void copy(const Array &other, const Type &type=typeNull);
 
         /** Return an "aliased" Array that share the memory with this one.
          * If index is 0, the new Array will have exactly the same dimensions.
@@ -141,22 +141,6 @@ namespace em
 
         /** Return the current dimensions of the Array */
         ArrayDim getDim() const;
-
-        /** Return a constant pointer to underlying Type object. */
-        const Type & getType() const;
-
-        /** Return a pointer to the internal data.
-         * Use this function with care. It is intended to be used by
-         * ImageReader subclasses to allow read from disk and put
-         * directly into memory without need of a buffer.
-         *
-         * For other memory manipulation, use the provided
-         * functions to copy element into the array from
-         * a given memory location.
-         */
-        void * getPointer();
-
-        const void * getPointer() const;
 
         template <class T>
         ArrayView<T> getView();
@@ -189,7 +173,7 @@ namespace em
         T& operator()(const int x, const int y=0, const int z=0,
                       const size_t n=1);
         void assign(const T &value);
-        T * getPointer();
+        T * getData();
         ArrayDim getDim() const;
 
     private:

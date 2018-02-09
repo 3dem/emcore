@@ -21,29 +21,38 @@ namespace em
      *
      * An object could contains any type inside.
      */
-    class Object
+    class Object: public Type::Container
     {
     public:
         /** Default empty constructor for an Object.
          *
          * After an Object instance is created through this constructor,
-         * both the data type and the internal data are void.
+         * its Type will be the nullType and it will not contain any data.
          */
-        Object();
+        Object() = default;
 
         /** Object constructor where the memory and type are provided.
          * In this case the Object will not be the "owner" of the memory
          * and should not free it when it is destroyed.
          */
-         Object(const Type & type, void *memory);
+        Object(const Type & type, void *memory);
 
-        /** Standard copy constructor */
+        /** Standard copy constructor.
+         *
+         * The newly created object will have the same data Type than the
+         * other object. The underlying data will be a copy of the other's
+         * data.
+         */
         Object(const Object &other);
 
         /** Object class destructor. */
-        ~Object();
+        // ~Object();
 
-        /** Copy construct from an existing Object. */
+        /** Copy construct from an existing Object.
+         *
+         * The new object will take the Type inferred from the type of
+         * the argument and the data will contain a copy of it.
+         */
         template <class T> Object(const T &valueIn);
 
         /** Assign operator to store an given value.
@@ -61,9 +70,6 @@ namespace em
         // Extract the value
         template<class T> operator T() const;
 
-        /** Return the Type singleton instance of this object. */
-        const Type & getType() const;
-
         /** Push the value of the Object to the output stream */
         void toStream(std::ostream &ostream) const;
 
@@ -76,21 +82,12 @@ namespace em
         /** Parse the value of the Object from string */
         void fromString(const std::string &str);
 
-        /** Return a pointer to the memory where this object data is stored. */
-        inline void * getPointer();
-        inline const void * getPointer() const;
-
-    private:
-        void * valuePtr = nullptr;
-        Type type;
-        bool isPointer = true; // Flag to store where the valuePtr points to the data
-        bool isOwner = false; // Flag to know whether this object owns the memory
-
         /** Set a new type to this object.
          * Release current memory if needed and allocate new one if needed as well.
          */
         void setType(const Type &newType);
-    };
+
+    }; // class Object
 
     std::ostream& operator<< (std::ostream &ostream, const em::Object &object);
 
@@ -98,10 +95,10 @@ namespace em
     using ObjectDict = std::map<std::string, Object>;
     using ObjectVector = std::vector<Object>;
 
+
 #include "object_priv.h"
-}
 
-
+} // namespace em
 
 
 #endif //EM_CORE_OBJECT_H

@@ -137,6 +137,48 @@ namespace em
 
         class Impl; // Implementation class that will store type information
 
+        /** @ingroup base
+         *
+         * Generic memory container of a given Type.
+         *
+         */
+        class Container
+        {
+        public:
+            /** Default empty constructor .
+             *
+             * After a GenericContainer instance is created through this constructor,
+             * its Type will be the nullType and it will not contain any data.
+             */
+            Container();
+
+            /** Object constructor where the memory and type are provided.
+             * In this case the Object will not be the "owner" of the memory
+             * and should not free it when it is destroyed.
+             */
+            Container(const Type &type, const size_t n, void *memory=nullptr);
+
+            /** Object class destructor. */
+            virtual ~Container();
+
+            /** Return the Type singleton instance of this object. */
+            const Type & getType() const;
+
+            /** Return a pointer to the memory where this object data is stored. */
+            void * getData();
+            const void * getData() const;
+
+        protected:
+            void allocate(const Type &type, const size_t n, void *memory=nullptr);
+            void deallocate();
+            void copyOrCast(const Type &type, const size_t n,
+                            const Container &other);
+
+        private:
+            class Impl;
+            Impl * impl;
+        }; // class Container
+
     private:
         // Type can only be instantiated via the Type<T> static method
         Type(Impl *impl);
@@ -159,6 +201,9 @@ namespace em
     static const Type& typeString = Type::get<std::string>();
 
     using TypeMap = std::map<int, const Type *>;
+
+
+
 
 
 #include "type_priv.h"

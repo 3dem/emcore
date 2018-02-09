@@ -51,34 +51,34 @@ TEST(Array, Basic) {
     Av(3, 3) = 20;
     Av(4, 4) = 20;
     Av(5, 5) = 20;
-    int * ptr = Av.getPointer();
+    int * ptr = Av.getData();
     ptr[10] = 15;
 
     //std::cout << Av.toString() << std::endl;
 
     Array A2(A);
     ArrayView<int> Av2 = A2.getView<int>();
-    const int * data2 = Av2.getPointer();
+    const int * data2 = Av2.getData();
     for (size_t i = 0; i < adim.getSize(); ++i)
         ASSERT_EQ(data2[i], ptr[i]);
 
     Array A3(adim, typeFloat);
     A3.copy(A);
     ASSERT_EQ(A3.getType(), typeFloat);
-    auto data3f = static_cast<const float *>(A3.getPointer());
+    auto data3f = static_cast<const float *>(A3.getData());
     for (size_t i = 0; i < adim.getSize(); ++i)
         ASSERT_FLOAT_EQ(data3f[i], (float)ptr[i]);
 
     A3.copy(A, typeUInt32);
     ASSERT_EQ(A3.getType(), typeUInt32);
-    auto data3ui = static_cast<const uint32_t *>(A3.getPointer());
+    auto data3ui = static_cast<const uint32_t *>(A3.getData());
     for (size_t i = 0; i < adim.getSize(); ++i)
         ASSERT_EQ(data3ui[i], (uint32_t)ptr[i]);
 
     Array A4;
     A4.copy(A);
     ASSERT_EQ(A4.getType(), typeInt32);
-    auto data3i = static_cast<const int32_t *>(A3.getPointer());
+    auto data3i = static_cast<const int32_t *>(A3.getData());
     for (size_t i = 0; i < adim.getSize(); ++i)
         ASSERT_FLOAT_EQ(data3i[i], (int32_t)ptr[i]);
 } // TEST(ArrayTest, Constructor)
@@ -129,7 +129,7 @@ TEST(Array, IndexingAlias)
             avSingle.assign(i);
         }
 
-        float * data = avAll.getPointer();
+        float * data = avAll.getData();
 
         for (size_t i = 0; i < adim.getSize(); ++i)
         {

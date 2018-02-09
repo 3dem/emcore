@@ -25,13 +25,21 @@ namespace em
     class ImageLocation
     {
     public:
+        // Constansts defining some special image indexes
+        static const int8_t UNDEFINED;
+        static const int8_t FIRST;
+        static const int8_t ALL;
         // TODO: maybe consider a pointer to string, so many ImageLocation objects
         // could share the same path string without extra memory
         std::string path;
-        size_t index; ///< Index to read from file (first one is 1, 0 means all images)
+        size_t index = UNDEFINED; ///< Index to read from file (first one is 1, 0 means all images)
 
         ImageLocation() = default;
-        ImageLocation(size_t index, const std::string &path);
+        ImageLocation(const std::string &path, size_t index=ALL);
+
+        // Comparison operators
+        bool operator==(const ImageLocation &other) const;
+        bool operator!=(const ImageLocation &other) const;
     }; // class ImageLocation
 
     /** @ingroup image

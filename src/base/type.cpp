@@ -122,3 +122,74 @@ std::ostream& em::operator<< (std::ostream &ostrm, const Type &t)
     ostrm << t.getName() << " (" << t.getSize() << " bytes)";
     return ostrm;
 }
+
+
+// ===================== Container Implementation =======================
+class Type::Container::Impl
+{
+public:
+    // Number of allocated elements in memory, if it is 0 the memory
+    // is not owned by this instance and not deallocation is required
+    size_t size = 0;
+    void * data = nullptr;
+    Type type;
+};
+
+Type::Container::Container()
+{
+    impl = new Impl();
+}
+
+Type::Container::Container(const Type &type, const size_t n,
+                                   void *memory):Container()
+{
+    allocate(type, n, memory);
+} // Container Ctor
+
+Type::Container::~Container()
+{
+    deallocate();
+    delete impl;
+} // Container Dtor
+
+const Type& Type::Container::getType() const { return impl->type; }
+
+const void* Type::Container::getData() const { return impl->data; }
+
+void* Type::Container::getData() { return impl->data; }
+
+void Type::Container::allocate(const Type &type, const size_t n, void *memory)
+{
+    deallocate();
+    impl->type = type;
+
+    if (memory == nullptr)
+    {
+        impl->size = n;
+        impl->data = type.allocate(n);
+    }
+    else
+        impl->data = memory;
+
+} // function Container.allocate
+
+void Type::Container::deallocate()
+{
+    if (impl->size)
+    {
+        impl->type.deallocate(impl->data, impl->size);
+        impl->size = 0;
+    }
+} // function Container.deallocate
+
+void Type::Container::copyOrCast(const Type &type, const size_t n,
+                                  const Type::Container &other)
+{
+    if (type != getType())
+        allocate(type, n);
+
+    if (type == other.getType())
+        type.copy(other.getData(), impl->data, n);
+    else
+        type.cast(other.getData(), impl->data, n, other.getType());
+} // function Container.copyOrCast
