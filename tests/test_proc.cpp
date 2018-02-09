@@ -48,7 +48,7 @@ TEST(ImageOperator, Basic)
                 ASSERT_EQ(img2.getDim(), imgDim);
                 std::string outFn = pair.first + std::string("_add.mrc");
                 std::cout << "     Writing ADD output to: " << outFn << std::endl;
-                img2.write(ImageLocation(1, outFn));
+                img2.write(outFn);
 
                 std::cerr << ">>>>>>>>>> Multiplying " << pair.first << std::endl;
                 imgOp[ImageMathProc::OPERATION] = ImageMathProc::MUL;
@@ -56,14 +56,14 @@ TEST(ImageOperator, Basic)
                 ASSERT_EQ(img2.getDim(), imgDim);
                 outFn = pair.first + std::string("_mul.mrc");
                 std::cout << "     Writing MUL output to: " << outFn << std::endl;
-                img2.write(ImageLocation(1, outFn));
+                img2.write(outFn);
 
                 imgOp[ImageMathProc::OPERATION] = ImageMathProc::ADD;
                 imgOp[ImageMathProc::OPERAND] = img2;
                 imgOp.process(img, img3);
                 outFn = pair.first + std::string("_add-image.mrc");
                 std::cout << "     Writing ADD-Img output to: " << outFn << std::endl;
-                img3.write(ImageLocation(1, outFn));
+                img3.write(outFn);
             }
         }
         catch (Error &err)

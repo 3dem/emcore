@@ -11,15 +11,32 @@
 
 using namespace em;
 
+TEST(ImageLocation, Basic)
+{
+    // The empty constructor should left index UNDEFINED
+    ImageLocation loc1;
+    ASSERT_EQ(loc1.index, ImageLocation::UNDEFINED);
+
+    // Image Location can be constructed from string and index is ALL
+    std::string path("/path/to/image");
+    ImageLocation loc2("/path/to/image");
+    ASSERT_EQ(loc2.index, ImageLocation::ALL);
+    ASSERT_EQ(loc2.path, path);
+
+    ImageLocation loc3(path, 2);
+    ASSERT_EQ(loc3.path, path);
+    ASSERT_NE(loc2, loc3);
+    loc3.index = 0;
+    ASSERT_EQ(loc2, loc3);
+} // TEST(ImageLocation, Basic)
 
 TEST(Image, Constructor)
 {
     //Image
     Image img(ArrayDim(10, 10), em::typeDouble);
     ObjectDict &header = img.getHeader();
-    //header["x"] = 10;
-    //header["y"] = 20.5;
-    // The following one is make it crash
+    header["x"] = 10;
+    header["y"] = 20.5;
     header["filename"] = std::string("/path/to/image/");
     std::cout << img << std::endl;
 

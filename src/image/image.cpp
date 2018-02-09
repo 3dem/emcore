@@ -40,9 +40,23 @@ public:
 
 // ===================== Image Implementation =======================
 
-ImageLocation::ImageLocation(size_t index, const std::string &path):
+const int8_t ImageLocation::UNDEFINED = -1;
+const int8_t ImageLocation::FIRST = 1;
+const int8_t ImageLocation::ALL = 0;
+
+ImageLocation::ImageLocation(const std::string &path, size_t index):
 index(index), path(path)
 {}
+
+bool ImageLocation::operator==(const ImageLocation &other) const
+{
+    return (index == other.index && path == other.path);
+}
+
+bool ImageLocation::operator!=(const ImageLocation &other) const
+{
+    return !(*this == other);
+}
 
 Image::Image(): Array()
 {
