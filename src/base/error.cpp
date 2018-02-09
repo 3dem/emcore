@@ -28,7 +28,8 @@ std::string Error::toString() const
 
 const char* Error::what() const throw()
 {
-    return toString().c_str();
+    return msg.c_str();
+    //return toString().c_str();
 }
 
 std::ostream& em::operator<< (std::ostream &ostream, const Error &err)
