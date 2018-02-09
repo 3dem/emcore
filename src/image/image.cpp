@@ -277,11 +277,14 @@ ArrayDim ImageIO::getDim() const
     return impl->dim;
 }
 
-void ImageIO::read(const size_t index, Image &image)
+void ImageIO::read(size_t index, Image &image)
 {
-    // TODO: Validate that open has been previously called and succeeded
+    ArrayDim adim = getDim(); // This will check that the file was open
+    ASSERT_ERROR(index > adim.n, "Invalid index");
 
-    ArrayDim adim = impl->dim;
+    // TODO: Allow to read more than one image
+    if (index == ImageLocation::ALL)
+        index = ImageLocation::FIRST;
     adim.n = 1; // Allocate for just one element
 
     auto imageType = image.getType();
@@ -322,7 +325,7 @@ void ImageIO::read(const size_t index, Image &image)
     //castPage2T(page, MULTIDIM_ARRAY(data) + haveread_n, datatype, readsize_n);
 }
 
-void ImageIO::write(const size_t index, const Image &image)
+void ImageIO::write(size_t index, const Image &image)
 {
     auto type = impl->type;
 

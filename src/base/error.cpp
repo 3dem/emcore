@@ -4,6 +4,7 @@
 
 #include "em/base/error.h"
 #include <cstring>
+#include <sstream>
 
 using namespace em;
 
@@ -16,6 +17,18 @@ Error::Error(const std::string &msg, const std::string &filename, const long lin
     this->line = line;
     this->errorCode = errorCode;
     this->functionName = func;
+}
+
+std::string Error::toString() const
+{
+    std::stringstream ss;
+    ss << *this;
+    return ss.str();
+} // function Error.toString
+
+const char* Error::what() const throw()
+{
+    return toString().c_str();
 }
 
 std::ostream& em::operator<< (std::ostream &ostream, const Error &err)

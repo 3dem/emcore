@@ -194,10 +194,10 @@ namespace em
         void expandFile(const size_t ndim);
 
         // TODO: DOCUMENT
-        void read(const size_t index, Image &image);
+        void read(size_t index, Image &image);
 
         // TODO: DOCUMENT
-        void write(const size_t index, const Image &image);
+        void write(size_t index, const Image &image);
 
         // String representation
         void toStream(std::ostream &ostream) const;

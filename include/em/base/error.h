@@ -15,7 +15,7 @@ namespace em {
     /** Class type for the errors thrown by the exceptions.
      */
 
-    class Error {
+    class Error: public std::exception {
     public:
         int errorCode; ///< Error code
         std::string msg; ///< Message of this error
@@ -25,6 +25,11 @@ namespace em {
 
         Error(const std::string &msg, const std::string &filename, const long line,
               const int errorCode=0, const std::string &func="");
+
+        /** String representation of the Error */
+        std::string toString() const;
+
+        virtual const char* what() const throw() override ;
     };
 
     /** Define how an Error is put into an stream.
