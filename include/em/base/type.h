@@ -49,6 +49,9 @@ namespace em
         /** Return True if this type is the NullType */
         bool isNull() const;
 
+        /** String representation of a Type */
+        std::string toString() const;
+
         /** Get a reference to the requested Type instance. */
         template <class T>
         static const Type& get()

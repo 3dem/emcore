@@ -1,7 +1,7 @@
 //
 // Created by josem on 12/2/16.
 //
-
+#include <sstream>
 #include "em/base/type.h"
 
 using namespace em;
@@ -49,6 +49,13 @@ bool Type::isNull() const
 {
     return impl->size == 0; // The only 0-size Type is Null type
 } // function Type.isNull
+
+std::string Type::toString() const
+{
+    std::stringstream ss;
+    ss << *this;
+    return ss.str();
+} // function toString
 
 Type Type::inferFromString(const std::string &str)
 {
@@ -119,7 +126,7 @@ bool Type::equals(const void *inputMem1, const void *inputMem2,
 
 std::ostream& em::operator<< (std::ostream &ostrm, const Type &t)
 {
-    ostrm << t.getName() << " (" << t.getSize() << " bytes)";
+    ostrm << "(type: " << t.getName() << ", " << t.getSize() << " bytes)";
     return ostrm;
 }
 
