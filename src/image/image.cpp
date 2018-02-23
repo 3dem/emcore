@@ -532,3 +532,9 @@ void ImageIO::Impl::swapBytes(void *data, size_t dataSize, size_t typeSize)
 
     }
 }
+
+#include "formats/image_mrc.cpp"
+#include "formats/image_spider.cpp"
+#include "formats/image_tiff.cpp"
+#include "formats/image_em.cpp"
+
