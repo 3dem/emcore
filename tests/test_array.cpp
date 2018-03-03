@@ -21,6 +21,7 @@ TEST(ArrayDim, Defaults) {
     // the rest will be set to 1
     ArrayDim adim2(100);
     ASSERT_TRUE((adim2 == ArrayDim(100, 1, 1, 1)));
+    ASSERT_EQ(adim2.getRank(), 1);
 
     std::cout << adim2 << std::endl;
 
@@ -29,6 +30,7 @@ TEST(ArrayDim, Defaults) {
 
     ASSERT_EQ(adim3.getSize(), 100 * 100 * 100);
     ASSERT_EQ(adim3.getItemSize(), 100 * 100);
+    ASSERT_EQ(adim3.getRank(), 2);
 
     // Test copy constructor
     ArrayDim adim4(adim3);
@@ -36,6 +38,10 @@ TEST(ArrayDim, Defaults) {
     ASSERT_EQ(adim4, adim3);
     ASSERT_EQ(adim4.getSize(), 100 * 100 * 100);
     ASSERT_EQ(adim4.getItemSize(), 100 * 100);
+    ASSERT_EQ(adim4.getRank(), 2);
+
+    adim4.z = 100;  // After this rank should be 3
+    ASSERT_EQ(adim4.getRank(), 3);
 
 
 } // TEST(ArrayTest, ArrayDim)

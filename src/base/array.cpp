@@ -60,6 +60,11 @@ std::string ArrayDim::toString() const
     return ss.str();
 } // function ArrayDim.toString
 
+int ArrayDim::getRank() const
+{
+    return (z > 1) ? 3 : (y > 1) ? 2 : 1;
+} // function ArrayDim.getRank
+
 std::ostream& em::operator<< (std::ostream &ostream, const ArrayDim &adim)
 {
     ostream << "(" << adim.x << " x " << adim.y << " x "
