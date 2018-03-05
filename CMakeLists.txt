@@ -18,6 +18,8 @@ option(BUILD_DOCS "Build the doxygen documentation" OFF)
 option(BUILD_TIFF "Build library with TIFF support" ON)
 # Build docopt or not
 option(BUILD_DOCOPT "Build library with docopt support" OFF)
+# Build static library
+option(BUILD_STATIC "Build static library." OFF)
 
 string(TIMESTAMP EM_CORE_TIMESTAMP "%d-%m-%y %H:%M:%S")
 
@@ -82,7 +84,12 @@ endif ()
 #find_package(JPEG)
 #find_package(PNG)
 
-add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES})
+if (BUILD_STATIC)
+    add_library(em-core STATIC ${SOURCE_FILES} ${HEADER_FILES})
+else()
+    add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES})
+endif()
+
 target_link_libraries( em-core ${EXT_LIBRARIES} )
 
 
@@ -154,7 +161,7 @@ endif()
 if(BUILD_DOCS)
     find_package(Doxygen)
 
-    if(NOT DOXYGEN_FOUND)
+    if (NOT DOXYGEN_FOUND)
         message(FATAL_ERROR
                 "Doxygen is needed to build the documentation.
                 Please make sure it is installed.")
