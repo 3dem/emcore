@@ -165,6 +165,8 @@ ArrayDim Array::getDim() const
 
 void Array::resize(const ArrayDim &adim, const Type & type)
 {
+    //TODO: Avoid allocation if memory is enough !!!
+
     // Use type if not none, the current type if not
     impl->adim = adim;
     auto& finalType = type.isNull() ? getType() : type;

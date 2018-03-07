@@ -90,6 +90,13 @@ else()
     add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES})
 endif()
 
+#############################
+#  FFTW3
+#############################
+# TODO: FIND OR COMPILE FFTW
+set(EXT_LIBRARIES ${EXT_LIBRARIES} fftw3 fftw3f)
+
+
 target_link_libraries( em-core ${EXT_LIBRARIES} )
 
 

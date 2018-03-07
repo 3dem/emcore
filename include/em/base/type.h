@@ -7,6 +7,7 @@
 #include <cstring>
 #include <map>
 #include <vector>
+#include <complex>
 
 #include "em/base/error.h"
 
@@ -200,6 +201,9 @@ namespace em
     static const Type& typeUInt32 = Type::get<uint32_t>();
     static const Type& typeFloat = Type::get<float>();
     static const Type& typeDouble = Type::get<double>();
+
+    static const Type& typeCFloat = Type::get<std::complex<float>>();
+    static const Type& typeCDouble = Type::get<std::complex<double>>();
 
     static const Type& typeString = Type::get<std::string>();
 
