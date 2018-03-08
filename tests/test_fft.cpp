@@ -7,6 +7,7 @@
 
 #include "em/os/filesystem.h"
 #include "em/proc/fft.h"
+#include "em/base/legacy_macros.h"
 
 
 using namespace em;
@@ -37,7 +38,23 @@ TEST(FourierTransformer, Basic)
             std::cout << "img type: " << rImg.getType().getName() << std::endl;
             ft.forward(rImg, fImg);
 
-            std::cout << "FT: " << fImg << std::endl;
+//            size_t counter = 0;
+//
+//            FOR_ALL_ELEMENTS_IN_FFTW_TRANSFORM(fImg, fImg.getDim())
+//            {
+//                int r2 = jp*jp + ip*ip + kp*kp;
+//                if (ip != i || kp != k)
+//                {
+//                std::cout << "Pyshical coords: (" << i << ", " << j << ", " << k << ") " << std::endl; //<<DIRECT_A3D_ELEM(m, k, i, j) << std::endl;
+//                std::cout << "        logical: (" << ip << ", " << jp << ", " << kp << ") " << std::endl;
+//                std::cout << "       distance: " << sqrt(r2) << std::endl << std::endl;
+//                }
+//                ++counter;
+//            }
+//
+//            std::cout << "FT: " << fImg << std::endl;
+
+            ft.backward(fImg, rImg);
 
         }
         catch (Error &err)

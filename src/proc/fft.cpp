@@ -143,6 +143,10 @@ FourierTransformer::~FourierTransformer()
 
 void FourierTransformer::forward(Image &rImg, Image &fImg)
 {
+    std::cout << "FourierTransformer::forward" << std::endl
+              << "     rMem: " << rImg.getData() << std::endl
+              << "     fMem: " << fImg.getData() << std::endl;
+
     if (impl == nullptr)
         impl = new FtFloatImpl();
 
@@ -155,6 +159,9 @@ void FourierTransformer::backward(Image &fImg, Image &rImg)
     if (impl == nullptr)
         impl = new FtFloatImpl();
 
+    std::cout << "FourierTransformer::backward" << std::endl
+              << "     rMem: " << rImg.getData() << std::endl
+              << "     fMem: " << fImg.getData() << std::endl;
     impl->setImages(rImg, fImg);
     impl->transform(FT::BACKWARD);
 }
