@@ -7,7 +7,7 @@
 
 #include "em/os/filesystem.h"
 #include "em/proc/fft.h"
-#include "em/base/legacy_macros.h"
+#include "em/base/legacy.h"
 
 
 using namespace em;
@@ -55,6 +55,13 @@ TEST(FourierTransformer, Basic)
 //            std::cout << "FT: " << fImg << std::endl;
 
             ft.backward(fImg, rImg);
+            rImg.write(ImageLocation("stack2D_img1_128.mrc", 1));
+
+            Image rImg64;
+            ft.scale(rImg, rImg64, 64);
+            rImg64.write(ImageLocation("stack2D_img1_64px.mrc", 1));
+
+            
 
         }
         catch (Error &err)
