@@ -45,10 +45,31 @@ namespace em
         /** TODO: Document!!! */
         void backward(Image &fImg, Image &rImg);
 
+        /** Shift zero-frequency component to center of spectrum if the
+         * direction is FT::FORWARD.
+         * After applying this operation, the the zero-frequency component
+         * of the input Fourier transform will by shifted to the center of
+         * the array.
+         *
+         * If y = 1, swaps the left and right halves of X (single row)
+         * If z = 1, swaps the first quadrant with the third,
+         *           and the second quadrant with the fourth.
+         * If z > 1, swaps half-spaces of X along each dimension.
+         *
+         * This operation is similar to Matlab fftshift.
+         *
+         * If the direction is FT::BACKWARD, the modification done by
+         * a forward center will be undone, similar to Matlab ifftshift
+         */
+        void centerFT(const Image &fImgIn, Image &fImgOut,
+                      FT direction=FT::FORWARD);
+        void centerFT(Image &inOutImg, FT direction=FT::FORWARD);
+
         /** Change the dimensions of an image resulting from a forward
          * transform. The dimensions can be reduced or augmented.
          */
-        void windowFT(Image &fImgIn, Image &fImgOut, size_t newdim);
+        void windowFT(const Image &fImgIn, Image &fImgOut, size_t newdim);
+        void windowFT(Image &inOutImg, size_t newdim);
 
         /** Scale an image in real space by computing its FT, apply a window
          * in Fourier space and transforming back to real space.

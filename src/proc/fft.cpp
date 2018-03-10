@@ -156,7 +156,7 @@ void FourierTransformer::forward(const Image &rImg, Image &fImg)
 
     impl->setImages(rImg, fImg);
     impl->transform(FT::FORWARD);
-}
+} // function FourierTransform.forward
 
 void FourierTransformer::backward(Image &fImg, Image &rImg)
 {
@@ -168,15 +168,54 @@ void FourierTransformer::backward(Image &fImg, Image &rImg)
               << "     fMem: " << fImg.getData() << std::endl;
     impl->setImages(rImg, fImg);
     impl->transform(FT::BACKWARD);
-}
+} // function FourierTransformer.backward
 
-void FourierTransformer::windowFT(Image &fImgIn, Image &fImgOut, size_t newdim)
+void FourierTransformer::centerFT(const Image &fImgIn, Image &fImgOut,
+                                  FT direction)
+{
+
+} // function FourierTransformer.centerFT
+
+void FourierTransformer::centerFT(Image &inOutImg, FT direction)
+{
+    centerFT(Image(inOutImg), inOutImg, direction);
+} // function FourierTransformer.centerFT
+
+
+template <class T>
+void _windowFT(const Image &fImgIn, Image &fImgOut)
+{
+    auto idim = fImgIn.getDim();
+    auto odim = fImgOut.getDim();
+
+    LegacyArray<std::complex<T>> in(idim, const_cast<void *>(fImgIn.getData()));
+    LegacyArray<std::complex<T>> out(odim, fImgOut.getData());
+
+    if (fImgOut.getDim().x > fImgIn.getDim().x)
+    {
+        long int max_r2 = (XSIZE(in) -1) * (XSIZE(in) - 1);
+        FOR_ALL_ELEMENTS_IN_FFTW_TRANSFORM(in)
+        {
+            // Make sure windowed FT has nothing in the corners, otherwise we end up with an asymmetric FT!
+            if (kp*kp + ip*ip + jp*jp <= max_r2)
+                FFTW_ELEM(out, kp, ip, jp) = FFTW_ELEM(in, kp, ip, jp);
+        }
+    }
+    else
+    {
+        FOR_ALL_ELEMENTS_IN_FFTW_TRANSFORM(out)
+        {
+            FFTW_ELEM(out, kp, ip, jp) = FFTW_ELEM(in, kp, ip, jp);
+        }
+    }
+} // helper function _windowFT
+
+void FourierTransformer::windowFT(const Image &fImgIn, Image &fImgOut, size_t newdim)
 {
     auto idim = fImgIn.getDim();
     auto& type = fImgIn.getType();
     size_t &y = idim.y;
 
-    ASSERT_ERROR(newdim > y, "Augmenting window NOT IMPLEMENTED yet.");
     ASSERT_ERROR(idim.getRank() != 2, "Only implemented for rank=2");
 
     size_t newhdim = newdim / 2 + 1;
@@ -188,23 +227,12 @@ void FourierTransformer::windowFT(Image &fImgIn, Image &fImgOut, size_t newdim)
                  "all dimensions.")
 
     fImgOut.resize(odim, type);
-
-    auto memIn = static_cast<int8_t *>(fImgIn.getData());
-    auto memOut = static_cast<int8_t *>(fImgOut.getData());
-    size_t size = type.getSize();
-    size_t jumpIn = newhdim * size;
-    size_t jumpOut = idim.x * size;
-
-    ASSERT_ERROR(type != typeCFloat, "Only Complex-Float type is implemented.")
-    auto data = static_cast<float*>(fImgIn.getData());
-
-    LegacyArray<std::complex<float>> in(idim, fImgIn.getData());
-    LegacyArray<std::complex<float>> out(odim, fImgOut.getData());
-
-    FOR_ALL_ELEMENTS_IN_FFTW_TRANSFORM(out)
-    {
-        FFTW_ELEM(out, kp, ip, jp) = FFTW_ELEM(in, kp, ip, jp);
-    }
+    if (type == typeCDouble)
+        _windowFT<double>(fImgIn, fImgOut);
+    else if (type == typeCFloat)
+        _windowFT<float>(fImgIn, fImgOut);
+    else
+        THROW_ERROR("Only FT of CFloat or CDouble are allowed.");
 } // function FourierTransformer.window
 
 void FourierTransformer::scale(const Image &inputImg, Image &outputImg,
