@@ -22,7 +22,7 @@ git submodule update --init
 
 cmake .. -DBUILD_TESTS=ON 
 ```
-### Building with Google-tests
+### Building with Docs generation
 To build the documentation you could add the following option to cmake:
 ```
 cmake .. -DBUILD_DOCS=ON 
