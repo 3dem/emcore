@@ -224,7 +224,7 @@ public:
 
 }; // class ImageIOMrc
 
-StringVector mrcExts = {"mrc", "mrcs"};
+StringVector mrcExts = {"mrc", "mrcs", "map"};
 
 REGISTER_IMAGE_IO(mrcExts, ImageIOMrc);
 
