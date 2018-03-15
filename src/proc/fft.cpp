@@ -30,6 +30,7 @@ public:
     virtual void destroyPlans() = 0;
 
     virtual void transform(FT direction) = 0;
+    virtual void normalize() = 0;
 
     /** Set the images that will be used for the transform. */
     void setImages(const Image &rImg, Image &fImg)
@@ -75,6 +76,17 @@ public:
 }; // class FourierTransformer::Impl
 
 
+template <class T>
+void _normalize(void * rawData, size_t n)
+{
+    std::cout << "Normalizing by: " << n << std::endl;
+    auto data = static_cast<float*>(rawData);
+    for (size_t i = 0; i < n; ++i, ++data)
+        *data /= n;
+} // function normalize<T>
+
+
+
 class FtFloatImpl: public FourierTransformer::Impl
 {
 private:
@@ -116,13 +128,65 @@ public:
 
     virtual void transform(FT direction) override
     {
-        auto & p = (direction == FT::FORWARD) ? plan : iplan;
-        fftwf_execute(p);
+        fftwf_execute(direction == FT::FORWARD ? plan : iplan);
     }
 
-    virtual ~FtFloatImpl() {};
+    virtual void normalize() override
+    {
+        _normalize<float>(inputData, inputDim.getSize());
+    }
 }; // class FtFloatImpl
 
+
+class FtDoubleImpl: public FourierTransformer::Impl
+{
+private:
+    bool hasPlans = false;  // True if the plans are set
+    fftw_plan plan, iplan; // Direct and inverse plans
+
+public:
+    virtual void cleanup() override
+    {
+        fftw_cleanup();
+    }
+
+    virtual void createPlans() override
+    {
+        destroyPlans();
+        int rank = inputDim.getRank();
+        auto input = static_cast<double*>(inputData);
+        auto output = static_cast<fftw_complex *>(outputData);
+        // Set the dimensions to the dims array as expected by FFTW
+        dims[0] = (int)inputDim.z;
+        dims[1] = (int)inputDim.y;
+        dims[2] = (int)inputDim.x;
+        // The starting memory within dims will depends on the rank of the input
+        int index = 3 - inputDim.getRank();
+        plan = fftw_plan_dft_r2c(rank, dims + index, input, output,
+                                  FFTW_ESTIMATE); // TODO: consider other flags??
+        iplan = fftw_plan_dft_c2r(rank, dims + index, output, input,
+                                   FFTW_ESTIMATE); // TODO: consider other flags??
+    }
+
+    virtual void destroyPlans() override
+    {
+        if (hasPlans)
+        {
+            fftw_destroy_plan(plan);
+            fftw_destroy_plan(iplan);
+        }
+    }
+
+    virtual void transform(FT direction) override
+    {
+        fftw_execute(direction == FT::FORWARD ? plan : iplan);
+    }
+
+    virtual void normalize() override
+    {
+        _normalize<double>(inputData, inputDim.getSize());
+    }
+}; // class FtDoubleImpl
 
 FourierTransformer::FourierTransformer()
 {
@@ -131,19 +195,9 @@ FourierTransformer::FourierTransformer()
 
 FourierTransformer::~FourierTransformer()
 {
+    impl->destroyPlans();
     delete impl;
 }
-
-//void FourierTransformer::forward(Image &rImg, Image &fImg)
-//{
-//    impl = new FtFloatImpl();
-//    impl->setImages(rImg, fImg);
-//}
-//
-//void FourierTransformer::transform(FT direction)
-//{
-//    impl->transform(direction);
-//}
 
 void FourierTransformer::forward(const Image &rImg, Image &fImg)
 {
@@ -168,6 +222,7 @@ void FourierTransformer::backward(Image &fImg, Image &rImg)
               << "     fMem: " << fImg.getData() << std::endl;
     impl->setImages(rImg, fImg);
     impl->transform(FT::BACKWARD);
+    impl->normalize();
 } // function FourierTransformer.backward
 
 void FourierTransformer::centerFT(const Image &fImgIn, Image &fImgOut,
@@ -235,6 +290,12 @@ void FourierTransformer::windowFT(const Image &fImgIn, Image &fImgOut, size_t ne
         THROW_ERROR("Only FT of CFloat or CDouble are allowed.");
 } // function FourierTransformer.window
 
+void FourierTransformer::windowFT(Image &fImgInOut, size_t newdim)
+{
+    Image tmp(fImgInOut);
+    windowFT(tmp, fImgInOut, newdim);
+} // function FourierTransformer.window
+
 void FourierTransformer::scale(const Image &inputImg, Image &outputImg,
                                size_t newdim)
 {
@@ -257,52 +318,3 @@ ArrayDim FourierTransformer::getDimFT(const ArrayDim &rDim)
 {
     return ArrayDim(rDim.x / 2 + 1, rDim.y, rDim.z, rDim.n);
 }
-
-//template<class T>
-//void windowFourierTransform(MultidimArray<T > &in,
-//                            MultidimArray<T > &out,
-//                            long int newdim)
-//{
-//    long int newhdim = newdim/2 + 1;
-//
-//    // If same size, just return input
-//    if (newhdim == XSIZE(in))
-//    {
-//        out = in;
-//        return;
-//    }
-//
-//    // Otherwise apply a windowing operation
-//    // Initialise output array
-//    switch (in.getDim())
-//    {
-//        case 1:
-//            out.initZeros(newhdim);
-//            break;
-//        case 2:
-//            out.initZeros(newdim, newhdim);
-//            break;
-//        case 3:
-//            out.initZeros(newdim, newdim, newhdim);
-//            break;
-//        default:
-//            REPORT_ERROR("windowFourierTransform ERROR: dimension should be 1, 2 or 3!");
-//    }
-//    if (newhdim > XSIZE(in))
-//    {
-//        long int max_r2 = (XSIZE(in) -1) * (XSIZE(in) - 1);
-//        FOR_ALL_ELEMENTS_IN_FFTW_TRANSFORM(in)
-//        {
-//            // Make sure windowed FT has nothing in the corners, otherwise we end up with an asymmetric FT!
-//            if (kp*kp + ip*ip + jp*jp <= max_r2)
-//                FFTW_ELEM(out, kp, ip, jp) = FFTW_ELEM(in, kp, ip, jp);
-//        }
-//    }
-//    else
-//    {
-//        FOR_ALL_ELEMENTS_IN_FFTW_TRANSFORM(out)
-//        {
-//            FFTW_ELEM(out, kp, ip, jp) = FFTW_ELEM(in, kp, ip, jp);
-//        }
-//    }
-//}

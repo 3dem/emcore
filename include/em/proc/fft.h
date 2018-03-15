@@ -88,10 +88,9 @@ namespace em
          */
         static ArrayDim getDimFT(const ArrayDim &rDim);
 
+
         class Impl; // Internal implementation class (PIMPL idiom)
         Impl * impl;
-
-
     }; // class FourierTransformer
 
 } // namespace em
