@@ -5,7 +5,16 @@
 #ifndef EM_CORE_LEGACY_MACROS_H
 #define EM_CORE_LEGACY_MACROS_H
 
-#include "em/base/array.h"
+#include "em/image/image.h"
+
+//======================= From macros.h ====================================
+/** Starting point for Xmipp volume/image
+ *
+ * Given a size (in some direction), this function returns the first index for
+ * a volume/image/array with this size. The formula is -(int) ((float) (size)
+ * / 2.0)
+ */
+#define FIRST_XMIPP_INDEX(size) -(long int)((float) (size) / 2.0)
 
 
 // ====================== From multidim_array.h ============================
@@ -354,6 +363,8 @@
 #define FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY1D(v) \
     for (long int i=0; i<v.xdim; i++)
 
+
+
 // ======================== From FFTW.h =====================================
 
 /** For all direct elements in the complex array in FFTW format.
@@ -459,5 +470,25 @@ public:
     {
         data = static_cast<T*>(rawMemory);
     }
+
+    LegacyArray(em::Image &image): LegacyArray(image.getDim(), image.getData())
+    {}
+
+    /** Set logical origin in Xmipp fashion.
+     *
+     * This function adjust the starting points in the array such that the
+     * center of the array is defined in the Xmipp fashion.
+     *
+     * @code
+     * V.setXmippOrigin();
+     * @endcode
+     */
+        void setXmippOrigin()
+        {
+            zinit = FIRST_XMIPP_INDEX(zdim);
+            yinit = FIRST_XMIPP_INDEX(ydim);
+            xinit = FIRST_XMIPP_INDEX(xdim);
+        }
+
 }; // class LegacyArray
 #endif //EM_CORE_LEGACY_MACROS_H
