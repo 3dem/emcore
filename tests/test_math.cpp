@@ -73,7 +73,7 @@ TEST(GaussianFunc, createImage)
 {
     float angpix = 1.05f;
     float gauss_max_value = 0.1;
-    int particle_diameter = 200; // A
+    int particle_diameter = 50; // A
 
     // Set particle boxsize to be 1.5x bigger than circle with particle_diameter
     int size =  1.5 * (particle_diameter/angpix);
@@ -94,7 +94,10 @@ TEST(GaussianFunc, createImage)
         A2D_ELEM(array, i, j) = gauss_max_value * gauss(r) / normgauss;
     }
 
-    ImageLocation loc("gauss2d.mrc", 1);
+    std::string path("gauss2d.mrc");
+
+    Path::remove(path);
+    ImageLocation loc(path, 1);
     img.write(loc);
 
 } // TEST GaussianFunc.createImage
