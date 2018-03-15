@@ -8,6 +8,7 @@
 #include "em/os/filesystem.h"
 #include "em/math/functions.h"
 #include "em/image/image.h"
+#include "em/base/legacy.h"
 
 
 using namespace em;
@@ -32,40 +33,70 @@ TEST(GaussianFun, Basic)
 //    for (size_t i = 0; i < n; ++i)
 //        ASSERT_NEAR(goldArray[i], gauss(i) * 300, 0.001);
 
-    GaussianFunc<float> gauss2d(stddev, stddev, 1.5708, mean, mean);
-    Image img(ArrayDim(n, n), typeFloat);
-    auto array = img.getView<float>();
-    int x, y;
+//    GaussianFunc<float> gauss2d(stddev, stddev, 1.5708, mean, mean);
+//    Image img(ArrayDim(n, n), typeFloat);
+//    auto array = img.getView<float>();
+//    int x, y;
+//
+//    for (int j = 0; j < n; ++j)
+//    {
+//        for (int i = 0; i < n; ++i)
+//        {
+//            array(i, j) = gauss2d(i, j) * 300;
+//            std::cout << array(i, j) << " ";
+//        }
+//        std::cout << std::endl;
+//    }
+//
+//    std::cout << std::endl<< std::endl<< std::endl;
 
-    for (int j = 0; j < n; ++j)
+    //        //array(i, j) = gaussian2D((float)i, (float)j, stddev, stddev, 1.5708f,  mean, mean);
+    //
+    //    ImageLocation loc("gauss2d.mrc", 1);
+    //    img.write(loc);
+    //
+    //    Image img2;
+    //    img2.read(loc);
+    //    auto array2 = img2.getView<float>();
+    //for (int j = 0; j < n; ++j)
+    //{
+    //for (int i = 0; i < n; ++i)
+    //{
+    //std::cout << array2(i, j) << " ";
+    //}
+    //std::cout << std::endl;
+    //}
+
+} // TEST FourierTransformer.Basic
+
+TEST(GaussianFunc, createImage)
+{
+    float angpix = 1.05f;
+    float gauss_max_value = 0.1;
+    int particle_diameter = 200; // A
+
+    // Set particle boxsize to be 1.5x bigger than circle with particle_diameter
+    int size =  1.5 * (particle_diameter/angpix);
+    size += size % 2; // make even
+
+    Image img(ArrayDim(size, size), typeFloat);
+    // Make a Gaussian reference. sigma is 1/6th of the particle size,
+    // such that 3 sigma is at the image edge
+    GaussianFunc<float> gauss((float)size/6);
+    float normgauss = gauss(0.);
+
+    LegacyArray<float> array(img);
+    array.setXmippOrigin();
+
+    FOR_ALL_ELEMENTS_IN_ARRAY2D(array)
     {
-        for (int i = 0; i < n; ++i)
-        {
-            array(i, j) = gauss2d(i, j) * 300;
-            std::cout << array(i, j) << " ";
-        }
-        std::cout << std::endl;
+        double r = sqrt((float)(i*i + j*j));
+        A2D_ELEM(array, i, j) = gauss_max_value * gauss(r) / normgauss;
     }
-
-    std::cout << std::endl<< std::endl<< std::endl;
-
-        //array(i, j) = gaussian2D((float)i, (float)j, stddev, stddev, 1.5708f,  mean, mean);
 
     ImageLocation loc("gauss2d.mrc", 1);
     img.write(loc);
 
-    Image img2;
-    img2.read(loc);
-    auto array2 = img2.getView<float>();
-for (int j = 0; j < n; ++j)
-{
-for (int i = 0; i < n; ++i)
-{
-std::cout << array2(i, j) << " ";
-}
-std::cout << std::endl;
-}
-
-} // TEST FourierTransformer.Basic
+} // TEST GaussianFunc.createImage
 
 
