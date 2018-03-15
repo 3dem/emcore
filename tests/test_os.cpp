@@ -37,7 +37,12 @@ TEST(File, Basic) {
     ASSERT_EQ(Path::exists(filename), true);
     ASSERT_EQ(Path::getFileSize(filename), 5*1024);
 
-    ASSERT_EQ(remove(filename), 0);
+    ASSERT_EQ(Path::remove(filename), 0);
+    ASSERT_FALSE(Path::exists(filename));
+
+    std::string filename2("non-existing");
+    // Check that removing a non-existing file is fine
+    ASSERT_EQ(Path::remove(filename2), 0);
 } // TEST File.Basic
 
 

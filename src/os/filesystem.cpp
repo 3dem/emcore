@@ -38,8 +38,10 @@ size_t Path::getFileSize(const std::string &path)
 
 int Path::remove(const std::string &path)
 {
-    // FIXME: Causing a Segmentation fault
-    return remove(path);
+    if (!exists(path))
+        return 0; // it is fine if the file does not exists
+
+    return ::remove(path.c_str());
 } // function Path::remove
 
 
