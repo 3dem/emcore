@@ -270,7 +270,7 @@ T& ArrayView<T>::operator()(int x, int y, int z, size_t n)
                  "Invalid indexes for this array. ");
 
     T *ptr = GET_DATA();
-    ptr += (n - 1) * impl->xyz + z * impl->xy + y * x + x;
+    ptr += (n - 1) * impl->xyz + z * impl->xy + y * impl->adim.x + x;
     return *ptr;
 } // function ArrayView.operator()
 
@@ -313,10 +313,26 @@ ArrayDim ArrayView<T>::getDim() const
 // ================ Explicit instantiations of Templates =======================
 // This allows to implement template code in the .cpp
 
-template em::ArrayView<int> em::Array::getView();
+template em::ArrayView<int8_t > em::Array::getView();
+template em::ArrayView<uint8_t > em::Array::getView();
+template em::ArrayView<int16_t > em::Array::getView();
+template em::ArrayView<uint16_t > em::Array::getView();
+template em::ArrayView<int32_t > em::Array::getView();
+template em::ArrayView<uint32_t > em::Array::getView();
+
 template em::ArrayView<float> em::Array::getView();
 template em::ArrayView<double> em::Array::getView();
+template em::ArrayView<cfloat> em::Array::getView();
+template em::ArrayView<cdouble> em::Array::getView();
 
-template class em::ArrayView<int>;
+template class em::ArrayView<int8_t>;
+template class em::ArrayView<uint8_t>;
+template class em::ArrayView<int16_t>;
+template class em::ArrayView<uint16_t>;
+template class em::ArrayView<int32_t>;
+template class em::ArrayView<uint32_t>;
+
 template class em::ArrayView<float>;
 template class em::ArrayView<double>;
+template class em::ArrayView<cfloat>;
+template class em::ArrayView<cdouble>;
