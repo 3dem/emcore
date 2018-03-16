@@ -195,7 +195,8 @@ FourierTransformer::FourierTransformer()
 
 FourierTransformer::~FourierTransformer()
 {
-    impl->destroyPlans();
+    if (impl != nullptr)
+        impl->destroyPlans();
     delete impl;
 }
 
@@ -225,16 +226,114 @@ void FourierTransformer::backward(Image &fImg, Image &rImg)
     impl->normalize();
 } // function FourierTransformer.backward
 
-void FourierTransformer::centerFT(const Image &fImgIn, Image &fImgOut,
-                                  FT direction)
+void FourierTransformer::shift(const Image &fImgIn, Image &fImgOut,
+                               FT direction)
 {
+    // FIXME: The assignment does not seem to resize the image
+    fImgOut = fImgIn;
+    shift(fImgOut, direction); // TODO: Shift could be more efficient if not inplace
+} // function FourierTransformer.shift
 
-} // function FourierTransformer.centerFT
-
-void FourierTransformer::centerFT(Image &inOutImg, FT direction)
+void FourierTransformer::shift(Image &inOutImg, FT direction)
 {
-    centerFT(Image(inOutImg), inOutImg, direction);
-} // function FourierTransformer.centerFT
+    auto adim = inOutImg.getDim();
+    auto rank = adim.getRank();
+    auto type = inOutImg.getType();
+    auto size = type.getSize();
+
+    std::cout << "adim: " << adim << " rank: " << rank << " type: " << type << " size: " << size << std::endl;
+
+    bool isForward = direction == FT::FORWARD;
+    size_t n = adim.x; // assuming all dimensions are the same
+    size_t r = n % 2;
+    size_t h = n / 2;
+
+    // Left memory position is always 0, let's calculate
+    // the left size and right pos and size depending on the
+    // direction and also if the input dim is even or odd
+    size_t lIndex = isForward ? h + r : h;  // number of items in first half
+    size_t lJump = isForward ? lIndex - r: lIndex + r;
+    size_t rJump = lJump - n;  // assuming all dimensions are the same
+    size_t lSize =  lIndex * size;
+    size_t ldPos = lJump * size;
+    size_t rPos = (isForward ? h + r : h) * size;
+    size_t rSize = (isForward ? h : h + r) * size;
+
+
+#define SWAP(mem1, mem2, buffer, msize) { memcpy(buffer, mem1, msize); \
+                                          memcpy(mem1, mem2, msize); \
+                                          memcpy(mem2, buffer, msize); }
+
+#define SWAPX(mem) { memcpy(buffer, mem, lSize); \
+                     memcpy(mem, mem+rPos, rSize); \
+                     memcpy(mem+ldPos, buffer, lSize); }
+
+    uint8_t * buffer = nullptr;
+    auto data = static_cast<uint8_t *>(inOutImg.getData());
+
+    switch (rank)
+    {
+        case 1:
+        {
+            // Half a row size to do shift in X
+            buffer = new uint8_t[(h + r) * size];
+            SWAPX(data);
+            break;
+        }
+        case 2:
+        {
+            size_t rowSize = n * size;
+            buffer = new uint8_t[rowSize];
+
+            auto rowData = data;
+            auto otherRow = data;
+
+            size_t rowHalfJump = rowSize * h;
+
+            // First of all, swap X all rows
+            for (size_t row = 0; row < n; ++row, rowData += rowSize)
+                SWAPX(rowData)
+
+            rowData = data;
+            // If r = 0, we can do a more direct swap, if not
+            // we need to jump to the next position
+            if (r == 0)
+            {
+                // Example: n = 4 (forward)
+                // 0 <-> 2,  1 <-> 3
+                for (size_t row = 0; row < h; ++row, rowData += rowSize)
+                {
+                    otherRow = rowData + rowHalfJump;
+                    SWAP(rowData, otherRow, buffer, rowSize);
+                }
+            }
+            else
+            {
+                // Example: n = 5 (forward)
+                // 0 -> 2,  2 -> 4,   4 -> 1,   1 -> 3,  3 -> 0
+                // Copy first row to the buffer
+                memcpy(buffer, data, rowSize);
+                for (size_t i = 0, index = 0; i < n; ++i)
+                {
+                    index += index < lIndex ? lJump : rJump;
+                    // Now swap it to the next position (this will store
+                    // the next position in buffer for next iter)
+                    // Using the first row as a new 'buffer'
+                    if (index == 0) // for the last index we just need to copy
+                        memcpy(data, buffer, rowSize);
+                    else
+                        SWAP(buffer, data + index * rowSize, data, rowSize);
+                }
+            }
+            break;
+        }
+
+        case 3:
+            break;
+    } // switch rank
+
+    delete buffer;
+} // function FourierTransformer.shift
 
 
 template <class T>

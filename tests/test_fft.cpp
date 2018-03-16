@@ -186,3 +186,57 @@ TEST(FourierTransformer, Crosscorrelation)
     }
 } // TEST FourierTransformer.Crosscorrelation
 
+TEST(FourierTransformer, shift)
+{
+    FourierTransformer ft;
+    Image img1, img2, img3;
+
+    for (auto adim: {ArrayDim(4), ArrayDim(5),
+                     ArrayDim(4, 4), ArrayDim(5, 5)})
+    {
+        img1.resize(adim, typeFloat);
+        auto array = img1.getView<float>();
+        auto data = array.getData();
+        std::cout << "data = " << data << std::endl;
+
+        auto n = adim.getSize();
+        std::cout << "Number of elements: " << n << std::endl;
+
+        // Fill it with consecutive numbers
+        std::cout << "Before: " << std::endl;
+        for (size_t y = 0, i = 0; y < adim.y; ++y)
+        {
+            for (size_t x = 0; x < adim.x; ++x)
+            {
+                array(x, y) = ++i;
+                std::cout << array(x, y) << " ";
+            }
+            std::cout << std::endl;
+        }
+
+        img2.resize(adim, typeFloat);
+        ft.shift(img1, img2);
+
+        std::cout << "After ft.shift: " << std::endl;
+        auto array2 = img2.getView<float>();
+        for (size_t y = 0; y < adim.y; ++y)
+        {
+            for (size_t x = 0; x < adim.x; ++x)
+                std::cout << array2(x, y) << " ";
+            std::cout << std::endl;
+        }
+
+        img3.resize(adim, typeFloat);
+        ft.shift(img2, img3, FT::BACKWARD);
+        auto array3 = img3.getView<float>();
+        for (size_t y = 0; y < adim.y; ++y)
+        {
+            for (size_t x = 0; x < adim.x; ++x)
+            std::cout << array3(x, y) << " ";
+            std::cout << std::endl;
+        }
+
+        std::cout << std::endl << std::endl;
+    }
+
+}

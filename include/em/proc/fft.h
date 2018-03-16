@@ -61,9 +61,9 @@ namespace em
          * If the direction is FT::BACKWARD, the modification done by
          * a forward center will be undone, similar to Matlab ifftshift
          */
-        void centerFT(const Image &fImgIn, Image &fImgOut,
-                      FT direction=FT::FORWARD);
-        void centerFT(Image &inOutImg, FT direction=FT::FORWARD);
+        void shift(const Image &fImgIn, Image &fImgOut,
+                   FT direction = FT::FORWARD);
+        void shift(Image &inOutImg, FT direction = FT::FORWARD);
 
         /** Change the dimensions of an image resulting from a forward
          * transform. The dimensions can be reduced or augmented.
