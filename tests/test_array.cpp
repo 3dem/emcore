@@ -70,24 +70,38 @@ TEST(Array, Basic) {
         ASSERT_EQ(data2[i], ptr[i]);
 
     Array A3(adim, typeFloat);
-    A3.copy(A);
+    A3 = A;
     ASSERT_EQ(A3.getType(), typeFloat);
     auto data3f = static_cast<const float *>(A3.getData());
     for (size_t i = 0; i < adim.getSize(); ++i)
         ASSERT_FLOAT_EQ(data3f[i], (float)ptr[i]);
 
-    A3.copy(A, typeUInt32);
-    ASSERT_EQ(A3.getType(), typeUInt32);
-    auto data3ui = static_cast<const uint32_t *>(A3.getData());
+    // Test the resize based on another Array dimensions and type
+    A3.resize(A);
+    A3 = A;
+    ASSERT_EQ(A3.getType(), typeInt32);
+    auto data3ui = static_cast<const int32_t *>(A3.getData());
     for (size_t i = 0; i < adim.getSize(); ++i)
-        ASSERT_EQ(data3ui[i], (uint32_t)ptr[i]);
+        ASSERT_EQ(data3ui[i], (int32_t)ptr[i]);
 
     Array A4;
-    A4.copy(A);
+    A4 = A;
     ASSERT_EQ(A4.getType(), typeInt32);
     auto data3i = static_cast<const int32_t *>(A3.getData());
     for (size_t i = 0; i < adim.getSize(); ++i)
         ASSERT_FLOAT_EQ(data3i[i], (int32_t)ptr[i]);
+
+    // Check that the resize operation will not allocate new memory
+    // if the currently allocated one is enough to store new type and dimensions
+    void * adata1 = A.getData();
+    A.resize(adim, typeUInt32);  // typeInt32 and typeUInt32 should have same size
+    void * adata2 = A.getData();
+    ASSERT_EQ(adata1, adata2);
+    // The memory should also be reused if the same number of elements
+    A.resize(ArrayDim(25, 4)); // same number of elements as 10 x 10
+    adata1 = A.getData();
+    ASSERT_EQ(adata1, adata2);
+
 } // TEST(ArrayTest, Constructor)
 
 

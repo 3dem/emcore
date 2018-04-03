@@ -77,8 +77,6 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::Object &object)
 
 Object& Object::operator=(const Object &other)
 {
-    //FIXME: Check the logic if we want always that this adopt the other
-    // type or cast its value
-    copyOrCast(other.getType(), 1, other);
+    copyOrCast(other, 1);
     return *this;
 }

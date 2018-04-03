@@ -110,7 +110,7 @@ Array::~Array()
 Array& Array::operator=(const Array &other)
 {
     impl->adim = other.getDim();
-    copyOrCast(other.getType(), impl->adim.getSize(), other);
+    copyOrCast(other, impl->adim.getSize());
     return *this;
 } // function Array.operator=
 
@@ -130,14 +130,6 @@ bool Array::operator!=(const Array &other) const
 {
     return !(*this == other);
 } // function Array.operator!=
-
-void Array::copy(const Array &other, const Type & type)
-{
-    auto finalType = !type.isNull() ? type :
-                     getType().isNull() ? other.getType() : getType();
-    impl->adim = other.getDim();
-    copyOrCast(finalType, impl->adim.getSize(), other);
-} // function Array.copy
 
 Array Array::getAlias(size_t index)
 {
@@ -165,12 +157,19 @@ ArrayDim Array::getDim() const
 
 void Array::resize(const ArrayDim &adim, const Type & type)
 {
-    //TODO: Avoid allocation if memory is enough !!!
-
-    // Use type if not none, the current type if not
+    // Use input type if not none, otherwise the current type of the array
     impl->adim = adim;
     auto& finalType = type.isNull() ? getType() : type;
+    // Validate that either the input type or the current type are not null
+    ASSERT_ERROR(finalType.isNull(),
+                 "Input type should not be null if the Array does not have "
+                 "a type yet.")
     allocate(finalType, adim.getSize());
+} // function Array.resize
+
+void Array::resize(const Array &other)
+{
+    resize(other.getDim(), other.getType());
 } // function Array.resize
 
 void Array::toStream(std::ostream &ostream) const

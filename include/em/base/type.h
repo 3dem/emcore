@@ -175,8 +175,14 @@ namespace em
         protected:
             void allocate(const Type &type, const size_t n, void *memory=nullptr);
             void deallocate();
-            void copyOrCast(const Type &type, const size_t n,
-                            const Container &other);
+
+            /** Copy or cast the elements from the other Type::Container.
+             * If type of current Container is not null, it will be kept, if not
+             * the type of the other will be used.
+             * @param other The other Type::Container
+             * @param n Number of elements we want to copy
+             */
+            void copyOrCast(const Container &other, size_t n);
 
         private:
             class Impl;

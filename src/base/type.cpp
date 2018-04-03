@@ -167,6 +167,13 @@ void* Type::Container::getData() { return impl->data; }
 
 void Type::Container::allocate(const Type &type, const size_t n, void *memory)
 {
+    // If the type have the same size and we are going to allocate the
+    // same number of elements, then we will use the same amount of
+    // memory, so there is not need for a new allocation if we own the memory
+    if (memory != nullptr && impl->size > 0
+        && impl->size * impl->type.getSize() == n * type.getSize())
+        return;
+
     deallocate();
     impl->type = type;
 
@@ -189,14 +196,21 @@ void Type::Container::deallocate()
     }
 } // function Container.deallocate
 
-void Type::Container::copyOrCast(const Type &type, const size_t n,
-                                  const Type::Container &other)
+/** Copy or cast the elements from the other Type::Container.
+ * If type of current Container is not null, it will be kept, if not
+ * the type of the other will be used.
+ * @param other The other Type::Container
+ * @param n Number of elements we want to copy
+ */
+void Type::Container::copyOrCast(const Type::Container &other, size_t n)
 {
-    if (type != getType())
-        allocate(type, n);
+    auto& otherType = other.getType();
+    auto& finalType = impl->type.isNull() ? otherType: impl->type;
 
-    if (type == other.getType())
-        type.copy(other.getData(), impl->data, n);
+    allocate(finalType, n);
+
+    if (finalType == otherType)
+        finalType.copy(other.getData(), impl->data, n);
     else
-        type.cast(other.getData(), impl->data, n, other.getType());
+        finalType.cast(other.getData(), impl->data, n, otherType);
 } // function Container.copyOrCast

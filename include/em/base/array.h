@@ -119,17 +119,6 @@ namespace em
         bool operator==(const Array &other) const;
         bool operator!=(const Array &other) const;
 
-        /**
-         * Copy the elements from another array. The input type, if not null,
-         * will be used for the resulting elements. If type is null, the type
-         * of this array will be used. If the type of the array is also null,
-         * then the type of the input array will be used.
-         * @param other The other array from which to copy the elements.
-         * @param type Type to be used for resulting elements, if null, use the
-         * current type of the array.
-         */
-        void copy(const Array &other, const Type &type=typeNull);
-
         /** Return an "aliased" Array that share the memory with this one.
          * If index is 0, the new Array will have exactly the same dimensions.
          * If index is between 1 and n, then it will point to a single item
@@ -143,8 +132,15 @@ namespace em
         /** Change the dimensions of the current Array.
          * This operation usually imply a new allocation of memory.
          * Optionally, a new type can be passed.
+         * If the current array does not have a type yet, then the input type
+         * should be different from typeNull.
          */
-        virtual void resize(const ArrayDim &adim, const Type & type=typeNull);
+        void resize(const ArrayDim &adim, const Type & type=typeNull);
+
+        /** Resize the array based on the dimensions and the type of the
+         * input Array.
+         */
+         void resize(const Array& other);
 
         /** Return the current dimensions of the Array */
         ArrayDim getDim() const;
