@@ -7,6 +7,7 @@
 #include <cstring>
 #include <map>
 #include <vector>
+#include <complex>
 
 #include "em/base/error.h"
 
@@ -191,6 +192,9 @@ namespace em
 
     std::ostream& operator<< (std::ostream &ostrm, const em::Type &t);
 
+    using cfloat = std::complex<float>;
+    using cdouble = std::complex<double>;
+
     static const Type typeNull;
     static const Type& typeInt8= Type::get<int8_t>();
     static const Type& typeUInt8 = Type::get<uint8_t>();
@@ -198,15 +202,15 @@ namespace em
     static const Type& typeUInt16 = Type::get<uint16_t>();
     static const Type& typeInt32 = Type::get<int32_t>();
     static const Type& typeUInt32 = Type::get<uint32_t>();
+
     static const Type& typeFloat = Type::get<float>();
     static const Type& typeDouble = Type::get<double>();
+    static const Type& typeCFloat = Type::get<cfloat>();
+    static const Type& typeCDouble = Type::get<cdouble>();
 
     static const Type& typeString = Type::get<std::string>();
 
     using TypeMap = std::map<int, const Type *>;
-
-
-
 
 
 #include "type_priv.h"

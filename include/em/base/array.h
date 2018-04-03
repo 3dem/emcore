@@ -64,6 +64,13 @@ namespace em
         /** Simple string representation */
         std::string toString() const;
 
+        /** Return the rank of this dimension.
+         * 1 if y = z = 1
+         * 2 if z = 1
+         * 3 otherwise
+         */
+         int getRank() const;
+
     }; // class ArrayDim
 
     std::ostream& operator<< (std::ostream &ostream, const ArrayDim &adim);

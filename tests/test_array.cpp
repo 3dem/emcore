@@ -7,6 +7,7 @@
 
 #include "em/base/error.h"
 #include "em/image/image.h"
+#include "em/base/legacy.h"
 
 
 using namespace em;
@@ -21,6 +22,7 @@ TEST(ArrayDim, Defaults) {
     // the rest will be set to 1
     ArrayDim adim2(100);
     ASSERT_TRUE((adim2 == ArrayDim(100, 1, 1, 1)));
+    ASSERT_EQ(adim2.getRank(), 1);
 
     std::cout << adim2 << std::endl;
 
@@ -29,6 +31,7 @@ TEST(ArrayDim, Defaults) {
 
     ASSERT_EQ(adim3.getSize(), 100 * 100 * 100);
     ASSERT_EQ(adim3.getItemSize(), 100 * 100);
+    ASSERT_EQ(adim3.getRank(), 2);
 
     // Test copy constructor
     ArrayDim adim4(adim3);
@@ -36,6 +39,10 @@ TEST(ArrayDim, Defaults) {
     ASSERT_EQ(adim4, adim3);
     ASSERT_EQ(adim4.getSize(), 100 * 100 * 100);
     ASSERT_EQ(adim4.getItemSize(), 100 * 100);
+    ASSERT_EQ(adim4.getRank(), 2);
+
+    adim4.z = 100;  // After this rank should be 3
+    ASSERT_EQ(adim4.getRank(), 3);
 
 
 } // TEST(ArrayTest, ArrayDim)
@@ -149,6 +156,59 @@ TEST(Array, IndexingAlias)
     catch (Error &e)
     {
         std::cerr << e << std::endl;
+    }
+
+
+} // TEST(Array, getAlias)
+
+TEST(Array, Legacy)
+{
+    const size_t DIM = 16; // 128
+    const size_t N = 10;
+    // Create an Array with 10 elements to test aliasing single images
+    ArrayDim adim(DIM, DIM, 1, N);
+    Array array(adim, typeFloat);
+    ArrayDim asdim(adim);
+    asdim.n = 1;
+
+    size_t xy = adim.getSliceSize();
+    size_t xyz = adim.getItemSize();
+
+    auto avAll = array.getView<float>();
+    avAll.assign(0);
+
+    try
+    {
+        for (size_t i = 1; i <= N; ++i)
+        {
+            auto arraySingle = array.getAlias(i);
+            ASSERT_EQ(arraySingle.getDim(), asdim);
+            auto avSingle = arraySingle.getView<float>();
+            // Set different values for each individual image
+            avSingle.assign(i);
+        }
+
+        float * data = avAll.getData();
+        LegacyArray<float> legacyArray(adim, data);
+
+        for (size_t i = 0; i < adim.getItemSize(); ++i)
+        {
+            size_t r = i % xyz;
+            size_t z = r / xy;
+            r = r % xy;
+            size_t y = r / adim.x;
+            size_t x = r % adim.x;
+
+            // Now check that the indexing logic is symmetric
+            // and also the assign operation over an alias
+            ASSERT_EQ(data[i], avAll(x, y, z, 1));
+            ASSERT_EQ(data[i], DIRECT_A3D_ELEM(legacyArray, z, y, x));
+            ASSERT_EQ(data[i], A3D_ELEM(legacyArray, z, y, x));
+        }
+    }
+    catch (Error &e)
+    {
+    std::cerr << e << std::endl;
     }
 
 
