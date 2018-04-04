@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <string>
 
-#include "em/base/type.h"
+#include "em/base/object.h"
 
 
 namespace em
@@ -112,10 +112,36 @@ namespace em
         // Destructor
         virtual ~Array();
 
-        // Assign operator
+        /** Assign other Array to this one. This operation will resize the
+         * current Array to have the same dimensions of the other Array. If the
+         * type of this Array is null, then the type of other will be used.
+         * After resizing, all elements will be copied/casted to the resulting
+         * array memory.
+         *
+         * @param other Other Array from which the elements will be assigned
+         * @return *this
+         */
         Array& operator=(const Array &other);
 
-        // Comparison operator
+        /** Assign the value of a single element to the values of the array.
+         * If the Array type is the same of the input Object type, then the
+         * elements will be copied. If not, they will be casted.
+         * @param value Input Object with the value that will be assigned
+         * @return *this
+         */
+        Array& operator=(const Object &value);
+
+        // Implement some arithmetic operators using as input another
+        // Array and single Object value.
+        Array& operator+=(const Array& other);
+        Array& operator+=(const Object& value);
+        Array& operator-=(const Array& other);
+        Array& operator-=(const Object& value);
+        Array& operator*=(const Array& other);
+        Array& operator*=(const Object& value);
+        Array& operator/=(const Array& other);
+        Array& operator/=(const Object& value);
+
         bool operator==(const Array &other) const;
         bool operator!=(const Array &other) const;
 

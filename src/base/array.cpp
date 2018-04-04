@@ -112,7 +112,81 @@ Array& Array::operator=(const Array &other)
     impl->adim = other.getDim();
     copyOrCast(other, impl->adim.getSize());
     return *this;
-} // function Array.operator=
+} // function Array.operator= Array
+
+Array& Array::operator=(const Object &value)
+{
+    copyOrCast(value, impl->adim.getSize(), true);
+    return *this;
+} // function Array.operator= Object
+
+Array& Array::operator+=(const Array &other)
+{
+    auto& dim = impl->adim;
+    ASSERT_ERROR(dim != other.getDim(),
+                 "Arrays should have the same dimensions.")
+    getType().operate(Type::ADD, other.getData(), other.getType(), getData(),
+                      dim.getSize());
+    return *this;
+} // function Array.operator+= Array
+
+Array& Array::operator+=(const Object &value)
+{
+    getType().operate(Type::ADD, value.getData(), value.getType(), getData(),
+                      impl->adim.getSize(), true);
+    return *this;
+} // function Array.operator+= Object
+
+Array& Array::operator-=(const Array &other)
+{
+    auto& dim = impl->adim;
+    ASSERT_ERROR(dim != other.getDim(),
+                 "Arrays should have the same dimensions.")
+    getType().operate(Type::SUB, other.getData(), other.getType(), getData(),
+                      dim.getSize());
+    return *this;
+} // function Array.operator-= Array
+
+Array& Array::operator-=(const Object &value)
+{
+    getType().operate(Type::SUB, value.getData(), value.getType(), getData(),
+                      impl->adim.getSize(), true);
+    return *this;
+} // function Array.operator-= Object
+
+Array& Array::operator*=(const Array &other)
+{
+    auto& dim = impl->adim;
+    ASSERT_ERROR(dim != other.getDim(),
+                 "Arrays should have the same dimensions.")
+    getType().operate(Type::MUL, other.getData(), other.getType(), getData(),
+                      dim.getSize());
+    return *this;
+} // function Array.operator*= Array
+
+Array& Array::operator*=(const Object &value)
+{
+    getType().operate(Type::MUL, value.getData(), value.getType(), getData(),
+                      impl->adim.getSize(), true);
+    return *this;
+} // function Array.operator*= Object
+
+Array& Array::operator/=(const Array &other)
+{
+    auto& dim = impl->adim;
+    ASSERT_ERROR(dim != other.getDim(),
+                 "Arrays should have the same dimensions.")
+    getType().operate(Type::DIV, other.getData(), other.getType(), getData(),
+                      dim.getSize());
+    return *this;
+} // function Array.operator/= Array
+
+Array& Array::operator/=(const Object &value)
+{
+    getType().operate(Type::DIV, value.getData(), value.getType(), getData(),
+                      impl->adim.getSize(), true);
+    return *this;
+} // function Array.operator/= Object
 
 bool Array::operator==(const Array &other) const
 {
@@ -130,6 +204,8 @@ bool Array::operator!=(const Array &other) const
 {
     return !(*this == other);
 } // function Array.operator!=
+
+
 
 Array Array::getAlias(size_t index)
 {

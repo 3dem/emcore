@@ -91,11 +91,11 @@ void Type::copy(const void *inputMem, void *outputMem, size_t count) const
     impl->copy(inputMem, outputMem, count);
 } // function Type.copy
 
-void Type::cast(const void *inputMem, void *outputMem, size_t count,
-                const Type &inputType) const
+void Type::operate(Operation op, const void *inputMem, const Type &inputType,
+                   void *outputMem, size_t count, bool singleInput) const
 {
-    impl->cast(inputMem, outputMem, count, inputType);
-} // function Type.cast
+    impl->operate(op, inputMem, inputType, outputMem, count, singleInput);
+} // function Type.operate
 
 void* Type::allocate(size_t count) const
 {
@@ -202,15 +202,17 @@ void Type::Container::deallocate()
  * @param other The other Type::Container
  * @param n Number of elements we want to copy
  */
-void Type::Container::copyOrCast(const Type::Container &other, size_t n)
+void Type::Container::copyOrCast(const Type::Container &other, size_t n,
+                                 bool singleInput)
 {
     auto& otherType = other.getType();
     auto& finalType = impl->type.isNull() ? otherType: impl->type;
 
     allocate(finalType, n);
 
-    if (finalType == otherType)
+    if (finalType == otherType && !singleInput)
         finalType.copy(other.getData(), impl->data, n);
     else
-        finalType.cast(other.getData(), impl->data, n, otherType);
+        finalType.operate(Type::CAST, other.getData(), otherType, impl->data,
+                          n, singleInput);
 } // function Container.copyOrCast

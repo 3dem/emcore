@@ -32,6 +32,19 @@ namespace em
     class Type
     {
     public:
+        /** Enumerate with common operations applied to most type.
+         * Basic arithmetic operations can only be applied to arithmetic types.
+         */
+        enum Operation {
+            CAST = 'c',
+            ADD = '+',
+            SUB = '-',
+            MUL = '*',
+            DIV = '/',
+            LOG = 'l',
+            SQRT = 's'
+        };
+
         /** Empty constructor, Null type */
         Type();
 
@@ -94,15 +107,20 @@ namespace em
         void copy(const void * inputMem, void * outputMem, size_t count) const;
 
         /**
-         * Cast N elements from inputMem (of type inputType) into outputMem
-         * (of type of the caller type object).
+         * Operate on N elements from inputMem (of type inputType) and store
+         * the results into outputMem (of type of the caller type object).
+         *
+         * @param op Operation to be applied
          * @param inputMem Memory location of the input data
-         * @param outputMem Memory where cast elements will be put
-         * @param count Number of elements in both input and output
          * @param inputType The Type of the elements in inputMem
+         * @param outputMem Memory where resulting elements will be stored
+         * @param count Number of elements in the output
+         * @param singleInput If true, the inputMem points to a single value,
+         * otherwise the outputMem has the same size (count elements) of input
          */
-        void cast(const void * inputMem, void * outputMem, size_t count,
-                  const Type &inputType) const;
+        void operate(Operation op, const void * inputMem, const Type &inputType,
+                     void * outputMem, size_t count,
+                     bool singleInput=false) const;
 
         /**
          * Allocate memory for N elements of this Type.
@@ -181,8 +199,13 @@ namespace em
              * the type of the other will be used.
              * @param other The other Type::Container
              * @param n Number of elements we want to copy
+             * @param singleInput if True, it means that other Containers only
+             * have a single element that will be copied or casted to this
+             * Container. If false, the other Container should have the same
+             * dimensions of this one.
              */
-            void copyOrCast(const Container &other, size_t n);
+            void copyOrCast(const Container &other, size_t n,
+                            bool singleInput=false);
 
         private:
             class Impl;

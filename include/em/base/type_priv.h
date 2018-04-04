@@ -27,8 +27,9 @@ public:
     virtual void * allocate(size_t count) const NOT_IMPLEMENTED;
     virtual void deallocate(void *mem,
                             size_t count) const NOT_IMPLEMENTED;
-    virtual void cast(const void * inputMem, void * outputMem, size_t count,
-                      const Type &inputType) const NOT_IMPLEMENTED;
+    virtual void operate(Type::Operation op, const void * inputMem,
+                         const Type &inputType, void * outputMem,
+                         size_t count, bool singleInput) const NOT_IMPLEMENTED;
     virtual void toStream(const void * inputMem,
                           std::ostream &stream,
                           size_t count) const NOT_IMPLEMENTED;
@@ -46,30 +47,73 @@ public:
 #undef NOT_IMPLEMENTED
 };
 
-
-template <class T1, class T2>
-void typeCast(const T1 * inputMem, T2 * outputMem, size_t count)
-{
-    std::cerr << "Invalid CAST???" << std::endl;
-
-    THROW_ERROR("Invalid cast between types.");
+// Implement a shortcut trait to check if two types are numeric
+template<class T1, class T2>
+struct both_arithmetic{
+    static const bool value = std::is_arithmetic<T1>::value && std::is_arithmetic<T2>::value;
 };
 
-#define TYPE_CAST_FUNC(type) template <class T1> \
-void typeCast(const T1 * inputMem, type * outputMem, size_t count) { \
-for (size_t i = 0; i < count; ++i, ++outputMem, ++inputMem) *outputMem = (type) *inputMem; \
-}
 
-TYPE_CAST_FUNC(int8_t);
-TYPE_CAST_FUNC(uint8_t);
-TYPE_CAST_FUNC(int16_t);
-TYPE_CAST_FUNC(uint16_t);
-TYPE_CAST_FUNC(int32_t);
-TYPE_CAST_FUNC(uint32_t);
-TYPE_CAST_FUNC(float);
-TYPE_CAST_FUNC(double);
+// Implementation of some operations when the types are numeric
+// and the operation make sense
+template <bool B>
+class TypeOperator
+{
+public:
+    template <class T1, class T2>
+    static void operate(Type::Operation op, const T1 * inputMem, T2 * outputMem,
+                        size_t count, bool singleInput)
+    {
+        if (singleInput)
+        {
+            T2 value = static_cast<T2>(*inputMem);
 
-#undef TYPE_CAST_FUNC
+#define OP_SINGLE(_op) for (size_t i = 0; i < count; ++i, ++outputMem, ++inputMem) *outputMem _op value; break
+
+            switch (op)
+            {
+                case Type::CAST: OP_SINGLE(=);
+                case Type::ADD: OP_SINGLE(+=);
+                case Type::SUB: OP_SINGLE(-=);
+                case Type::MUL: OP_SINGLE(*=);
+                case Type::DIV: OP_SINGLE(/=);
+                default:
+                    THROW_ERROR("Operation not supported!");
+            }
+#undef OP_SINGLE
+        }
+        else
+        {
+# define OP_MULT(_op) for (size_t i = 0; i < count; ++i, ++outputMem, ++inputMem) *outputMem _op static_cast<T2>(*inputMem); break
+            switch (op)
+            {
+                case Type::CAST: OP_MULT(=);
+                case Type::ADD: OP_MULT(+=);
+                case Type::SUB: OP_MULT(-=);
+                case Type::MUL: OP_MULT(*=);
+                case Type::DIV: OP_MULT(/=);
+                default:
+                    THROW_ERROR("Operation not supported!");
+            }
+#undef OP_MULT
+        }
+
+    }
+};
+
+// Just default implementation to cover other types (e.g, string, char *, etc)
+// that do not support the operations
+template <>
+class TypeOperator<false>
+{
+public:
+    template <class T1, class T2>
+    static void operate(Type::Operation op, const T1 * inputMem, T2 * outputMem,
+                        size_t count, bool singleInput)
+    {
+        THROW_ERROR("Invalid cast between types.");
+    }
+};
 
 
 template <class T>
@@ -128,12 +172,13 @@ public:
             delete ptr;
     } // function TypeImplBaseT.destroy
 
-    virtual void cast(const void * inputMem, void * outputMem, size_t count,
-                      const Type &inputType) const override
+    virtual void operate(Type::Operation op, const void * inputMem, const Type &inputType,
+                 void * outputMem, size_t count, bool singleInput) const override
     {
         auto outputMemT = static_cast<T *>(outputMem);
-
-#define CAST_IF_TYPE(type) if (inputType == Type::get<type>()) typeCast(static_cast<const type*>(inputMem), outputMemT, count)
+        // std::is_arithmetic<type>::value
+#define CAST_IF_TYPE(type) if (inputType == Type::get<type>()) \
+        TypeOperator<both_arithmetic<T, type>::value>::operate(op, static_cast<const type*>(inputMem), outputMemT, count, singleInput);
 
         CAST_IF_TYPE(int8_t);
         CAST_IF_TYPE(uint8_t);

@@ -29,7 +29,7 @@ Object& Object::operator=(const T& valueIn)
     if (type == valueType)
         type.copy(inputMem, outputMem, 1);
     else
-        type.cast(inputMem, outputMem, 1, valueType);
+        type.operate(Type::CAST, inputMem, valueType, outputMem, 1);
     return *this;
 }
 

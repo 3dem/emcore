@@ -54,11 +54,47 @@ TEST(Array, Basic) {
     Array A(adim, typeInt32);
     ArrayView<int> Av = A.getView<int>();
 
+    // Check the assignment through the ArrayView class
     Av.assign(11);
+    int * ptr = Av.getData();
+
+    for (size_t i = 0; i < adim.getSize(); ++i)
+        ASSERT_EQ(11, ptr[i]);
+
+
+    // Now test the assignment through the Array class directly
+    A = 22;
+    for (size_t i = 0; i < adim.getSize(); ++i)
+        ASSERT_EQ(22, ptr[i]);
+
+    Array A0(A);
+    A0 += 22;
+    int * ptr0 = static_cast<int*>(A0.getData());
+    for (size_t i = 0; i < adim.getSize(); ++i)
+        ASSERT_EQ(44, ptr0[i]);
+
+    A0 -= A; // Now A0 and A should be equal
+    for (size_t i = 0; i < adim.getSize(); ++i)
+        ASSERT_EQ(ptr[i], ptr0[i]);
+
+    A0 /= 22; // now all values are 1
+    for (size_t i = 0; i < adim.getSize(); ++i)
+        ASSERT_EQ(1, ptr0[i]);
+
+    A0 *= A; // equals again
+    for (size_t i = 0; i < adim.getSize(); ++i)
+        ASSERT_EQ(ptr[i], ptr0[i]);
+
+    A0 += A;
+    A0 += A0; // Now A0 is 4 times A
+    A0 /= 4;
+    for (size_t i = 0; i < adim.getSize(); ++i)
+        ASSERT_EQ(ptr[i], ptr0[i]);
+
     Av(3, 3) = 20;
     Av(4, 4) = 20;
     Av(5, 5) = 20;
-    int * ptr = Av.getData();
+
     ptr[10] = 15;
 
     //std::cout << Av.toString() << std::endl;

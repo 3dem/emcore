@@ -70,7 +70,7 @@ TEST(Type, General) {
 
     // Test type casting
     int32_t * arrayInt = new int32_t[n];
-    typeInt32.cast(array, arrayInt, n, typeFloat);
+    typeInt32.operate(Type::CAST, array, typeFloat, arrayInt, n);
 
     for (size_t i = 0; i < n; ++i)
         ASSERT_FLOAT_EQ(array[i], (float)arrayInt[i]);
