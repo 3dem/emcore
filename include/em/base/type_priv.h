@@ -115,6 +115,22 @@ public:
     }
 };
 
+// Implement stream operations for enums since they are needed in toStream
+// and fromStream generic implementations in Type
+template<typename T>
+std::ostream& operator<<(typename std::enable_if<std::is_enum<T>::value, std::ostream>::type& stream, const T& e)
+{
+    return stream << static_cast<typename std::underlying_type<T>::type>(e);
+}
+
+template<typename T>
+std::istream& operator>>(typename std::enable_if<std::is_enum<T>::value, std::istream>::type& stream, T& e)
+{
+    typename std::underlying_type<T>::type v;
+    stream >> v;
+    e = static_cast<T>(v);
+    return stream;
+}
 
 template <class T>
 class TypeImplBaseT: public Type::Impl
