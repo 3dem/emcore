@@ -12,10 +12,8 @@ namespace em
 {
 
 
-    /**
-     * Base class for all operations that receive an Image as input and produce
+    /** Base class for all operations that receive an Image as input and produce
      * an Image as output.
-     *
      */
     class ImageProcessor
     {
@@ -38,6 +36,21 @@ namespace em
         ObjectDict params;
 
     }; // class ImageProcessor
+
+    /** Special type of Processor that can contains a list of other processors.
+     */
+     class ImagePipeProc: public ImageProcessor
+     {
+     public:
+         virtual void process(const Image &input, Image &output) override ;
+         virtual void process(Image &inputOutput) override ;
+
+         /** Add a new processor to the list */
+        void addProcessor(ImageProcessor* imgProc);
+
+     protected:
+         std::vector<ImageProcessor*> processors;
+     }; // class ImagePipeProc
 
 } // namespace em
 
