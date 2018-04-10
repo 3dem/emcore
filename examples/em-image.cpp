@@ -48,6 +48,12 @@ public:
         return USAGE;
     }
 
+    virtual StringVector getCommands() const override
+    {
+        return {"create", "add", "sub", "mul", "div", "shift", "rotate",
+                "flip", "scale"};
+    }
+
 protected:
     virtual int run() override ;
     virtual void readArgs() override ;
@@ -78,8 +84,7 @@ void EmImageProgram::readArgs()
         std::cout << "Output file: " << outputFn << std::endl;
     }
 
-    StringVector commands = {"create", "add", "sub", "mul", "div",
-                             "shift", "rotate", "flip", "scale"};
+    StringVector commands = ;
     // Store the pointers to each of the commands
     std::vector<size_t> cmdPos;
     size_t i = 0;
