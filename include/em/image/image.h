@@ -25,9 +25,16 @@ namespace em
     class ImageLocation
     {
     public:
-        // Constansts defining some special image indexes
-        static const int8_t FIRST;
-        static const int8_t ALL;
+        /***
+         *  Possible indexes contansts to be used in ImageLocation
+         */
+        enum Index
+        {
+            NONE = -1, ///< Index not set
+            ALL = 0,   ///< All indexes availables
+            FIRST = 1  ///< The first index
+        };
+
         // TODO: maybe consider a pointer to string, so many ImageLocation objects
         // could share the same path string without extra memory
         std::string path;

@@ -40,10 +40,6 @@ public:
 
 // ================== ImageLocation Implementation ====================
 
-const int8_t ImageLocation::FIRST = 1;
-const int8_t ImageLocation::ALL = 0;
-
-
 ImageLocation::ImageLocation(const std::string &path, size_t index):
 index(index), path(path)
 {}
@@ -328,6 +324,10 @@ void ImageIO::read(size_t index, Image &image)
 void ImageIO::write(size_t index, const Image &image)
 {
     auto type = impl->type;
+
+    // FIXME: Check what to do with ALL as index
+    if (index == ImageLocation::ALL)
+        index = ImageLocation::FIRST;
 
 //    std::cerr << "ImageIO::write: type: " << *type << std::endl;
 //    std::cerr << "ImageIO::write: image.getType(): " << *image.getType() << std::endl;
