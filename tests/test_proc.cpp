@@ -32,7 +32,7 @@ TEST(ImageOperator, Basic)
 
             for (auto &pair: fileDims)
             {
-                imgOp[ImageMathProc::OPERATION] = ImageMathProc::ADD;
+                imgOp[ImageMathProc::OPERATION] = Type::ADD;
                 imgOp[ImageMathProc::OPERAND] = 100.f;
                 loc.index = 1;
                 std::cerr << ">>>>>>>>>> Reading " << pair.first << std::endl;
@@ -43,26 +43,30 @@ TEST(ImageOperator, Basic)
                 ASSERT_EQ(img.getDim(), imgDim);
 
                 std::cerr << ">>>>>>>>>> Adding " << pair.first << std::endl;
-                imgOp[ImageMathProc::OPERATION] = ImageMathProc::ADD;
+                imgOp[ImageMathProc::OPERATION] = Type::ADD;
                 imgOp.process(img, img2);
                 ASSERT_EQ(img2.getDim(), imgDim);
                 std::string outFn = pair.first + std::string("_add.mrc");
                 std::cout << "     Writing ADD output to: " << outFn << std::endl;
-                img2.write(outFn);
+                std::cout << "img2: " << img2 << std::endl;
+                img2.write(ImageLocation(outFn, 1));
 
                 std::cerr << ">>>>>>>>>> Multiplying " << pair.first << std::endl;
-                imgOp[ImageMathProc::OPERATION] = ImageMathProc::MUL;
+                imgOp[ImageMathProc::OPERATION] = Type::MUL;
                 imgOp.process(img, img2);
                 ASSERT_EQ(img2.getDim(), imgDim);
                 outFn = pair.first + std::string("_mul.mrc");
                 std::cout << "     Writing MUL output to: " << outFn << std::endl;
+                std::cout << "img2: " << img2 << std::endl;
                 img2.write(outFn);
 
-                imgOp[ImageMathProc::OPERATION] = ImageMathProc::ADD;
+                imgOp[ImageMathProc::OPERATION] = Type::ADD;
                 imgOp[ImageMathProc::OPERAND] = img2;
                 imgOp.process(img, img3);
                 outFn = pair.first + std::string("_add-image.mrc");
                 std::cout << "     Writing ADD-Img output to: " << outFn << std::endl;
+
+                std::cout << "img3: " << img3 << std::endl;
                 img3.write(outFn);
             }
         }

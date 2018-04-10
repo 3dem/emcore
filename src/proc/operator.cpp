@@ -9,93 +9,46 @@ using namespace em;
 const std::string ImageMathProc::OPERATION = "operation";
 const std::string ImageMathProc::OPERAND = "operand";
 
-const ImageMathProc::Operation ImageMathProc::ADD = 0;
-const ImageMathProc::Operation ImageMathProc::SUB = 1;
-const ImageMathProc::Operation ImageMathProc::MUL = 2;
-const ImageMathProc::Operation ImageMathProc::DIV = 3;
-
-
-template <class T>
-void processImage(Image &image, const Object &object, ImageMathProc::Operation op)
-{
-    ArrayDim adim = image.getDim();
-    size_t size = adim.getSize(), i = 0;
-
-    T * data = static_cast<T*>(image.getData());
-
-    if (object.getType() == Type::get<Image>())
-    {
-        Image image2 = (Image) object;
-        T * data2 = static_cast<T*>(image2.getData());
-
-        switch (op)
-        {
-            case ImageMathProc::ADD:
-                for (; i < size; ++data, ++data2, ++i)
-                    *data += *data2;
-                break;
-            case ImageMathProc::SUB:
-                for (; i < size; ++data, ++data2, ++i)
-                    *data -= *data2;
-                break;
-            case ImageMathProc::MUL:
-                for (; i < size; ++data, ++data2, ++i)
-                    *data *= *data2;
-                break;
-            case ImageMathProc::DIV:
-                for (; i < size; ++data, ++data2, ++i)
-                    *data /= *data2;
-                break;
-        } // switch (op)
-    }
-    else
-    {
-        T value = (T) object;
-        switch (op)
-        {
-            case ImageMathProc::ADD:
-                for (; i < size; ++data, ++i)
-                    *data += value;
-                break;
-            case ImageMathProc::SUB:
-                for (; i < size; ++data, ++i)
-                    *data -= value;
-                break;
-            case ImageMathProc::MUL:
-                for (; i < size; ++data, ++i)
-                    *data *= value;
-                break;
-            case ImageMathProc::DIV:
-                for (; i < size; ++data, ++i)
-                    *data /= value;
-                break;
-        } // switch (op)
-    }
-} // function processImage<T>
-
-
 ImageMathProc::ImageMathProc()
 {
-#define REGISTER_TYPE(type) map[&Type::get<type>()] = processImage<type>;
-
-    REGISTER_TYPE(float);
-    REGISTER_TYPE(uint8_t);
-    REGISTER_TYPE(uint16_t);
+    // Use int to store the value of the enum
+    (*this)[ImageMathProc::OPERATION] = Object(Type::ADD);
 }
 
 void ImageMathProc::process(const Image &input, Image &output)
 {
+    output.resize(input);
     output = input;
+    std::cout << "input: " << input << std::endl;
+    std::cout << "output: " << output << std::endl;
+
     process(output);
 }
 
 void ImageMathProc::process(Image &image)
 {
-    ProcessFunc f = map[&image.getType()];
+    // Just initialize with the proper type
+    Type::Operation op = (Type::Operation )(*this)[OPERATION];
+    auto &operand = (*this)[OPERAND];
 
-    if (f != nullptr)
-        return f(image, (*this)[OPERAND], (*this)[OPERATION]);
+    std::cout << "op: " << (char)op << std::endl;
+    switch (op)
+    {
+        case Type::ADD:
+            image += operand;
+            break;
+        case Type::SUB:
+            image -= operand;
+            break;
+        case Type::MUL:
+            image *= operand;
+            break;
+        case Type::DIV:
+            image /= operand;
+            break;
+        default:
+            THROW_ERROR("Unsupported operation.");
 
-    THROW_ERROR("Unsupported type.");
-}
+    }
+} // function ImageMathProc.process
 

@@ -22,15 +22,6 @@ namespace em
         static const std::string OPERATION;
         static const std::string OPERAND;
 
-        // FIXME: Using ENUM provoke a compilation error due to instantiation
-        // FIXME: of Type::get<Operation> and it does not have operator>> used in Type
-        // enum Operation {ADD, SUB, MUL, DIV};
-        using Operation = int8_t ;
-        static const Operation ADD;
-        static const Operation SUB;
-        static const Operation MUL;
-        static const Operation DIV;
-
         ImageMathProc();
 
         /** Apply the operation defined by this Processor to the input
@@ -44,11 +35,6 @@ namespace em
          */
         virtual void process(Image &inputOutput) override ;
 
-    private:
-        /** Define a function pointer type to process images */
-        using ProcessFunc = void (*)(Image &, const Object&, Operation);
-
-        std::map<const Type *, ProcessFunc> map;
     }; // class ImageMathProc
 
 } // namespace em
