@@ -16,9 +16,9 @@ static const char USAGE[] =
     Usage:
       em-image (<input> | create <xdim> [<ydim> [<zdim>]])
                        [(add|sub|mul|div) <file_or_value>   |
-                        (shift|rotate) ((x|y|z) <value>)... |
+                        (shift|rotate) (x|y|z) <value>      |
                          rotate <value>                     |
-                         flip (x|y|z)...                    |
+                         flip (x|y|z)                       |
                          scale  <scale_factor>              |
                          scale angpix <old> <new>           |
                          scale (x|y|z) <new_dim>            |
@@ -73,38 +73,37 @@ int EmImageProgram::run()
 
 void EmImageProgram::readArgs()
 {
-    if (checkArg("<input>"))
+    if (hasArg("<input>"))
     {
-        inputFn = getArg("<input>");
+        inputFn = getValue("<input>");
         std::cout << "Input file: " << inputFn << std::endl;
     }
-    if (checkArg("<output>"))
+    if (hasArg("<output>"))
     {
-        outputFn = getArg("<output>");
+        outputFn = getValue("<output>");
         std::cout << "Output file: " << outputFn << std::endl;
     }
+//
+//    // Store the pointers to each of the commands
+//    std::vector<size_t> cmdPos;
+//    size_t i = 0;
+//    auto& args = getArgs();
 
-    StringVector commands = ;
-    // Store the pointers to each of the commands
-    std::vector<size_t> cmdPos;
-    size_t i = 0;
-    auto& args = getArgs();
-
-    for (auto &arg: args)
-    {
-        // Check if args is in commands
-        for (auto &cmd: commands)
-            if (arg == cmd)
-            {
-                cmdPos.push_back(i);
-                break;
-            }
-        ++i;
-    }
-
-    std::cout << "Found commands: " << std::endl;
-    for (auto& pos: cmdPos)
-        std::cout << args[pos] << std::endl;
+//    for (auto &arg: args)
+//    {
+//        // Check if args is in commands
+//        for (auto &cmd: commands)
+//            if (arg == cmd)
+//            {
+//                cmdPos.push_back(i);
+//                break;
+//            }
+//        ++i;
+//    }
+//
+//    std::cout << "Found commands: " << std::endl;
+//    for (auto& pos: cmdPos)
+//        std::cout << args[pos] << std::endl;
 
 } // function EmImageProgram.readArgs
 

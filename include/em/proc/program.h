@@ -11,8 +11,6 @@
 
 namespace em
 {
-    class ProgramImpl;
-
     /**
      * Base class for all programs. It contains functionality for parsing
      * input arguments. This class provides access to input params and
@@ -22,6 +20,28 @@ namespace em
     class Program
     {
     public:
+        /** Argument class to manage the arguments values passed to the
+         */
+        class Argument
+        {
+        public:
+            Argument(int argc, const char **argv);
+            /** Return the name of the argument */
+            std::string toString() const;
+
+            /** Return the value of the argument in a given position */
+            const char * get(size_t pos = 1) const;
+
+            /** Return the value of the argument in a given position
+             * but casted to a given type.
+             */
+            template <class T>
+            T get(size_t pos = 1) const;
+        private:
+            int argc;
+            const char ** argv;
+        }; // class Argument
+
         /** Default constructor */
         Program();
 
@@ -46,20 +66,14 @@ namespace em
         /** Public function used to start a program. */
         int start(int argc, const char ** argv);
 
-        /** Return a cont array of strings with the input arguments */
-        const StringVector & getArgs() const;
-
         /** Return True if the argument 'arg' was provided. */
-        bool checkArg(const std::string &arg) const;
+        bool hasArg(const std::string &arg) const;
 
         /** Return the value of the provide argument 'arg' */
-        std::string getArg(const std::string & arg) const;
+        const Argument& getArg(const std::string & arg) const;
 
-        /** Return the value of the provide argument 'arg' as integer */
-        int getIntArg(const std::string &arg) const;
-
-        /** Return the value of the provide argument 'arg' as a float */
-        float getFloatArg(const std::string &arg) const;
+        /** Directly query values of parameters that are not commands */
+        const std::string getValue(const char * arg) const;
 
     protected:
         /** Implement the job that this program does. */

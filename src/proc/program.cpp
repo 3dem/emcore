@@ -4,9 +4,11 @@
 
 #include <map>
 #include <iostream>
-#include <em/base/type.h>
+#include <cstring>
 
 #include "docopt.h"
+
+#include <em/base/type.h>
 #include "em/proc/program.h"
 
 using namespace em;
@@ -20,17 +22,58 @@ public:
     std::map<std::string, docopt::value> docoptArgs;
     int argc;
     const char ** argv;
-    // Store arguments as std::string without the program name
-    StringVector args;
+    // Store commands and options recognized by this program
+    std::vector<Argument> arguments;
 
-    void readArgs(int argc, const char ** argv)
+    void readArgs(int argc, const char ** argv, const StringVector& commands)
     {
         this->argc = argc;
         this->argv = argv;
-        this->args = {argv + 1, argv + argc};
+
+        // FIXME: This is a quick and dirty parsing of the commands
+        // I don't want to spend more time right now to a proper parsing
+        // We are assuming now that the program will receive a list of
+        // commands or options and in between there are the arguments
+        // of each command/option
+        const char ** iter = argv + 1;
+        int prevPos = -1;
+
+        for (int i = 0; i < argc; ++i)
+        {
+            // Check if the command is present
+            bool hasCmd = false;
+            for (auto& cmd: commands)
+                if (strcmp(*iter, cmd.c_str()) == 0)
+                {
+                    hasCmd = true;
+                    break;
+                }
+
+            if (hasCmd)
+            {
+                if (prevPos > 0)
+                    arguments.emplace_back(Argument(i - prevPos, argv+prevPos));
+                prevPos = i;
+            }
+            ++iter;
+        }
+        // Add the last command
+        // FIXME: This now will also take the <output> or last positional
+        // arguments as part of the last command...but it will not hurt for now
+        arguments.emplace_back(Argument(argc - prevPos, argv+prevPos));
     }
+
 }; // class ProgramImpl
 
+Program::Argument::Argument(int argc, const char **argv):argc(argc), argv(argv)
+{}
+
+const char* Program::Argument::get(size_t pos) const
+{
+    ASSERT_ERROR(pos > argc,
+                 "Position is greater than the number of argument values");
+    return argv[pos];
+}
 
 Program::Program()
 {
@@ -42,17 +85,16 @@ Program::~Program()
     delete impl;
 } // Dtor
 
-const StringVector& Program::getArgs() const
-{
-    return impl->args;
-}
-
-bool Program::checkArg(const std::string &arg) const
+bool Program::hasArg(const std::string &arg) const
 {
     return impl->docoptArgs.find(arg) != impl->docoptArgs.end();
-} //function Program.checkArg
+} //function Program.hasArg
 
-std::string Program::getArg(const std::string &arg) const
+const Program::Argument& Program::getArg(const std::string &arg) const
+{
+}
+
+const std::string Program::getValue(const char *arg) const
 {
     return impl->docoptArgs[arg].asString();
 }
@@ -63,9 +105,10 @@ int Program::start(int argc, const char **argv)
               << " (" << EM_CORE_TIMESTAMP << ")"
               << std::endl << std::endl;
 
-    impl->readArgs(argc, argv);
-    impl->docoptArgs = docopt::docopt(getUsage(), getArgs(),
-                                true, getName());
+    impl->readArgs(argc, argv, getCommands());
+    impl->docoptArgs = docopt::docopt(getUsage(),
+                                      {argv + 1, argv + argc},
+                                      true, getName());
 
     for(auto const& arg : impl->docoptArgs) {
         std::cout << arg.first << ": " << arg.second << std::endl;
