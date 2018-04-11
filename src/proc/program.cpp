@@ -37,8 +37,9 @@ public:
         // of each command/option
         const char ** iter = argv + 1;
         int prevPos = -1;
+        int n = argc - 1;  // remove the program name
 
-        for (int i = 0; i < argc; ++i)
+        for (int i = 0; i < n; ++i)
         {
             // Check if the command is present
             bool hasCmd = false;
@@ -60,7 +61,7 @@ public:
         // Add the last command
         // FIXME: This now will also take the <output> or last positional
         // arguments as part of the last command...but it will not hurt for now
-        arguments.emplace_back(Argument(argc - prevPos, argv+prevPos));
+        arguments.emplace_back(Argument(n - prevPos, argv+prevPos));
     }
 
 }; // class ProgramImpl
@@ -99,20 +100,20 @@ const std::string Program::getValue(const char *arg) const
     return impl->docoptArgs[arg].asString();
 }
 
-int Program::start(int argc, const char **argv)
+int Program::main(int argc, const char **argv)
 {
     std::cout << EM_CORE_VERSION
               << " (" << EM_CORE_TIMESTAMP << ")"
-              << std::endl << std::endl;
+              << std::endl;
 
     impl->readArgs(argc, argv, getCommands());
     impl->docoptArgs = docopt::docopt(getUsage(),
                                       {argv + 1, argv + argc},
                                       true, getName());
 
-    for(auto const& arg : impl->docoptArgs) {
-        std::cout << arg.first << ": " << arg.second << std::endl;
-    }
+//    for(auto const& arg : impl->docoptArgs) {
+//        std::cout << arg.first << ": " << arg.second << std::endl;
+//    }
 
     std::cout << std::endl << std::endl;
 

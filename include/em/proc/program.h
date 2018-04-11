@@ -64,7 +64,7 @@ namespace em
         virtual StringVector getCommands() const = 0;
 
         /** Public function used to start a program. */
-        int start(int argc, const char ** argv);
+        int main(int argc, const char ** argv);
 
         /** Return True if the argument 'arg' was provided. */
         bool hasArg(const std::string &arg) const;

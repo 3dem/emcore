@@ -61,8 +61,13 @@ protected:
 private:
     std::string inputFn = "";
     std::string outputFn = "";
+
+    void processCommand(const StringVector& args,
+                        size_t startIndex, size_t endIndex);
 }; // class EmImageProgram
 
+
+// ---------------------- Implementation -------------------------------
 int EmImageProgram::run()
 {
     std::cerr << "Doing nothing for now..." << std::endl;
@@ -105,11 +110,14 @@ void EmImageProgram::readArgs()
 //    for (auto& pos: cmdPos)
 //        std::cout << args[pos] << std::endl;
 
+
 } // function EmImageProgram.readArgs
 
 
 int main (int argc, const char **argv)
 {
-    EmImageProgram program;
-    return program.start(argc, argv);
+    std::cout << "main: argc = " << argc << std::endl;
+    for (int i = 0; i < argc; ++i)
+        std::cout << "     argv[" << i << "] = " << argv[i] << std::endl;
+    return EmImageProgram().main(argc, argv);
 }
