@@ -53,31 +53,5 @@ T GaussianFunc<T>::operator()(T x, T y)
     return ps * exp(-0.5 * (xp * xp + yp * yp));
 } // GaussianFunc<T>.operator(x)
 
-
-template <class RFLOAT>
-RFLOAT gaussian1D(RFLOAT x, RFLOAT sigma, RFLOAT mu)
-{
-    x -= mu;
-    return 1 / sqrt(2*M_PI*sigma*sigma)*exp(-0.5*((x / sigma)*(x / sigma)));
-}
-
-template <class RFLOAT>
-RFLOAT gaussian2D(RFLOAT x, RFLOAT y, RFLOAT sigmaX, RFLOAT sigmaY,
-                  RFLOAT ang, RFLOAT muX, RFLOAT muY)
-{
-    // Express x,y in the gaussian internal coordinates
-    x -= muX;
-    y -= muY;
-    RFLOAT xp = cos(ang) * x + sin(ang) * y;
-    RFLOAT yp = -sin(ang) * x + cos(ang) * y;
-
-    // Now evaluate
-    return 1 / sqrt(2*M_PI*sigmaX*sigmaY)*exp(-0.5*((xp / sigmaX)*(xp / sigmaX) +
-                                                  (yp / sigmaY)*(yp / sigmaY)));
-}
-
-template class GaussianFunc<float>;
-template class GaussianFunc<double>;
-
-//template class gaussian2D<float>(float, float float, float, float, float, float);
-//template class gaussian2D<double>(float, float float, float, float, float, float);
+template class em::GaussianFunc<float>;
+template class em::GaussianFunc<double>;

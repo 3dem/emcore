@@ -18,7 +18,7 @@ namespace em
  * from the universal X to the gaussian X).
  * X and Y are supposed to be independent.
  */
-    template<class T=double>
+    template<class T>
     class GaussianFunc
     {
     public:
@@ -38,30 +38,5 @@ namespace em
     }; // class GaussianFunc
 
 } // namespace em
-
-/** 1D gaussian value
- *
- * This function returns the value of a univariate gaussian function at the
- * point x.
- */
-template <class RFLOAT>
-RFLOAT gaussian1D(RFLOAT x, RFLOAT sigma, RFLOAT mu = 0);
-
-/** 2D gaussian value
- *
- * This function returns the value of a multivariate (2D) gaussian function at
- * the point (x,y) when the X axis of the gaussian is rotated ang
- * (counter-clockwise) radians (the angle is positive when measured from the
- * universal X to the gaussian X). X and Y are supposed to be independent.
- */
- template <class RFLOAT>
-RFLOAT gaussian2D(RFLOAT x,
-                  RFLOAT y,
-                  RFLOAT sigmaX,
-                  RFLOAT sigmaY,
-                  RFLOAT ang,
-                  RFLOAT muX = 0,
-                  RFLOAT muY = 0);
-
 
 #endif //EM_CORE_FUNCTIONS_H
