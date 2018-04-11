@@ -3,6 +3,8 @@
 //
 
 #include <iostream>
+
+#include "em/base/error.h"
 #include "em/base/string.h"
 
 using namespace em;
@@ -18,4 +20,31 @@ std::string String::trim(const std::string &input)
 
     auto end = input.find_last_not_of(SPACES);
     return input.substr(begin, end - begin + 1);
-} // function Sring::trim
+} // function String::trim
+
+// Define a convenience macro to use sscanf,
+// str and retval should be defined
+#define SCAN_NUMBER(type, format) type retval; char dummy; \
+if (sscanf(str, format, &retval, &dummy) == 1) return retval; \
+THROW_ERROR("Type conversion error")
+
+int String::toInt(const char *str)
+{
+    SCAN_NUMBER(int, "%d%c");
+} // function String::toInt
+
+float String::toFloat(const char *str)
+{
+    SCAN_NUMBER(float, "%f%c");
+} // function String::toFloat
+
+double String::toDouble(const char *str)
+{
+    SCAN_NUMBER(double, "%lf%c");
+} // function String::toDouble
+
+long long int String::toLongInt(const char *str)
+{
+    SCAN_NUMBER(long long int, "%lld%c");
+} // function String::toLongInt
+

@@ -24,6 +24,17 @@ namespace em
          */
         static std::string trim(const std::string &input);
 
+        /** Convert a string to integer */
+        static int toInt(const char *str);
+
+        /** Convert a string to float */
+        static float toFloat(const char *str);
+
+        /** Convert a string to double */
+        static double toDouble(const char *str);
+
+        /** Convert a string to a long int */
+        static long long int toLongInt(const char *str);
 
     }; // class String
 
