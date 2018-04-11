@@ -16,6 +16,8 @@ using namespace em;
 using DocoptArgs = std::map<std::string, docopt::value>;
 
 
+// ----------------------Program::Impl Implementation -------------------------
+
 class Program::Impl
 {
 public:
@@ -42,6 +44,8 @@ public:
         for (int i = 0; i < n; ++i)
         {
             // Check if the command is present
+            const char * str = *iter;
+
             bool hasCmd = false;
             for (auto& cmd: commands)
                 if (strcmp(*iter, cmd.c_str()) == 0)
@@ -53,7 +57,8 @@ public:
             if (hasCmd)
             {
                 if (prevPos > 0)
-                    arguments.emplace_back(Argument(i - prevPos, argv+prevPos));
+                    arguments.emplace_back(Argument(i - prevPos,
+                                                    argv + 1 + prevPos));
                 prevPos = i;
             }
             ++iter;
@@ -61,10 +66,14 @@ public:
         // Add the last command
         // FIXME: This now will also take the <output> or last positional
         // arguments as part of the last command...but it will not hurt for now
-        arguments.emplace_back(Argument(n - prevPos, argv+prevPos));
+        if (prevPos > 0)
+            arguments.emplace_back(Argument(n - prevPos, argv + 1 + prevPos));
     }
 
 }; // class ProgramImpl
+
+
+// ----------------------Program::Argument  Implementation --------------------
 
 Program::Argument::Argument(int argc, const char **argv):argc(argc), argv(argv)
 {}
@@ -75,6 +84,19 @@ const char* Program::Argument::get(size_t pos) const
                  "Position is greater than the number of argument values");
     return argv[pos];
 }
+
+std::string Program::Argument::toString() const
+{
+    return argv[0];
+} // function Program::Argument.toString
+
+size_t Program::Argument::getSize() const
+{
+    return argc;
+} // function Program::Argument.getSize
+
+
+// ----------------------Program Implementation -------------------------------
 
 Program::Program()
 {
@@ -93,7 +115,13 @@ bool Program::hasArg(const std::string &arg) const
 
 const Program::Argument& Program::getArg(const std::string &arg) const
 {
-}
+    THROW_ERROR("NOT IMPLEMENTED. ");
+} // function Program.getArg
+
+const std::vector<Program::Argument>& Program::getArgList() const
+{
+    return impl->arguments;
+} // function Program.getArgList
 
 const std::string Program::getValue(const char *arg) const
 {

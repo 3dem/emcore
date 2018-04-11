@@ -29,6 +29,11 @@ namespace em
             /** Return the name of the argument */
             std::string toString() const;
 
+            /** Return the number of values of this argument (including 0,
+             * the name of the argument.
+             */
+             size_t getSize() const;
+
             /** Return the value of the argument in a given position */
             const char * get(size_t pos = 1) const;
 
@@ -71,6 +76,9 @@ namespace em
 
         /** Return the value of the provide argument 'arg' */
         const Argument& getArg(const std::string & arg) const;
+
+        /** Return the list of all arguments */
+        const std::vector<Argument>& getArgList() const;
 
         /** Directly query values of parameters that are not commands */
         const std::string getValue(const char * arg) const;

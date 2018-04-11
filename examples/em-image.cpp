@@ -6,6 +6,7 @@
 #include "em/base/error.h"
 #include "em/image/image.h"
 #include "em/proc/program.h"
+#include "em/proc/operator.h"
 
 
 using namespace em;
@@ -88,36 +89,49 @@ void EmImageProgram::readArgs()
         outputFn = getValue("<output>");
         std::cout << "Output file: " << outputFn << std::endl;
     }
-//
-//    // Store the pointers to each of the commands
-//    std::vector<size_t> cmdPos;
-//    size_t i = 0;
-//    auto& args = getArgs();
 
-//    for (auto &arg: args)
-//    {
-//        // Check if args is in commands
-//        for (auto &cmd: commands)
-//            if (arg == cmd)
-//            {
-//                cmdPos.push_back(i);
-//                break;
-//            }
-//        ++i;
-//    }
-//
-//    std::cout << "Found commands: " << std::endl;
-//    for (auto& pos: cmdPos)
-//        std::cout << args[pos] << std::endl;
+    auto& args = getArgList();
 
+    std::cout << "Number of parsed arguments: " << args.size() << std::endl;
+
+    std::string cmdName;
+
+    for (auto& a: args)
+    {
+        cmdName = a.toString();
+
+        if (cmdName == "add")
+        std::cout << "argument: " << a.toString() << std::endl;
+        std::cout << "   values: ";
+        for (int i = 1; i < a.getSize(); ++i)
+            std::cout << a.get(i) << " " << std::endl;
+    }
 
 } // function EmImageProgram.readArgs
+
+ImageProcessor* getProcessorFromArg(const Program::Argument& arg)
+{
+    std::string cmdName = arg.toString();
+    char op = 0;
+
+    // Check first if the argument is for a basic arithmetic operation
+    if (cmdName == "add")
+        op = Type::ADD;
+    else if (cmdName == "sub")
+        op = Type::SUB;
+    else if (cmdName == "mul")
+        op = Type::MUL;
+    else if (cmdName == "div")
+        op = Type::DIV;
+
+    if (op != 0)
+    {
+        return new ImageMathProc();
+    }
+}
 
 
 int main (int argc, const char **argv)
 {
-    std::cout << "main: argc = " << argc << std::endl;
-    for (int i = 0; i < argc; ++i)
-        std::cout << "     argv[" << i << "] = " << argv[i] << std::endl;
     return EmImageProgram().main(argc, argv);
 }
