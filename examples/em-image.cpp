@@ -8,7 +8,7 @@
 #include "em/os/filesystem.h"
 #include "em/image/image.h"
 #include "em/proc/program.h"
-#include "em/proc/operator.h"
+#include "em/proc/processor.h"
 
 
 using namespace em;
@@ -147,17 +147,13 @@ ImageProcessor* EmImageProgram::getProcessorFromArg(const Program::Argument& arg
     else if (cmdName == "div")
         op = Type::DIV;
 
+        std::cout << ">>> Cmd: " << cmdName << ", op: " << (char)op << std::endl;
+
     if (op != Type::NO_OP)
-    {
-        auto pproc = new ImageMathProc();
-        (*pproc)[ImageMathProc::OPERATION] = op;
-        (*pproc)[ImageMathProc::OPERAND] = String::toFloat(arg.get(1));
-
-        std::cout << "Math cmd: " << cmdName << ", op: " << (char)op << ", operand: "
-                  << (*pproc)[ImageMathProc::OPERAND] << std::endl;
-
-        return pproc;
-    }
+        return new ImageMathProc({{ImageMathProc::OPERATION, op},
+                                  {ImageMathProc::OPERAND,
+                                   String::toFloat(arg.get(1))}
+                                 });
 
     return nullptr;
 }

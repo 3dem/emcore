@@ -5,7 +5,7 @@
 
 #include "gtest/gtest.h"
 
-#include "em/proc/operator.h"
+#include "em/proc/processor.h"
 
 
 using namespace em;
