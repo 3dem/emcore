@@ -1,9 +1,11 @@
 // A simple program
 
 #include <iostream>
+#include <iomanip>
 #include <math.h>
 
 #include "em/base/error.h"
+#include "em/os/filesystem.h"
 #include "em/image/image.h"
 #include "em/proc/program.h"
 #include "em/proc/operator.h"
@@ -62,17 +64,28 @@ protected:
 private:
     std::string inputFn = "";
     std::string outputFn = "";
+    ImagePipeProc pipeProc;
+    StringVector inputList;
 
     void processCommand(const StringVector& args,
                         size_t startIndex, size_t endIndex);
+
+    ImageProcessor* getProcessorFromArg(const Program::Argument& arg);
 }; // class EmImageProgram
 
 
 // ---------------------- Implementation -------------------------------
 int EmImageProgram::run()
 {
-    std::cerr << "Doing nothing for now..." << std::endl;
+    Image image;
 
+    for (auto& path: inputList)
+    {
+        //TODO: Check if using the ImageIO makes any difference
+        image.read(path);
+        pipeProc.process(image);
+        image.write(outputFn);
+    }
 
     return 0;
 } // function EmImageProgram.run
@@ -82,37 +95,47 @@ void EmImageProgram::readArgs()
     if (hasArg("<input>"))
     {
         inputFn = getValue("<input>");
-        std::cout << "Input file: " << inputFn << std::endl;
+        std::cout << std::setw(10) << std::right << "Input: "
+                  << inputFn << std::endl;
+
+        // TODO: Allow to input a pattern and glob all files that match it
+
+        inputList.push_back(inputFn);
+
+        for (auto& path: inputList)
+            ASSERT_ERROR(!Path::exists(path),
+                         std::string("Input path '") + path +
+                         "' does not exists!!!");
     }
+
     if (hasArg("<output>"))
     {
         outputFn = getValue("<output>");
-        std::cout << "Output file: " << outputFn << std::endl;
+        std::cout << std::setw(10) << std::right << "Output: "
+                  << outputFn << std::endl;
     }
 
     auto& args = getArgList();
 
-    std::cout << "Number of parsed arguments: " << args.size() << std::endl;
+    std::cout << std::setw(10) << std::right << "Commands: "
+              << args.size() << std::endl;
 
     std::string cmdName;
 
     for (auto& a: args)
     {
-        cmdName = a.toString();
-
-        if (cmdName == "add")
-        std::cout << "argument: " << a.toString() << std::endl;
-        std::cout << "   values: ";
-        for (int i = 1; i < a.getSize(); ++i)
-            std::cout << a.get(i) << " " << std::endl;
+        auto pproc = getProcessorFromArg(a);
+        if (pproc != nullptr)
+            pipeProc.addProcessor(pproc);
+        //else TODO: handle when the processor can not be constructed.
     }
 
 } // function EmImageProgram.readArgs
 
-ImageProcessor* getProcessorFromArg(const Program::Argument& arg)
+ImageProcessor* EmImageProgram::getProcessorFromArg(const Program::Argument& arg)
 {
     std::string cmdName = arg.toString();
-    char op = 0;
+    Type::Operation op = Type::NO_OP;
 
     // Check first if the argument is for a basic arithmetic operation
     if (cmdName == "add")
@@ -124,10 +147,19 @@ ImageProcessor* getProcessorFromArg(const Program::Argument& arg)
     else if (cmdName == "div")
         op = Type::DIV;
 
-    if (op != 0)
+    if (op != Type::NO_OP)
     {
-        return new ImageMathProc();
+        auto pproc = new ImageMathProc();
+        (*pproc)[ImageMathProc::OPERATION] = op;
+        (*pproc)[ImageMathProc::OPERAND] = String::toFloat(arg.get(1));
+
+        std::cout << "Math cmd: " << cmdName << ", op: " << (char)op << ", operand: "
+                  << (*pproc)[ImageMathProc::OPERAND] << std::endl;
+
+        return pproc;
     }
+
+    return nullptr;
 }
 
 

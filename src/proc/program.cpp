@@ -130,23 +130,29 @@ const std::string Program::getValue(const char *arg) const
 
 int Program::main(int argc, const char **argv)
 {
-    std::cout << EM_CORE_VERSION
-              << " (" << EM_CORE_TIMESTAMP << ")"
-              << std::endl;
+    try
+    {
 
-    impl->readArgs(argc, argv, getCommands());
-    impl->docoptArgs = docopt::docopt(getUsage(),
-                                      {argv + 1, argv + argc},
-                                      true, getName());
+        std::cout << EM_CORE_VERSION
+                  << " (" << EM_CORE_TIMESTAMP << ")"
+                  << std::endl << std::endl;
+
+        impl->readArgs(argc, argv, getCommands());
+        impl->docoptArgs = docopt::docopt(getUsage(),
+                                          {argv + 1, argv + argc},
+                                          true, getName());
 
 //    for(auto const& arg : impl->docoptArgs) {
 //        std::cout << arg.first << ": " << arg.second << std::endl;
 //    }
-
-    std::cout << std::endl << std::endl;
-
-    readArgs();
-    return run();
+        readArgs();
+        return run();
+    }
+    catch (Error &e)
+    {
+        std::cerr << e << std::endl;
+        return -1;
+    }
 } // function start
 
 

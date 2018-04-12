@@ -36,6 +36,7 @@ namespace em
          * Basic arithmetic operations can only be applied to arithmetic types.
          */
         enum Operation {
+            NO_OP = 0,
             CAST = 'c',
             ADD = '+',
             SUB = '-',

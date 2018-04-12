@@ -12,7 +12,7 @@ const std::string ImageMathProc::OPERAND = "operand";
 ImageMathProc::ImageMathProc()
 {
     // Use int to store the value of the enum
-    (*this)[ImageMathProc::OPERATION] = Object(Type::ADD);
+    //(*this)[ImageMathProc::OPERATION] = Object(Type::ADD);
 }
 
 void ImageMathProc::process(const Image &input, Image &output)
@@ -28,10 +28,9 @@ void ImageMathProc::process(const Image &input, Image &output)
 void ImageMathProc::process(Image &image)
 {
     // Just initialize with the proper type
-    Type::Operation op = (Type::Operation )(*this)[OPERATION];
+    Type::Operation op = (*this)[OPERATION];
     auto &operand = (*this)[OPERAND];
 
-    std::cout << "op: " << (char)op << std::endl;
     switch (op)
     {
         case Type::ADD:
