@@ -18,14 +18,17 @@ static const char USAGE[] =
 
     Usage:
       em-image (<input> | create <xdim> [<ydim> [<zdim>]])
-                       [(add|sub|mul|div) <file_or_value>   |
-                        (shift|rotate) (x|y|z) <value>      |
-                         rotate <value>                     |
-                         flip (x|y|z)                       |
-                         scale  <scale_factor>              |
-                         scale angpix <old> <new>           |
-                         scale (x|y|z) <new_dim>            |
-                        (lowpass|highpass) <freq>           |
+                       [(add|sub|mul|div) <file_or_value>         |
+                         flip (x|y|z)                             |
+                         crop <left> [<top> [<right> [<bottom>]]] |
+                         window <point1> <point2>                 |
+                         shift (x|y|z) <value>                    |
+                         rotate <value>                           |
+                         rotate (x|y|z) <value>                   |
+                         scale  <scale_factor>                    |
+                         scale angpix <old> <new>                 |
+                         scale (x|y|z) <new_dim>                  |
+                        (lowpass|highpass) <freq>                 |
                         (bandpass <low_freq> <high_freq>)
                        ]... <output>
 
