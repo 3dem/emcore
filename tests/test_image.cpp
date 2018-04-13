@@ -7,6 +7,7 @@
 
 #include "em/base/error.h"
 #include "em/image/image.h"
+#include "em/base/timer.h"
 
 
 using namespace em;
@@ -207,3 +208,122 @@ TEST(ImageIO, Create)
 
     }
 } // TEST(ImageIO, Create)
+
+
+TEST(Image, Performance)
+{
+    auto testDataPath = getenv("EM_TEST_DATA");
+
+    if (testDataPath != nullptr)
+    {
+        try
+        {
+            // Load a big ~ 10k x 10k to check the performance of some
+            // operations
+            std::string micFn(testDataPath);
+            micFn += "xmipp_tutorial/micrographs/BPV_1386.mrc";
+
+            ImageLocation loc(micFn, 1);
+            Image img, img2, img3;
+
+            img.read(loc);
+            ArrayDim adim = img.getDim();
+            Type type = img.getType();
+            size_t n = adim.getSize();
+            std::cout << std::endl << "Image memory: " << n * type.getSize()
+                                   << " bytes. " << std::endl;
+            uint8_t * imgData = static_cast<uint8_t*>(img.getData());
+            uint8_t * iter = nullptr, *iter2 = nullptr;
+
+            Timer t;
+
+            // Resize before comparing times
+            t.tic();
+            img2.resize(img);
+            t.toc("One image ALLOCATION");
+            img3.resize(img);
+            std::cout << std::endl;
+
+            //------------------ Check Assignment to ARRAY --------------------
+            t.tic();
+            iter = imgData;
+            iter2 = static_cast<uint8_t*>(img2.getData());
+            for (size_t i = 0; i < n; ++i, ++iter, ++iter2)
+                *iter2 = *iter;
+            t.toc("LOOP assign array");
+
+            t.tic();
+            iter = imgData;
+            iter2 = static_cast<uint8_t*>(img2.getData());
+            memcpy(iter2, iter, n * type.getSize());
+            t.toc("MEMCPY assign array");
+
+            t.tic();
+            img3 = img;
+            t.toc("IMAGE assign array");
+            ASSERT_EQ(img2, img3);
+
+            std::cout << std::endl;
+
+            //------------------ Check Assignment to VALUE --------------------
+            t.tic();
+            iter2 = static_cast<uint8_t*>(img2.getData());
+            for (size_t i = 0; i < n; ++i, ++iter2)
+                *iter2 = 100;
+            t.toc("LOOP assign value");
+
+            t.tic();
+            // FIXME: Why the following line does not work
+            //img3 = Object(100);
+            Array * array = &img3;
+            *array = 100;
+            t.toc("IMAGE assign value");
+            ASSERT_EQ(img2, img3);
+
+            std::cout << std::endl;
+
+            //------------------ Check Multiplication by ARRAY ---------------
+            img3 = img2 = img;
+
+            t.tic();
+            iter2 = static_cast<uint8_t*>(img2.getData());
+            for (size_t i = 0; i < n; ++i, ++iter, ++iter2)
+                *iter2 *= *iter;
+            t.toc("LOOP mult by array");
+
+            t.tic();
+            img3 *= img;
+            t.toc("IMAGE mult by array");
+            ASSERT_EQ(img2, img3);
+
+            std::cout << std::endl;
+
+            //------------------ Check Multiplication by VALUE ---------------
+            img3 = img2 = img;
+
+            t.tic();
+            iter2 = static_cast<uint8_t*>(img2.getData());
+            for (size_t i = 0; i < n; ++i, ++iter, ++iter2)
+            *iter2 *= 100;
+            t.toc("LOOP mult by value");
+
+            t.tic();
+            img3 *= 100;
+            t.toc("IMAGE mult by value");
+
+            ASSERT_EQ(img2, img3);
+
+            std::cout << std::endl;
+
+        }
+        catch (Error &err)
+        {
+            std::cout << err << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "Skipping image processing tests, EM_TEST_DATA not "
+                     "defined in environment. " << std::endl;
+    }
+} // TEST Image.Performance

@@ -8,6 +8,7 @@
 #include "em/proc/processor.h"
 
 
+
 using namespace em;
 
 
@@ -80,5 +81,5 @@ TEST(ImageOperator, Basic)
         std::cout << "Skipping image processing tests, EM_TEST_DATA not "
                      "defined in environment. " << std::endl;
     }
-} // TEST Column.Basic
+} // TEST ImageOperator.Basic
 
