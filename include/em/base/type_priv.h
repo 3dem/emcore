@@ -204,28 +204,9 @@ public:
         CAST_IF_TYPE(uint32_t);
         CAST_IF_TYPE(float);
         CAST_IF_TYPE(double);
-    } // function TypeImplBaseT.cast
-
-
-    virtual void castTo(const void * inputMem, void * outputMem, size_t count,
-    ConstTypePtr outputType) const override
-    {
-        auto inputMemT = static_cast<const T *>(inputMem);
-
-#define CAST_IF_TYPE(type) if (outputType == Type::get<type>()) typeCast(inputMemT, static_cast<type*>(outputMem), count)
-
-        CAST_IF_TYPE(int8_t);
-        CAST_IF_TYPE(uint8_t);
-        CAST_IF_TYPE(int16_t);
-        CAST_IF_TYPE(uint16_t);
-        CAST_IF_TYPE(int32_t);
-        CAST_IF_TYPE(uint32_t);
-        CAST_IF_TYPE(float);
-        CAST_IF_TYPE(double);
 
 #undef CAST_IF_TYPE
-
-    };
+    } // function TypeImplBaseT.cast
 
     virtual void toStream(const void * inputMem, std::ostream &stream,
                           size_t count) const override
@@ -290,7 +271,10 @@ DEFINE_TYPENAME(int16_t, "int16");
 DEFINE_TYPENAME(uint16_t, "uint16");
 DEFINE_TYPENAME(int32_t, "int32");
 DEFINE_TYPENAME(uint32_t, "uint32");
+DEFINE_TYPENAME(int64_t, "int64");
+DEFINE_TYPENAME(uint64_t, "uint64");
 
+DEFINE_TYPENAME(bool, "bool");
 DEFINE_TYPENAME(std::string, "string");
 
 #undef DEFINE_TYPENAME

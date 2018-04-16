@@ -14,8 +14,7 @@ struct DmTag
     std::string tagName;
     std::string tagClass;
     uint64_t size;
-    ConstTypePtr type = nullptr;
-    Array values;
+    std::vector<Array> values;
 
     DmTag(){};
     DmTag(size_t nodeId, size_t parentId, int tagType,
@@ -71,7 +70,7 @@ std::function< size_t(uint64_t*, size_t, FILE*, bool) > freadSwapLong;
  * Inherit properties from base ImageIOImpl and add information
  * specific for DM3/4 formats
  */
-class ImageIODm: public em::ImageIOImpl
+class ImageIODm: public em::ImageIO::Impl
 {
 public:
 
@@ -97,11 +96,10 @@ public:
         unsigned char cTag;
         unsigned short int ltName;
 
-        fread(&cTag, 1, 1, file); // Identification tag: 20 = tag dir,  21 = tag
-        freadSwap(&ltName, 1, 2, file, isLE); // Length of the tag name
+        ::fread(&cTag, 1, 1, file); // Identification tag: 20 = tag dir,  21 = tag
+        fread(file, &ltName, 1, 2, isLE); // Length of the tag name
 
-        int tagType = int(cTag);
-        tag.tagType = tagType;
+        tag.tagType = int(cTag);
 
         if (ltName > 0)
         {
@@ -119,11 +117,8 @@ public:
             fseek(file, 8, SEEK_CUR);
         }
 
-
-
-
         /* Reading tags ======================================================*/
-        if (tagType == 20)  // Tag directory
+        if (tag.tagType == 20)  // Tag directory
         {
             tag.tagClass = "Dir";
 
@@ -141,7 +136,7 @@ public:
 
             return 0;
         }
-        else if (tagType == 21)    // Tag
+        else if (tag.tagType == 21)    // Tag
         {
             // We skip the %%%% symbols
             fseek(file, 4, SEEK_CUR);
@@ -158,12 +153,12 @@ public:
             if (ninfo == 1)   // Single entry tag
             {
                 tag.tagClass = "Single";
-                tag.type = getTypeFromMode(info[0]);
                 tag.size = 0;
+                // Store a single value of an Array, of a single element ;)
+                tag.values.emplace_back(Array(ArrayDim(1),
+                                              getTypeFromMode(info[0])));
 
-                tag.values.resize(ArrayDim(1), tag.type);
-
-                freadArray(tag.values, file, swap);
+                fread(file, tag.values[0], swap);
             }
             else if(ninfo == 3 && info[0]==20)   // Tag array
             {
@@ -176,13 +171,13 @@ public:
                 tag.type = getTypeFromMode(info[1]);
                 tag.size = info[2];
 
-                tag.values.resize(ArrayDim(1), TypeUInt64);
+                tag.values.emplace_back(Array(ArrayDim(1), typeUInt64));
 
                 // We store the image position in file to be read properly
                 size_t pos = ftell(file);
                 // The following could be replaced by?
                 // tag.values = pos; ????
-                tag.values.copyFrom(&pos, TypeUInt64);
+                tag.values[0] = &pos;
 
                 // We jump the image bytes
                 fseek(file, tag.size*tag.type->getSize(), SEEK_CUR);
@@ -193,22 +188,26 @@ public:
                          info(0) = 20 (array)
                          info(1) = 15 (group)
                          info(2) = 0 (always 0)
-                         info(3) = number of values in group
+                         info(3) = number of elements in group
                          info(2*i+  3) = number type for value i
                          info(ninfo) = size of info array*/
                 tag.tagClass = "GroupArray";
-                tag.size = info[3];
+                uint64_t nGroups = info[3];
+                tag.size = info[ninfo-1];
 
-                //For future use we store info array
-                tag.values.resize(ArrayDim(tag.size), TypeUInt64);
-                tag.values.copyFrom(&info, TypeUInt64);
+                // We do not store de group arrays. They are entangled and we don't know
+                // how useful they are at this moment. We store only the different datatypes
+                // in one array per element in the group
+                for (size_t n = 0; n < nGroups; ++n)
+                    tag.values.emplace_back(Array(ArrayDim(1),
+                                                  getTypeFromMode(info[5+2*n])));
 
                 size_t nBytes=0;
-                for (size_t n = 0; n < tag.size; ++n)
-                    nBytes += getTypeFromMode(info[3+2*n])->getSize();
+                for (size_t n = 0; n < nGroups; ++n)
+                    nBytes += tag.values[n].getType().getSize();
 
                 // Jump the array values
-                fseek(file, info[ninfo-1]*nBytes , SEEK_CUR);
+                fseek(file, tag.size*nBytes , SEEK_CUR);
             }
             else if (info[0] == 15)    // Tag Group  (struct)
             {
@@ -228,13 +227,13 @@ public:
 
                 for (size_t n = 0; n < tag.size; ++n)
                 {
-                    aValue.resize(adim, getTypeFromMode(info[4+2*n]));
-                    freadArray(aValue, file, swap);
-                    aValue.copyTo(&(dValues[n]), TypeDouble);
+                    tag.values.emplace_back(Array(ArrayDim(1),
+                                                  getTypeFromMode(info[4+2*n])));
+
+                    fread(file, tag.values[n], swap);
                 }
 
-                tag.values.resize(ArrayDim(tag.size), TypeDouble);
-                tag.values.copyFrom(dValues, TypeDouble);
+
             }
         }
         return 0;
@@ -247,9 +246,9 @@ public:
         int dummy;
 
         // Check Machine endianness
-        isLE = isLittleEndian();
+        isLE = Type::isLittleEndian();
 
-        freadSwap(&fileInfo.version, 1, 4, file, isLE);
+        ::fread(&fileInfo.version, 1, 4,file, isLE);
 
         /* Main difference between v3 and v4 is that lentype is 4 and8 bytes
          * so we select the proper function to store it in a int64_t type.
@@ -261,7 +260,7 @@ public:
             ([](uint64_t *data, size_t count, FILE *file, bool swap) -> size_t
                     {
                         int32_t tmp[count];
-                        freadSwap(&tmp, count, 4, file, swap);
+                        fread(file, &tmp, count, 4, swap);
                         for (size_t i = 0; i < count; ++i)
                             data[i] = (uint64_t) (tmp[i]);
                     });
@@ -271,7 +270,7 @@ public:
             freadSwapLong = static_cast<std::function<size_t(uint64_t *, size_t,
                                                              FILE *, bool)>>
             ([](uint64_t *data, size_t count, FILE *file, bool swap) -> size_t
-                    {return freadSwap(data, count, 8, file, swap);});
+                    {return fread(file, data, count, 8, swap);});
         }
         else
             THROW_ERROR("ImageIODm::freadSwapLong: unsupported Digital "
@@ -279,13 +278,13 @@ public:
 
 
         freadSwapLong(&fileInfo.rootlen, 1, file, isLE);
-        freadSwap(&fileInfo.byteOrder, 1, 4, file, isLE);
+        fread(file, &fileInfo.byteOrder, 1, 4, isLE);
 
         // Set swap mode from endiannes and file byteorder
         swap = (isLE^fileInfo.byteOrder);
 
-        fread(&fileInfo.sorted, 1, 1, file);
-        fread(&fileInfo.open, 1, 1, file);
+        ::fread(&fileInfo.sorted, 1, 1, file);
+        ::fread(&fileInfo.open, 1, 1, file);
         freadSwapLong(&fileInfo.nTags, 1, file, isLE);
 
         size_t nodeID = 0, parentID = 0;
@@ -312,47 +311,19 @@ public:
 
     virtual const TypeMap & getTypeMap() const override
     {
-        static const TypeMap tm = {{2,  TypeInt16},
-                                   {3,  TypeInt32},
-                                   {4,  TypeUInt16},
-                                   {5,  TypeUInt32},
-                                   {6,  TypeFloat},
-                                   {7,  TypeDouble},
-                                   {8,  TypeBool},
-                                   {9,  TypeInt8},
-                                   {10, TypeUInt8},
-                                   {11, TypeUInt64}};
+        static const TypeMap tm = {{2,  &typeInt16},
+                                   {3,  &typeInt32},
+                                   {4,  &typeUInt16},
+                                   {5,  &typeUInt32},
+                                   {6,  &typeFloat},
+                                   {7,  &typeDouble},
+                                   {8,  &typeBool},
+                                   {9,  &typeInt8},
+                                   {10, &typeUInt8},
+                                   {11, &typeUInt64}};
 
         return tm;
     } // function getTypeMap
-
-
-/*    size_t freadSwapLong(uint64_t *data, size_t count, FILE *file,
-                         bool swap) const
-    {
-        switch (fileInfo.version)
-        {
-            case 3:
-            {
-                int32_t tmp[count];
-                freadSwap(&tmp, count, 4, file, swap);
-                for (size_t i = 0; i < count; ++i)
-                    data[i] = (uint64_t) (tmp[i]);
-
-                break;
-            }
-            case 4:
-            {
-                freadSwap(data, count, 8, file, swap);
-                break;
-            }
-            default:
-                THROW_ERROR("ImageIODm::freadSwapLong: unsupported Digital micrograph");
-        }
-
-    }*/
-
-
 }; // class ImageIOMrc
 
 StringVector dmExts = {"dm3", "dm4"};

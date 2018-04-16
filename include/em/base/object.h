@@ -35,7 +35,7 @@ namespace em
          * In this case the Object will not be the "owner" of the memory
          * and should not free it when it is destroyed.
          */
-        Object(const Type & type, void *memory);
+        Object(const Type & type, void *memory = nullptr);
 
         /** Standard copy constructor.
          *

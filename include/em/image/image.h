@@ -211,6 +211,28 @@ namespace em
 
         ~ImageIO();
 
+        /**
+         * Read from file and swap the data if needed
+         * @param file File handler
+         * @param data Pointer to data
+         * @param count Number of data elements
+         * @param typeSize Number of bytes for each element
+         * @param swap Boolean to either swap or not the data array
+         * @return
+         */
+        static size_t fread(FILE *file, void *data, size_t count,
+                            size_t typeSize, bool swap = false);
+
+        /**
+         * Read from file to Array and swap the data if needed
+         * @param file File handler
+         * @param array object Array to copy data from file
+         * @param swap Boolean to either swap or not the data array
+         * @return
+         */
+        static size_t fread(FILE *file, Array &array, bool swap = false);
+
+
     private:
         // Pointer to implementation class, PIMPL idiom
         Impl* impl = nullptr;

@@ -451,11 +451,11 @@ void ImageIO::Impl::readImageData(const size_t index, Image &image)
     // approach, right now only read a big chunk of one item size
     std::cerr << "DEBUG: reading " << readSize << " bytes." << std::endl;
 
-    if (fread(image.getData(), readSize, 1, file) != 1)
+    if (::fread(image.getData(), readSize, 1, file) != 1)
         THROW_SYS_ERROR("Could not 'fread' data from file. ");
 
     if (swap)
-        swapBytes(image.getData(), image.getDim().getItemSize(),
+        Type::swapBytes(image.getData(), image.getDim().getItemSize(),
                   image.getType().getSize());
 }
 
@@ -493,35 +493,22 @@ int ImageIO::Impl::getModeFromType(const Type &type) const
     return -999;
 } // function ImageIO::Impl.getTypeFromMode
 
-bool ImageIO::Impl::isLittleEndian()
-{
-    static const unsigned long ul = 0x00000001;
-    return ((int)(*((unsigned char *) &ul)))!=0;
-}
 
-
-size_t em::freadSwap(void *data, size_t count, size_t typeSize, FILE *file,
-                 bool swap)
+size_t ImageIO::fread(FILE *file, void *data, size_t count,
+                      size_t typeSize, bool swap)
 {
-    size_t  out = fread(data, count, typeSize, file);
+    size_t  out = ::fread(data, count, typeSize, file);
 
     if (swap)
-        swapBytes(data, count, typeSize);
+        Type::swapBytes(data, count, typeSize);
     return out;
-}
+} // function ImageIO::fread
 
-size_t em::freadArray(Array &array, FILE *file, bool swap)
+size_t ImageIO::fread(FILE *file, Array &array, bool swap)
 {
-    void * data = array.getDataPointer();
-    size_t count = array.getDim().getSize();
-    size_t typeSize = array.getType()->getSize();
-
-    size_t  out = fread(data, count, typeSize, file);
-
-    if (swap)
-        swapBytes(data, count, typeSize);
-    return out;
-}
+    return fread(file, array.getData(), array.getDim().getSize(),
+                 array.getType().getSize(), swap);
+} // function ImageIO::fread
 
 #include "formats/image_mrc.cpp"
 #include "formats/image_spider.cpp"

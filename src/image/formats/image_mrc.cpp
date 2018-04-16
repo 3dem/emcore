@@ -154,7 +154,7 @@ public:
 
         // Set the machine Endianess
         auto machine_stamp = static_cast<char *>(header.machst);
-        if (isLittleEndian())
+        if (Type::isLittleEndian())
         {
             machine_stamp[0] = 68;
             machine_stamp[1] = 65;

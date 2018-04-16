@@ -160,6 +160,17 @@ namespace em
         bool equals(const void *inputMem1, const void *inputMem2,
                     size_t count) const;
 
+        /** Swap the bytes order
+         *
+         * @param mem Pointer to data
+         * @param count Number of data elements
+         * @param typeSize Number of bytes for each element
+         */
+        static void swapBytes(void * mem, size_t count, size_t typeSize);
+
+        /** Returns true if machine is little endian else false */
+        static bool isLittleEndian();
+
         class Impl; // Implementation class that will store type information
 
         /** @ingroup base
@@ -234,23 +245,18 @@ namespace em
     static const Type& typeUInt16 = Type::get<uint16_t>();
     static const Type& typeInt32 = Type::get<int32_t>();
     static const Type& typeUInt32 = Type::get<uint32_t>();
+    static const Type& typeInt64 = Type::get<int64_t>();
+    static const Type& typeUInt64 = Type::get<uint64_t>();
 
     static const Type& typeFloat = Type::get<float>();
     static const Type& typeDouble = Type::get<double>();
     static const Type& typeCFloat = Type::get<cfloat>();
     static const Type& typeCDouble = Type::get<cdouble>();
 
+    static const Type& typeBool = Type::get<bool>();
     static const Type& typeString = Type::get<std::string>();
 
     using TypeMap = std::map<int, const Type *>;
-
-    /** Swap the bytes order
-     *
-     * @param mem Pointer to data
-     * @param count Number of data elements
-     * @param typeSize Number of bytes for each element
-     */
-    void swapBytes(void * mem, size_t count, size_t typeSize);
 
 #include "type_priv.h"
 
