@@ -255,9 +255,10 @@ public:
             ([](uint64_t *data, size_t count, FILE *file, bool swap) -> size_t
                     {
                         int32_t tmp[count];
-                        ImageIO::fread(file, &tmp, count, 4, swap);
+                        auto bytes = ImageIO::fread(file, &tmp, count, 4, swap);
                         for (size_t i = 0; i < count; ++i)
                             data[i] = (uint64_t) (tmp[i]);
+                        return bytes;
                     });
         }
         else if (fileInfo.version == 4)
@@ -268,8 +269,9 @@ public:
                     {return ImageIO::fread(file, data, count, 8, swap);});
         }
         else
-            THROW_ERROR("ImageIODm::freadSwapLong: unsupported Digital "
-                     "micrograph version " + fileInfo.version);
+            THROW_ERROR(std::string("ImageIODm::freadSwapLong: unsupported "
+                                    "Digital micrograph version ")
+                        + Object(fileInfo.version).toString());
 
 
         freadSwapLong(&fileInfo.rootlen, 1, file, isLE);

@@ -4,6 +4,7 @@
 #include <sstream>
 #include "em/base/type.h"
 
+
 using namespace em;
 
 Type::Type()
@@ -257,7 +258,8 @@ void Type::swapBytes(void *mem, size_t count, size_t typeSize)
             break;
 
         default:
-            THROW_ERROR("swapBytes: unsupported byte size " + typeSize);
+            THROW_ERROR(std::string("swapBytes: unsupported byte size "));
+                       // + typeSize);
     }
 }
 

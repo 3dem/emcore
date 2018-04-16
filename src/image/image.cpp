@@ -514,5 +514,5 @@ size_t ImageIO::fread(FILE *file, Array &array, bool swap)
 #include "formats/image_spider.cpp"
 #include "formats/image_tiff.cpp"
 #include "formats/image_em.cpp"
-#include "image_dm.cpp"
+#include "formats/image_dm.cpp"
 

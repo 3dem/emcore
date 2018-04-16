@@ -68,7 +68,7 @@ public:
         {
             T2 value = static_cast<T2>(*inputMem);
 
-#define OP_SINGLE(_op) for (size_t i = 0; i < count; ++i, ++outputMem, ++inputMem) *outputMem _op value; break
+#define OP_SINGLE(_op) for (size_t i = 0; i < count; ++i, ++outputMem) *outputMem _op value; break
 
             switch (op)
             {
