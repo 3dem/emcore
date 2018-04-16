@@ -11,6 +11,7 @@ struct DmTag
     size_t nodeId;
     size_t parentId;
     int tagType;
+    Type type;
     std::string tagName;
     std::string tagClass;
     uint64_t size;
@@ -96,8 +97,8 @@ public:
         unsigned char cTag;
         unsigned short int ltName;
 
-        ::fread(&cTag, 1, 1, file); // Identification tag: 20 = tag dir,  21 = tag
-        fread(file, &ltName, 1, 2, isLE); // Length of the tag name
+        fread(&cTag, 1, 1, file); // Identification tag: 20 = tag dir,  21 = tag
+        ImageIO::fread(file, &ltName, 1, 2, isLE); // Length of the tag name
 
         tag.tagType = int(cTag);
 
@@ -158,7 +159,7 @@ public:
                 tag.values.emplace_back(Array(ArrayDim(1),
                                               getTypeFromMode(info[0])));
 
-                fread(file, tag.values[0], swap);
+                ImageIO::fread(file, tag.values[0], swap);
             }
             else if(ninfo == 3 && info[0]==20)   // Tag array
             {
@@ -174,13 +175,10 @@ public:
                 tag.values.emplace_back(Array(ArrayDim(1), typeUInt64));
 
                 // We store the image position in file to be read properly
-                size_t pos = ftell(file);
-                // The following could be replaced by?
-                // tag.values = pos; ????
-                tag.values[0] = &pos;
+                tag.values[0] = ftell(file);
 
                 // We jump the image bytes
-                fseek(file, tag.size*tag.type->getSize(), SEEK_CUR);
+                fseek(file, tag.size*tag.type.getSize(), SEEK_CUR);
             }
             else if (info[0]==20 && info[1] == 15)    // Tag Group array
             {
@@ -229,11 +227,8 @@ public:
                 {
                     tag.values.emplace_back(Array(ArrayDim(1),
                                                   getTypeFromMode(info[4+2*n])));
-
-                    fread(file, tag.values[n], swap);
+                    ImageIO::fread(file, tag.values[n], swap);
                 }
-
-
             }
         }
         return 0;
@@ -248,7 +243,7 @@ public:
         // Check Machine endianness
         isLE = Type::isLittleEndian();
 
-        ::fread(&fileInfo.version, 1, 4,file, isLE);
+        ImageIO::fread(file, &fileInfo.version, 1, 4, isLE);
 
         /* Main difference between v3 and v4 is that lentype is 4 and8 bytes
          * so we select the proper function to store it in a int64_t type.
@@ -260,7 +255,7 @@ public:
             ([](uint64_t *data, size_t count, FILE *file, bool swap) -> size_t
                     {
                         int32_t tmp[count];
-                        fread(file, &tmp, count, 4, swap);
+                        ImageIO::fread(file, &tmp, count, 4, swap);
                         for (size_t i = 0; i < count; ++i)
                             data[i] = (uint64_t) (tmp[i]);
                     });
@@ -270,7 +265,7 @@ public:
             freadSwapLong = static_cast<std::function<size_t(uint64_t *, size_t,
                                                              FILE *, bool)>>
             ([](uint64_t *data, size_t count, FILE *file, bool swap) -> size_t
-                    {return fread(file, data, count, 8, swap);});
+                    {return ImageIO::fread(file, data, count, 8, swap);});
         }
         else
             THROW_ERROR("ImageIODm::freadSwapLong: unsupported Digital "
@@ -278,13 +273,13 @@ public:
 
 
         freadSwapLong(&fileInfo.rootlen, 1, file, isLE);
-        fread(file, &fileInfo.byteOrder, 1, 4, isLE);
+        ImageIO::fread(file, &fileInfo.byteOrder, 1, 4, isLE);
 
         // Set swap mode from endiannes and file byteorder
         swap = (isLE^fileInfo.byteOrder);
 
-        ::fread(&fileInfo.sorted, 1, 1, file);
-        ::fread(&fileInfo.open, 1, 1, file);
+        fread(&fileInfo.sorted, 1, 1, file);
+        fread(&fileInfo.open, 1, 1, file);
         freadSwapLong(&fileInfo.nTags, 1, file, isLE);
 
         size_t nodeID = 0, parentID = 0;
@@ -320,7 +315,8 @@ public:
                                    {8,  &typeBool},
                                    {9,  &typeInt8},
                                    {10, &typeUInt8},
-                                   {11, &typeUInt64}};
+                                   {11, &typeUInt64},
+                                   {12, &typeInt64}};
 
         return tm;
     } // function getTypeMap
