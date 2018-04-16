@@ -113,6 +113,8 @@ namespace em
          *
          * @param op Operation to be applied
          * @param inputMem Memory location of the input data
+         * @param outputMem Memory where cast elements will be put
+         * @param count Number of elements in both input and output
          * @param inputType The Type of the elements in inputMem
          * @param outputMem Memory where resulting elements will be stored
          * @param count Number of elements in the output
@@ -242,6 +244,13 @@ namespace em
 
     using TypeMap = std::map<int, const Type *>;
 
+    /** Swap the bytes order
+     *
+     * @param mem Pointer to data
+     * @param count Number of data elements
+     * @param typeSize Number of bytes for each element
+     */
+    void swapBytes(void * mem, size_t count, size_t typeSize);
 
 #include "type_priv.h"
 

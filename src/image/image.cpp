@@ -356,6 +356,11 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::ImageIO &imageIO)
     return ostream;
 }
 
+size_t ImageIO::Impl::getHeaderSize() const
+{
+    return 0;
+} // function ImageIO::Impl::getHeaderSize
+
 size_t ImageIO::Impl::getPadSize() const
 {
     return pad;
@@ -494,43 +499,28 @@ bool ImageIO::Impl::isLittleEndian()
     return ((int)(*((unsigned char *) &ul)))!=0;
 }
 
-void ImageIO::Impl::swapBytes(void *data, size_t dataSize, size_t typeSize)
+
+size_t em::freadSwap(void *data, size_t count, size_t typeSize, FILE *file,
+                 bool swap)
 {
+    size_t  out = fread(data, count, typeSize, file);
 
-    size_t i = 0;
+    if (swap)
+        swapBytes(data, count, typeSize);
+    return out;
+}
 
-    switch (typeSize)
-    {
-        case 8:
-        {
-            auto dtmp = (uint64_t*) data;
+size_t em::freadArray(Array &array, FILE *file, bool swap)
+{
+    void * data = array.getDataPointer();
+    size_t count = array.getDim().getSize();
+    size_t typeSize = array.getType()->getSize();
 
-            for (; i < dataSize; ++dtmp, ++i)
-                *dtmp = ((*dtmp & 0x00000000000000ff) << 56) | ((*dtmp & 0xff00000000000000) >> 56) |\
-                        ((*dtmp & 0x000000000000ff00) << 40) | ((*dtmp & 0x00ff000000000000) >> 40) |\
-                        ((*dtmp & 0x0000000000ff0000) << 24) | ((*dtmp & 0x0000ff0000000000) >> 24) |\
-                        ((*dtmp & 0x00000000ff000000) <<  8) | ((*dtmp & 0x000000ff00000000) >>  8);
-        }
-            break;
-        case 4:
-        {
-            auto * dtmp = (uint32_t*) data;
+    size_t  out = fread(data, count, typeSize, file);
 
-            for (; i < dataSize; ++dtmp, ++i)
-                *dtmp = ((*dtmp & 0x000000ff) << 24) | ((*dtmp & 0xff000000) >> 24) |\
-                        ((*dtmp & 0x0000ff00) <<  8) | ((*dtmp & 0x00ff0000) >>  8);
-        }
-            break;
-        case 2:
-        {
-            auto dtmp = (uint16_t*) data;
-
-            for (; i < dataSize; ++dtmp, ++i)
-                *dtmp = static_cast<uint16_t>(((*dtmp & 0x00ff) << 8) | ((*dtmp & 0xff00) >> 8));
-        }
-            break;
-
-    }
+    if (swap)
+        swapBytes(data, count, typeSize);
+    return out;
 }
 
 #include "formats/image_mrc.cpp"

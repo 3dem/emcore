@@ -130,89 +130,43 @@ std::ostream& em::operator<< (std::ostream &ostrm, const Type &t)
     return ostrm;
 }
 
-
-// ===================== Container Implementation =======================
-class Type::Container::Impl
+void em::swapBytes(void *mem, size_t count, size_t typeSize)
 {
-public:
-    // Number of allocated elements in memory, if it is 0 the memory
-    // is not owned by this instance and not deallocation is required
-    size_t size = 0;
-    void * data = nullptr;
-    Type type;
-};
 
-Type::Container::Container()
-{
-    impl = new Impl();
+    size_t i = 0;
+
+    switch (typeSize)
+    {
+        case 8:
+        {
+            auto dtmp = (uint64_t*) mem;
+
+            for (; i < count; ++dtmp, ++i)
+                *dtmp = ((*dtmp & 0x00000000000000ff) << 56) | ((*dtmp & 0xff00000000000000) >> 56) |\
+                        ((*dtmp & 0x000000000000ff00) << 40) | ((*dtmp & 0x00ff000000000000) >> 40) |\
+                        ((*dtmp & 0x0000000000ff0000) << 24) | ((*dtmp & 0x0000ff0000000000) >> 24) |\
+                        ((*dtmp & 0x00000000ff000000) <<  8) | ((*dtmp & 0x000000ff00000000) >>  8);
+        }
+            break;
+        case 4:
+        {
+            auto * dtmp = (uint32_t*) mem;
+
+            for (; i < count; ++dtmp, ++i)
+                *dtmp = ((*dtmp & 0x000000ff) << 24) | ((*dtmp & 0xff000000) >> 24) |\
+                        ((*dtmp & 0x0000ff00) <<  8) | ((*dtmp & 0x00ff0000) >>  8);
+        }
+            break;
+        case 2:
+        {
+            auto dtmp = (uint16_t*) mem;
+
+            for (; i < count; ++dtmp, ++i)
+                *dtmp = static_cast<uint16_t>(((*dtmp & 0x00ff) << 8) | ((*dtmp & 0xff00) >> 8));
+        }
+            break;
+
+        default:
+            THROW_ERROR("swapBytes: unsupported byte size " + typeSize);
+    }
 }
-
-Type::Container::Container(const Type &type, const size_t n,
-                                   void *memory):Container()
-{
-    allocate(type, n, memory);
-} // Container Ctor
-
-Type::Container::~Container()
-{
-    deallocate();
-    delete impl;
-} // Container Dtor
-
-const Type& Type::Container::getType() const { return impl->type; }
-
-const void* Type::Container::getData() const { return impl->data; }
-
-void* Type::Container::getData() { return impl->data; }
-
-void Type::Container::allocate(const Type &type, const size_t n, void *memory)
-{
-    // If the type have the same size and we are going to allocate the
-    // same number of elements, then we will use the same amount of
-    // memory, so there is not need for a new allocation if we own the memory
-    if (memory != nullptr && impl->size > 0
-        && impl->size * impl->type.getSize() == n * type.getSize())
-        return;
-
-    deallocate();
-    impl->type = type;
-
-    if (memory == nullptr)
-    {
-        impl->size = n;
-        impl->data = type.allocate(n);
-    }
-    else
-        impl->data = memory;
-
-} // function Container.allocate
-
-void Type::Container::deallocate()
-{
-    if (impl->size)
-    {
-        impl->type.deallocate(impl->data, impl->size);
-        impl->size = 0;
-    }
-} // function Container.deallocate
-
-/** Copy or cast the elements from the other Type::Container.
- * If type of current Container is not null, it will be kept, if not
- * the type of the other will be used.
- * @param other The other Type::Container
- * @param n Number of elements we want to copy
- */
-void Type::Container::copyOrCast(const Type::Container &other, size_t n,
-                                 bool singleInput)
-{
-    auto& otherType = other.getType();
-    auto& finalType = impl->type.isNull() ? otherType: impl->type;
-
-    allocate(finalType, n);
-
-    if (finalType == otherType && !singleInput)
-        finalType.copy(other.getData(), impl->data, n);
-    else
-        finalType.operate(Type::CAST, other.getData(), otherType, impl->data,
-                          n, singleInput);
-} // function Container.copyOrCast

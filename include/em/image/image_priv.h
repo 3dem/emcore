@@ -71,7 +71,7 @@ namespace em
         virtual void writeHeader() = 0;
 
         /** Return the size of the header for this format */
-        virtual size_t getHeaderSize() const = 0;
+        virtual size_t getHeaderSize() const;
 
         /** Return the size of padding between images/volumes in a stack */
         virtual size_t getPadSize() const;
@@ -117,14 +117,6 @@ namespace em
         /** Returns true if machine is little endian else false */
         bool isLittleEndian();
 
-        /** Swap the bytes order
-         *
-         * @param data Pointer to data
-         * @param dataSize Number of data elements
-         * @param typeSize Number of bytes for each element
-         */
-        void swapBytes(void * data, size_t dataSize, size_t typeSize);
-
     private:
         // Store a mapping between format names (mrc, spider, etc)
         // and a function that helps to build a new ImageIO::Impl
@@ -134,6 +126,26 @@ namespace em
     using ImageIOImplBuilder = ImageIO::Impl* (*)();
     bool registerImageIOImpl(const StringVector &sv, ImageIOImplBuilder builder);
 
+    /**
+     * Read from file and swap the data if needed
+     * @param data Pointer to data
+     * @param count Number of data elements
+     * @param typeSize Number of bytes for each element
+     * @param file File handler
+     * @param swap Boolean to either swap or not the data array
+     * @return
+     */
+    size_t freadSwap(void *data, size_t count, size_t typeSize, FILE *file,
+                         bool swap = false);
+
+    /**
+     * Read from file to Array
+     * @param array object Array to copy data from file
+     * @param file File handler
+     * @param swap Boolean to either swap or not the data array
+     * @return
+     */
+    size_t freadArray(Array &array, FILE *file, bool swap = false);
 } // em namespace
 
 
