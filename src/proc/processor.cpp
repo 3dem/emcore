@@ -35,6 +35,11 @@ void ImagePipeProc::addProcessor(ImageProcessor* imgProc)
     processors.push_back(imgProc);
 } // function ImagePipeProc.addProcessor
 
+size_t ImagePipeProc::getSize() const
+{
+    return processors.size();
+} // function ImagePipeProc.getSize
+
 void ImagePipeProc::process(const Image &input, Image &output)
 {
     Image localInput(input);

@@ -30,7 +30,7 @@ static const char USAGE[] =
                          scale (x|y|z) <new_dim>                  |
                         (lowpass|highpass) <freq>                 |
                         (bandpass <low_freq> <high_freq>)
-                       ]... <output>
+                       ]... [<output>]
 
     Options:
       <input>       An input file or a pattern matching many files.
@@ -80,6 +80,9 @@ private:
 // ---------------------- Implementation -------------------------------
 int EmImageProgram::run()
 {
+    if (outputFn.empty())
+        return 0;
+
     Image image;
 
     for (auto& path: inputList)
@@ -95,6 +98,9 @@ int EmImageProgram::run()
 
 void EmImageProgram::readArgs()
 {
+    inputFn = "";
+    outputFn = "";
+
     if (hasArg("<input>"))
     {
         inputFn = getValue("<input>");
@@ -111,12 +117,7 @@ void EmImageProgram::readArgs()
                          "' does not exists!!!");
     }
 
-    if (hasArg("<output>"))
-    {
-        outputFn = getValue("<output>");
-        std::cout << std::setw(10) << std::right << "Output: "
-                  << outputFn << std::endl;
-    }
+
 
     auto& args = getArgList();
 
@@ -131,6 +132,30 @@ void EmImageProgram::readArgs()
         if (pproc != nullptr)
             pipeProc.addProcessor(pproc);
         //else TODO: handle when the processor can not be constructed.
+    }
+
+    if (hasArg("<output>"))
+    {
+        outputFn = getValue("<output>");
+        std::cout << std::setw(10) << std::right << "Output: "
+                  << outputFn << std::endl;
+    }
+    else
+    {
+        std::cout << "pipeProc.getSize: " << pipeProc.getSize() << std::endl;
+
+        // Handle the case when the output is not defined
+        ASSERT_ERROR(pipeProc.getSize() > 0,
+                     "Output should be specified if performing any operation.")
+        Image image;
+
+        for (auto& path: inputList)
+        {
+            //FIXME: Retrieve image header info from ImageIO to avoid reading
+            // the image if not necessary
+            image.read(path);
+            std::cout << image << std::endl;
+        }
     }
 
 } // function EmImageProgram.readArgs

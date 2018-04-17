@@ -57,6 +57,9 @@ namespace em
          /** Add a new processor to the list */
         void addProcessor(ImageProcessor* imgProc);
 
+         /** Return the number of processors */
+        size_t getSize() const;
+
      protected:
          std::vector<ImageProcessor*> processors;
      }; // class ImagePipeProc

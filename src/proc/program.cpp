@@ -110,7 +110,9 @@ Program::~Program()
 
 bool Program::hasArg(const std::string &arg) const
 {
-    return impl->docoptArgs.find(arg) != impl->docoptArgs.end();
+    auto pos = impl->docoptArgs.find(arg);
+    return (pos != impl->docoptArgs.end()
+            && (bool)impl->docoptArgs[arg]);
 } //function Program.hasArg
 
 const Program::Argument& Program::getArg(const std::string &arg) const
@@ -142,9 +144,9 @@ int Program::main(int argc, const char **argv)
                                           {argv + 1, argv + argc},
                                           true, getName());
 
-//    for(auto const& arg : impl->docoptArgs) {
-//        std::cout << arg.first << ": " << arg.second << std::endl;
-//    }
+    for(auto const& arg : impl->docoptArgs) {
+        std::cout << arg.first << ": " << arg.second << std::endl;
+    }
         readArgs();
         return run();
     }
