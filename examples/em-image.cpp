@@ -89,7 +89,8 @@ int EmImageProgram::run()
     {
         //TODO: Check if using the ImageIO makes any difference
         image.read(path);
-        pipeProc.process(image);
+        if (pipeProc.getSize() > 0)
+            pipeProc.process(image);
         image.write(outputFn);
     }
 
@@ -116,8 +117,6 @@ void EmImageProgram::readArgs()
                          std::string("Input path '") + path +
                          "' does not exists!!!");
     }
-
-
 
     auto& args = getArgList();
 
@@ -147,14 +146,14 @@ void EmImageProgram::readArgs()
         // Handle the case when the output is not defined
         ASSERT_ERROR(pipeProc.getSize() > 0,
                      "Output should be specified if performing any operation.")
-        Image image;
+        ImageIO imgIO;
 
         for (auto& path: inputList)
         {
             //FIXME: Retrieve image header info from ImageIO to avoid reading
             // the image if not necessary
-            image.read(path);
-            std::cout << image << std::endl;
+            imgIO.open(path);
+            std::cout << imgIO << std::endl;
         }
     }
 
