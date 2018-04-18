@@ -279,7 +279,15 @@ DEFINE_TYPENAME(int32_t, "int32");
 DEFINE_TYPENAME(uint32_t, "uint32");
 DEFINE_TYPENAME(int64_t, "int64");
 DEFINE_TYPENAME(uint64_t, "uint64");
+
+// FIXME: We need to find a better way to distinguish
+// when size_t and uint64_t are not the same
+// they are not for Mac (JM MacOs HighSierra)
+// but they are for Linux (Ubuntu 16.04)
+#ifdef __APPLE__
 DEFINE_TYPENAME(size_t, "size_t");
+
+#endif
 
 
 DEFINE_TYPENAME(bool, "bool");
