@@ -384,10 +384,21 @@ public:
         header.nIm = (child->childs.size() > 2 ) ?
                        (int)child->childs[2]->values[0] : 1;
 
-        child = imageData->parent->getChild({"ImageTags", "Acquisition", "Frame", "CCD",
-                                     "Pixel Size (um)"});
-        header.pixelHeight = (double)child->values[0]*1e4;
-        header.pixelWidth = (double)child->values[1]*1e4;
+        try
+        {
+            child = imageData->parent->getChild({"ImageTags", "Acquisition", "Frame", "CCD",
+                                                 "Pixel Size (um)"});
+            header.pixelHeight = (double)child->values[0]*1e4;
+            header.pixelWidth = (double)child->values[1]*1e4;
+
+        }
+        catch (em::Error &e)
+        {
+            std::cout << "Pixel size info not available" << std::endl;
+            header.pixelHeight = header.pixelWidth = 0;
+        }
+
+
 
 
         // Setting the ImageIO header info
