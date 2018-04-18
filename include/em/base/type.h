@@ -247,6 +247,7 @@ namespace em
     static const Type& typeUInt32 = Type::get<uint32_t>();
     static const Type& typeInt64 = Type::get<int64_t>();
     static const Type& typeUInt64 = Type::get<uint64_t>();
+    static const Type& typeSize = Type::get<size_t>();
 
     static const Type& typeFloat = Type::get<float>();
     static const Type& typeDouble = Type::get<double>();

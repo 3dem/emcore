@@ -19,7 +19,7 @@ struct DmTag
     Class tagClass;
     std::string tagName;
 
-    uint64_t size;
+    size_t size;
     std::vector<Object> values;
     std::vector<DmTag*> childs;
 
@@ -124,15 +124,14 @@ struct DmHeader
 
 /**
  * Function pointer to be used to read size values that, depending of DM version
- * may be addressed by 4 or 8 bytes. Data will always be stored in a uint64_t type
+ * may be addressed by 4 or 8 bytes. Data will always be stored in a size_t type
  * @param data Pointer to data
  * @param count Number of data elements
  * @param file File handler
  * @param swap Boolean to either swap or not the data array
  * @return biven by fread
  */
-std::function< size_t(uint64_t*, size_t, FILE*, bool) > freadSwapLong;
-//size_t (*freadSwapLong)(uint64_t*, size_t, FILE*, bool);
+std::function< size_t(size_t*, size_t, FILE*, bool) > freadSwapLong;
 
 /**
  * Inherit properties from base ImageIOImpl and add information
@@ -143,11 +142,11 @@ class ImageIODm: public em::ImageIO::Impl
 public:
     // File information attributes
     int version;
-    uint64_t rootlen;
+    size_t rootlen;
     int byteOrder;
     char sorted;
     char open;
-    uint64_t nTags;
+    size_t nTags;
     DmTag *rootTag;
     DmTag *dataTypeTag;
 
@@ -219,10 +218,10 @@ public:
             fseek(file, 4, SEEK_CUR);
 
             // Size of info array
-            uint64_t ninfo;
+            size_t ninfo;
             freadSwapLong(&ninfo, 1, file, isLE);
             // Reading of Info
-            uint64_t info[ninfo];
+            size_t info[ninfo];
             freadSwapLong(info, ninfo, file, isLE);
 
             /* Tag classification  ===========================================*/
@@ -253,16 +252,9 @@ public:
                 tag.size = info[2];
 
                 // We store the image position in file to be read properly
-                tag.values.emplace_back(Object(typeUInt64));
+                tag.values.emplace_back(Object(typeSize));
                 size_t  cpos  = ftell(file);
                 tag.values[0] = cpos;
-
-                std::cout << "NodeId: " << tag.nodeId << " TagName: "
-                          << tag.tagName << " - ftell: " << cpos
-                          << " - tag.values[0].type: "<< tag.values[0].getType().getName()
-                          << " - tag.values[0].value: " << tag.values[0]
-                          << " - (uint64_t) tag.values[0].value: " << (uint64_t)tag.values[0]
-                          << std::endl;
 
                 // We jump the image bytes
                 fseek(file, tag.size*getTypeFromMode(tag.dataType).getSize(),
@@ -278,7 +270,7 @@ public:
                          info(2*i+  3) = number type for value i
                          info(ninfo) = size of info array*/
                 tag.tagClass = DmTag::GROUP_ARRAY;
-                uint64_t nGroups = info[3];
+                size_t nGroups = info[3];
                 tag.size = info[ninfo-1];
 
                 // We do not store de group arrays. They are entangled and we
@@ -328,22 +320,22 @@ public:
          * */
         if (version == 3)
         {
-            freadSwapLong = static_cast<std::function<size_t(uint64_t *, size_t,
+            freadSwapLong = static_cast<std::function<size_t(size_t *, size_t,
                                                              FILE *, bool)>>
-            ([](uint64_t *data, size_t count, FILE *file, bool swap) -> size_t
+            ([](size_t *data, size_t count, FILE *file, bool swap) -> size_t
                     {
                         int32_t tmp[count];
                         auto bytes = ImageIO::fread(file, &tmp, count, 4, swap);
                         for (size_t i = 0; i < count; ++i)
-                            data[i] = (uint64_t) (tmp[i]);
+                            data[i] = (size_t) (tmp[i]);
                         return bytes;
                     });
         }
         else if (version == 4)
         {
-            freadSwapLong = static_cast<std::function<size_t(uint64_t *, size_t,
+            freadSwapLong = static_cast<std::function<size_t(size_t *, size_t,
                                                              FILE *, bool)>>
-            ([](uint64_t *data, size_t count, FILE *file, bool swap) -> size_t
+            ([](size_t *data, size_t count, FILE *file, bool swap) -> size_t
                     {
                         return ImageIO::fread(file, data, count, 8, swap);
                     });

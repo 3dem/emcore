@@ -204,6 +204,7 @@ public:
         CAST_IF_TYPE(uint32_t);
         CAST_IF_TYPE(int64_t);
         CAST_IF_TYPE(uint64_t);
+        CAST_IF_TYPE(size_t);
 
         CAST_IF_TYPE(float);
         CAST_IF_TYPE(double);
@@ -278,6 +279,8 @@ DEFINE_TYPENAME(int32_t, "int32");
 DEFINE_TYPENAME(uint32_t, "uint32");
 DEFINE_TYPENAME(int64_t, "int64");
 DEFINE_TYPENAME(uint64_t, "uint64");
+DEFINE_TYPENAME(size_t, "size_t");
+
 
 DEFINE_TYPENAME(bool, "bool");
 DEFINE_TYPENAME(std::string, "string");
