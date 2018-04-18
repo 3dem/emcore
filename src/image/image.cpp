@@ -339,15 +339,20 @@ void ImageIO::write(size_t index, const Image &image)
     impl->writeImageData(index, image);
 } // function ImageIO::write
 
-void ImageIO::toStream(std::ostream &ostream) const
+void ImageIO::toStream(std::ostream &ostream, int verbosity) const
 {
-    ostream << " -- File info --" << std::endl;
-    ostream << "Dimensions: " << impl->dim << std::endl;
-    ostream << "Type: " << impl->type << std::endl;
-    ostream << "Header size: " << impl->getHeaderSize() << std::endl;
-    ostream << "Pad size: " << impl->getPadSize() << std::endl;
-    ostream << "Swap: " << impl->swap << std::endl;
+    if (verbosity > 0)
+    {
+        ostream << " -- File info --" << std::endl;
+        ostream << "Dimensions: " << impl->dim << std::endl;
+        ostream << "Type: " << impl->type << std::endl;
+        ostream << "Header size: " << impl->getHeaderSize() << std::endl;
+        ostream << "Pad size: " << impl->getPadSize() << std::endl;
+        ostream << "Swap: " << impl->swap << std::endl;
 
+        if (verbosity > 1)
+            impl->toStream(std::cout, verbosity);
+    }
 }
 
 std::ostream& em::operator<< (std::ostream &ostream, const em::ImageIO &imageIO)
@@ -493,6 +498,11 @@ int ImageIO::Impl::getModeFromType(const Type &type) const
     return -999;
 } // function ImageIO::Impl.getTypeFromMode
 
+
+void ImageIO::Impl::toStream(std::ostream &ostream, int verbosity) const
+{
+
+}
 
 size_t ImageIO::fread(FILE *file, void *data, size_t count,
                       size_t typeSize, bool swap)
