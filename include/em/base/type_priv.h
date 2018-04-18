@@ -202,8 +202,13 @@ public:
         CAST_IF_TYPE(uint16_t);
         CAST_IF_TYPE(int32_t);
         CAST_IF_TYPE(uint32_t);
+        CAST_IF_TYPE(int64_t);
+        CAST_IF_TYPE(uint64_t);
+
         CAST_IF_TYPE(float);
         CAST_IF_TYPE(double);
+
+        CAST_IF_TYPE(bool);
 
 #undef CAST_IF_TYPE
     } // function TypeImplBaseT.cast

@@ -1,4 +1,6 @@
+#include <iomanip>
 #include <functional>
+
 #include "em/base/error.h"
 #include "em/image/image.h"
 #include "em/image/image_priv.h"
@@ -8,34 +10,98 @@ using namespace em;
 
 struct DmTag
 {
+    enum Class {DIR, SINGLE, GROUP, ARRAY, GROUP_ARRAY};
+
     size_t nodeId;
-    size_t parentId;
+    const DmTag *parent;
     int tagType;
-    Type type;
+    short int dataType;
+    Class tagClass;
     std::string tagName;
-    std::string tagClass;
+
     uint64_t size;
-    std::vector<Array> values;
+    std::vector<Object> values;
+    std::vector<DmTag*> childs;
 
-    DmTag(){};
-    DmTag(size_t nodeId, size_t parentId, int tagType,
-          const std::string tagName) : nodeId(nodeId), parentId(parentId),
-                                        tagType(tagType), tagName(tagName) {}
+    DmTag(size_t nodeId, const DmTag *parent): nodeId(nodeId), parent(parent) {}
+
+    // Get the inner child iterating through the input tagName list
+    const DmTag* getChild(std::initializer_list<std::string> list) const
+    {
+        auto child = this;
+
+        for (auto& tagName: list)
+        {
+            auto oldChild = child;
+            child = child->getChild(tagName);
+            if (child == nullptr)
+            {
+                std::cout << "Failed getChild in : " << oldChild->tagName << std::endl;
+
+                for (auto c: oldChild->childs)
+                    std::cout << c->tagName << " ";
+                std::cout << std::endl;
+                ASSERT_ERROR(child == nullptr,
+                             std::string("Child not found with tagName ")
+                             + tagName);
+            }
+        }
+
+        return child;
+    }
+
+    // Return the first child which tagName is equal to the provided param
+    const DmTag* getChild(const std::string& childTagName) const
+    {
+        for (auto child: childs)
+            if (child->tagName == childTagName)
+                return child;
+        return nullptr;
+    }
+
+    void print(std::ostream &ostream, std::string space)
+    {
+        std::string tTypeStr = "DIR";
+
+        if (tagClass == SINGLE)
+            tTypeStr = "SINGLE";
+        else if (tagClass == GROUP)
+            tTypeStr = "GROUP";
+        else if (tagClass == ARRAY)
+            tTypeStr = "ARRAY";
+        else if (tagClass == GROUP_ARRAY)
+            tTypeStr = "GROUP_ARRAY";
+
+
+        ostream << std::setw(6) << parent->nodeId
+                << std::setw(6) << nodeId
+                << std::setw(15) << tTypeStr
+                << space << "˪-- " << tagName;
+
+        if (tagClass == DIR)
+        {
+            ostream  << std::endl;
+
+            auto childSpace = space + "    ";
+            for (auto child: this->childs)
+                child->print(ostream, childSpace);
+
+        }
+        else
+        {
+            ostream << " - Datatype: " << this->dataType;
+
+            if (values.size() > 0)
+                ostream << " -  Value: " << values[0] << std::endl;
+        }
+    }
+
+    ~DmTag()
+    {
+        for (auto child: childs)
+            delete child;
+    }
 }; //DmTag
-
-struct DmFileInfo
-{
-    int version;
-    uint64_t rootlen;
-    int byteOrder;
-    char sorted;
-    char open;
-    uint64_t nTags;
-    std::vector<DmTag> tags;
-    int nIm;
-    bool isLE;
-    bool swap;
-}; //DmFileInfo
 
 
 struct DmHeader
@@ -47,8 +113,9 @@ struct DmHeader
     double      pixelHeight;           //CalibrationDeltaY
     int         CalibrationElementY;    //CalibrationElementY
     short int   dataType;     //DataType
-    int         imageWidth;            //ArraySizeX
-    int         imageHeight;           //ArraySizeY
+    int         nx;            //ArraySizeX
+    int         ny;           //ArraySizeY
+    int         nIm;           //Number of images
     short int   dataTypeSize;
     size_t      headerSize;
     bool        flip;
@@ -74,25 +141,38 @@ std::function< size_t(uint64_t*, size_t, FILE*, bool) > freadSwapLong;
 class ImageIODm: public em::ImageIO::Impl
 {
 public:
+    // File information attributes
+    int version;
+    uint64_t rootlen;
+    int byteOrder;
+    char sorted;
+    char open;
+    uint64_t nTags;
+    DmTag *rootTag;
+    DmTag *dataTypeTag;
 
-    DmFileInfo fileInfo;
-    DmHeader header;
+    int nIm;
+    bool swap;
     bool isLE;
+    DmHeader header;
 
+    // Other variables used during the reading of tags
+    size_t nodeCounter;
 
-    double readTag(size_t parentId, size_t &nodeId)
+    // Read a single object from file
+    void freadObject(Object &object)
+    {
+        ImageIO::fread(file, object.getData(), 1, object.getType().getSize(),
+                       swap);
+    }
+
+    DmTag* readTag(const DmTag* parent)
     {
         /* Header Tag ============================================================== */
 
-//        fileInfo.tags.emplace_back(nodeId, parentId, tagType, stagName);
-        fileInfo.tags.emplace_back();
-//        fileInfo.tags.push_back(DmTag());
-        DmTag &tag = fileInfo.tags.back();
-
-        ++nodeId;
-        tag.nodeId = nodeId;
-        tag.parentId = parentId;
-
+        // Generate an incremental and unique node id from nodeCounter
+        DmTag* pTag = new DmTag(++nodeCounter, parent);
+        auto &tag = *pTag; // shortcut name
 
         unsigned char cTag;
         unsigned short int ltName;
@@ -104,14 +184,11 @@ public:
 
         if (ltName > 0)
         {
-            char * tagName =  new char[ltName+1];
-            fread(tagName, ltName, 1, file); // Tag name
-            tagName[ltName] = '\0';
-            tag.tagName = tagName;
-            delete [] tagName;
+            tag.tagName.resize(ltName);
+            fread(&tag.tagName[0], ltName, 1, file); // Tag name
         }
 
-        if (fileInfo.version == 4)
+        if (version == 4)
         {
             /*total bytes in tag/tag directory including all sub-directories
              * (new for DM4). Actually, we don't use it*/
@@ -121,7 +198,7 @@ public:
         /* Reading tags ======================================================*/
         if (tag.tagType == 20)  // Tag directory
         {
-            tag.tagClass = "Dir";
+            tag.tagClass = DmTag::DIR;
 
             // We skip the following parameters, actually we don't use it.
             // 1 = sorted (normally = 1)
@@ -129,13 +206,12 @@ public:
             fseek(file, 2, SEEK_CUR);
 
             //  number of tags in tag directory
-            freadSwapLong(&tag.size, 1, file, isLE);
+            size_t tagSize;
+            freadSwapLong(&tagSize, 1, file, isLE);
+            tag.size = tagSize;
 
-            parentId = nodeId;
-            for (size_t i = 0; i < tag.size; ++i)
-                readTag(parentId, nodeId);
-
-            return 0;
+            for (size_t i = 0; i < tagSize; ++i)
+                tag.childs.push_back(readTag(pTag));
         }
         else if (tag.tagType == 21)    // Tag
         {
@@ -153,13 +229,18 @@ public:
 
             if (ninfo == 1)   // Single entry tag
             {
-                tag.tagClass = "Single";
-                tag.size = 0;
+                tag.tagClass = DmTag::SINGLE;
+                tag.dataType = info[0];
+                tag.size = 1;
                 // Store a single value of an Array, of a single element ;)
-                tag.values.emplace_back(Array(ArrayDim(1),
-                                              getTypeFromMode(info[0])));
+                tag.values.emplace_back(Object(getTypeFromMode(tag.dataType)));
+                freadObject(tag.values[0]);
 
-                ImageIO::fread(file, tag.values[0], swap);
+                // We store the special tag which we assume contains the image
+                // information, i.e, the one that has 'Datatype' as name and
+                // is not 23, which seems to be the thumbnail image
+                if (tag.tagName == "DataType" && (int)tag.values[0] != 23)
+                    dataTypeTag = pTag;
             }
             else if(ninfo == 3 && info[0]==20)   // Tag array
             {
@@ -167,18 +248,25 @@ public:
                 info(0) = 20
                 info(1) = number type for all values
                 info(2) = info(ninfo) = size of array*/
-
-                tag.tagClass = "Array";
-                tag.type = getTypeFromMode(info[1]);
+                tag.tagClass = DmTag::ARRAY;
+                tag.dataType = info[1];
                 tag.size = info[2];
 
-                tag.values.emplace_back(Array(ArrayDim(1), typeUInt64));
-
                 // We store the image position in file to be read properly
-                tag.values[0] = ftell(file);
+                tag.values.emplace_back(Object(typeUInt64));
+                size_t  cpos  = ftell(file);
+                tag.values[0] = cpos;
+
+                std::cout << "NodeId: " << tag.nodeId << " TagName: "
+                          << tag.tagName << " - ftell: " << cpos
+                          << " - tag.values[0].type: "<< tag.values[0].getType().getName()
+                          << " - tag.values[0].value: " << tag.values[0]
+                          << " - (uint64_t) tag.values[0].value: " << (uint64_t)tag.values[0]
+                          << std::endl;
 
                 // We jump the image bytes
-                fseek(file, tag.size*tag.type.getSize(), SEEK_CUR);
+                fseek(file, tag.size*getTypeFromMode(tag.dataType).getSize(),
+                      SEEK_CUR);
             }
             else if (info[0]==20 && info[1] == 15)    // Tag Group array
             {
@@ -189,16 +277,15 @@ public:
                          info(3) = number of elements in group
                          info(2*i+  3) = number type for value i
                          info(ninfo) = size of info array*/
-                tag.tagClass = "GroupArray";
+                tag.tagClass = DmTag::GROUP_ARRAY;
                 uint64_t nGroups = info[3];
                 tag.size = info[ninfo-1];
 
-                // We do not store de group arrays. They are entangled and we don't know
-                // how useful they are at this moment. We store only the different datatypes
-                // in one array per element in the group
+                // We do not store de group arrays. They are entangled and we
+                // don't know how useful they are at this moment. We store only
+                // the different datatypes in one array per element in the group
                 for (size_t n = 0; n < nGroups; ++n)
-                    tag.values.emplace_back(Array(ArrayDim(1),
-                                                  getTypeFromMode(info[5+2*n])));
+                    tag.values.emplace_back(Object(getTypeFromMode(info[5+2*n])));
 
                 size_t nBytes=0;
                 for (size_t n = 0; n < nGroups; ++n)
@@ -215,40 +302,31 @@ public:
                     info(2) = ngroup, number of elements in group
                     info(2*i+1) = length of fieldname? (always = 0)
                     info(2*i+2) = tag data type for value i */
-
-                tag.tagClass = "Group";
+                tag.tagClass = DmTag::GROUP;
                 tag.size = info[2];
-
-                double dValues[tag.size];
-                Array aValue;
-                ArrayDim adim(1);
 
                 for (size_t n = 0; n < tag.size; ++n)
                 {
-                    tag.values.emplace_back(Array(ArrayDim(1),
-                                                  getTypeFromMode(info[4+2*n])));
-                    ImageIO::fread(file, tag.values[n], swap);
+                    tag.values.emplace_back(Object(getTypeFromMode(info[4+2*n])));
+                    freadObject(tag.values[n]);
                 }
             }
         }
-        return 0;
+        return pTag;
     }
 
 
     virtual void readHeader() override
     {
-
-        int dummy;
-
         // Check Machine endianness
         isLE = Type::isLittleEndian();
 
-        ImageIO::fread(file, &fileInfo.version, 1, 4, isLE);
+        ImageIO::fread(file, &version, 1, 4, isLE);
 
         /* Main difference between v3 and v4 is that lentype is 4 and8 bytes
          * so we select the proper function to store it in a int64_t type.
          * */
-        if (fileInfo.version == 3)
+        if (version == 3)
         {
             freadSwapLong = static_cast<std::function<size_t(uint64_t *, size_t,
                                                              FILE *, bool)>>
@@ -261,35 +339,71 @@ public:
                         return bytes;
                     });
         }
-        else if (fileInfo.version == 4)
+        else if (version == 4)
         {
             freadSwapLong = static_cast<std::function<size_t(uint64_t *, size_t,
                                                              FILE *, bool)>>
             ([](uint64_t *data, size_t count, FILE *file, bool swap) -> size_t
-                    {return ImageIO::fread(file, data, count, 8, swap);});
+                    {
+                        return ImageIO::fread(file, data, count, 8, swap);
+                    });
         }
         else
             THROW_ERROR(std::string("ImageIODm::freadSwapLong: unsupported "
-                                    "Digital micrograph version ")
-                        + Object(fileInfo.version).toString());
+                                            "Digital micrograph version ") +
+                        Object(version).toString());
 
 
-        freadSwapLong(&fileInfo.rootlen, 1, file, isLE);
-        ImageIO::fread(file, &fileInfo.byteOrder, 1, 4, isLE);
+        freadSwapLong(&rootlen, 1, file, isLE);
+        ImageIO::fread(file, &byteOrder, 1, 4, isLE);
 
         // Set swap mode from endiannes and file byteorder
-        swap = (isLE^fileInfo.byteOrder);
+        swap = (isLE ^ byteOrder);
 
-        fread(&fileInfo.sorted, 1, 1, file);
-        fread(&fileInfo.open, 1, 1, file);
-        freadSwapLong(&fileInfo.nTags, 1, file, isLE);
+        fread(&sorted, 1, 1, file);
+        fread(&open, 1, 1, file);
+        freadSwapLong(&nTags, 1, file, isLE);
 
-        size_t nodeID = 0, parentID = 0;
-
-        for (size_t j = 0; j < fileInfo.nTags ; ++j)
-            readTag(parentID, nodeID);
+        nodeCounter = 0;
+        rootTag = new DmTag(0, nullptr);
 
 
+        for (size_t j = 0; j < nTags; ++j)
+            rootTag->childs.push_back(readTag(rootTag));
+
+        dim.n = 0;
+
+       // auto pred = [](
+         //       const DmTag &dmtag) { return dmtag.tagName=="DataType"; };
+
+        int value;
+
+        auto imageData = dataTypeTag->parent;
+
+        std::cout << "ImageData: " << imageData->tagName << std::endl;
+
+        auto child = imageData->getChild("Data");
+        header.headerSize = (size_t) child->values[0];
+        header.dataType = child->dataType;
+
+        child = imageData->getChild("Dimensions");
+        header.nx = child->childs[0]->values[0];
+        header.ny = child->childs[1]->values[0];
+        header.nIm = (child->childs.size() > 2 ) ?
+                       (int)child->childs[2]->values[0] : 1;
+
+        child = imageData->parent->getChild({"ImageTags", "Acquisition", "Frame", "CCD",
+                                     "Pixel Size (um)"});
+        header.pixelHeight = (double)child->values[0]*1e4;
+        header.pixelWidth = (double)child->values[1]*1e4;
+
+
+        // Setting the ImageIO header info
+        dim.x = header.nx;
+        dim.y = header.ny;
+        dim.z = 1;
+        dim.n = header.nIm;
+        type = getTypeFromMode(header.dataType);
 
     } // function readHeader
 
@@ -303,7 +417,7 @@ public:
 
     virtual size_t getHeaderSize() const override
     {
-      //  return MRC_HEADER_SIZE;
+        return header.headerSize;
     } // function getHeaderSize
 
     virtual const TypeMap & getTypeMap() const override
@@ -322,6 +436,28 @@ public:
 
         return tm;
     } // function getTypeMap
+
+
+    virtual void toStream(std::ostream &ostream, int verbosity) const override
+    {
+
+            ostream << "verbosity normal" << std::endl;
+
+
+            if (verbosity > 1)
+            {
+                ostream << "--- DM File struct ---" << std::endl;
+
+                for (auto child: rootTag->childs)
+                    child->print(ostream, "");
+            }
+    } // function toStream
+
+    virtual ~ImageIODm()
+    {
+        delete rootTag;
+    }
+
 }; // class ImageIOMrc
 
 StringVector dmExts = {"dm3", "dm4"};

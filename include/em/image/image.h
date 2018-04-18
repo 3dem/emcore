@@ -206,8 +206,13 @@ namespace em
         // TODO: DOCUMENT
         void write(size_t index, const Image &image);
 
-        // String representation
-        void toStream(std::ostream &ostream) const;
+        /**
+         * Print information about the image file.
+         * @param verbosity 0 means silent, so nothing will be printed
+         * if it is 1, only the basic information will be shown. If > 1,
+         * some extra information will be provided.
+         */
+        void toStream(std::ostream &ostream, int verbosity=1) const;
 
         ~ImageIO();
 

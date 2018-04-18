@@ -114,6 +114,15 @@ namespace em
         const Type& getTypeFromMode(int mode) const;
         int getModeFromType(const Type &type) const;
 
+
+        /**
+         * Print information about the image file.
+         * @param verbosity 0 means silent, so nothing will be printed
+         * if it is 1, only the basic information will be shown. If > 1,
+         * some extra information will be provided.
+         */
+        virtual void toStream(std::ostream &ostream, int verbosity=1) const;
+
     private:
         // Store a mapping between format names (mrc, spider, etc)
         // and a function that helps to build a new ImageIO::Impl
