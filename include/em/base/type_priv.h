@@ -193,25 +193,28 @@ public:
     {
         auto outputMemT = static_cast<T *>(outputMem);
         // std::is_arithmetic<type>::value
-#define CAST_IF_TYPE(type) if (inputType == Type::get<type>()) \
-        TypeOperator<both_arithmetic<T, type>::value>::operate(op, static_cast<const type*>(inputMem), outputMemT, count, singleInput);
+#define OPERATE_IF_TYPE(type) if (inputType == Type::get<type>()) \
+        return TypeOperator<both_arithmetic<T, type>::value>::operate(op, static_cast<const type*>(inputMem), outputMemT, count, singleInput);
 
-        CAST_IF_TYPE(int8_t);
-        CAST_IF_TYPE(uint8_t);
-        CAST_IF_TYPE(int16_t);
-        CAST_IF_TYPE(uint16_t);
-        CAST_IF_TYPE(int32_t);
-        CAST_IF_TYPE(uint32_t);
-        CAST_IF_TYPE(int64_t);
-        CAST_IF_TYPE(uint64_t);
-        CAST_IF_TYPE(size_t);
+        OPERATE_IF_TYPE(int8_t);
+        OPERATE_IF_TYPE(uint8_t);
+        OPERATE_IF_TYPE(int16_t);
+        OPERATE_IF_TYPE(uint16_t);
+        OPERATE_IF_TYPE(int32_t);
+        OPERATE_IF_TYPE(uint32_t);
+        OPERATE_IF_TYPE(int64_t);
+        OPERATE_IF_TYPE(uint64_t);
+        OPERATE_IF_TYPE(size_t);
 
-        CAST_IF_TYPE(float);
-        CAST_IF_TYPE(double);
+        OPERATE_IF_TYPE(float);
+        OPERATE_IF_TYPE(double);
 
-        CAST_IF_TYPE(bool);
+        OPERATE_IF_TYPE(bool);
 
-#undef CAST_IF_TYPE
+        THROW_ERROR(std::string("Operate has not been implemented for type: ")
+                    + inputType.getName());
+
+#undef OPERATE_IF_TYPE
     } // function TypeImplBaseT.cast
 
     virtual void toStream(const void * inputMem, std::ostream &stream,
