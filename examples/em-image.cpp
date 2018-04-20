@@ -150,10 +150,8 @@ void EmImageProgram::readArgs()
 
         for (auto& path: inputList)
         {
-            //FIXME: Retrieve image header info from ImageIO to avoid reading
-            // the image if not necessary
             imgIO.open(path);
-            std::cout << imgIO << std::endl;
+            imgIO.toStream(std::cout, 2);
         }
     }
 
