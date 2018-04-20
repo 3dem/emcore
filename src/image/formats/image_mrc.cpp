@@ -24,6 +24,8 @@ struct MrcHeader
                          //                 3  transform: complex 16-bit integers
                          //                 4  transform: complex 32-bit reals
                          //                 6  16-bit unsigned integer
+                         //               101  4-bit values
+                         //                    (non-standard: http://bio3d.colorado.edu/imod/betaDoc/mrc_format.txt)
     int nxstart;         //  5      17-20   location of first column in unit cell
     int nystart;         //  6      21-24   location of first row in unit cell
     int nzstart;         //  7      25-28   location of first section in unit cell
@@ -104,6 +106,10 @@ public:
         // Check dimensions of the data taking into account
         // if it is a 2D or 3D stack
         dim.x = (size_t) header.nx;
+        // For the special mode 101 the x dimension should be doubled
+        if (header.mode == 101)
+            dim.x *= 2;
+        
         dim.y = (size_t) header.ny;
 
         if (isImgStack)
@@ -207,6 +213,43 @@ public:
 
     } // function writeHeader
 
+    // Override this method to support the 101 special MRC flag in which
+    // the ImageSize is half of the normal size, because each pixel value
+    // is stored only in 4 bits
+    virtual void readImageData(const size_t index, Image& image) override
+    {
+        if (header.mode != 101)
+            ImageIO::Impl::readImageData(index, image);
+        else // special non-standard 101 mode of 4 bits
+        {
+            // Correct the itemSize for the 101 mode
+            // Since the half size is stored, we can assumme that the size
+            // will be even and in this case the type is uint8_t (1 byte)
+            // We also know that the pad size for MRC is 0
+            size_t half = getImageSize() / 2;
+            // Compute the position of the item data in the file given its size
+            size_t itemPos = getHeaderSize() + half * (index - 1);
+
+            if (fseek(file, itemPos, SEEK_SET) != 0)
+                THROW_SYS_ERROR("Could not 'fseek' in file. ");
+
+            // Read the 4-bit data in the second half of the data array.
+            // In that way, we can iterate in normal order and expand the
+            // value of each pixel by shifting bits or masking
+            uint8_t mask = 15; // 00001111
+            auto data = static_cast<uint8_t *>(image.getData());
+            if (::fread(data + half, half, 1, file) != 1)
+                THROW_SYS_ERROR("Could not 'fread' data from file. ");
+
+            for (size_t i = 0, j = half; i < dim.getItemSize() - 1; i += 2, ++j)
+            {
+                auto& value = *(data+j);
+                data[i] = value & mask; // take the lower 4 bits
+                data[i+1] = value >> 4; // take the upper 4 bits
+            }
+        }
+    } // function readImageData
+
     virtual size_t getHeaderSize() const override
     {
         return MRC_HEADER_SIZE;
@@ -215,7 +258,8 @@ public:
     virtual const TypeMap & getTypeMap() const override
     {
         static const TypeMap tm = {{0, &typeInt8}, {1, &typeInt16},
-                                   {2, &typeFloat}, {6, &typeUInt16}};
+                                   {2, &typeFloat}, {6, &typeUInt16},
+                                   {101, &typeInt8}};
         // TODO:
         // 3: Complex short
         // 4: Complex float

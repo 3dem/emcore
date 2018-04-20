@@ -313,13 +313,15 @@ void ImageIO::read(size_t index, Image &image)
 
     impl->readImageData(index, readImage);
 
-    // TODO: Check swap
-    //swap per page
-    //if (swap)
-    //    swapPage(page, readsize, datatype);
-    // cast to T per page
-    //castPage2T(page, MULTIDIM_ARRAY(data) + haveread_n, datatype, readsize_n);
-}
+    if (impl->swap)
+        Type::swapBytes(readImage.getData(), adim.getItemSize(),
+                        fileType.getSize());
+
+    // If we have read the image into the internal buffer image due to
+    // a different datatype, we need to cast now to the output image
+    if (!sameType)
+        image = impl->image;
+} // function ImageIO::read
 
 void ImageIO::write(size_t index, const Image &image)
 {
@@ -446,22 +448,15 @@ void ImageIO::Impl::readImageData(const size_t index, Image &image)
     // Compute the position of the item data in the file given its size
     size_t itemPos = getHeaderSize() + itemSize * (index - 1) + padSize;
 
-    std::cerr << "ImageIO::Impl::readImageData: getPadSize() " << padSize << std::endl;
-    std::cerr << "DEBUG: fseeking to " << itemPos << std::endl;
-
     if (fseek(file, itemPos, SEEK_SET) != 0)
         THROW_SYS_ERROR("Could not 'fseek' in file. ");
 
     // FIXME: change this to read by chunks when we change this
     // approach, right now only read a big chunk of one item size
-    std::cerr << "DEBUG: reading " << readSize << " bytes." << std::endl;
 
     if (::fread(image.getData(), readSize, 1, file) != 1)
         THROW_SYS_ERROR("Could not 'fread' data from file. ");
 
-    if (swap)
-        Type::swapBytes(image.getData(), image.getDim().getItemSize(),
-                  image.getType().getSize());
 }
 
 void ImageIO::Impl::writeImageData(const size_t index, const Image &image)

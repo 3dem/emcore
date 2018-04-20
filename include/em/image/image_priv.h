@@ -76,7 +76,7 @@ namespace em
         /** Return the size of padding between images/volumes in a stack */
         virtual size_t getPadSize() const;
 
-        /** Return the size of the image.
+        /** Return the size of the image in bytes (including pad size).
          * Usually this will be the product: x * y * z * typeSize + padSize
          */
         virtual size_t getImageSize() const;
