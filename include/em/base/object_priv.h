@@ -36,16 +36,15 @@ Object& Object::operator=(const T& valueIn)
 template <class T>
 Object::operator T() const
 {
-//    // Check the type is the same of the object
-//    auto& type = getType();
-//    ASSERT_ERROR(type !=,
-//                 std::string("Types are not the same: \n   object type: ") +
-//                 type.toString() + "\n   cast type: " +
-//                 Type::get<T>().toString());
-//    // Extract the value
-//    return *static_cast<const T *>(getData());
+    // Check the type is the same of the object
+    auto& type = getType();
+    auto& otherType = Type::get<T>();
+
+    if (type == otherType)
+        return *static_cast<const T *>(getData());
+
     T value;
-    Type::get<T>().operate(Type::CAST, getData(), getType(), &value, 1);
+    otherType.operate(Type::CAST, getData(), getType(), &value, 1);
     return value;
 }
 
