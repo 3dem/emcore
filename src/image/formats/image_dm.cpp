@@ -32,19 +32,9 @@ struct DmTag
 
         for (auto& tagName: list)
         {
-            auto oldChild = child;
             child = child->getChild(tagName);
             if (child == nullptr)
-            {
-                std::cout << "Failed getChild in : " << oldChild->tagName << std::endl;
-
-                for (auto c: oldChild->childs)
-                    std::cout << c->tagName << " ";
-                std::cout << std::endl;
-                ASSERT_ERROR(child == nullptr,
-                             std::string("Child not found with tagName ")
-                             + tagName);
-            }
+                break;
         }
 
         return child;
@@ -384,22 +374,16 @@ public:
         header.nIm = (child->childs.size() > 2 ) ?
                        (int)child->childs[2]->values[0] : 1;
 
-        try
+        child = imageData->parent->getChild({"ImageTags", "Acquisition",
+                                             "Frame", "CCD","Pixel Size (um)"});
+        if ( child != nullptr )
         {
-            child = imageData->parent->getChild({"ImageTags", "Acquisition", "Frame", "CCD",
-                                                 "Pixel Size (um)"});
             header.pixelHeight = (double)child->values[0]*1e4;
             header.pixelWidth = (double)child->values[1]*1e4;
 
         }
-        catch (em::Error &e)
-        {
-            std::cout << "Pixel size info not available" << std::endl;
+        else
             header.pixelHeight = header.pixelWidth = 0;
-        }
-
-
-
 
         // Setting the ImageIO header info
         dim.x = header.nx;
