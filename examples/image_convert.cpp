@@ -28,48 +28,56 @@ static const char USAGE[] =
 int main (int argc, char *argv[])
 {
 
-    std::map<std::string, docopt::value> args = docopt::docopt(USAGE,
-                                                               { argv + 1, argv + argc },
-                                                               true,               // show help if requested
-                                                               EM_CORE_VERSION ": image_convert");  // version string
+    try
+    {
+        std::map<std::string, docopt::value> args = docopt::docopt(USAGE,
+                                                                   {argv + 1,
+                                                                    argv +
+                                                                    argc},
+                                                                   true,               // show help if requested
+                                                                   EM_CORE_VERSION ": image_convert");  // version string
 
-    for(auto const& arg : args) {
-        std::cout << arg.first << ": " << arg.second << std::endl;
+        for (auto const &arg : args)
+        {
+            std::cout << arg.first << ": " << arg.second << std::endl;
+        }
+
+        std::cout << "args.first" << ": " << args["<input>"] << std::endl;
+
+
+        ImageIO imageI, imageO;
+        ImageLocation inloc, outloc;
+        inloc.index = 1;
+        outloc.index = 1;
+
+        inloc.path = args["<input>"].asString();
+        outloc.path = args["<output>"].asString();
+
+
+        imageI.open(inloc.path);
+
+        Image image;
+
+        imageI.read(1, image);
+        imageI.close();
+
+        std::cout << imageI << std::endl;
+
+        std::cout << image << std::endl;
+
+        imageO.open(outloc.path, imageO.TRUNCATE);
+        imageO.createFile(image.getDim(), image.getType());
+
+        imageO.write(1, image);
+        imageO.close();
+
+
+        //imageI.write(outloc);
+
+    } catch (em::Error &e)
+    {
+        std::cout << e << std::endl;
     }
-
-    std::cout << "args.first" << ": " << args["<input>"] << std::endl;
-
-
-    ImageIO imageI, imageO;
-    ImageLocation inloc, outloc;
-    inloc.index = 1;
-    outloc.index = 1;
-
-    inloc.path = args["<input>"].asString();
-    outloc.path = args["<output>"].asString();
-
-
-    imageI.open(inloc.path);
-
-    Image image;
-
-    imageI.read(1, image);
-    imageI.close();
-
-    std::cout << imageI << std::endl;
-
-    std::cout << image << std::endl;
-
-    imageO.open(outloc.path, imageO.TRUNCATE);
-    imageO.createFile(image.getDim(), image.getType());
-
-    imageO.write(1, image);
-    imageO.close();
-
-
-    //imageI.write(outloc);
-
-
 
 
 
