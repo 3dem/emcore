@@ -171,11 +171,14 @@ void Type::Container::allocate(const Type &type, const size_t n, void *memory)
     // If the type have the same size and we are going to allocate the
     // same number of elements, then we will use the same amount of
     // memory, so there is not need for a new allocation if we own the memory
-    if (memory != nullptr && impl->size > 0
+    if (impl->data != nullptr && impl->size > 0
         && impl->size * impl->type.getSize() == n * type.getSize())
+    {
+        impl->type = type; // set new type and return, not allocation needed
         return;
+    }
 
-    deallocate();
+    deallocate(); // deallocate using previous type
     impl->type = type;
 
     if (memory == nullptr)
