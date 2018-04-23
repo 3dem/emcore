@@ -1,3 +1,4 @@
+#include <iomanip>
 
 #include "em/base/error.h"
 #include "em/image/image.h"
@@ -24,6 +25,8 @@ struct MrcHeader
                          //                 3  transform: complex 16-bit integers
                          //                 4  transform: complex 32-bit reals
                          //                 6  16-bit unsigned integer
+                         //               101  4-bit values
+                         //                    (non-standard: http://bio3d.colorado.edu/imod/betaDoc/mrc_format.txt)
     int nxstart;         //  5      17-20   location of first column in unit cell
     int nystart;         //  6      21-24   location of first row in unit cell
     int nzstart;         //  7      25-28   location of first section in unit cell
@@ -154,7 +157,7 @@ public:
 
         // Set the machine Endianess
         auto machine_stamp = static_cast<char *>(header.machst);
-        if (isLittleEndian())
+        if (Type::isLittleEndian())
         {
             machine_stamp[0] = 68;
             machine_stamp[1] = 65;
@@ -196,9 +199,6 @@ public:
         header.nsymbt = 0;
         header.nlabl = 10; // FIXME: or zero?
 
-        std::cout << "header size: " << sizeof(MrcHeader)
-                  << "MRC_HEADER_SIZE: " << MRC_HEADER_SIZE
-                  << std::endl;
         fwrite(&header, MRC_HEADER_SIZE, 1, file);
 
         // FIXME: consider swap
@@ -206,6 +206,45 @@ public:
         //   swapPage((char *) header, MRCSIZE - 800, DT_Float);
 
     } // function writeHeader
+
+    // Override this method to support the 101 special MRC flag in which
+    // the ImageSize is half of the normal size, because each pixel value
+    // is stored only in 4 bits
+    virtual void readImageData(const size_t index, Image& image) override
+    {
+        if (header.mode != 101)
+            ImageIO::Impl::readImageData(index, image);
+        else // special non-standard 101 mode of 4 bits
+        {
+            // Correct the itemSize for the 101 mode
+            // We know at this point that the type is uint8_t (1 byte)
+            // and the pad size for MRC is 0
+            size_t size = getImageSize();
+            size_t half = size / 2 + size % 2;
+            // Compute the position of the item data in the file given its size
+            size_t itemPos = getHeaderSize() + half * (index - 1);
+
+            if (fseek(file, itemPos, SEEK_SET) != 0)
+                THROW_SYS_ERROR("Could not 'fseek' in file. ");
+
+            // Read the 4-bit data in the second half of the data array.
+            // In that way, we can iterate in normal order and expand the
+            // value of each pixel by shifting bits or masking
+            uint8_t mask = 15; // 00001111
+            auto data = static_cast<uint8_t *>(image.getData());
+            size_t start = size - half;
+
+            if (::fread(data + start, half, 1, file) != 1)
+                THROW_SYS_ERROR("Could not 'fread' data from file. ");
+
+            for (size_t i = 0, j = start; i < dim.getItemSize() - 1; i += 2, ++j)
+            {
+                auto& value = *(data+j);
+                data[i] = value & mask; // take the lower 4 bits
+                data[i+1] = value >> 4; // take the upper 4 bits
+            }
+        }
+    } // function readImageData
 
     virtual size_t getHeaderSize() const override
     {
@@ -215,12 +254,63 @@ public:
     virtual const TypeMap & getTypeMap() const override
     {
         static const TypeMap tm = {{0, &typeInt8}, {1, &typeInt16},
-                                   {2, &typeFloat}, {6, &typeUInt16}};
+                                   {2, &typeFloat}, {6, &typeUInt16},
+                                   {101, &typeInt8}};
         // TODO:
         // 3: Complex short
         // 4: Complex float
         return tm;
     } // function getTypeMap
+
+    virtual void toStream(std::ostream &ostream, int verbosity) const override
+    {
+
+        ostream << "verbosity normal" << std::endl;
+
+
+        if (verbosity > 0)
+        {
+            ostream << "--- MRC File Header ---" << std::endl;
+
+            std::cout << std::setw(7) << "nx: " << header.nx << std::endl;
+            std::cout << std::setw(7) << "ny: " << header.ny << std::endl;
+            std::cout << std::setw(7) << "nz: " << header.nz << std::endl;
+            std::cout << std::setw(7) << "nz: " << header.nz << std::endl;
+            std::cout << std::setw(7) << "mode: " << header.mode << std::endl;
+
+
+            // Variable              Word   Bytes   Description
+            int nx;              //  1      1-4     number of columns in 3D data array (fast axis, x dimension)
+            int ny;              //  2      5-8     number of rows in 3D data array (medium axis, y dimension)
+            int nz;              //  3	    9-12	number of sections in 3D data array (slow axis, z*n dimension)
+            int mode;            //  4      13-16   0  8-bit signed integer (range -127 to 127)
+            //                 1  16-bit signed integer
+            //                 2  32-bit signed real (float)
+            //                 3  transform: complex 16-bit integers
+            //                 4  transform: complex 32-bit reals
+            //                 6  16-bit unsigned integer
+            //               101  4-bit values
+            //                    (non-standard: http://bio3d.colorado.edu/imod/betaDoc/mrc_format.txt)
+            int nxstart;         //  5      17-20   location of first column in unit cell
+            int nystart;         //  6      21-24   location of first row in unit cell
+            int nzstart;         //  7      25-28   location of first section in unit cell
+            int mx;              //  8      29-32   sampling along X axis of unit cell
+            int my;              //  9      33-36   sampling along Y axis of unit cell
+            int mz;              //  10     37-40   sampling along Z axis of unit cell (z dimension in EM)
+            //                 MRC2014: For EM, where there is no unit cell, MZ represents the number of
+            //                 sections in a single volume. For a volume stack, NZ/MZ will be the
+            //                 number of volumes in the stack. For images, MZ = 1.
+            float cella[3];      // 11-13   41-52   cell dimensions in Angstroms
+            float cellb[3];      // 14-16   53-64   cell angles in degrees
+            int mapc;            // 17      65-68	axis corresp to cols (1,2,3 for X,Y,Z)
+            int mapr;            // 18      69-72	axis corresp to rows (1,2,3 for X,Y,Z)
+            int maps;            // 19      73-76	axis corresp to sections (1,2,3 for X,Y,Z)
+
+            float dmin;          // 20      77-80   minimum density value
+            float dmax;          // 21      81-84   maximum density value
+            float dmean;         // 22      85-88   mean density value
+        }
+    } // function toStream
 
 }; // class ImageIOMrc
 

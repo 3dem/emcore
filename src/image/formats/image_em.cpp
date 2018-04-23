@@ -107,7 +107,7 @@ public:
 
         // endian: If machine is SGI, OS-9 or MAC: Big Endian, otherwise Litle Endian
         // Check Machine endianess
-        bool isLE = isLittleEndian();
+        bool isLE = Type::isLittleEndian();
 
         if (header.machine == 0 || header.machine == 3 || header.machine == 5)
             swap = isLE;
@@ -120,8 +120,8 @@ public:
 
         if (swap)
         {
-            swapBytes((char *) &(this->header.xdim), 3, typeUInt32.getSize());
-            swapBytes((char *) &(this->header.params), 40, typeUInt32.getSize());
+            Type::swapBytes((char *) &(this->header.xdim), 3, typeUInt32.getSize());
+            Type::swapBytes((char *) &(this->header.params), 40, typeUInt32.getSize());
         }
 
         // Check dimensions of the data taking into account

@@ -24,8 +24,6 @@ TEST(ArrayDim, Defaults) {
     ASSERT_TRUE((adim2 == ArrayDim(100, 1, 1, 1)));
     ASSERT_EQ(adim2.getRank(), 1);
 
-    std::cout << adim2 << std::endl;
-
     // Test helper functions to compute the size
     ArrayDim adim3(100, 100, 1, 100);
 
@@ -60,7 +58,6 @@ TEST(Array, Basic) {
 
     for (size_t i = 0; i < adim.getSize(); ++i)
         ASSERT_EQ(11, ptr[i]);
-
 
     // Now test the assignment through the Array class directly
     A = 22;
@@ -97,8 +94,6 @@ TEST(Array, Basic) {
 
     ptr[10] = 15;
 
-    //std::cout << Av.toString() << std::endl;
-
     Array A2(A);
     ArrayView<int> Av2 = A2.getView<int>();
     const int * data2 = Av2.getData();
@@ -130,6 +125,7 @@ TEST(Array, Basic) {
     // Check that the resize operation will not allocate new memory
     // if the currently allocated one is enough to store new type and dimensions
     void * adata1 = A.getData();
+
     A.resize(adim, typeUInt32);  // typeInt32 and typeUInt32 should have same size
     void * adata2 = A.getData();
     ASSERT_EQ(adata1, adata2);
@@ -258,7 +254,7 @@ TEST(Array, Legacy)
     }
     catch (Error &e)
     {
-    std::cerr << e << std::endl;
+        std::cerr << e << std::endl;
     }
 
 

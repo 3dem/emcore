@@ -110,7 +110,9 @@ Program::~Program()
 
 bool Program::hasArg(const std::string &arg) const
 {
-    return impl->docoptArgs.find(arg) != impl->docoptArgs.end();
+    auto pos = impl->docoptArgs.find(arg);
+    return (pos != impl->docoptArgs.end()
+            && (bool)impl->docoptArgs[arg]);
 } //function Program.hasArg
 
 const Program::Argument& Program::getArg(const std::string &arg) const

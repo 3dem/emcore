@@ -5,15 +5,75 @@
 #include <math.h>
 #include "em/base/error.h"
 #include "em/image/image.h"
+#include "docopt.h"
+
 
 using namespace em;
+
+
+static const char USAGE[] =
+        R"(image_convert.
+
+    Usage:
+      image_convert <input> <output>
+
+    Options:
+      <input>       An input file or a pattern matching many files.
+      <output>      An output file or a suffix when many files are produced.
+      -h --help     Show this screen.
+      --version     Show version.
+)";
 
 
 int main (int argc, char *argv[])
 {
 
+    std::map<std::string, docopt::value> args = docopt::docopt(USAGE,
+                                                               { argv + 1, argv + argc },
+                                                               true,               // show help if requested
+                                                               EM_CORE_VERSION ": image_convert");  // version string
 
-    auto testDataPath = getenv("EM_TEST_DATA");
+    for(auto const& arg : args) {
+        std::cout << arg.first << ": " << arg.second << std::endl;
+    }
+
+    std::cout << "args.first" << ": " << args["<input>"] << std::endl;
+
+
+    ImageIO imageI, imageO;
+    ImageLocation inloc, outloc;
+    inloc.index = 1;
+    outloc.index = 1;
+
+    inloc.path = args["<input>"].asString();
+    outloc.path = args["<output>"].asString();
+
+
+    imageI.open(inloc.path);
+
+    Image image;
+
+    imageI.read(1, image);
+    imageI.close();
+
+    std::cout << imageI << std::endl;
+
+    std::cout << image << std::endl;
+
+    imageO.open(outloc.path, imageO.TRUNCATE);
+    imageO.createFile(image.getDim(), image.getType());
+
+    imageO.write(1, image);
+    imageO.close();
+
+
+    //imageI.write(outloc);
+
+
+
+
+
+/*    auto testDataPath = getenv("EM_TEST_DATA");
 
     if (testDataPath != nullptr)
     {
@@ -53,10 +113,10 @@ int main (int argc, char *argv[])
                 {
                     mrcIO.read(i, img);
                     snprintf(suffix, 5, "%03d.", (int) i);
-                    imgLoc.path = std::string("image") + suffix + ext;
+                    imgLoc.path = std::string("imageI") + suffix + ext;
                     filenames.push_back(imgLoc.path);
 
-                    std::cout << ">>> Writing image: " << imgLoc.path << std::endl;
+                    std::cout << ">>> Writing imageI: " << imgLoc.path << std::endl;
 //                    imgio2.open(imgLoc.path, ImageIO::TRUNCATE);
 //                    imgio2.createFile(imgDim, em::typeFloat);
 //                    imgio2.write(1, img);
@@ -87,9 +147,9 @@ int main (int argc, char *argv[])
     }
     else
     {
-        std::cout << "Skipping image format tests, EM_TEST_DATA not defined "
+        std::cout << "Skipping imageI format tests, EM_TEST_DATA not defined "
                      "in environment. " << std::endl;
-    }
+    }  */
 
     return 0;
 }

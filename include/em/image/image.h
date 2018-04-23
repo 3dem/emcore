@@ -206,10 +206,37 @@ namespace em
         // TODO: DOCUMENT
         void write(size_t index, const Image &image);
 
-        // String representation
-        void toStream(std::ostream &ostream) const;
+        /**
+         * Print information about the image file.
+         * @param verbosity 0 means silent, so nothing will be printed
+         * if it is 1, only the basic information will be shown. If > 1,
+         * some extra information will be provided.
+         */
+        void toStream(std::ostream &ostream, int verbosity=1) const;
 
         ~ImageIO();
+
+        /**
+         * Read from file and swap the data if needed
+         * @param file File handler
+         * @param data Pointer to data
+         * @param count Number of data elements
+         * @param typeSize Number of bytes for each element
+         * @param swap Boolean to either swap or not the data array
+         * @return
+         */
+        static size_t fread(FILE *file, void *data, size_t count,
+                            size_t typeSize, bool swap = false);
+
+        /**
+         * Read from file to Array and swap the data if needed
+         * @param file File handler
+         * @param array object Array to copy data from file
+         * @param swap Boolean to either swap or not the data array
+         * @return
+         */
+        static size_t fread(FILE *file, Array &array, bool swap = false);
+
 
     private:
         // Pointer to implementation class, PIMPL idiom

@@ -71,12 +71,12 @@ namespace em
         virtual void writeHeader() = 0;
 
         /** Return the size of the header for this format */
-        virtual size_t getHeaderSize() const = 0;
+        virtual size_t getHeaderSize() const;
 
         /** Return the size of padding between images/volumes in a stack */
         virtual size_t getPadSize() const;
 
-        /** Return the size of the image.
+        /** Return the size of the image in bytes (including pad size).
          * Usually this will be the product: x * y * z * typeSize + padSize
          */
         virtual size_t getImageSize() const;
@@ -114,16 +114,14 @@ namespace em
         const Type& getTypeFromMode(int mode) const;
         int getModeFromType(const Type &type) const;
 
-        /** Returns true if machine is little endian else false */
-        bool isLittleEndian();
 
-        /** Swap the bytes order
-         *
-         * @param data Pointer to data
-         * @param dataSize Number of data elements
-         * @param typeSize Number of bytes for each element
+        /**
+         * Print information about the image file.
+         * @param verbosity 0 means silent, so nothing will be printed
+         * if it is 1, only the basic information will be shown. If > 1,
+         * some extra information will be provided.
          */
-        void swapBytes(void * data, size_t dataSize, size_t typeSize);
+        virtual void toStream(std::ostream &ostream, int verbosity=1) const;
 
     private:
         // Store a mapping between format names (mrc, spider, etc)
@@ -133,6 +131,7 @@ namespace em
 
     using ImageIOImplBuilder = ImageIO::Impl* (*)();
     bool registerImageIOImpl(const StringVector &sv, ImageIOImplBuilder builder);
+
 
 } // em namespace
 

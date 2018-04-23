@@ -38,12 +38,14 @@ Object::operator T() const
 {
     // Check the type is the same of the object
     auto& type = getType();
-    ASSERT_ERROR(type != Type::get<T>(),
-                 std::string("Types are not the same: \n   object type: ") +
-                 type.toString() + "\n   cast type: " +
-                 Type::get<T>().toString());
-    // Extract the value
-    return *static_cast<const T *>(getData());
+    auto& otherType = Type::get<T>();
+
+    if (type == otherType)
+        return *static_cast<const T *>(getData());
+
+    T value;
+    otherType.operate(Type::CAST, getData(), getType(), &value, 1);
+    return value;
 }
 
 

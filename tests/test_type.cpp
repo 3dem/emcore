@@ -44,6 +44,9 @@ TEST(Type, Basic) {
     ASSERT_EQ(i8.getSize(), sizeof(int8_t));
     std::cout << i8 << std::endl;
 
+    std::cout << em::Type::get<size_t>() << std::endl;
+    std::cout << em::Type::get<uint64_t>() << std::endl;
+
 }
 
 TEST(Type, General) {

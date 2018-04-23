@@ -68,7 +68,7 @@ public:
         {
             T2 value = static_cast<T2>(*inputMem);
 
-#define OP_SINGLE(_op) for (size_t i = 0; i < count; ++i, ++outputMem, ++inputMem) *outputMem _op value; break
+#define OP_SINGLE(_op) for (size_t i = 0; i < count; ++i, ++outputMem) *outputMem _op value; break
 
             switch (op)
             {
@@ -193,17 +193,28 @@ public:
     {
         auto outputMemT = static_cast<T *>(outputMem);
         // std::is_arithmetic<type>::value
-#define CAST_IF_TYPE(type) if (inputType == Type::get<type>()) \
-        TypeOperator<both_arithmetic<T, type>::value>::operate(op, static_cast<const type*>(inputMem), outputMemT, count, singleInput);
+#define OPERATE_IF_TYPE(type) if (inputType == Type::get<type>()) \
+        return TypeOperator<both_arithmetic<T, type>::value>::operate(op, static_cast<const type*>(inputMem), outputMemT, count, singleInput);
 
-        CAST_IF_TYPE(int8_t);
-        CAST_IF_TYPE(uint8_t);
-        CAST_IF_TYPE(int16_t);
-        CAST_IF_TYPE(uint16_t);
-        CAST_IF_TYPE(int32_t);
-        CAST_IF_TYPE(uint32_t);
-        CAST_IF_TYPE(float);
-        CAST_IF_TYPE(double);
+        OPERATE_IF_TYPE(int8_t);
+        OPERATE_IF_TYPE(uint8_t);
+        OPERATE_IF_TYPE(int16_t);
+        OPERATE_IF_TYPE(uint16_t);
+        OPERATE_IF_TYPE(int32_t);
+        OPERATE_IF_TYPE(uint32_t);
+        OPERATE_IF_TYPE(int64_t);
+        OPERATE_IF_TYPE(uint64_t);
+        OPERATE_IF_TYPE(size_t);
+
+        OPERATE_IF_TYPE(float);
+        OPERATE_IF_TYPE(double);
+
+        OPERATE_IF_TYPE(bool);
+
+        THROW_ERROR(std::string("Operate has not been implemented for type: ")
+                    + inputType.getName());
+
+#undef OPERATE_IF_TYPE
     } // function TypeImplBaseT.cast
 
     virtual void toStream(const void * inputMem, std::ostream &stream,
@@ -269,7 +280,20 @@ DEFINE_TYPENAME(int16_t, "int16");
 DEFINE_TYPENAME(uint16_t, "uint16");
 DEFINE_TYPENAME(int32_t, "int32");
 DEFINE_TYPENAME(uint32_t, "uint32");
+DEFINE_TYPENAME(int64_t, "int64");
+DEFINE_TYPENAME(uint64_t, "uint64");
 
+// FIXME: We need to find a better way to distinguish
+// when size_t and uint64_t are not the same
+// they are not for Mac (JM MacOs HighSierra)
+// but they are for Linux (Ubuntu 16.04)
+#ifdef __APPLE__
+DEFINE_TYPENAME(size_t, "size_t");
+
+#endif
+
+
+DEFINE_TYPENAME(bool, "bool");
 DEFINE_TYPENAME(std::string, "string");
 
 #undef DEFINE_TYPENAME

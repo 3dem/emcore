@@ -313,13 +313,15 @@ void ImageIO::read(size_t index, Image &image)
 
     impl->readImageData(index, readImage);
 
-    // TODO: Check swap
-    //swap per page
-    //if (swap)
-    //    swapPage(page, readsize, datatype);
-    // cast to T per page
-    //castPage2T(page, MULTIDIM_ARRAY(data) + haveread_n, datatype, readsize_n);
-}
+    if (impl->swap)
+        Type::swapBytes(readImage.getData(), adim.getItemSize(),
+                        fileType.getSize());
+
+    // If we have read the image into the internal buffer image due to
+    // a different datatype, we need to cast now to the output image
+    if (!sameType)
+        image = impl->image;
+} // function ImageIO::read
 
 void ImageIO::write(size_t index, const Image &image)
 {
@@ -339,15 +341,20 @@ void ImageIO::write(size_t index, const Image &image)
     impl->writeImageData(index, image);
 } // function ImageIO::write
 
-void ImageIO::toStream(std::ostream &ostream) const
+void ImageIO::toStream(std::ostream &ostream, int verbosity) const
 {
-    ostream << " -- File info --" << std::endl;
-    ostream << "Dimensions: " << impl->dim << std::endl;
-    ostream << "Type: " << impl->type << std::endl;
-    ostream << "Header size: " << impl->getHeaderSize() << std::endl;
-    ostream << "Pad size: " << impl->getPadSize() << std::endl;
-    ostream << "Swap: " << impl->swap << std::endl;
+    if (verbosity > 0)
+    {
+        ostream << " -- File info --" << std::endl;
+        ostream << "Dimensions: " << impl->dim << std::endl;
+        ostream << "Type: " << impl->type << std::endl;
+        ostream << "Header size: " << impl->getHeaderSize() << std::endl;
+        ostream << "Pad size: " << impl->getPadSize() << std::endl;
+        ostream << "Swap: " << impl->swap << std::endl;
 
+        if (verbosity > 1)
+            impl->toStream(std::cout, verbosity);
+    }
 }
 
 std::ostream& em::operator<< (std::ostream &ostream, const em::ImageIO &imageIO)
@@ -355,6 +362,11 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::ImageIO &imageIO)
     imageIO.toStream(ostream);
     return ostream;
 }
+
+size_t ImageIO::Impl::getHeaderSize() const
+{
+    return 0;
+} // function ImageIO::Impl::getHeaderSize
 
 size_t ImageIO::Impl::getPadSize() const
 {
@@ -436,22 +448,15 @@ void ImageIO::Impl::readImageData(const size_t index, Image &image)
     // Compute the position of the item data in the file given its size
     size_t itemPos = getHeaderSize() + itemSize * (index - 1) + padSize;
 
-    std::cerr << "ImageIO::Impl::readImageData: getPadSize() " << padSize << std::endl;
-    std::cerr << "DEBUG: fseeking to " << itemPos << std::endl;
-
     if (fseek(file, itemPos, SEEK_SET) != 0)
         THROW_SYS_ERROR("Could not 'fseek' in file. ");
 
     // FIXME: change this to read by chunks when we change this
     // approach, right now only read a big chunk of one item size
-    std::cerr << "DEBUG: reading " << readSize << " bytes." << std::endl;
 
-    if (fread(image.getData(), readSize, 1, file) != 1)
+    if (::fread(image.getData(), readSize, 1, file) != 1)
         THROW_SYS_ERROR("Could not 'fread' data from file. ");
 
-    if (swap)
-        swapBytes(image.getData(), image.getDim().getItemSize(),
-                  image.getType().getSize());
 }
 
 void ImageIO::Impl::writeImageData(const size_t index, const Image &image)
@@ -488,53 +493,31 @@ int ImageIO::Impl::getModeFromType(const Type &type) const
     return -999;
 } // function ImageIO::Impl.getTypeFromMode
 
-bool ImageIO::Impl::isLittleEndian()
-{
-    static const unsigned long ul = 0x00000001;
-    return ((int)(*((unsigned char *) &ul)))!=0;
-}
 
-void ImageIO::Impl::swapBytes(void *data, size_t dataSize, size_t typeSize)
+void ImageIO::Impl::toStream(std::ostream &ostream, int verbosity) const
 {
 
-    size_t i = 0;
-
-    switch (typeSize)
-    {
-        case 8:
-        {
-            auto dtmp = (uint64_t*) data;
-
-            for (; i < dataSize; ++dtmp, ++i)
-                *dtmp = ((*dtmp & 0x00000000000000ff) << 56) | ((*dtmp & 0xff00000000000000) >> 56) |\
-                        ((*dtmp & 0x000000000000ff00) << 40) | ((*dtmp & 0x00ff000000000000) >> 40) |\
-                        ((*dtmp & 0x0000000000ff0000) << 24) | ((*dtmp & 0x0000ff0000000000) >> 24) |\
-                        ((*dtmp & 0x00000000ff000000) <<  8) | ((*dtmp & 0x000000ff00000000) >>  8);
-        }
-            break;
-        case 4:
-        {
-            auto * dtmp = (uint32_t*) data;
-
-            for (; i < dataSize; ++dtmp, ++i)
-                *dtmp = ((*dtmp & 0x000000ff) << 24) | ((*dtmp & 0xff000000) >> 24) |\
-                        ((*dtmp & 0x0000ff00) <<  8) | ((*dtmp & 0x00ff0000) >>  8);
-        }
-            break;
-        case 2:
-        {
-            auto dtmp = (uint16_t*) data;
-
-            for (; i < dataSize; ++dtmp, ++i)
-                *dtmp = static_cast<uint16_t>(((*dtmp & 0x00ff) << 8) | ((*dtmp & 0xff00) >> 8));
-        }
-            break;
-
-    }
 }
+
+size_t ImageIO::fread(FILE *file, void *data, size_t count,
+                      size_t typeSize, bool swap)
+{
+    size_t  out = ::fread(data, count, typeSize, file);
+
+    if (swap)
+        Type::swapBytes(data, count, typeSize);
+    return out;
+} // function ImageIO::fread
+
+size_t ImageIO::fread(FILE *file, Array &array, bool swap)
+{
+    return fread(file, array.getData(), array.getDim().getSize(),
+                 array.getType().getSize(), swap);
+} // function ImageIO::fread
 
 #include "formats/image_mrc.cpp"
 #include "formats/image_spider.cpp"
 #include "formats/image_tiff.cpp"
 #include "formats/image_em.cpp"
+#include "formats/image_dm.cpp"
 

@@ -118,3 +118,22 @@ TEST(Object, Parsing)
     // ASSERT_FLOAT_EQ(o1, o2);
     std::cout << o1.toString() << std::endl;
 } // TEST Object.Parsing
+
+TEST(Object, Cast)
+{
+    // Test the parsing methods
+    uint64_t value = 57536865;
+    Object o1 = value;
+    ASSERT_EQ(o1.getType(), typeUInt64);
+
+    uint64_t value2 = o1;
+    ASSERT_EQ(value, value2);
+
+    size_t value3 = (size_t) o1;
+    ASSERT_EQ(value, value3);
+
+    size_t value4 = (int64_t) o1;
+    ASSERT_EQ(value, value4);
+
+    ASSERT_TRUE((bool)o1);
+} // TEST Object.Parsing
