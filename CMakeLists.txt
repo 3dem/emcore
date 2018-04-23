@@ -18,6 +18,8 @@ option(BUILD_DOCS "Build the doxygen documentation" OFF)
 option(BUILD_TIFF "Build library with TIFF support" ON)
 # Build docopt or not
 option(BUILD_DOCOPT "Build library with docopt support" OFF)
+# Build Python binding or not
+option(BUILD_PYBIND "Build library with Python binding support" OFF)
 # Build static library
 option(BUILD_STATIC "Build static library." OFF)
 
@@ -89,6 +91,10 @@ if (BUILD_STATIC)
 else()
     add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES})
 endif()
+
+set_property(TARGET em-core PROPERTY PREFIX "lib")
+set_property(TARGET em-core PROPERTY OUTPUT_NAME "emcore.so")
+set_property(TARGET em-core PROPERTY SUFFIX "")
 
 #############################
 #  FFTW3
@@ -186,3 +192,40 @@ if(BUILD_DOCS)
 
 endif(BUILD_DOCS)
 
+################################
+# Python bindings
+################################
+if(BUILD_PYBIND)
+
+    set(PYBIND_PATH        "${PROJECT_PATH}/python")
+    set(PYBIND_SRC_PATH    "${PYBIND_PATH}/src")
+    set(PYBIND_TESTS_PATH  "${PYBIND_PATH}/tests")
+    set(PYBIND11_PATH  "${EXT_PATH}/pybind11")
+
+
+    if ( NOT EXISTS ${PYBIND11_PATH}/pybind11 )
+        MESSAGE( STATUS " Update submodule ${PYBIND11_PATH}" )
+        execute_process(COMMAND git submodule update --init ${PYBIND11_PATH} )
+    endif()
+
+    add_subdirectory(${PYBIND11_PATH})
+
+    file(GLOB PYBIND_SOURCE_FILES "${PYBIND_SRC_PATH}/*.cpp")
+
+    pybind11_add_module(em "${PYBIND_SOURCE_FILES}")
+
+    target_link_libraries(em PRIVATE em-core)
+
+    # Find all test under /tests folder and add them as test-cases
+    enable_testing()
+    file(GLOB PYBIND_TEST_FILES "${PYBIND_TESTS_PATH}/pytest_*.py")
+    message(STATUS "Found tests:")
+
+    foreach (_file ${PYBIND_TEST_FILES})
+        # Specify target name WE=WithoutExtension
+        GET_FILENAME_COMPONENT(_target "${_file}" NAME_WE)
+        message(STATUS "    ${_target}...")
+        add_test(NAME ${_target} COMMAND ${PYTHON_EXECUTABLE} ${_file})
+    endforeach()
+
+endif(BUILD_PYBIND)

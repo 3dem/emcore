@@ -19,8 +19,9 @@ class Type::Impl
 
 public:
     virtual std::string getName() const { return "null"; }
-    virtual std::size_t getSize() const {return 0;}
-    virtual bool isPod() const {return false; }
+    virtual std::size_t getSize() const { return 0; }
+    virtual bool isPod() const { return false; }
+    virtual bool isTriviallyCopyable() const { return false; }
 
     virtual void copy(const void *inputMem, void *outputMem,
                       size_t count) const NOT_IMPLEMENTED;
@@ -118,13 +119,15 @@ public:
 // Implement stream operations for enums since they are needed in toStream
 // and fromStream generic implementations in Type
 template<typename T>
-std::ostream& operator<<(typename std::enable_if<std::is_enum<T>::value, std::ostream>::type& stream, const T& e)
+std::ostream& operator<<(typename std::enable_if<std::is_enum<T>::value,
+                         std::ostream>::type& stream, const T& e)
 {
     return stream << static_cast<typename std::underlying_type<T>::type>(e);
 }
 
 template<typename T>
-std::istream& operator>>(typename std::enable_if<std::is_enum<T>::value, std::istream>::type& stream, T& e)
+std::istream& operator>>(typename std::enable_if<std::is_enum<T>::value,
+                         std::istream>::type& stream, T& e)
 {
     typename std::underlying_type<T>::type v;
     stream >> v;
@@ -151,6 +154,11 @@ public:
     virtual bool isPod() const override
     {
         return std::is_pod<T>();
+    }
+
+    virtual bool isTriviallyCopyable() const override
+    {
+        return std::is_trivially_copyable<T>();
     }
 
     virtual void copy(const void * inputMem, void * outputMem,

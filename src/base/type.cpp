@@ -46,6 +46,11 @@ bool Type::isPod() const
     return impl->ispod;
 } // function Type.isPod
 
+bool Type::isTriviallyCopyable() const
+{
+    return impl->isTriviallyCopyable();
+} // function Type.isTriviallyCopyable
+
 bool Type::isNull() const
 {
     return impl->size == 0; // The only 0-size Type is Null type
@@ -171,7 +176,7 @@ void Type::Container::allocate(const Type &type, const size_t n, void *memory)
     // If the type have the same size and we are going to allocate the
     // same number of elements, then we will use the same amount of
     // memory, so there is not need for a new allocation if we own the memory
-    if (impl->data != nullptr && impl->size > 0
+    if (impl->data != nullptr && impl->size > 0 && type.isTriviallyCopyable()
         && impl->size * impl->type.getSize() == n * type.getSize())
     {
         impl->type = type; // set new type and return, not allocation needed

@@ -61,6 +61,18 @@ namespace em
         /** Return True if this type is a plain old type (POD) */
         bool isPod() const;
 
+        /** Return True if this type is trivially copyable.
+         *
+         * Objects of trivially-copyable types are the only C++ objects that
+         * may be safely copied with std::memcpy or serialized to/from binary
+         * files with std::ofstream::write()/std::ifstream::read(). In general,
+         * a trivially copyable type is any type for which the underlying bytes
+         * can be copied to an array of char or unsigned char and into a new
+         * object of the same type, and the resulting object would have the
+         * same value as the original.
+         */
+         bool isTriviallyCopyable() const;
+
         /** Return True if this type is the NullType */
         bool isNull() const;
 
