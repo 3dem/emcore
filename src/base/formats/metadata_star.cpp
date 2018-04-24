@@ -106,14 +106,9 @@ protected:
     void parseLine(const std::string &line,
                    const Table &table, Table::Row &row)
     {
-        auto& colMap = table.getColumnMap();
-
         std::stringstream ss(line);
-
-        // FIXME: Change the following with a way to iterate over a Row
-        // <ColumnName, Object> pairs
-        for (auto& col: colMap)
-            row[col.getName()].fromStream(ss);
+        for (auto& obj: row)
+            obj.fromStream(ss);
     } // function parseLine
 
 }; // class TableIOStar
