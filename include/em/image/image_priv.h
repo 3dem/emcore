@@ -104,15 +104,12 @@ namespace em
 
     }; // class ImageIO::Impl
 
-    using ImageIOImplBuilder = ImageIO::Impl* (*)();
-    bool registerImageIOImpl(const StringVector &sv, ImageIOImplBuilder builder);
-
 } // em namespace
 
 
 // The following macro can be used as a shortcut to register new ImageIO subclasses
 #define REGISTER_IMAGE_IO(extensions, ioClassName) \
     ImageIO::Impl * new___##ioClassName(){ return new ioClassName(); } \
-    bool reg___##ioClassName = em::registerImageIOImpl(extensions, new___##ioClassName)
+    bool reg___##ioClassName = em::ImageIO::registerImpl(extensions, new___##ioClassName)
 
 #endif //EM_CORE_IMAGE_PRIV_H

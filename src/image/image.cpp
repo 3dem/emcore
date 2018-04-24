@@ -170,14 +170,10 @@ ImageIOImplRegistry * getRegistry()
     return &registry;
 } // function getRegistry
 
-bool em::registerImageIOImpl(const StringVector &extensions,
-                             ImageIOImplBuilder builder)
+bool em::ImageIO::registerImpl(const StringVector &extOrNames,
+                             ImageIO::ImplBuilder builder)
 {
-    auto registry = getRegistry();
-    for (auto ext: extensions)
-        registry->registerImpl(ext, builder);
-
-    return true;
+    return getRegistry()->registerImpl(extOrNames, builder);
 } // function registerImageIOImpl
 
 bool ImageIO::hasImpl(const std::string &extension)

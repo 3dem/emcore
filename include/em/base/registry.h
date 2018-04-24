@@ -6,6 +6,7 @@
 #define EM_CORE_REGISTRY_H_H
 
 #include <map>
+#include "em/base/string.h"
 
 
 namespace em
@@ -27,10 +28,11 @@ namespace em
          * registred.
          * @return Return True if the new ImageIO was successfully registered.
          */
-        bool registerImpl(const std::string &extOrName,
+        bool registerImpl(const StringVector &extOrNames,
                           BuilderFuncPtr newImplBuilder)
         {
-            registryMap[extOrName] = newImplBuilder;
+            for (auto &extOrName: extOrNames)
+                registryMap[extOrName] = newImplBuilder;
             return true;
         }
 
@@ -43,8 +45,7 @@ namespace em
          */
         bool hasImpl(const std::string &extOrName)
         {
-            auto it = registryMap.find(extOrName);
-            return it != registryMap.end();
+            return registryMap.find(extOrName) != registryMap.end();
         }
 
         /**

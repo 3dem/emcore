@@ -135,6 +135,12 @@ namespace em
          * formats */
         class Impl;
 
+        /** Used when registering new Impl classes.
+         * The ImplBuilder is a function that should return a pointer to
+         * a newly created implementation.
+         */
+        using ImplBuilder = Impl* (*)();
+
         /** Constants for open files. */
         static const FileMode READ_ONLY = 0;
         static const FileMode READ_WRITE = 1;
@@ -166,13 +172,22 @@ namespace em
         ImageIO(const std::string &extOrName);
 
         /**
-         * Check if some ImageIO is registered for a given name or extension.
+         * Check if some ImageIO implementation is registered for a given name
+         * or extension.
          *
          * @param extOrName Input string representing either the ImageIO name
          * or one of the extensions registered.
          * @return Return True if there is any ImageIO registered.
          */
         static bool hasImpl(const std::string &extOrName);
+
+        /**
+         * Register a new ImageIO implementation.
+         * This function should not be used unless you are developing an
+         * implementation for a new ImageIO format.
+         */
+         static bool registerImpl(const StringVector &extOrNames,
+                                  ImplBuilder builder);
 
         /** Return the dimensions of the file opened. */
         ArrayDim getDim() const;
