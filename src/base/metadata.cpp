@@ -5,9 +5,13 @@
 #include <iostream>
 #include <fstream> // the good one
 #include <sstream>
-#include <em/base/string.h>
 
+#include "em/base/string.h"
+#include "em/base/registry.h"
 #include "em/base/metadata.h"
+#include "em/base/metadata_priv.h"
+#include "em/os/filesystem.h"
+
 
 using namespace em;
 
@@ -316,155 +320,61 @@ Table::Row& Table::operator[](const size_t pos)
     return impl->rows[pos];
 } // function Table::operator[]
 
+
 // ========================== TableIO Implementation ===========================
 
-class TableIO::Impl
+using TableIOImplRegistry = ImplRegistry<TableIO::Impl>;
+
+TableIOImplRegistry * getTableIORegistry()
 {
-public:
-    FILE* file = nullptr; // Keep a file handler
-    std::string path;
-    std::string line; // Used for parsing the star file lines
+    static TableIOImplRegistry registry;
+    return &registry;
+} // function getTableIORegistry
 
-    virtual void open(const std::string &path);
-    virtual void close();
-    virtual void read(const std::string &tableName, Table &table);
-
-protected:
-    void readTable(std::ifstream &ifs, Table &table);
-    void readLoopColumns(std::ifstream &ifs, ColumnMap &colMap);
-    void readColumns(std::ifstream &ifs, ColumnMap &colMap);
-    void parseLine(const std::string &line,
-                   const Table &table, Table::Row &row);
-}; // class TableIO::Impl
-
-void TableIO::Impl::open(const std::string &path)
+bool em::TableIO::registerImpl(const StringVector &extOrNames,
+                               TableIO::ImplBuilder builder)
 {
-    this->path = path;
-    file = fopen(path.c_str(), "r");
-} // TableIO::Impl.open
-
-void TableIO::Impl::close()
-{
-    fclose(file);
-} // TableIO::Impl.close
-
-void TableIO::Impl::read(const std::string &tableName, Table &table)
-{
-    table.clear();
-
-    std::ifstream ifs(path.data(), std::ios_base::in);
-    ifs.seekg(0);
-    size_t lineCount = 0;
-
-    while (getline(ifs, line))
-    {
-        ++lineCount;
-
-        if (line.find("data_") == 0)
-        {
-            if (tableName.empty() || line.substr(5) == tableName)
-            {
-                std::cout << "Table: " << tableName << " found at line: "
-                          << lineCount << std::endl;
-                return readTable(ifs, table);
-            }
-        }
-
-    }
-} // TableIO::Impl.read
-
-void TableIO::Impl::readTable(std::ifstream &ifs, Table &table)
-{
-    // Read all lines until EOF or first non-empty line
-    while (getline(ifs, line) && line.empty());
-
-    std::cout << "Before loop: '" << line << "'" << std::endl;
-
-    if (line.find("loop_") == 0) // starts with 'loop_'
-    {
-        // Parse Loop column Names (all lines starting with '_')
-        StringVector colNames;
-        while (getline(ifs, line) && line[0] == '_')
-            colNames.push_back(line.substr(1, line.find_first_of(String::SPACES)));
-
-        line = String::trim(line);
-        ASSERT_ERROR(line.empty(),
-                     "There are empty lines after columns and before data");
-
-        // TODO: Infer the Column types from the first data line
-        for (auto& col: colNames)
-            table.addColumn(ColumnMap::Column(col, typeString));
-
-        auto row = table.createRow();
-
-        bool moreColumns = true;
-
-        while (!line.empty() && moreColumns)
-        {
-            //parseLine()
-            moreColumns = bool(getline(ifs, line)); // FIXME
-            line = String::trim(line);
-            parseLine(line, table, row);
-            table.addRow(row);
-        }
-
-//        std::cout << "Columns: " << std::endl;
-//        for (auto& col: colNames)
-//            std::cout << col << std::endl;
-    }
-    else
-    {
-        //readColumns(ifs, line, colMap, true);
-    }
-} // TableIO::Impl.read
-
-void TableIO::Impl::readLoopColumns(std::ifstream &ifs, ColumnMap &colMap)
-{
-    std::string colName;
-
-
-} // TableIO::Impl.readColumns
-
-void TableIO::Impl::parseLine(const std::string &line,
-                              const Table &table, Table::Row &row)
-{
-    auto& colMap = table.getColumnMap();
-
-    std::stringstream ss(line);
-
-    // FIXME: Change the following with a way to iterate over a Row
-    // <ColumnName, Object> pairs
-    for (auto& col: colMap)
-        row[col.getName()].fromStream(ss);
-
-} // function TableIO::Impl.parseLine
-
-TableIO::TableIO()
-{
-    impl = new Impl();
-} // Default Ctor
-
-TableIO::TableIO(const std::string &extOrName): TableIO() {}
-
-TableIO::~TableIO() { delete impl; }
+    return getTableIORegistry()->registerImpl(extOrNames, builder);
+} // function registerImageIOImpl
 
 bool TableIO::hasImpl(const std::string &extension)
 {
-    THROW_ERROR("NOT IMPLEMENTED. ");
-} // function hasImpl
+    return getTableIORegistry()->hasImpl(extension);
+
+} // function hasIO
+
+TableIO::TableIO()
+{
+    impl = nullptr;
+} // Default Ctor
+
+TableIO::TableIO(const std::string &extOrName): TableIO()
+{
+    impl = getTableIORegistry()->buildImpl(extOrName);
+} // ctor TableIO(std::string)
+
+TableIO::~TableIO()
+{
+    delete impl;
+}
 
 void TableIO::open(const std::string &path)
 {
+    delete impl;  // Does it make sense to reuse impl?
+    impl = getTableIORegistry()->buildImpl(Path::getExtension(path));
     impl->open(path);
 } // function TableIO.open
 
 void TableIO::close()
 {
+    ASSERT_ERROR(impl == nullptr, "Invalid operation, implementation is null.");
     impl->close();
 } // function TableIO.close
 
 void TableIO::read(const std::string &tableName, Table &table)
 {
+    ASSERT_ERROR(impl == nullptr, "Invalid operation, implementation is null.");
     impl->read(tableName, table);
 } // TableIO.read
 
+#include "formats/metadata_star.cpp"

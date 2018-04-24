@@ -10,6 +10,7 @@
 
 #include "em/base/type.h"
 #include "em/base/object.h"
+#include "em/base/string.h"
 
 
 namespace em {
@@ -267,6 +268,12 @@ namespace em {
     public:
         class Impl;
 
+        /** Used when registering new Impl classes.
+         * The ImplBuilder is a function that should return a pointer to
+         * a newly created implementation.
+         */
+        using ImplBuilder = Impl* (*)();
+
         /** Constants for open files. */
         static const int READ_ONLY = 0;
         static const int READ_WRITE = 1;
@@ -303,11 +310,19 @@ namespace em {
          * Check if some TableIO implementation is registered for a given name
          * or extension.
          *
-         * @param extOrName Input string representing either the implementation
-         * name or one of the extensions registered.
-         * @return Return True if there is any implementation registered.
+         * @param extOrName Input string representing either the TableIO name
+         * or one of the extensions registered.
+         * @return Return True if there is any TableIO registered.
          */
         static bool hasImpl(const std::string &extOrName);
+
+        /**
+         * Register a new TableIO implementation.
+         * This function should not be used unless you are developing an
+         * implementation for a new TableIO format.
+         */
+        static bool registerImpl(const StringVector &extOrNames,
+                                 ImplBuilder builder);
 
         // TODO: DOCUMENT
         void open(const std::string &path); //, const FileMode mode=READ_ONLY);
