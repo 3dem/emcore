@@ -74,7 +74,20 @@ ColumnMap::ColumnMap(std::initializer_list<Column> list): ColumnMap()
         addColumn(column);
 } // Ctor from list of Columns
 
-ColumnMap::~ColumnMap() { delete impl; }
+ColumnMap::~ColumnMap()
+{
+    delete impl;
+} // ColumnMap dtor
+
+size_t ColumnMap::getSize() const
+{
+    return impl->columns.size();
+} // function ColumnMap.getSize
+
+bool ColumnMap::isEmpty() const
+{
+    return impl->columns.empty();
+} // function ColumnMap.isEmpty
 
 size_t ColumnMap::addColumn(const Column &column)
 {
@@ -246,7 +259,7 @@ Table::Table(std::initializer_list<ColumnMap::Column> columns)
 
 Table::Table()
 {
-    THROW_ERROR("Not implemented!");
+    impl = nullptr;
 } // Empty Table ctor
 
 Table::~Table()

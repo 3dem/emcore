@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 
 #include "em/base/metadata.h"
+#include "em/base/timer.h"
 
 
 using namespace em;
@@ -145,6 +146,8 @@ TEST(Table, Read)
 {
     auto testDataPath = getenv("EM_TEST_DATA");
 
+    ASSERT_TRUE(TableIO::hasImpl("star"));
+
     if (testDataPath != nullptr)
     {
         std::string root(testDataPath);
@@ -158,23 +161,71 @@ TEST(Table, Read)
                  Column(3, "col3", typeString)
                 });
         TableIO tio;
+
+        auto &colMap = t.getColumnMap();
+        ASSERT_EQ(colMap.getSize(), 3);
+        ASSERT_TRUE(t.isEmpty());
+
         tio.open(fn1);
         tio.read("images", t);
 
-        printTable(t);
-    }
+        StringVector refColNames = {"rlnVoltage", "rlnDefocusU",
+                                    "rlnSphericalAberration", "rlnAmplitudeContrast",
+                                    "rlnImageName", "rlnNormCorrection",
+                                    "rlnMicrographName", "rlnGroupNumber",
+                                    "rlnOriginX", "rlnOriginY", "rlnAngleRot",
+                                    "rlnAngleTilt", "rlnAnglePsi",
+                                    "rlnClassNumber", "rlnLogLikeliContribution",
+                                    "rlnNrOfSignificantSamples",
+                                    "rlnMaxValueProbDistribution"};
+
+        int i = 0;
+        for (auto &col: colMap)
+        {
+            ASSERT_EQ(refColNames[i++], col.getName());
+            std::cout << col.getName() << " type: " << col.getType().getName() << std::endl;
+        }
+        //printTable(t);
+    } // if TEST_DATA
 /*
  * relion_tutorial/import/case1/classify3d_small_it038_data.star
-relion_tutorial/import/case1/classify3d_small_it038_model.star
-relion_tutorial/import/case1/classify3d_small_it038_optimiser.star
-relion_tutorial/import/case1/classify3d_small_it038_sampling.star
-relion_tutorial/import/case2/relion_it015_data.star
-relion_tutorial/import/case2/relion_it015_model.star
-relion_tutorial/import/case2/relion_it015_optimiser.star
-relion_tutorial/import/case2/relion_it015_sampling.star
-relion_tutorial/import/classify2d/extra/relion_it015_data.star
-relion_tutorial/import/classify2d/extra/relion_it015_model.star
-relion_tutorial/import/classify2d/extra/relion_it015_optimiser.star
-relion_tutorial/import/classify2d/extra/relion_it015_sampling.star
+   xmipp_tutorial/gold/images200k.xmd
  */
 } // TEST Table.Read
+
+TEST(Table, ReadXmd)
+{
+    auto testDataPath = getenv("EM_TEST_DATA");
+
+    ASSERT_TRUE(TableIO::hasImpl("xmd"));
+
+    if (testDataPath != nullptr)
+    {
+        std::string root(testDataPath);
+        std::string fn1 = root + "xmipp_tutorial/gold/images200k.xmd";
+
+        std::cout << "Reading xmd: " << fn1 << std::endl;
+
+        Table t;
+        TableIO tio;
+
+        tio.open(fn1);
+
+        Timer timer;
+        timer.tic();
+        tio.read("noname", t);
+        timer.toc();
+        int i = 0;
+        auto &colMap = t.getColumnMap();
+        for (auto &col: colMap)
+        {
+            //ASSERT_EQ(refColNames[i++], col.getName());
+            std::cout << col.getName() << " type: " << col.getType().getName() << std::endl;
+        }
+        //printTable(t);
+    } // if TEST_DATA
+    /*
+     * relion_tutorial/import/case1/classify3d_small_it038_data.star
+
+     */
+} // TEST Table.ReadXmd

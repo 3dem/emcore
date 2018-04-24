@@ -61,10 +61,16 @@ protected:
         {
             // Parse Loop column Names (all lines starting with '_')
             StringVector colNames;
-            while (getline(ifs, line) && line[0] == '_')
-                colNames.push_back(line.substr(1, line.find_first_of(String::SPACES)));
+            while (getline(ifs, line))
+            {
+                line = String::trim(line); //FIXME: Check how to optimize this and avoid the triming
+                if (line[0] != '_')
+                    break;
+                colNames.push_back(
+                        line.substr(1, line.find_first_of(String::SPACES) - 1));
+            }
 
-            line = String::trim(line);
+
             ASSERT_ERROR(line.empty(),
                          "There are empty lines after columns and before data");
 
@@ -113,4 +119,4 @@ protected:
 }; // class TableIOStar
 
 
-REGISTER_TABLE_IO(StringVector({"star"}), TableIOStar);
+REGISTER_TABLE_IO(StringVector({"star", "xmd"}), TableIOStar);

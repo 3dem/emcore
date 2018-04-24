@@ -75,6 +75,12 @@ namespace em {
         /** Destructor */
         ~ColumnMap();
 
+        /** Return the number of columns */
+        size_t getSize() const;
+
+        /** Return true if there are no columns */
+        bool isEmpty() const;
+
         /** Add a new column, return the column index.
          * If the given column has no ID, it will be set.
         */
