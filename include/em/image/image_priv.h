@@ -39,26 +39,6 @@ namespace em
 
         Image image; ///< Temporary image used as buffer to read from disk
 
-        // ---- Static methods related to ImageIO instances --------
-        /**
-         * Register a ImageIO class to be available for reading/writing images.
-         * The class will be accessible via the ImageIO name and the extensions
-         * defined by the class.
-         * @param imgio Input pointer to the ImageIO subclass that will be
-         * registred.
-         * @return Return True if the new ImageIO was successfully registered.
-         */
-        static bool registerImpl(const ImageIO *imgio);
-
-        /**
-         * Check if some ImageIO is registered for a given name or extension.
-         *
-         * @param extOrName Input string representing either the ImageIO name
-         * or one of the extensions registered.
-         * @return Return True if there is any ImageIO registered.
-         */
-        static bool hasImpl(const std::string &extOrName);
-
         friend class ImageIO;
 
         virtual ~Impl();
@@ -114,7 +94,6 @@ namespace em
         const Type& getTypeFromMode(int mode) const;
         int getModeFromType(const Type &type) const;
 
-
         /**
          * Print information about the image file.
          * @param verbosity 0 means silent, so nothing will be printed
@@ -123,15 +102,10 @@ namespace em
          */
         virtual void toStream(std::ostream &ostream, int verbosity=1) const;
 
-    private:
-        // Store a mapping between format names (mrc, spider, etc)
-        // and a function that helps to build a new ImageIO::Impl
-        static std::map<std::string, const ImageIO*> * implMap;
     }; // class ImageIO::Impl
 
     using ImageIOImplBuilder = ImageIO::Impl* (*)();
     bool registerImageIOImpl(const StringVector &sv, ImageIOImplBuilder builder);
-
 
 } // em namespace
 
