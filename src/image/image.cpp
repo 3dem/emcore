@@ -164,21 +164,21 @@ void Image::write(const ImageLocation &location) const
 
 using ImageIOImplRegistry = ImplRegistry<ImageIO::Impl>;
 
-ImageIOImplRegistry * getRegistry()
+ImageIOImplRegistry * getImageIORegistry()
 {
     static ImageIOImplRegistry registry;
     return &registry;
-} // function getRegistry
+} // function getImageIORegistry
 
 bool em::ImageIO::registerImpl(const StringVector &extOrNames,
                              ImageIO::ImplBuilder builder)
 {
-    return getRegistry()->registerImpl(extOrNames, builder);
+    return getImageIORegistry()->registerImpl(extOrNames, builder);
 } // function registerImageIOImpl
 
 bool ImageIO::hasImpl(const std::string &extension)
 {
-    return getRegistry()->hasImpl(extension);
+    return getImageIORegistry()->hasImpl(extension);
 } // function hasIO
 
 ImageIO::ImageIO()
@@ -188,11 +188,7 @@ ImageIO::ImageIO()
 
 ImageIO::ImageIO(const std::string &extOrName)
 {
-    auto builder = getRegistry()->getImplBuilder(extOrName);
-    ASSERT_ERROR(builder == nullptr,
-                 std::string("Can not find image format implementation for ")
-                 + extOrName);
-    impl = builder();
+    impl = getImageIORegistry()->buildImpl(extOrName);
 } // Ctor ImageIO
 
 ImageIO::~ImageIO()
@@ -204,19 +200,12 @@ ImageIO::~ImageIO()
 
 ImageIO::Impl::~Impl()
 {
-
 }
 
 void ImageIO::open(const std::string &path, const FileMode mode)
 {
-    if (impl == nullptr)
-    {
-        std::string ext = Path::getExtension(path);
-        auto builder = getRegistry()->getImplBuilder(ext);
-        assert(builder!= nullptr);
-        impl = builder();
-    }
-
+    delete impl;  // Does it make sense to reuse impl?
+    impl = getImageIORegistry()->buildImpl(Path::getExtension(path));
     impl->path = path;
     impl->fileMode = mode;
 
@@ -225,15 +214,11 @@ void ImageIO::open(const std::string &path, const FileMode mode)
     if (mode == READ_WRITE and !Path::exists(path))
         impl->fileMode = TRUNCATE;
 
-//    std::cerr << "ImageIO::open: " << std::endl <<
-//                 "         path: " << path << std::endl <<
-//                 "    file Mode: " << (int)impl->fileMode << std::endl <<
-//                 "  file Exists: " << Path::exists(path) << std::endl;
     impl->openFile();
 
     if (impl->fileMode != TRUNCATE)
         impl->readHeader();
-} // open
+} // function ImageIO.open
 
 void ImageIO::close()
 {

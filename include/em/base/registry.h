@@ -63,10 +63,17 @@ namespace em
             return registryMap[extOrName];
         }
 
+        /**
+         * Return a pointer to a new instance of the Implementation
+         * @param extOrName
+         * @return
+         */
         T* buildImpl(const std::string &extOrName)
         {
             auto implBuilder = getImplBuilder(extOrName);
-            assert(implBuilder!= nullptr);
+            ASSERT_ERROR(implBuilder == nullptr,
+                         std::string("Can not find implementation for ")
+                         + extOrName);
             return implBuilder();
         }
 
