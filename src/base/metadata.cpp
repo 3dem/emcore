@@ -44,16 +44,16 @@ public:
     std::map<std::string, size_t> colStrMap;
     size_t maxId = ColumnMap::NO_ID; // Keep track of the biggest ID
 
-    inline size_t getIndex(size_t columnId) const
+    inline size_t getIndex(size_t colId) const
     {
-        return colIntMap.find(columnId) != colIntMap.end() ?
-               colIntMap.at(columnId) : NO_INDEX;
+        return colIntMap.find(colId) != colIntMap.end() ?
+               colIntMap.at(colId) : NO_INDEX;
     }
 
-    inline size_t getIndex(const std::string &columnName) const
+    inline size_t getIndex(const std::string &colName) const
     {
-        return colStrMap.find(columnName) != colStrMap.end() ?
-               colStrMap.at(columnName) : NO_INDEX;
+        return colStrMap.find(colName) != colStrMap.end() ?
+               colStrMap.at(colName) : NO_INDEX;
     }
 
     inline const ColumnMap::Column& getColumn(size_t index) const
@@ -79,6 +79,7 @@ size_t ColumnMap::addColumn(const Column &column)
     auto colId = column.getId();
     auto colName = column.getName();
 
+    //FIXME: Check if the column has ID, but it overlaps with an existing one
     if (colId == NO_ID) // Find a new ID
         colId = ++(impl->maxId); // increment maxId and assign it to colId
     else
@@ -128,7 +129,15 @@ ColumnMap::const_iterator ColumnMap::end() const
 }
 
 
-// ========================== Table Implementation =============================
+// ========================== Table::Row Implementation ========================
+
+class Table::Impl
+{
+public:
+    ColumnMap colMap;
+
+    std::vector<Table::Row> rows;
+}; // class Table::Impl
 
 class Table::RowImpl
 {
@@ -139,25 +148,19 @@ public:
     /** Default empty constructor */
     RowImpl() = default;
 
-    /** Constructor of RowImpl. Receives the parent Table pointer and
-     * the number of objects.
+    /** Constructor of RowImpl. Receives the parent Table pointer.
+     * It will create one object per column in the Table.
      */
-    RowImpl(const Table * parent, size_t n): parent(parent)
+    RowImpl(const Table * parent): parent(parent)
     {
         // TODO: The Table could be implemented in the future to
         // contain a vector with all objects. So the row will only need
         // to point to the first object of this row.
-        objects.resize(n); // Allocate space for N objects
+        for (auto& col: parent->getColumnMap())
+            objects.emplace_back(col.getType());
     } // Ctor Table::RowImpl
+
 }; // class Table::RowImpl
-
-class Table::TableImpl
-{
-public:
-    ColumnMap colIndex;
-
-    std::vector<Table::Row> rows;
-}; // class Table::TableImpl
 
 Table::Row::Row(RowImpl *rowImpl): impl(rowImpl) {}
 
@@ -175,22 +178,34 @@ Table::Row& Table::Row::operator=(const Row &other)
 
 Table::Row::~Row() { delete impl; }
 
+const Object& Table::Row::operator[](size_t columnId) const
+{
+    size_t index = impl->parent->impl->colMap.getIndex(columnId);
+    return impl->objects[index];
+} // function Table::Row.operator[size_t] const
+
 Object& Table::Row::operator[](size_t columnId)
 {
-    size_t index = impl->parent->impl->colIndex.getIndex(columnId);
+    size_t index = impl->parent->impl->colMap.getIndex(columnId);
     return impl->objects[index];
 } // function Table::Row.operator[size_t]
 
+const Object& Table::Row::operator[](const std::string &columnName) const
+{
+    size_t index = impl->parent->impl->colMap.getIndex(columnName);
+    return impl->objects[index];
+} // function Table::Row.operator[string] const
+
 Object& Table::Row::operator[](const std::string &columnName)
 {
-    size_t index = impl->parent->impl->colIndex.getIndex(columnName);
+    size_t index = impl->parent->impl->colMap.getIndex(columnName);
     return impl->objects[index];
 } // function Table::Row.operator[string]
 
 void Table::Row::toStream(std::ostream &ostream) const
 {
     size_t i = 0;
-    for (auto& column: impl->parent->impl->colIndex)
+    for (auto& column: impl->parent->impl->colMap)
     {
         ostream << column.getName() << ": ";
         impl->objects[i++].toStream(ostream);
@@ -202,25 +217,68 @@ std::ostream& operator<< (std::ostream &ostream, const Table::Row &row)
 {
     row.toStream(ostream);
     return ostream;
+} // operator << (Table::Row)
+
+Table::Row::iterator Table::Row::begin()
+{
+    return impl->objects.begin();
 }
+
+Table::Row::iterator Table::Row::end()
+{
+    return impl->objects.end();
+}
+
+
+// ========================== Table Implementation ========================
 
 Table::Table(std::initializer_list<ColumnMap::Column> columns)
 {
-    impl = new TableImpl();
+    impl = new Impl();
 
     for (auto& col: columns)
-        impl->colIndex.addColumn(col);
+        impl->colMap.addColumn(col);
 } // Ctor Table
+
+Table::Table()
+{
+    THROW_ERROR("Not implemented!");
+} // Empty Table ctor
 
 Table::~Table()
 {
     delete impl;
 } // Dtor ~Table
 
+void Table::clear()
+{
+    delete impl;
+    impl = new Impl();
+} // function Table.clear
+
+// ---------------- Column related methods ------------------------
+
+void Table::addColumn(const ColumnMap::Column &col)
+{
+    impl->colMap.addColumn(col);
+} // function Table.addColumn
+
+
+// ---------------- Row related methods ------------------------
+
+size_t Table::getSize() const
+{
+    return impl->rows.size();
+} // function Table.getSize
+
+bool Table::isEmpty() const
+{
+    return impl->rows.empty();
+} // function Table.isEmpty
+
 Table::Row Table::createRow() const
 {
-    RowImpl *rowImpl = new RowImpl(this, impl->colIndex.size());
-    return Row(rowImpl);
+    return Row(new RowImpl(this));
 } // function Table.createRow
 
 bool Table::addRow(const Row &row)
@@ -235,18 +293,28 @@ bool Table::addRow(const Row &row)
 
 const ColumnMap& Table::getColumnMap() const
 {
-    return impl->colIndex;
+    return impl->colMap;
 } // function Table.getColumnMap
 
 Table::iterator Table::begin()
 {
     return impl->rows.begin();
-}
+} // function Table.begin
 
 Table::iterator Table::end()
 {
     return impl->rows.end();
-}
+} // function Table.end
+
+const Table::Row& Table::operator[](const size_t pos) const
+{
+    return impl->rows[pos];
+} // function Table::operator[] const
+
+Table::Row& Table::operator[](const size_t pos)
+{
+    return impl->rows[pos];
+} // function Table::operator[]
 
 // ========================== TableIO Implementation ===========================
 
@@ -265,7 +333,8 @@ protected:
     void readTable(std::ifstream &ifs, Table &table);
     void readLoopColumns(std::ifstream &ifs, ColumnMap &colMap);
     void readColumns(std::ifstream &ifs, ColumnMap &colMap);
-    void parseLine(const std::string &line, Table &table);
+    void parseLine(const std::string &line,
+                   const Table &table, Table::Row &row);
 }; // class TableIO::Impl
 
 void TableIO::Impl::open(const std::string &path)
@@ -281,6 +350,8 @@ void TableIO::Impl::close()
 
 void TableIO::Impl::read(const std::string &tableName, Table &table)
 {
+    table.clear();
+
     std::ifstream ifs(path.data(), std::ios_base::in);
     ifs.seekg(0);
     size_t lineCount = 0;
@@ -304,8 +375,6 @@ void TableIO::Impl::read(const std::string &tableName, Table &table)
 
 void TableIO::Impl::readTable(std::ifstream &ifs, Table &table)
 {
-    ColumnMap colMap;
-
     // Read all lines until EOF or first non-empty line
     while (getline(ifs, line) && line.empty());
 
@@ -324,7 +393,9 @@ void TableIO::Impl::readTable(std::ifstream &ifs, Table &table)
 
         // TODO: Infer the Column types from the first data line
         for (auto& col: colNames)
-            colMap.addColumn(ColumnMap::Column(col, typeString));
+            table.addColumn(ColumnMap::Column(col, typeString));
+
+        auto row = table.createRow();
 
         bool moreColumns = true;
 
@@ -333,11 +404,13 @@ void TableIO::Impl::readTable(std::ifstream &ifs, Table &table)
             //parseLine()
             moreColumns = bool(getline(ifs, line)); // FIXME
             line = String::trim(line);
+            parseLine(line, table, row);
+            table.addRow(row);
         }
 
-        std::cout << "Columns: " << std::endl;
-        for (auto& col: colNames)
-            std::cout << col << std::endl;
+//        std::cout << "Columns: " << std::endl;
+//        for (auto& col: colNames)
+//            std::cout << col << std::endl;
     }
     else
     {
@@ -352,9 +425,9 @@ void TableIO::Impl::readLoopColumns(std::ifstream &ifs, ColumnMap &colMap)
 
 } // TableIO::Impl.readColumns
 
-void TableIO::Impl::parseLine(const std::string &line, Table &table)
+void TableIO::Impl::parseLine(const std::string &line,
+                              const Table &table, Table::Row &row)
 {
-    auto row = table.createRow();
     auto& colMap = table.getColumnMap();
 
     std::stringstream ss(line);
@@ -363,6 +436,7 @@ void TableIO::Impl::parseLine(const std::string &line, Table &table)
     // <ColumnName, Object> pairs
     for (auto& col: colMap)
         row[col.getName()].fromStream(ss);
+
 } // function TableIO::Impl.parseLine
 
 TableIO::TableIO()

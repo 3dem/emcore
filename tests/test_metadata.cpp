@@ -2,7 +2,7 @@
 // Created by Jose Miguel de la Rosa Trevin on 2017-10-15.
 //
 
-
+#include <iomanip>
 #include "gtest/gtest.h"
 
 #include "em/base/metadata.h"
@@ -62,15 +62,29 @@ void printTable(Table &table)
 {
     std::cerr << std::endl <<
               "============== Table ===============" << std::endl;
+    size_t w = 12;
 
-    for (auto& row: table)
+    for (auto &col: table.getColumnMap())
+        std::cerr << std::setw(2*w) << std::right << col.getName() << std::endl;
+
+    auto &firstRow = table[0];
+
+    std::vector<int> widths;
+    for (auto &obj: firstRow)
+        widths.push_back(obj.toString().size() + 2);
+
+    int i = 0;
+
+    for (auto &row: table)
     {
-        std::cerr << row << std::endl;
-
+        i = 0;
+        for (auto &obj: row)
+            std::cerr << std::setw(widths[i++]) << std::right << obj << " ";
+        std::cerr << std::endl;
     }
 }
 
-TEST(Row, Basic)
+TEST(Table, Basic)
 {
     Table table({Column(1, "col1", typeFloat),
                  Column(2, "col2", typeInt16),
@@ -117,6 +131,14 @@ TEST(Row, Basic)
 
     printTable(table);
 
+    ASSERT_EQ(table.getSize(), 2);
+    ASSERT_FALSE(table.isEmpty());
+
+    table.clear();
+    ASSERT_EQ(table.getSize(), 0);
+    ASSERT_TRUE(table.isEmpty());
+
+
 } // TEST Row.Basic
 
 TEST(Table, Read)
@@ -139,6 +161,7 @@ TEST(Table, Read)
         tio.open(fn1);
         tio.read("images", t);
 
+        printTable(t);
     }
 /*
  * relion_tutorial/import/case1/classify3d_small_it038_data.star

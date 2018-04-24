@@ -91,8 +91,8 @@ namespace em {
         /** Return the index of the column with this NAME. */
         size_t getIndex(const std::string &columnName);
 
-        /** Return the column at this index */
-        const Column& operator[](size_t index);
+        /** Return the column at this position */
+        const Column& operator[](size_t pos);
 
         /** Return how many columns are in the Index. */
         size_t size() const;
@@ -124,8 +124,8 @@ namespace em {
     private:
         /** Implementation class for Row and Table to use the PIMPL idiom */
         class RowImpl;
-        class TableImpl;
-        TableImpl * impl = nullptr;
+        class Impl;
+        Impl * impl = nullptr;
 
     public:
         /**
@@ -138,9 +138,11 @@ namespace em {
         {
         public:
             /** Return the index of the column specified by columnId. */
+            const Object& operator[](size_t columnId) const;
             Object& operator[](size_t columnId);
 
             /** Return the index of the column specified by columnName. */
+            const Object& operator[](const std::string &columnName) const;
             Object& operator[](const std::string &columnName);
 
             /** Row Dtor */
@@ -153,8 +155,12 @@ namespace em {
             // there is not a single way to push to stream a Row
             void toStream(std::ostream &ostream) const;
 
-            // TODO: Add an iterator for the Objects in the Row
-            // Maybe with a pair of <ColumnName(string), Object>
+            // TODO: Hide implementation details and implement a proper iterator
+            using iterator = std::vector<Object>::iterator;
+            using const_iterator = std::vector<Object>::const_iterator;
+
+            iterator begin();
+            iterator end();
 
         private:
             RowImpl * impl = nullptr;
@@ -166,12 +172,50 @@ namespace em {
             friend class Table;
         }; // class Row
 
-        /** Constructor of Table base of input Columns */
+        /** Empty Table constructor */
+        Table();
+
+        /** Table constructor based on input columns */
         Table(std::initializer_list<ColumnMap::Column> list);
-        //Table(ColumnMap::ColumnVector &columns);
 
         /** Destructor for Table */
         virtual ~Table();
+
+        /** Clear all columns and rows */
+        void clear();
+
+
+        // ---------------- Column related methods ------------------------
+
+        /** Return the row at this position */
+        const Row& operator[](size_t pos) const;
+        Row& operator[](size_t pos);
+
+        /** Add a new column */
+        void addColumn(const ColumnMap::Column &col);
+
+        /** Insert a new column at a given position */
+        void insertColumn(const ColumnMap::Column &col, size_t pos);
+
+        /** Remove an existing column from the Table */
+        void removeColumn(size_t colId);
+        void removeColumn(const std::string &colName);
+
+        /** Change the position of a column */
+        void moveColumn(size_t colId, size_t pos);
+        void moveColumn(const std::string &colName, size_t pos);
+
+        /** Give access to a const object of the ColumnMap */
+        const ColumnMap& getColumnMap() const;
+
+
+        // ---------------- Row related methods ------------------------
+
+        /** Return the number of rows in the Table */
+        size_t getSize() const;
+
+        /** Return true if the number of rows is 0 */
+        bool isEmpty() const;
 
         /** Create a new row with the columns defined in this Table. */
         Row createRow() const;
@@ -179,10 +223,28 @@ namespace em {
         /** Add a new row to the set */
         bool addRow(const Row &row);
 
-        // TODO: Think more carefully all operations that a Table will
-        // provide related to columns
-        const ColumnMap& getColumnMap() const;
+        /** Insert a new row in a given position */
+        bool insertRow(const Row &row, size_t pos);
 
+        /** Delete a given row */
+        bool deleteRow(const Row &row);
+
+        /** Delete all rows that match a query string
+         * @returns The number of deleted rows.
+         */
+        size_t deleteRows(const std::string &queryStr);
+
+        /** Update a given row */
+        bool updateRow(const Row &row);
+
+        /** Update many rows at once. Apply the operation string to all
+         * rows that match the query string.
+         * @returns The number of updated rows.
+         */
+        size_t updateRows(const std::string &operation,
+                          const std::string &queryStr);
+
+        // ---------------- Type definitions ------------------------
         using RowVector = std::vector<Row>;
         using iterator = RowVector::iterator;
         using const_iterator = RowVector::const_iterator;
