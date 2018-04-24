@@ -7,6 +7,7 @@
 
 #include <map>
 #include "em/base/string.h"
+#include "em/base/error.h"
 
 
 namespace em
