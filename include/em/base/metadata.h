@@ -144,6 +144,17 @@ namespace em {
         class Row
         {
         public:
+            /** Empty constructor */
+            Row() = default;
+
+            /** Copy constructor and assignment */
+            Row(const Row& other);
+            /** Move constructor */
+            Row(Row&& other) noexcept;
+
+            /** Row Dtor */
+            ~Row();
+
             /** Return the index of the column specified by columnId. */
             const Object& operator[](size_t columnId) const;
             Object& operator[](size_t columnId);
@@ -152,11 +163,9 @@ namespace em {
             const Object& operator[](const std::string &columnName) const;
             Object& operator[](const std::string &columnName);
 
-            /** Row Dtor */
-            ~Row();
-            /** Copy constructor and assignment */
-            Row(const Row& other);
+
             Row& operator=(const Row& other);
+            Row& operator=(Row&& other) noexcept;
 
             // FIXME: Not sure if this method should be placed here
             // there is not a single way to push to stream a Row

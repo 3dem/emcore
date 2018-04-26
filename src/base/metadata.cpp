@@ -179,19 +179,32 @@ public:
 
 }; // class Table::RowImpl
 
+
 Table::Row::Row(RowImpl *rowImpl): impl(rowImpl) {}
 
 Table::Row::Row(const Row &other)
 {
     impl = new RowImpl();
-    *this = other;
+    *impl = *(other.impl);
 } // Copy ctor
+
+Table::Row::Row(Row &&other) noexcept
+{
+    std::swap(impl, other.impl);
+} // Move ctor
 
 Table::Row& Table::Row::operator=(const Row &other)
 {
     *impl = *(other.impl);
     return *this;
 } // Copy Ctor Table::Row
+
+Table::Row& Table::Row::operator=(Row &&other) noexcept
+{
+    std::swap(impl, other.impl);
+    return *this;
+} // Copy Ctor Table::Row
+
 
 Table::Row::~Row() { delete impl; }
 
@@ -245,7 +258,6 @@ Table::Row::iterator Table::Row::end()
 {
     return impl->objects.end();
 }
-
 
 // ========================== Table Implementation ========================
 
