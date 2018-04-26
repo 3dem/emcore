@@ -10,6 +10,7 @@
 
 namespace em
 {
+    using StringVector = std::vector<std::string>;
 
     class String
     {
@@ -23,6 +24,9 @@ namespace em
          * @return Input string without leading and trailing spaces
          */
         static std::string trim(const std::string &input);
+
+        /** Split the string into tokens */
+        static StringVector split(const char *str, const char sep = ' ');
 
         /** Convert a string to integer */
         static int toInt(const char *str);
@@ -38,7 +42,7 @@ namespace em
 
     }; // class String
 
-    using StringVector = std::vector<std::string>;
+
 
 } // namespace em
 
