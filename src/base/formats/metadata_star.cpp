@@ -63,23 +63,25 @@ protected:
             StringVector colNames;
             while (getline(ifs, line))
             {
-                line = String::trim(line); //FIXME: Check how to optimize this and avoid the triming
+                //FIXME: Check how to optimize this and avoid the trimming
+                line = String::trim(line);
                 if (line[0] != '_')
                     break;
                 colNames.push_back(
                         line.substr(1, line.find_first_of(String::SPACES) - 1));
             }
 
-
             ASSERT_ERROR(line.empty(),
                          "There are empty lines after columns and before data");
 
             // TODO: Infer the Column types from the first data line
+            StringVector tokens = String::split(line.c_str());
+            int i = 0;
+
             for (auto& col: colNames)
-                table.addColumn(ColumnMap::Column(col, typeString));
+                table.addColumn(Table::Column(col, Type::inferFromString(tokens[i++])));
 
             auto row = table.createRow();
-
             bool moreColumns = true;
 
             while (!line.empty() && moreColumns)
@@ -93,12 +95,13 @@ protected:
         }
         else
         {
+            // TODO: pARSE key=value star file
             //readColumns(ifs, line, colMap, true);
         }
     } // function readTable
 
-    void readLoopColumns(std::ifstream &ifs, ColumnMap &colMap);
-    void readColumns(std::ifstream &ifs, ColumnMap &colMap)
+    void readLoopColumns(std::ifstream &ifs, Table &table);
+    void readColumns(std::ifstream &ifs, Table &table)
     {
 
     } // function readColumns

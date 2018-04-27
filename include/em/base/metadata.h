@@ -15,17 +15,14 @@
 
 namespace em {
 
-
     /**
-     * List of Columns that can be accessed by ID or NAME.
-     * Indexes start at 0.
+     * Class to store several rows of data values.
+     * Each Row will contain value objects that are mapped to the Columns
+     * defined in this Table.
      */
-    class ColumnMap
+    class Table
     {
     public:
-        static const size_t NO_ID;
-        static const size_t NO_INDEX;
-
         /**
          * Class defining the properties of a given column in a Row or Table.
          * Each column should have an integer ID and a string NAME (both of which
@@ -35,6 +32,9 @@ namespace em {
         class Column
         {
         public:
+            static const size_t NO_ID;
+            static const size_t NO_INDEX;
+
             /** Constructor of a Column given the ID */
             Column(size_t id, const std::string &name, const Type & type,
                    const std::string &description="");
@@ -54,87 +54,20 @@ namespace em {
             /** Return the description of this Column */
             std::string getDescription() const;
 
-            private:
-                size_t id;
-                std::string name;
-                Type type;
-                std::string descr = "";
+        private:
+            size_t id;
+            std::string name;
+            Type type;
+            std::string descr = "";
 
-            friend class ColumnMap;
+            friend class Table;
 
-            }; // class Column
+        }; // class Column
 
         using ColumnVector = std::vector<Column>;
+        using col_iterator = ColumnVector::iterator;
+        using const_col_iterator = ColumnVector ::const_iterator;
 
-        /** Default empty constructor */
-        ColumnMap();
-
-        /** Construct a ColumnMap from a list of Columns */
-        ColumnMap(std::initializer_list<Column> list);
-
-        /** Destructor */
-        ~ColumnMap();
-
-        /** Return the number of columns */
-        size_t getSize() const;
-
-        /** Return true if there are no columns */
-        bool isEmpty() const;
-
-        /** Add a new column, return the column index.
-         * If the given column has no ID, it will be set.
-        */
-        size_t addColumn(const Column &column);
-
-        /** Return the column with this column ID. */
-        const Column& getColumn(size_t columnId);
-
-        /** Return the column with this NAME */
-        const Column& getColumn(const std::string &columnName);
-
-        /** Return the index of the column with this ID */
-        size_t getIndex(size_t columnId);
-
-        /** Return the index of the column with this NAME. */
-        size_t getIndex(const std::string &columnName);
-
-        /** Return the column at this position */
-        const Column& operator[](size_t pos);
-
-        /** Return how many columns are in the Index. */
-        size_t size() const;
-
-        using iterator = ColumnVector::iterator;
-        using const_iterator = ColumnVector::const_iterator;
-
-        const_iterator begin() const;
-        const_iterator end() const;
-
-    private:
-        class Impl;
-        Impl * impl;
-
-        // JMRT: For now disallow assignment between ColumnMap
-        // If needed, we should implement the copy constructor and = operator
-        ColumnMap &operator=(const ColumnMap& other) = default;
-
-    }; // class ColumnMap
-
-
-    /**
-     * Class to store several rows of data values.
-     * Each Row will contain value objects that are mapped to the Columns
-     * defined in this Table.
-     */
-    class Table
-    {
-    private:
-        /** Implementation class for Row and Table to use the PIMPL idiom */
-        class RowImpl;
-        class Impl;
-        Impl * impl = nullptr;
-
-    public:
         /**
          * Class to hold key-value pairs. Keys will be either string or integer
          * representing a given column. Values are instances of class Object
@@ -155,13 +88,13 @@ namespace em {
             /** Row Dtor */
             ~Row();
 
-            /** Return the index of the column specified by columnId. */
-            const Object& operator[](size_t columnId) const;
-            Object& operator[](size_t columnId);
+            /** Return the index of the column specified by colId. */
+            const Object& operator[](size_t colId) const;
+            Object& operator[](size_t colId);
 
-            /** Return the index of the column specified by columnName. */
-            const Object& operator[](const std::string &columnName) const;
-            Object& operator[](const std::string &columnName);
+            /** Return the index of the column specified by colName. */
+            const Object& operator[](const std::string &colName) const;
+            Object& operator[](const std::string &colName);
 
 
             Row& operator=(const Row& other);
@@ -179,20 +112,25 @@ namespace em {
             iterator end();
 
         private:
-            RowImpl * impl = nullptr;
+            class Impl;
+            Impl * impl = nullptr;
             /** Construction of a Row, given its implementation.
              * Only accesible by Table.
              */
-             Row(RowImpl * rowImpl);
+             Row(Impl * rowImpl);
 
             friend class Table;
         }; // class Row
+
+        using RowVector = std::vector<Row>;
+        using iterator = RowVector::iterator;
+        using const_iterator = RowVector::const_iterator;
 
         /** Empty Table constructor */
         Table();
 
         /** Table constructor based on input columns */
-        Table(std::initializer_list<ColumnMap::Column> list);
+        Table(std::initializer_list<Column> list);
 
         /** Destructor for Table */
         virtual ~Table();
@@ -200,18 +138,46 @@ namespace em {
         /** Clear all columns and rows */
         void clear();
 
+        /** Return the number of rows in the Table */
+        size_t getSize() const;
 
-        // ---------------- Column related methods ------------------------
+        /** Return true if the number of rows is 0 */
+        bool isEmpty() const;
 
-        /** Return the row at this position */
-        const Row& operator[](size_t pos) const;
-        Row& operator[](size_t pos);
+        /** Return the index of the column with this ID */
+        size_t getIndex(size_t colId);
 
-        /** Add a new column */
-        void addColumn(const ColumnMap::Column &col);
+        /** Return the index of the column with this NAME. */
+        size_t getIndex(const std::string &colName);
+
+        /** Return the column with this column ID. */
+        const Column& getColumn(size_t colId);
+
+        /** Return the column with this NAME */
+        const Column& getColumn(const std::string &colName);
+
+        /** Return the column in the given INDEX */
+        const Column& getColumnByIndex(size_t index);
+
+        /**
+         * Add a column when the table does not contain any row.
+         * If there are rows, the other function should be used where
+         * a default value should be provided.
+         * @param col Column to be added
+         */
+        size_t addColumn(const Column &col);
+
+        // TODO: Check if it is better to put the default value
+        // as part of the column
+        /**
+         * Add a new column when the table already contains some rows.
+         * */
+        size_t addColumn(const Column &col, const Object &defaultValue);
 
         /** Insert a new column at a given position */
-        void insertColumn(const ColumnMap::Column &col, size_t pos);
+        size_t insertColumn(const Column &col, size_t pos);
+        size_t insertColumn(const Column &col, size_t pos,
+                            const Object &defaultValue);
 
         /** Remove an existing column from the Table */
         void removeColumn(size_t colId);
@@ -221,17 +187,15 @@ namespace em {
         void moveColumn(size_t colId, size_t pos);
         void moveColumn(const std::string &colName, size_t pos);
 
-        /** Give access to a const object of the ColumnMap */
-        const ColumnMap& getColumnMap() const;
+        /** Return column iterator at the beginning */
+        const_col_iterator cbegin() const;
 
+        /** Return column iterator at the end */
+        const_col_iterator cend() const;
 
-        // ---------------- Row related methods ------------------------
-
-        /** Return the number of rows in the Table */
-        size_t getSize() const;
-
-        /** Return true if the number of rows is 0 */
-        bool isEmpty() const;
+        /** Return the row at this position */
+        const Row& operator[](size_t pos) const;
+        Row& operator[](size_t pos);
 
         /** Create a new row with the columns defined in this Table. */
         Row createRow() const;
@@ -260,15 +224,16 @@ namespace em {
         size_t updateRows(const std::string &operation,
                           const std::string &queryStr);
 
-        // ---------------- Type definitions ------------------------
-        using RowVector = std::vector<Row>;
-        using iterator = RowVector::iterator;
-        using const_iterator = RowVector::const_iterator;
-
         iterator begin();
         iterator end();
 
+    private:
+        /** Implementation class for Row and Table to use the PIMPL idiom */
+        class Impl;
+        Impl * impl = nullptr;
+
     }; // class Table
+
 
     /** @ingroup image
      * Read and write metadata (as table) from/to files.

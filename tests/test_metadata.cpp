@@ -10,30 +10,30 @@
 
 
 using namespace em;
-using Column = ColumnMap::Column;
+using Column = Table::Column;
 
 
-TEST(ColumnIndex, Basic)
+TEST(Table, ColumnsBasic)
 {
     std::string c1Name = "firstCol";
     Column c1(c1Name, typeFloat);
-    ASSERT_EQ(c1.getId(), ColumnMap::NO_ID);
+    ASSERT_EQ(c1.getId(), Column::NO_ID);
     ASSERT_EQ(c1.getName(), c1Name);
     ASSERT_EQ(c1.getType(), typeFloat);
 
     std::string c2Name = "secondCol";
     Column c2(c2Name, typeInt16);
-    ASSERT_EQ(c2.getId(), ColumnMap::NO_ID);
+    ASSERT_EQ(c2.getId(), Column::NO_ID);
     ASSERT_EQ(c2.getName(), c2Name);
     ASSERT_EQ(c2.getType(), typeInt16);
 
-    ColumnMap colMap;
+    Table colMap;
     ASSERT_EQ(0, colMap.addColumn(c1));
     ASSERT_EQ(1, colMap.addColumn(c2));
 
     // Get columns stored and do some validations
-    auto& rc1 = colMap[0];
-    auto& rc2 = colMap[1];
+    auto& rc1 = colMap.getColumnByIndex(0);
+    auto& rc2 = colMap.getColumnByIndex(1);
     ASSERT_EQ(rc1.getId(), 1);
     ASSERT_EQ(rc2.getId(), 2);
 
@@ -43,20 +43,33 @@ TEST(ColumnIndex, Basic)
     ASSERT_EQ(0, colMap.getIndex(rc1.getId()));
     ASSERT_EQ(1, colMap.getIndex(rc2.getId()));
 
-    ASSERT_EQ(ColumnMap::NO_INDEX, colMap.getIndex(100));
-    ASSERT_EQ(ColumnMap::NO_INDEX, colMap.getIndex("noColumn"));
+    ASSERT_EQ(Column::NO_INDEX, colMap.getIndex(100));
+    ASSERT_EQ(Column::NO_INDEX, colMap.getIndex("noColumn"));
 
     // Add more columns with and without IDs
     size_t bigId = 100;
     size_t c3index = colMap.addColumn(Column(bigId, "thirdCol", typeFloat));
-    auto& rc3 = colMap[c3index];
+    auto &rc3 = colMap.getColumnByIndex(c3index);
     ASSERT_EQ(bigId, rc3.getId());
     ASSERT_EQ(std::string("thirdCol"), rc3.getName());
 
     colMap.addColumn(Column("forthCol", typeFloat));
-    auto& rc4 = colMap[c3index + 1];
+    auto &rc4 = colMap.getColumnByIndex(c3index + 1);
     ASSERT_EQ(bigId + 1, rc4.getId());
     ASSERT_EQ(std::string("forthCol"), rc4.getName());
+
+    // Let's insert a new column, all indexes before should not be
+    // changed, but the ones after the position should be increased by 1
+    size_t c3bindex = colMap.insertColumn(Column("thirdBCol", typeFloat),
+                                          c3index + 1);
+    ASSERT_EQ(c3bindex, c3index + 1);
+
+    size_t i = 0;
+    for (auto &colName: {"firstCol", "secondCol", "thirdCol"})
+        ASSERT_EQ(colMap.getIndex(colName), i++);
+
+    ASSERT_EQ(colMap.getIndex("forthCol"), c3bindex + 1);
+
 } // TEST Column.Basic
 
 void printTable(Table &table)
@@ -65,8 +78,11 @@ void printTable(Table &table)
               "============== Table ===============" << std::endl;
     size_t w = 12;
 
-    for (auto &col: table.getColumnMap())
-        std::cerr << std::setw(2*w) << std::right << col.getName() << std::endl;
+    for (auto it = table.cbegin(); it < table.cend(); ++it)
+    {
+        std::cerr << std::setw(2 * w) << std::right << it->getName()
+                  << std::endl;
+    }
 
     auto &firstRow = table[0];
 
@@ -162,8 +178,7 @@ TEST(Table, Read)
                 });
         TableIO tio;
 
-        auto &colMap = t.getColumnMap();
-        ASSERT_EQ(colMap.getSize(), 3);
+        ASSERT_EQ(t.cend() - t.cbegin(), 3);
         ASSERT_TRUE(t.isEmpty());
 
         tio.open(fn1);
@@ -180,8 +195,9 @@ TEST(Table, Read)
                                     "rlnMaxValueProbDistribution"};
 
         int i = 0;
-        for (auto &col: colMap)
+        for (auto it = t.cbegin(); it < t.cend(); ++it)
         {
+            auto &col = *it;
             ASSERT_EQ(refColNames[i++], col.getName());
             std::cout << col.getName() << " type: " << col.getType().getName() << std::endl;
         }
@@ -216,9 +232,9 @@ TEST(Table, ReadXmd)
         tio.read("noname", t);
         timer.toc();
         int i = 0;
-        auto &colMap = t.getColumnMap();
-        for (auto &col: colMap)
+        for (auto it = t.cbegin(); it < t.cend(); ++it)
         {
+            auto &col = *it;
             //ASSERT_EQ(refColNames[i++], col.getName());
             std::cout << col.getName() << " type: " << col.getType().getName() << std::endl;
         }

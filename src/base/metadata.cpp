@@ -14,136 +14,30 @@
 
 
 using namespace em;
+using Column = Table::Column;
+using Row = Table::Row;
 
 
 // ========================== Column Implementation ============================
 
-const size_t ColumnMap::NO_ID = 0;
-const size_t ColumnMap::NO_INDEX = -1;
+const size_t Table::Column::NO_ID = 0;
+const size_t Table::Column::NO_INDEX = -1;
 
-ColumnMap::Column::Column(size_t id, const std::string &name, const Type & type,
+Table::Column::Column(size_t id, const std::string &name, const Type & type,
                    const std::string &description):
                    id(id), name(name), type(type), descr(description) {}
 
-ColumnMap::Column::Column(const std::string &name, const Type & type,
+Table::Column::Column(const std::string &name, const Type & type,
                           const std::string &description):
                     Column(NO_ID, name, type, description) {}
 
-size_t ColumnMap::Column::getId() const { return id; }
+size_t Table::Column::getId() const { return id; }
 
-std::string ColumnMap::Column::getName() const { return name; }
+std::string Table::Column::getName() const { return name; }
 
-const Type & ColumnMap::Column::getType() const { return type; }
+const Type & Table::Column::getType() const { return type; }
 
-std::string ColumnMap::Column::getDescription() const { return descr; }
-
-
-// ======================= ColumnMap Implementation ==========================
-
-class ColumnMap::Impl
-{
-public:
-    ColumnVector columns;
-    std::map<size_t, size_t> colIntMap;
-    std::map<std::string, size_t> colStrMap;
-    size_t maxId = ColumnMap::NO_ID; // Keep track of the biggest ID
-
-    inline size_t getIndex(size_t colId) const
-    {
-        return colIntMap.find(colId) != colIntMap.end() ?
-               colIntMap.at(colId) : NO_INDEX;
-    }
-
-    inline size_t getIndex(const std::string &colName) const
-    {
-        return colStrMap.find(colName) != colStrMap.end() ?
-               colStrMap.at(colName) : NO_INDEX;
-    }
-
-    inline const ColumnMap::Column& getColumn(size_t index) const
-    {
-        return columns[index];
-    }
-}; // class ColumnMap::Impl
-
-ColumnMap::ColumnMap() { impl = new Impl(); }
-
-ColumnMap::ColumnMap(std::initializer_list<Column> list): ColumnMap()
-{
-    for (auto& column: list)
-        addColumn(column);
-} // Ctor from list of Columns
-
-ColumnMap::~ColumnMap()
-{
-    delete impl;
-} // ColumnMap dtor
-
-size_t ColumnMap::getSize() const
-{
-    return impl->columns.size();
-} // function ColumnMap.getSize
-
-bool ColumnMap::isEmpty() const
-{
-    return impl->columns.empty();
-} // function ColumnMap.isEmpty
-
-size_t ColumnMap::addColumn(const Column &column)
-{
-    size_t index = impl->columns.size();
-
-    auto colId = column.getId();
-    auto colName = column.getName();
-
-    //FIXME: Check if the column has ID, but it overlaps with an existing one
-    if (colId == NO_ID) // Find a new ID
-        colId = ++(impl->maxId); // increment maxId and assign it to colId
-    else
-        impl->maxId = std::max(impl->maxId, colId);
-
-    impl->columns.emplace_back(colId, colName, column.getType(),
-                               column.getDescription());
-
-    return impl->colStrMap[colName] = impl->colIntMap[colId] = index;
-} // function ColumnMap.addColumn
-
-const ColumnMap::Column& ColumnMap::getColumn(size_t columnId)
-{
-    return impl->getColumn(impl->getIndex(columnId));
-} // function ColumnMap.getColumn(size_t)
-
-const ColumnMap::Column& ColumnMap::getColumn(const std::string &columnName)
-{
-    return impl->getColumn(impl->getIndex(columnName));
-} // function ColumnMap.getColumn(std::string)
-
-size_t ColumnMap::getIndex(size_t columnId)
-{
-    return impl->getIndex(columnId);
-} // function ColumnMap.getColumn(size_t)
-
-size_t ColumnMap::getIndex(const std::string &columnName)
-{
-    return impl->getIndex(columnName);
-} // function ColumnMap.getColumn(std::string)
-
-const ColumnMap::Column& ColumnMap::operator[](size_t index)
-{
-    return impl->getColumn(index);
-} // function ColumnMap.operator[string]
-
-size_t ColumnMap::size() const { return impl->columns.size(); }
-
-ColumnMap::const_iterator ColumnMap::begin() const
-{
-    return impl->columns.begin();
-}
-
-ColumnMap::const_iterator ColumnMap::end() const
-{
-    return impl->columns.end();
-}
+std::string Table::Column::getDescription() const { return descr; }
 
 
 // ========================== Table::Row Implementation ========================
@@ -151,40 +45,100 @@ ColumnMap::const_iterator ColumnMap::end() const
 class Table::Impl
 {
 public:
-    ColumnMap colMap;
-
+    ColumnVector columns;
+    std::map<size_t, size_t> colIntMap;
+    std::map<std::string, size_t> colStrMap;
+    size_t maxColId = Column::NO_ID; // Keep track of the biggest ID
     std::vector<Table::Row> rows;
+
+    inline size_t getIndex(size_t colId) const
+    {
+        return colIntMap.find(colId) != colIntMap.end() ?
+               colIntMap.at(colId) : Column::NO_INDEX;
+    }
+
+    inline size_t getIndex(const std::string &colName) const
+    {
+        return colStrMap.find(colName) != colStrMap.end() ?
+               colStrMap.at(colName) : Column::NO_INDEX;
+    }
+
+    inline const Column& getColumnByIndex(size_t index) const
+    {
+        return columns[index];
+    }
+
+    inline size_t addColumn(const Column &col)
+    {
+        insertColumn(col, columns.size());
+    }
+
+    size_t insertColumn(const Column &col, size_t pos)
+    {
+        size_t size = columns.size();
+
+        if (pos > size)
+            pos = size;
+
+        auto colId = col.getId();
+        auto colName = col.getName();
+
+        //FIXME: Check if the col has ID, but it overlaps with an existing one
+        if (colId == Column::NO_ID) // Find a new ID
+            colId = ++maxColId; // increment maxColId and assign it to colId
+        else
+            maxColId = std::max(maxColId, colId);
+
+        auto it = columns.begin() + pos;
+        columns.emplace(it, colId, colName, col.getType(), col.getDescription());
+
+        updateIndexes(columns.begin() + pos + 1, 1);
+
+        return colStrMap[colName] = colIntMap[colId] = pos;
+    } // function insertColumn
+
+    /**
+     * Update the indexes of some columns when new columns are added or
+     * existing one are deleted.
+     * @param firstToUpdate This is the position (iterator) of the first
+     * element to update
+     * @param updateFactor This will be 1 if a new column is inserted
+     * and -1 if a column was deleted.
+     */
+    void updateIndexes(ColumnVector::iterator firstToUpdate,
+                       int updateFactor)
+    {
+        for (auto it=firstToUpdate; it < columns.end(); ++it)
+        {
+            auto &col = *it;
+            colStrMap[col.getName()] += updateFactor;
+            colIntMap[col.getId()] += updateFactor;
+        }
+    } // function updateIndexes
 }; // class Table::Impl
 
-class Table::RowImpl
+
+class Table::Row::Impl
 {
 public:
     const Table * parent;
     std::vector<Object> objects;
 
     /** Default empty constructor */
-    RowImpl() = default;
+    Impl() = default;
 
     /** Constructor of RowImpl. Receives the parent Table pointer.
-     * It will create one object per column in the Table.
      */
-    RowImpl(const Table * parent): parent(parent)
-    {
-        // TODO: The Table could be implemented in the future to
-        // contain a vector with all objects. So the row will only need
-        // to point to the first object of this row.
-        for (auto& col: parent->getColumnMap())
-            objects.emplace_back(col.getType());
-    } // Ctor Table::RowImpl
+    Impl(const Table * parent): parent(parent) {}
 
-}; // class Table::RowImpl
+}; // class Table::Row::Impl
 
 
-Table::Row::Row(RowImpl *rowImpl): impl(rowImpl) {}
+Table::Row::Row(Impl *rowImpl): impl(rowImpl) {}
 
 Table::Row::Row(const Row &other)
 {
-    impl = new RowImpl();
+    impl = new Impl();
     *impl = *(other.impl);
 } // Copy ctor
 
@@ -205,39 +159,38 @@ Table::Row& Table::Row::operator=(Row &&other) noexcept
     return *this;
 } // Copy Ctor Table::Row
 
-
 Table::Row::~Row() { delete impl; }
 
-const Object& Table::Row::operator[](size_t columnId) const
+const Object& Table::Row::operator[](size_t colId) const
 {
-    size_t index = impl->parent->impl->colMap.getIndex(columnId);
+    size_t index = impl->parent->impl->getIndex(colId);
     return impl->objects[index];
 } // function Table::Row.operator[size_t] const
 
-Object& Table::Row::operator[](size_t columnId)
+Object& Table::Row::operator[](size_t colId)
 {
-    size_t index = impl->parent->impl->colMap.getIndex(columnId);
+    size_t index = impl->parent->impl->getIndex(colId);
     return impl->objects[index];
 } // function Table::Row.operator[size_t]
 
-const Object& Table::Row::operator[](const std::string &columnName) const
+const Object& Table::Row::operator[](const std::string &colName) const
 {
-    size_t index = impl->parent->impl->colMap.getIndex(columnName);
+    size_t index = impl->parent->impl->getIndex(colName);
     return impl->objects[index];
 } // function Table::Row.operator[string] const
 
-Object& Table::Row::operator[](const std::string &columnName)
+Object& Table::Row::operator[](const std::string &colName)
 {
-    size_t index = impl->parent->impl->colMap.getIndex(columnName);
+    size_t index = impl->parent->impl->getIndex(colName);
     return impl->objects[index];
 } // function Table::Row.operator[string]
 
 void Table::Row::toStream(std::ostream &ostream) const
 {
     size_t i = 0;
-    for (auto& column: impl->parent->impl->colMap)
+    for (auto &col: impl->parent->impl->columns)
     {
-        ostream << column.getName() << ": ";
+        ostream << col.getName() << ": ";
         impl->objects[i++].toStream(ostream);
         ostream << "\t";
     }
@@ -261,17 +214,17 @@ Table::Row::iterator Table::Row::end()
 
 // ========================== Table Implementation ========================
 
-Table::Table(std::initializer_list<ColumnMap::Column> columns)
+Table::Table(std::initializer_list<Column> columns)
 {
     impl = new Impl();
 
     for (auto& col: columns)
-        impl->colMap.addColumn(col);
+        impl->addColumn(col);
 } // Ctor Table
 
 Table::Table()
 {
-    impl = nullptr;
+    impl = new Impl();
 } // Empty Table ctor
 
 Table::~Table()
@@ -284,13 +237,6 @@ void Table::clear()
     delete impl;
     impl = new Impl();
 } // function Table.clear
-
-// ---------------- Column related methods ------------------------
-
-void Table::addColumn(const ColumnMap::Column &col)
-{
-    impl->colMap.addColumn(col);
-} // function Table.addColumn
 
 
 // ---------------- Row related methods ------------------------
@@ -305,9 +251,38 @@ bool Table::isEmpty() const
     return impl->rows.empty();
 } // function Table.isEmpty
 
+size_t Table::getIndex(size_t colId)
+{
+    return impl->getIndex(colId);
+} // function Table.getIndex(size_t)
+
+size_t Table::getIndex(const std::string &colName)
+{
+    return impl->getIndex(colName);
+} // function Table.getIndex(string)
+
+const Table::Column & Table::getColumn(size_t colId)
+{
+    return impl->getColumnByIndex(impl->getIndex(colId));
+} // function Table.getColumnByIndex
+
+const Table::Column& Table::getColumn(const std::string &colName)
+{
+    return impl->getColumnByIndex(impl->getIndex(colName));
+}
+
+const Column& Table::getColumnByIndex(size_t index)
+{
+    return impl->getColumnByIndex(index);
+}
+
 Table::Row Table::createRow() const
 {
-    return Row(new RowImpl(this));
+    auto rowImpl = new Row::Impl(this);
+    for (auto &col: impl->columns)
+        rowImpl->objects.emplace_back(col.getType());
+
+    return Row(rowImpl);
 } // function Table.createRow
 
 bool Table::addRow(const Row &row)
@@ -320,11 +295,6 @@ bool Table::addRow(const Row &row)
     return true;
 } // function Table.addRow
 
-const ColumnMap& Table::getColumnMap() const
-{
-    return impl->colMap;
-} // function Table.getColumnMap
-
 Table::iterator Table::begin()
 {
     return impl->rows.begin();
@@ -334,6 +304,7 @@ Table::iterator Table::end()
 {
     return impl->rows.end();
 } // function Table.end
+
 
 const Table::Row& Table::operator[](const size_t pos) const
 {
@@ -345,6 +316,79 @@ Table::Row& Table::operator[](const size_t pos)
     return impl->rows[pos];
 } // function Table::operator[]
 
+
+// ---------------- Column related methods ------------------------
+
+size_t Table::addColumn(const Column &col)
+{
+    ASSERT_ERROR(!isEmpty(),
+                 "A default value should be provided when add a column "
+                 "to a non-empty table.");
+
+    return impl->addColumn(col);
+} // function Table.addColumn
+
+size_t Table::addColumn(const Column &col, const Object &defaultValue)
+{
+    ASSERT_ERROR(col.getType() != defaultValue.getType(),
+                 "The default value has not the same type of the column.");
+
+    size_t index = impl->addColumn(col);
+    for (auto &row: impl->rows)
+        row.impl->objects.emplace_back(defaultValue);
+    return index;
+} // function Table.addColumn
+
+size_t Table::insertColumn(const Column &col, size_t pos)
+{
+    ASSERT_ERROR(!isEmpty(),
+                 "A default value should be provided when add a column "
+                         "to a non-empty table.");
+    return impl->insertColumn(col, pos);
+}
+
+size_t Table::insertColumn(const Column &col, size_t pos,
+                         const Object &defaultValue)
+{
+    ASSERT_ERROR(col.getType() != defaultValue.getType(),
+                 "The default value has not the same type of the column.");
+
+    size_t index = impl->insertColumn(col, pos);
+    for (auto &row: impl->rows)
+        row.impl->objects.emplace(row.impl->objects.begin()+pos, defaultValue);
+
+    return index;
+} // function Table.addColumn
+
+void Table::removeColumn(size_t colId)
+{
+    THROW_ERROR("Not implemented.");
+}
+
+void Table::removeColumn(const std::string &colName)
+{
+    THROW_ERROR("Not implemented.");
+}
+
+void Table::moveColumn(size_t colId, size_t pos)
+{
+    THROW_ERROR("Not implemented.");
+}
+
+void Table::moveColumn(const std::string &colName, size_t pos)
+{
+    THROW_ERROR("Not implemented.");
+}
+
+Table::const_col_iterator Table::cbegin() const
+{
+    return impl->columns.begin();
+}
+
+Table::const_col_iterator Table::cend() const
+{
+    return impl->columns.end();
+}
 
 // ========================== TableIO Implementation ===========================
 
