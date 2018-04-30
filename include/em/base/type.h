@@ -233,7 +233,6 @@ namespace em
             void copyOrCast(const Container &other, size_t n,
                             bool singleInput=false);
 
-        private:
             class Impl;
             Impl * impl;
         }; // class Container

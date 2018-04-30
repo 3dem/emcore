@@ -14,6 +14,11 @@ Object::Object(const Object &other)
     *this = other;
 } // Ctor Object
 
+Object::Object(Object &&other) noexcept
+{
+    std::swap(impl, other.impl);
+}
+
 Object::Object(const Type & type, void *memory):
         Type::Container(type, 1, memory)
 {
@@ -78,5 +83,11 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::Object &object)
 Object& Object::operator=(const Object &other)
 {
     copyOrCast(other, 1);
+    return *this;
+}
+
+Object& Object::operator=(Object &&other) noexcept
+{
+    std::swap(impl, other.impl);
     return *this;
 }
