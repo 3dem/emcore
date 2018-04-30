@@ -45,6 +45,11 @@ namespace em
          */
         Object(const Object &other);
 
+        /** Move constructor.
+         * TODO: DOCUMENT!!!
+         */
+        Object(Object &&other) noexcept;
+
         /** Object class destructor. */
         // ~Object();
 
@@ -63,6 +68,9 @@ namespace em
          */
         template <class T> Object& operator=(const T &valueIn);
         Object& operator=(const Object &other);
+
+        /** Move assign. */
+        Object& operator=(Object &&other) noexcept;
 
         bool operator==(const Object &other) const;
         bool operator!=(const Object &other) const;

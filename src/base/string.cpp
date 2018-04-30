@@ -22,6 +22,23 @@ std::string String::trim(const std::string &input)
     return input.substr(begin, end - begin + 1);
 } // function String::trim
 
+StringVector String::split(const char *str, const char sep)
+{
+    StringVector result;
+    do
+    {
+        const char *begin = str;
+
+        while(*str != sep && *str)
+            ++str;
+
+        if (str > begin)
+            result.emplace_back(begin, str);
+    } while (0 != *str++);
+
+    return result;
+} // function String::split
+
 // Define a convenience macro to use sscanf,
 // str and retval should be defined
 #define SCAN_NUMBER(type, format) type retval; char dummy; \
