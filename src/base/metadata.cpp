@@ -319,11 +319,15 @@ Table::iterator Table::end()
 
 const Table::Row& Table::operator[](const size_t pos) const
 {
+    ASSERT_ERROR(pos >= impl->rows.size(),
+                 "Requested position is greater than Table size.")
     return impl->rows[pos];
 } // function Table::operator[] const
 
 Table::Row& Table::operator[](const size_t pos)
 {
+    ASSERT_ERROR(pos >= impl->rows.size(),
+                 "Requested position is greater than Table size.")
     return impl->rows[pos];
 } // function Table::operator[]
 
