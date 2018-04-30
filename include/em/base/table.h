@@ -129,6 +129,16 @@ namespace em {
         /** Empty Table constructor */
         Table();
 
+        /** Copy constructor */
+        Table(const Table &other);
+
+        /** Move constructor */
+        Table(Table &&other) noexcept;
+
+        /** Assign operators */
+        Table& operator=(const Table &other);
+        Table& operator=(Table &&other) noexcept;
+
         /** Table constructor based on input columns */
         Table(std::initializer_list<Column> list);
 
@@ -158,6 +168,9 @@ namespace em {
 
         /** Return the column in the given INDEX */
         const Column& getColumnByIndex(size_t index);
+
+        /** Return number of columns in the table */
+        size_t getColumnsSize() const;
 
         /**
          * Add a column when the table does not contain any row.

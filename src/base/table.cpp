@@ -225,10 +225,8 @@ Table::Row::iterator Table::Row::end()
 
 // ========================== Table Implementation ========================
 
-Table::Table(std::initializer_list<Column> columns)
+Table::Table(std::initializer_list<Column> columns): Table()
 {
-    impl = new Impl();
-
     for (auto& col: columns)
         impl->addColumn(col);
 } // Ctor Table
@@ -237,6 +235,26 @@ Table::Table()
 {
     impl = new Impl();
 } // Empty Table ctor
+
+Table::Table(const Table &other): Table()
+{
+    *impl = *other.impl;
+} // Table Copy-ctor
+
+Table::Table(Table &&other) noexcept : Table()
+{
+    std::swap(impl, other.impl);
+} // Table Move-ctor
+
+Table& Table::operator=(const Table &other)
+{
+    *impl = *other.impl;
+} // Table assign operator
+
+Table& Table::operator=(Table &&other) noexcept
+{
+    std::swap(impl, other.impl);
+} // Table Move-assign operator
 
 Table::~Table()
 {
@@ -248,7 +266,6 @@ void Table::clear()
     delete impl;
     impl = new Impl();
 } // function Table.clear
-
 
 // ---------------- Row related methods ------------------------
 
@@ -280,12 +297,17 @@ const Table::Column & Table::getColumn(size_t colId)
 const Table::Column& Table::getColumn(const std::string &colName)
 {
     return impl->getColumnByIndex(impl->getIndex(colName));
-}
+} // function Table.getColumn
 
 const Column& Table::getColumnByIndex(size_t index)
 {
     return impl->getColumnByIndex(index);
-}
+} // function Table.getColumnByIndex
+
+size_t Table::getColumnsSize() const
+{
+    return impl->columns.size();
+} // function Table.getColumnsSize
 
 Table::Row Table::createRow() const
 {

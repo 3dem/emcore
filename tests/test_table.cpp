@@ -65,6 +65,18 @@ Table createTable(size_t nRows)
     return table;
 }
 
+void checkColumns(Table &table, std::vector<int> indexes={})
+{
+    StringVector colNames = {"col1", "col2", "col3"};
+
+    if (indexes.empty())
+        indexes = {0, 1, 2};
+
+    // Check all expected columns are there
+    for (int i = 0; i < table.getColumnsSize(); ++i)
+        ASSERT_EQ(colNames[indexes[i]], table.getColumnByIndex(i).getName());
+}
+
 
 TEST(Table, ColumnsBasic)
 {
@@ -179,6 +191,28 @@ TEST(Table, Basic)
     ASSERT_TRUE(table.isEmpty());
 } // TEST Row.Basic
 
+
+TEST(Table, Copy)
+{
+    size_t n = 10;
+    auto table10 = createTable(n);
+    Table table10copy(table10);
+    checkColumns(table10copy);
+    ASSERT_EQ(table10copy.getSize(), table10.getSize());
+    ASSERT_EQ(table10copy.getSize(), n);
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        auto &row1 = table10[i];
+        auto &row2 = table10copy[i];
+        for (auto it = table10.cbegin(); it < table10.cend(); ++it)
+        {
+            auto colName = it->getName();
+            ASSERT_EQ(row1[colName], row2[colName]);
+        }
+    }
+} // Test Table.Copy
+
 TEST(Table, RemoveColumns)
 {
     // Let's create a table with no rows
@@ -188,27 +222,16 @@ TEST(Table, RemoveColumns)
 
     StringVector colNames123 = {"col1", "col2", "col3"};
     StringVector colNames13 = {"col1", "col3"};
-    size_t i = 0;
     // Check all expected columns are there
-    for (auto it = table0.cbegin(); it < table0.cend(); ++it)
-        ASSERT_EQ(colNames123[i++], it->getName());
-
+    checkColumns(table0);
     // Remove a column from empty table works
     table0.removeColumn("col2");
-    i = 0;
-    for (auto it = table0.cbegin(); it < table0.cend(); ++it)
-        ASSERT_EQ(colNames13[i++], it->getName());
+    checkColumns(table0, {0, 2});
 
     auto table10 = createTable(10);
-    // Check all expected columns are there
-    i = 0;
-    for (auto it = table10.cbegin(); it < table10.cend(); ++it)
-        ASSERT_EQ(colNames123[i++], it->getName());
-
+    checkColumns(table10);
     table10.removeColumn("col2");
-    i = 0;
-    for (auto it = table10.cbegin(); it < table10.cend(); ++it)
-        ASSERT_EQ(colNames13[i++], it->getName());
+    checkColumns(table10, {0, 2});
 } // TEST Row.RemoveColumns
 
 TEST(Table, Read)
