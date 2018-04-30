@@ -42,6 +42,22 @@ std::string Table::Column::getDescription() const { return descr; }
 
 // ========================== Table::Row Implementation ========================
 
+class Table::Row::Impl
+{
+public:
+    const Table * parent;
+    std::vector<Object> objects;
+
+    /** Default empty constructor */
+    Impl() = default;
+
+    /** Constructor of RowImpl. Receives the parent Table pointer.
+     */
+    Impl(const Table * parent): parent(parent) {}
+
+}; // class Table::Row::Impl
+
+
 class Table::Impl
 {
 public:
@@ -97,6 +113,16 @@ public:
         return colStrMap[colName] = colIntMap[colId] = pos;
     } // function insertColumn
 
+    void removeColumn(size_t index)
+    {
+        auto it = columns.erase(columns.begin() + index);
+        updateIndexes(it, -1);
+        // FIXME: Maybe if we store elements grouped by columns we can avoid
+        // the following
+        for (auto &row: rows)
+            row.impl->objects.erase(row.impl->objects.begin() + index);
+    }
+
     /**
      * Update the indexes of some columns when new columns are added or
      * existing one are deleted.
@@ -117,21 +143,6 @@ public:
     } // function updateIndexes
 }; // class Table::Impl
 
-
-class Table::Row::Impl
-{
-public:
-    const Table * parent;
-    std::vector<Object> objects;
-
-    /** Default empty constructor */
-    Impl() = default;
-
-    /** Constructor of RowImpl. Receives the parent Table pointer.
-     */
-    Impl(const Table * parent): parent(parent) {}
-
-}; // class Table::Row::Impl
 
 
 Table::Row::Row(Impl *rowImpl): impl(rowImpl) {}
@@ -362,12 +373,13 @@ size_t Table::insertColumn(const Column &col, size_t pos,
 
 void Table::removeColumn(size_t colId)
 {
-    THROW_ERROR("Not implemented.");
+    impl->removeColumn(impl->getIndex(colId));
 }
 
 void Table::removeColumn(const std::string &colName)
 {
-    THROW_ERROR("Not implemented.");
+
+    impl->removeColumn(impl->getIndex(colName));
 }
 
 void Table::moveColumn(size_t colId, size_t pos)

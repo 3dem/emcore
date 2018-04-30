@@ -13,6 +13,56 @@ using namespace em;
 using Column = Table::Column;
 
 
+void printTable(Table &table)
+{
+    std::cerr << std::endl <<
+              "============== Table ===============" << std::endl;
+    size_t w = 12;
+
+    for (auto it = table.cbegin(); it < table.cend(); ++it)
+    {
+        std::cerr << std::setw(2 * w) << std::right << it->getName()
+                  << std::endl;
+    }
+
+    auto &firstRow = table[0];
+
+    std::vector<int> widths;
+    for (auto &obj: firstRow)
+        widths.push_back(obj.toString().size() + 2);
+
+    int i = 0;
+
+    for (auto &row: table)
+    {
+        i = 0;
+        for (auto &obj: row)
+            std::cerr << std::setw(widths[i++]) << std::right << obj << " ";
+        std::cerr << std::endl;
+    }
+} // function printTable
+
+Table createTable(size_t nRows)
+{
+    Table table({Column(1, "col1", typeSize),
+                 Column(2, "col2", typeFloat),
+                 Column(3, "col3", typeString)
+                });
+
+    auto row = table.createRow();
+
+    for (size_t i = 0; i < nRows; ++i)
+    {
+        row["col1"] = i;
+        row["col2"] = float(i) / 100;
+        row["col3"] = std::string("image_") + row["col1"].toString();
+        table.addRow(row);
+    }
+
+    return table;
+}
+
+
 TEST(Table, ColumnsBasic)
 {
     std::string c1Name = "firstCol";
@@ -72,34 +122,6 @@ TEST(Table, ColumnsBasic)
 
 } // TEST Column.Basic
 
-void printTable(Table &table)
-{
-    std::cerr << std::endl <<
-              "============== Table ===============" << std::endl;
-    size_t w = 12;
-
-    for (auto it = table.cbegin(); it < table.cend(); ++it)
-    {
-        std::cerr << std::setw(2 * w) << std::right << it->getName()
-                  << std::endl;
-    }
-
-    auto &firstRow = table[0];
-
-    std::vector<int> widths;
-    for (auto &obj: firstRow)
-        widths.push_back(obj.toString().size() + 2);
-
-    int i = 0;
-
-    for (auto &row: table)
-    {
-        i = 0;
-        for (auto &obj: row)
-            std::cerr << std::setw(widths[i++]) << std::right << obj << " ";
-        std::cerr << std::endl;
-    }
-}
 
 TEST(Table, Basic)
 {
@@ -158,6 +180,30 @@ TEST(Table, Basic)
 
 } // TEST Row.Basic
 
+TEST(Table, RemoveColumns)
+{
+    // Let's create a table with no rows
+    auto table0 = createTable(0);
+    ASSERT_EQ(table0.getSize(), 0);
+    ASSERT_TRUE(table0.isEmpty());
+
+    StringVector colNames123 = {"col1", "col2", "col3"};
+    StringVector colNames13 = {"col1", "col3"};
+    size_t i = 0;
+    for (auto it = table0.cbegin(); it < table0.cend(); ++it)
+        ASSERT_EQ(colNames123[i++], it->getName());
+
+    auto &tableCopy = table0;
+    tableCopy.removeColumn("col2");
+    i = 0;
+    for (auto it = tableCopy.cbegin(); it < tableCopy.cend(); ++it)
+        ASSERT_EQ(colNames13[i++], it->getName());
+
+    auto table10 = createTable(10);
+    table10.removeColumn("col2");
+    printTable(table10);
+} // TEST Row.RemoveColumns
+
 TEST(Table, Read)
 {
     auto testDataPath = getenv("EM_TEST_DATA");
@@ -201,7 +247,7 @@ TEST(Table, Read)
             ASSERT_EQ(refColNames[i++], col.getName());
             std::cout << col.getName() << " type: " << col.getType().getName() << std::endl;
         }
-        //printTable(t);
+        printTable(t);
     } // if TEST_DATA
 /*
  * relion_tutorial/import/case1/classify3d_small_it038_data.star
