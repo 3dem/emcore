@@ -25,20 +25,23 @@ void printTable(Table &table)
                   << std::endl;
     }
 
-    auto &firstRow = table[0];
-
-    std::vector<int> widths;
-    for (auto &obj: firstRow)
-        widths.push_back(obj.toString().size() + 2);
-
-    int i = 0;
-
-    for (auto &row: table)
+    if (!table.isEmpty())
     {
-        i = 0;
-        for (auto &obj: row)
-            std::cerr << std::setw(widths[i++]) << std::right << obj << " ";
-        std::cerr << std::endl;
+        auto &firstRow = table[0];
+
+        std::vector<int> widths;
+        for (auto &obj: firstRow)
+            widths.push_back(obj.toString().size() + 2);
+
+        int i = 0;
+
+        for (auto &row: table)
+        {
+            i = 0;
+            for (auto &obj: row)
+                std::cerr << std::setw(widths[i++]) << std::right << obj << " ";
+            std::cerr << std::endl;
+        }
     }
 } // function printTable
 
@@ -160,8 +163,6 @@ TEST(Table, Basic)
     table.addRow(row);
     table.addRow(row3);
 
-    printTable(table);
-
     for (auto& row: table)
     {
         row["col3"] = std::string("Other name 2");
@@ -190,18 +191,26 @@ TEST(Table, RemoveColumns)
     StringVector colNames123 = {"col1", "col2", "col3"};
     StringVector colNames13 = {"col1", "col3"};
     size_t i = 0;
+    // Check all expected columns are there
     for (auto it = table0.cbegin(); it < table0.cend(); ++it)
         ASSERT_EQ(colNames123[i++], it->getName());
 
-    auto &tableCopy = table0;
-    tableCopy.removeColumn("col2");
+    // Remove a column from empty table works
+    table0.removeColumn("col2");
     i = 0;
-    for (auto it = tableCopy.cbegin(); it < tableCopy.cend(); ++it)
+    for (auto it = table0.cbegin(); it < table0.cend(); ++it)
         ASSERT_EQ(colNames13[i++], it->getName());
 
     auto table10 = createTable(10);
+    // Check all expected columns are there
+    i = 0;
+    for (auto it = table10.cbegin(); it < table10.cend(); ++it)
+        ASSERT_EQ(colNames123[i++], it->getName());
+
     table10.removeColumn("col2");
-    printTable(table10);
+    i = 0;
+    for (auto it = table10.cbegin(); it < table10.cend(); ++it)
+        ASSERT_EQ(colNames13[i++], it->getName());
 } // TEST Row.RemoveColumns
 
 TEST(Table, Read)
@@ -247,7 +256,6 @@ TEST(Table, Read)
             ASSERT_EQ(refColNames[i++], col.getName());
             std::cout << col.getName() << " type: " << col.getType().getName() << std::endl;
         }
-        printTable(t);
     } // if TEST_DATA
 /*
  * relion_tutorial/import/case1/classify3d_small_it038_data.star
