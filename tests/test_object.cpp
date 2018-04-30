@@ -101,7 +101,13 @@ TEST(Object, Basic)
     //ASSERT_EQ((std::string) o2, (std::string) o3);
     Object o5(oo2);
     ASSERT_EQ(oo2, o5);
+
+    // Test copy objects of different types
+    Object oInt = 100;
+    Object oStr = std::string("testing");
+    oInt = oStr;
 } // TEST Object.Basic
+
 
 TEST(Object, Parsing)
 {
