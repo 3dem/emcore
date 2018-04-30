@@ -11,16 +11,20 @@ using namespace em;
 
 void init_submodule_image(py::module &m) {
 
-    py::class_<ImageLocation>(m, "ImageLocation")
-//        .def_readonly_static("FIRST", 1)
-//        .def_readonly_static("ALL", 0)
-        .def(py::init<>())
-        .def(py::init<const std::string&, size_t>(),
-            py::arg("path"), py::arg("index")=1)
-        .def_readwrite("path", &ImageLocation::path)
-        .def_readwrite("index", &ImageLocation::index)
-        .def(py::self == py::self)
-        .def(py::self != py::self);
+    py::class_<ImageLocation> imgLoc(m, "ImageLocation");
+    imgLoc.def(py::init<>())
+          .def(py::init<const std::string&, size_t>(),
+               py::arg("path"), py::arg("index")=1)
+          .def_readwrite("path", &ImageLocation::path)
+          .def_readwrite("index", &ImageLocation::index)
+          .def(py::self == py::self)
+          .def(py::self != py::self);
+
+    py::enum_<ImageLocation::Index>(imgLoc, "Index")
+            .value("NONE", ImageLocation::Index::NONE)
+            .value("ALL", ImageLocation::Index::ALL)
+            .value("FIRST", ImageLocation::Index::FIRST)
+            .export_values();
 
     py::class_<Image, Array>(m, "Image")
         .def(py::init<>())

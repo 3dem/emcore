@@ -11,13 +11,13 @@ class TestImageLocation(BaseTest):
     def test_basic(self):
         path = '/path/to/image'
         loc2 = em.ImageLocation('/path/to/image')
-        self.assertEqual(loc2.index, em.ImageLocation.ALL)
+        self.assertEqual(loc2.index, em.ImageLocation.FIRST)
         self.assertEqual(loc2.path, path)
 
         loc3 = em.ImageLocation(path, 2)
         self.assertEqual(loc3.path, path)
         self.assertNotEqual(loc2, loc3)
-        loc3.index = 0
+        loc3.index = em.ImageLocation.FIRST
         self.assertEqual(loc2, loc3)
 
 
