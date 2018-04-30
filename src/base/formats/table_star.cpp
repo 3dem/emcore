@@ -2,7 +2,7 @@
 // Created by josem on 4/24/18.
 //
 
-#include "em/base/metadata_priv.h"
+#include "em/base/table_priv.h"
 
 
 using namespace em;

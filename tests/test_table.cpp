@@ -5,7 +5,7 @@
 #include <iomanip>
 #include "gtest/gtest.h"
 
-#include "em/base/metadata.h"
+#include "em/base/table.h"
 #include "em/base/timer.h"
 
 
@@ -177,8 +177,6 @@ TEST(Table, Basic)
     table.clear();
     ASSERT_EQ(table.getSize(), 0);
     ASSERT_TRUE(table.isEmpty());
-
-
 } // TEST Row.Basic
 
 TEST(Table, RemoveColumns)

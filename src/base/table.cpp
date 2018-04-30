@@ -8,8 +8,8 @@
 
 #include "em/base/string.h"
 #include "em/base/registry.h"
-#include "em/base/metadata.h"
-#include "em/base/metadata_priv.h"
+#include "em/base/table.h"
+#include "em/base/table_priv.h"
 #include "em/os/filesystem.h"
 
 
@@ -462,4 +462,4 @@ void TableIO::read(const std::string &tableName, Table &table)
     impl->read(tableName, table);
 } // TableIO.read
 
-#include "formats/metadata_star.cpp"
+#include "formats/table_star.cpp"
