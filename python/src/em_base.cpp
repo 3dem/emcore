@@ -7,11 +7,19 @@
 
 #include "em/base/type.h"
 #include "em/base/array.h"
-#include "em/image/image.h"
+#include "em/base/table.h"
+#include "em/base/object.h"
 
 namespace py = pybind11;
 
 using namespace em;
+
+//using std::map<std::string, std::string> TypeFormatMap;
+//
+//const TypeFormatMap& getTypeFormatMap()
+//{
+//
+//}
 
 /** Return the character expected by the protocol buffer for
 defining the type of the buffer, base on our own type class. */
@@ -35,6 +43,21 @@ if (type.getName() == t.getName()) return py::format_descriptor<T>::format();
     THROW_ERROR("Unsupported type");
 } // function getTypeFormat
 
+
+/** Build an em::Object from a given Python object */
+Object * buildObject(const py::object &pyobj)
+{
+    if (py::isinstance<py::str>(pyobj))
+        return new Object(pyobj.cast<std::string>());
+    if (py::isinstance<py::int_>(pyobj))
+        return new Object(pyobj.cast<int32_t>());
+    if (py::isinstance<py::float_>(pyobj))
+        return new Object(pyobj.cast<float>());
+
+    THROW_ERROR(std::string("Unsupported object type: ") +
+                (std::string)py::str(pyobj.get_type()));
+} // function buildObject
+
 void init_submodule_base(py::module &m) {
 
     py::class_<Error>(m, "Error")
@@ -48,11 +71,18 @@ void init_submodule_base(py::module &m) {
 
     py::class_<Type>(m, "Type")
          .def(py::init<>())
+         .def(py::self == py::self)
+         .def(py::self != py::self)
          .def("getName", &Type::getName)
          .def("getSize", &Type::getSize)
+         .def("isPod", &Type::isPod)
+         .def("isTriviallyCopyable", &Type::isTriviallyCopyable)
          .def("isNull", &Type::isNull)
+         .def("toString", &Type::toString)
          .def("__repr__", &Type::toString)
-         .def("__str__", &Type::toString);
+         .def("__str__", &Type::toString)
+         .def_static("inferFromString", (Type (*)(const std::string&))
+                 &Type::inferFromString);
 
     m.attr("typeNull") = em::typeNull;
     m.attr("typeInt8") = em::typeInt8;
@@ -61,8 +91,16 @@ void init_submodule_base(py::module &m) {
     m.attr("typeUInt16") = em::typeUInt16;
     m.attr("typeInt32") = em::typeInt32;
     m.attr("typeUInt32") = em::typeUInt32;
+    m.attr("typeInt64") = em::typeInt64;
+    m.attr("typeUInt64") = em::typeUInt64;
+
     m.attr("typeFloat") = em::typeFloat;
     m.attr("typeDouble") = em::typeDouble;
+    m.attr("typeCFloat") = em::typeCFloat;
+    m.attr("typeCDouble") = em::typeCDouble;
+
+    m.attr("typeBool") = em::typeBool;
+    m.attr("typeString") = em::typeString;
 
     py::class_<ArrayDim>(m, "ArrayDim")
         .def(py::init<>())
@@ -132,5 +170,60 @@ void init_submodule_base(py::module &m) {
              py::arg("adim"), py::arg("type")=em::typeNull)
         .def("getDim", &Array::getDim);
 
+    py::class_<Object, Type::Container>(m, "Object")
+            .def(py::init<>())
+            .def(py::init<const Object&>())
+            .def(py::init(&buildObject))
+            .def("set", [](Object &self, const py::object& pyobj)
+                        {
+                            Object *obj = buildObject(pyobj);
+                            self = *obj;
+                            delete obj;
+                        })
+            .def("toString", &Object::toString)
+            .def("fromString", &Object::fromString)
+            .def("setType", &Object::setType)
+            .def("__repr__", &Object::toString)
+            .def("__str__", &Object::toString)
+            .def("__int__", [](const Object &self) { return (int)self; })
+            .def("__float__", [](const Object &self) { return (float)self; })
+            .def(py::self == py::self)
+            .def(py::self != py::self);
 
+//    py::class_<Table> table(m, "Table");
+//
+//    py::class_<Table::Column>(table, "Column")
+//            .def(py::init<size_t, const std::string&, const Type&,
+//                    const std::string&>())
+//            .def(py::init<const std::string&, const Type&,
+//                    const std::string&>())
+//            .def("getId", &Table::Column::getId)
+//            .def("getName", &Table::Column::getName)
+//            .def("getType", &Table::Column::getType)
+//            .def("getDescription", &Table::Column::getDescription);
+//
+//    py::class_<Table::Row>(table, "Row")
+//            .def(py::init<>())
+//            .def(py::init<const Table::Row&>())
+//            .def("__getitem__", (const Object& (Table::Row::*)(size_t) const)
+//                    &Table::Row::operator[])
+//            .def("__getitem__", (Object& (Table::Row::*)(size_t))
+//                    &Table::Row::operator[])
+//            .def("__getitem__", (const Object& (Table::Row::*)(const std::string&) const)
+//                    &Table::Row::operator[])
+//            .def("__getitem__", (Object& (Table::Row::*)(const std::string&))
+//                    &Table::Row::operator[]);
+
+//    table.def(py::init<>())
+//            .def(py::init<const Table&>());
+//
+//    py::class_<TableIO>(m, "TableIO")
+//            .def(py::init<>())
+//            .def(py::init<const std::string&>())
+//            .def_static("hasImpl", &TableIO::hasImpl)
+//            .def_static("registerImpl", &TableIO::registerImpl)
+//            .def("open", &TableIO::open)
+//            .def("close", &TableIO::close)
+//            .def("read", &TableIO::read)
+//            .def("write", &TableIO::write);
 } // em/base sub-module definition
