@@ -18,6 +18,7 @@ class Type::Impl
 #define NOT_IMPLEMENTED { THROW_ERROR("Operation not valid for Null type."); }
 
 public:
+    virtual size_t getId() const { return 0; }
     virtual std::string getName() const { return "null"; }
     virtual std::size_t getSize() const { return 0; }
     virtual bool isPod() const { return false; }
@@ -41,6 +42,7 @@ public:
                         const void *inputMem2,
                         size_t count) const NOT_IMPLEMENTED;
 
+    size_t id;
     size_t size;
     std::string name;
     bool ispod;
@@ -140,6 +142,11 @@ class TypeImplBaseT: public Type::Impl
 {
 public:
     TypeImplBaseT() = default;
+
+    virtual size_t getId() const override
+    {
+        return typeid(T).hash_code();
+    }
 
     virtual std::string getName() const override
     {

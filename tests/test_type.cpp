@@ -46,7 +46,6 @@ TEST(Type, Basic) {
 
     std::cout << em::Type::get<size_t>() << std::endl;
     std::cout << em::Type::get<uint64_t>() << std::endl;
-
 }
 
 TEST(Type, General) {
@@ -125,6 +124,27 @@ TEST(Type, General) {
 } // TEST(Type, General)
 
 
+TEST(Type, Indexing)
+{
+    Type t1 = typeInt8;
+    Type t2 = typeInt8;
+
+
+//
+//    // Test use of Type as index of maps
+//    TypeVector tv = {typeInt8, typeInt16, typeInt32};
+//    StringVector sv = {"type-int8", "type-int16", "type-int32"};
+//    TypeStringMap map;
+//
+//    for (int i = 0; i < tv.size(); ++i)
+//        map[tv[i]] = sv[i];
+//
+//    TypeVector tv2 = {typeInt8, typeInt16, typeInt32};
+//    for (int i = 0; i < tv2.size(); ++i)
+//        ASSERT_NE(map.find(tv2[i]), map.end());
+
+} // TEST Type.Indexing
+
 TEST(TypeContainer, Basic)
 {
     // Empty container
@@ -154,3 +174,5 @@ TEST(TypeContainer, Basic)
 
 
 } // TEST Container.Basic
+
+

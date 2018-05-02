@@ -251,13 +251,15 @@ public:
         return MRC_HEADER_SIZE;
     } // function getHeaderSize
 
-    virtual const TypeMap & getTypeMap() const override
+    virtual const IntTypeMap & getTypeMap() const override
     {
-        static const TypeMap tm = {{0, typeInt8},
-                                   {1, typeInt16},
-                                   {2, typeFloat},
-                                   {6, typeUInt16},
-                                   {101, typeInt8}};
+        static const IntTypeMap tm = {
+               {0, typeInt8},
+               {1, typeInt16},
+               {2, typeFloat},
+               {6, typeUInt16},
+               {101, typeInt8}
+        };
         // TODO:
         // 3: Complex short
         // 4: Complex float
@@ -269,7 +271,6 @@ public:
 
         ostream << "verbosity normal" << std::endl;
 
-
         if (verbosity > 0)
         {
             ostream << "--- MRC File Header ---" << std::endl;
@@ -279,7 +280,6 @@ public:
             std::cout << std::setw(7) << "nz: " << header.nz << std::endl;
             std::cout << std::setw(7) << "nz: " << header.nz << std::endl;
             std::cout << std::setw(7) << "mode: " << header.mode << std::endl;
-
 
             // Variable              Word   Bytes   Description
             int nx;              //  1      1-4     number of columns in 3D data array (fast axis, x dimension)

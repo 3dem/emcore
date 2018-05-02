@@ -398,9 +398,9 @@ public:
         return header.headerSize;
     } // function getHeaderSize
 
-    virtual const TypeMap & getTypeMap() const override
+    virtual const IntTypeMap & getTypeMap() const override
     {
-        static const TypeMap tm = {{2,  typeInt16},
+        static const IntTypeMap tm = {{2,  typeInt16},
                                    {3,  typeInt32},
                                    {4,  typeUInt16},
                                    {5,  typeUInt32},

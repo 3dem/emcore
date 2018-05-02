@@ -19,29 +19,31 @@ Type::Type(Impl *impl)
     impl->size = impl->getSize();
     impl->name = impl->getName();
     impl->ispod = impl->isPod();
+    impl->id = impl->getId();
 
-    if (impl->name == "int32" || impl->name == "")
-        std::cout << "Type ctor: " << impl->name << " impl: " << impl << std::endl;
+    if (impl->name == "int8")
+        std::cout << "Type::Type: " << *this << " id: " << getId() << std::endl;
+
 } // Type ctor based on impl
 
 bool Type::operator==(const Type &other) const
 {
-    return impl == other.impl;
+    return impl->id == other.impl->id;
 } // function Type.operator==
 
 bool Type::operator!=(const Type &other) const
 {
-    return impl != other.impl;
+    return impl->id != other.impl->id;
 } // function Type.operator!=
 
 bool Type::operator<(const Type &other) const
 {
-    return impl < other.impl;
+    return impl->id < other.impl->id;
 } // function Type.operator<
 
 size_t Type::getId() const
 {
-    return (size_t)impl;
+    return impl->id;
 } // function Type.getId
 
 std::string Type::getName() const
@@ -149,7 +151,6 @@ std::ostream& em::operator<< (std::ostream &ostrm, const Type &t)
     return ostrm;
 }
 
-
 // ===================== Container Implementation =======================
 class Type::Container::Impl
 {
@@ -239,9 +240,6 @@ void Type::Container::copyOrCast(const Type::Container &other, size_t n,
                           n, singleInput);
 } // function Container.copyOrCast
 
-
-
-
 void Type::swapBytes(void *mem, size_t count, size_t typeSize)
 {
 
@@ -281,8 +279,8 @@ void Type::swapBytes(void *mem, size_t count, size_t typeSize)
         default:
             THROW_ERROR(std::string("swapBytes: unsupported byte size "));
                        // + typeSize);
-    }
-}
+    } // switch
+} // function Type::swapBytes
 
 bool Type::isLittleEndian()
 {
@@ -290,4 +288,4 @@ bool Type::isLittleEndian()
     static bool isLE = ((int)(*((unsigned char *) &ul)))!=0;
 
     return isLE;
-}
+} // function Type::isLittleEndian

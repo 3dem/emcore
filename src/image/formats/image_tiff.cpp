@@ -304,15 +304,17 @@ public:
 
     } // function writeImageData
 
-    const TypeMap &getTypeMap() const override
+    const IntTypeMap &getTypeMap() const override
     {
-        static const TypeMap tm = {{8+SAMPLEFORMAT_UINT, typeUInt8},
-                                   {8+SAMPLEFORMAT_INT,  typeInt8},
-                                   {16+SAMPLEFORMAT_UINT, typeUInt16},
-                                   {16+SAMPLEFORMAT_INT, typeInt16},
-                                   {32+SAMPLEFORMAT_UINT, typeUInt32},
-                                   {32+SAMPLEFORMAT_INT, typeInt32},
-                                   {32+SAMPLEFORMAT_IEEEFP, typeFloat}};
+        static const IntTypeMap tm = {
+                {8+SAMPLEFORMAT_UINT, typeUInt8},
+                {8+SAMPLEFORMAT_INT,  typeInt8},
+                {16+SAMPLEFORMAT_UINT, typeUInt16},
+                {16+SAMPLEFORMAT_INT, typeInt16},
+                {32+SAMPLEFORMAT_UINT, typeUInt32},
+                {32+SAMPLEFORMAT_INT, typeInt32},
+                {32+SAMPLEFORMAT_IEEEFP, typeFloat}
+        };
         return tm;
     } // function getTypeMap
 

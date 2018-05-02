@@ -16,6 +16,7 @@ namespace em
 {
     template <class T> class TypeImplT;
 
+
     /**
      *  \ingroup base
      *  The Type class is one of the central pieces of the em-core library.
@@ -253,29 +254,34 @@ namespace em
     using cfloat = std::complex<float>;
     using cdouble = std::complex<double>;
 
-    using TypeMap = std::map<int, Type>;
+    // Some shortcuts for Type related maps
+    using TypeVector = std::vector<Type>;
+    using IntTypeMap = std::map<int, Type>;
+    using TypeIntMap = std::map<Type, int>;
+    using StringTypeMap = std::map<std::string, Type>;
+    using TypeStringMap = std::map<Type, std::string>;
+
+    static const Type typeNull;
+    const static Type& typeInt8 = Type::get<int8_t>();
+    const static Type& typeUInt8 = Type::get<uint8_t>();
+    const static Type& typeInt16 = Type::get<int16_t>();
+    const static Type& typeUInt16 = Type::get<uint16_t>();
+    const static Type& typeInt32 = Type::get<int32_t>();
+    const static Type& typeUInt32 = Type::get<uint32_t>();
+    const static Type& typeInt64 = Type::get<int64_t>();
+    const static Type& typeUInt64 = Type::get<uint64_t>();
+    const static Type& typeSizeT = Type::get<size_t>();
+
+    const static Type& typeFloat = Type::get<float>();
+    const static Type& typeDouble = Type::get<double>();
+    const static Type& typeCFloat = Type::get<cfloat>();
+    const static Type& typeCDouble = Type::get<cdouble>();
+
+    const static Type& typeBool = Type::get<bool>();
+    const static Type& typeString = Type::get<std::string>();
 
 #include "type_priv.h"
 
 } // namespace em
-
-static const em::Type typeNull;
-#define  typeInt8 (em::Type::get<int8_t>())
-#define  typeUInt8 (em::Type::get<uint8_t>())
-#define  typeInt16 (em::Type::get<int16_t>())
-#define  typeUInt16 (em::Type::get<uint16_t>())
-#define  typeInt32 (em::Type::get<int32_t>())
-#define  typeUInt32 (em::Type::get<uint32_t>())
-#define  typeInt64 (em::Type::get<int64_t>())
-#define  typeUInt64 (em::Type::get<uint64_t>())
-#define  typeSizeT (em::Type::get<size_t>())
-
-#define  typeFloat (em::Type::get<float>())
-#define  typeDouble (em::Type::get<double>())
-#define  typeCFloat (em::Type::get<cfloat>())
-#define  typeCDouble (em::Type::get<cdouble>())
-
-#define  typeBool (em::Type::get<bool>())
-#define  typeString (em::Type::get<std::string>())
 
 #endif //EM_CORE_TYPE_H

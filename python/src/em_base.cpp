@@ -25,22 +25,31 @@ using namespace em;
 defining the type of the buffer, base on our own type class. */
 std::string getTypeFormat(const Type &type)
 {
-std::cout << "Current type: " << type.getName() << std::endl;
-Type t;
-//#define RETURN_FORMAT_IF_TYPE(T) if (type == Type::get<T>()) return py::format_descriptor<T>::format();
-#define RETURN_FORMAT_IF_TYPE(T) t = Type::get<T>(); std::cout << "Checking type: " << t.getName() << " equals: " << (type == t) << std::endl; \
-if (type.getName() == t.getName()) return py::format_descriptor<T>::format();
+#define TYPE_FORMAT(t) {Type::get<t>(), py::format_descriptor<t>::format()}
 
-    RETURN_FORMAT_IF_TYPE(float);
-    RETURN_FORMAT_IF_TYPE(uint8_t);
-    RETURN_FORMAT_IF_TYPE(int8_t);
-    RETURN_FORMAT_IF_TYPE(double);
-    RETURN_FORMAT_IF_TYPE(int16_t);
-    RETURN_FORMAT_IF_TYPE(uint16_t);
-    RETURN_FORMAT_IF_TYPE(int32_t);
-    RETURN_FORMAT_IF_TYPE(uint32_t);
+    static const TypeStringMap typeFormatMap = {
+            TYPE_FORMAT(int8_t),
+            TYPE_FORMAT(uint8_t),
+            TYPE_FORMAT(int16_t),
+            TYPE_FORMAT(uint16_t),
+            TYPE_FORMAT(int32_t),
+            TYPE_FORMAT(uint32_t),
+            TYPE_FORMAT(float),
+            TYPE_FORMAT(double)
+    };
 
-    THROW_ERROR("Unsupported type");
+    std::cout << "----------------- Type format map: " << std::endl;
+    for (auto& it: typeFormatMap)
+        std::cout << it.first.getName() << " (" << it.first.getId() << ") -> "
+                  << it.second << std::endl;
+
+    auto it = typeFormatMap.find(type);
+    if (it != typeFormatMap.end())
+        return it->second;
+
+    std::cout << "Missing type: " << type.getId() << std::endl;
+
+    THROW_ERROR(std::string("Unsupported type ") + type.toString());
 } // function getTypeFormat
 
 

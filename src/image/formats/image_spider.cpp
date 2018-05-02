@@ -224,9 +224,9 @@ public:
         return dim.n > 1 ? SPIDER_HEADER_SIZE : 0;
     }
 
-    virtual const TypeMap & getTypeMap() const override
+    virtual const IntTypeMap & getTypeMap() const override
     {
-        static const TypeMap tm = {{0, typeFloat}};
+        static const IntTypeMap tm = {{0, typeFloat}};
         return tm;
     } // function getTypeMap
 

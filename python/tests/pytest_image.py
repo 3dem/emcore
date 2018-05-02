@@ -66,7 +66,7 @@ class TestImageIO(BaseTest):
                 import numpy as np
                 a = np.array(img, copy=False)
             except Exception as ex:
-                print("Exception: ", str(ex))
+                raise ex
 
             self.assertEqual(img.getDim(), micDim)
 
