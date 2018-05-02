@@ -4,6 +4,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pybind11/pytypes.h>
+#include <pybind11/stl.h>
+#include <pybind11/complex.h>
 
 #include "em/base/type.h"
 #include "em/base/array.h"
@@ -201,40 +203,65 @@ void init_submodule_base(py::module &m) {
             .def(py::self == py::self)
             .def(py::self != py::self);
 
-//    py::class_<Table> table(m, "Table");
-//
-//    py::class_<Table::Column>(table, "Column")
-//            .def(py::init<size_t, const std::string&, const Type&,
-//                    const std::string&>())
-//            .def(py::init<const std::string&, const Type&,
-//                    const std::string&>())
-//            .def("getId", &Table::Column::getId)
-//            .def("getName", &Table::Column::getName)
-//            .def("getType", &Table::Column::getType)
-//            .def("getDescription", &Table::Column::getDescription);
-//
-//    py::class_<Table::Row>(table, "Row")
-//            .def(py::init<>())
-//            .def(py::init<const Table::Row&>())
-//            .def("__getitem__", (const Object& (Table::Row::*)(size_t) const)
-//                    &Table::Row::operator[])
-//            .def("__getitem__", (Object& (Table::Row::*)(size_t))
-//                    &Table::Row::operator[])
-//            .def("__getitem__", (const Object& (Table::Row::*)(const std::string&) const)
-//                    &Table::Row::operator[])
-//            .def("__getitem__", (Object& (Table::Row::*)(const std::string&))
-//                    &Table::Row::operator[]);
+    py::class_<Table> table(m, "Table");
 
-//    table.def(py::init<>())
-//            .def(py::init<const Table&>());
-//
-//    py::class_<TableIO>(m, "TableIO")
-//            .def(py::init<>())
-//            .def(py::init<const std::string&>())
-//            .def_static("hasImpl", &TableIO::hasImpl)
-//            .def_static("registerImpl", &TableIO::registerImpl)
-//            .def("open", &TableIO::open)
-//            .def("close", &TableIO::close)
-//            .def("read", &TableIO::read)
-//            .def("write", &TableIO::write);
+    py::class_<Table::Column>(table, "Column")
+            .def_readonly_static("NO_ID", &Table::Column::NO_ID)
+            .def_readonly_static("NO_INDEX", &Table::Column::NO_INDEX)
+            .def(py::init<size_t, const std::string&, const Type&, const std::string&>(),
+                 py::arg("id"), py::arg("name"), py::arg("type"), py::arg("description")="")
+            .def(py::init<const std::string&, const Type&, const std::string&>(),
+                 py::arg("name"), py::arg("type"), py::arg("description")="")
+            .def("getId", &Table::Column::getId)
+            .def("getName", &Table::Column::getName)
+            .def("getType", &Table::Column::getType)
+            .def("getDescription", &Table::Column::getDescription);
+
+    py::class_<Table::Row>(table, "Row")
+            .def(py::init<>())
+            .def(py::init<const Table::Row&>())
+            .def("__getitem__", (const Object& (Table::Row::*)(size_t) const)
+                    &Table::Row::operator[])
+            .def("__getitem__", (Object& (Table::Row::*)(size_t))
+                    &Table::Row::operator[])
+            .def("__getitem__", (const Object& (Table::Row::*)(const std::string&) const)
+                    &Table::Row::operator[])
+            .def("__getitem__", (Object& (Table::Row::*)(const std::string&))
+                    &Table::Row::operator[]);
+
+    table.def(py::init<>())
+            .def(py::init<>())
+            .def(py::init<const Table&>())
+            .def(py::init<const std::vector<Table::Column>&>())
+            .def("clear", &Table::clear)
+            .def("getSize", &Table::getSize)
+            .def("isEmpty", &Table::isEmpty)
+            .def("getIndex", (size_t (Table::*)(size_t)) &Table::getIndex)
+            .def("getIndex", (size_t (Table::*)(const std::string&)) &Table::getIndex)
+            .def("getColumn", (const Table::Column& (Table::*)(size_t)) &Table::getColumn)
+            .def("getColumn", (const Table::Column& (Table::*)(const std::string&)) &Table::getColumn)
+            .def("getColumnByIndex", &Table::getColumnByIndex)
+            .def("getColumnsSize", &Table::getColumnsSize)
+            .def("addColumn", (size_t (Table::*)(const Table::Column&)) &Table::addColumn)
+            .def("addColumn", (size_t (Table::*)(const Table::Column&, const Object&)) &Table::addColumn)
+            .def("insertColumn", (size_t (Table::*)(const Table::Column&, size_t)) &Table::insertColumn)
+            .def("insertColumn", (size_t (Table::*)(const Table::Column&, size_t, const Object&)) &Table::insertColumn)
+            .def("removeColumn", (void (Table::*)(size_t)) &Table::removeColumn)
+            .def("removeColumn", (void (Table::*)(const std::string&)) &Table::removeColumn)
+            .def("createRow", &Table::createRow)
+            .def("addRow", &Table::addRow);
+//            .def("insertRow", &Table::insertRow)
+//            .def("deleteRow", &Table::deleteRow)
+//            .def("deleteRows", &Table::deleteRows)
+//            .def("updateRow", &Table::updateRow)
+//            .def("updateRows", &Table::updateRows);
+
+    py::class_<TableIO>(m, "TableIO")
+            .def(py::init<const std::string&>())
+            .def_static("hasImpl", &TableIO::hasImpl)
+            .def_static("registerImpl", &TableIO::registerImpl)
+            .def("open", &TableIO::open)
+            .def("close", &TableIO::close)
+            .def("read", &TableIO::read);
+            //.def("write", &TableIO::write);
 } // em/base sub-module definition

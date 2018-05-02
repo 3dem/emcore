@@ -96,7 +96,6 @@ namespace em {
             const Object& operator[](const std::string &colName) const;
             Object& operator[](const std::string &colName);
 
-
             Row& operator=(const Row& other);
             Row& operator=(Row&& other) noexcept;
 
@@ -115,7 +114,7 @@ namespace em {
             class Impl;
             Impl * impl = nullptr;
             /** Construction of a Row, given its implementation.
-             * Only accesible by Table.
+             * Only accessible by Table.
              */
              Row(Impl * rowImpl);
 
@@ -140,7 +139,7 @@ namespace em {
         Table& operator=(Table &&other) noexcept;
 
         /** Table constructor based on input columns */
-        Table(std::initializer_list<Column> list);
+        Table(const std::vector<Column> &columns);
 
         /** Destructor for Table */
         virtual ~Table();

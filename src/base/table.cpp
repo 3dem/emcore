@@ -225,7 +225,7 @@ Table::Row::iterator Table::Row::end()
 
 // ========================== Table Implementation ========================
 
-Table::Table(std::initializer_list<Column> columns): Table()
+Table::Table(const std::vector<Column> &columns): Table()
 {
     for (auto& col: columns)
         impl->addColumn(col);
