@@ -149,12 +149,12 @@ public:
 
     virtual const TypeMap & getTypeMap() const override
     {
-        static const TypeMap tm = {{1, &typeInt8},
-                                   {2, &typeInt16},
-                                   {4, &typeInt32},
-                                   {5, &typeFloat},
+        static const TypeMap tm = {{1, typeInt8},
+                                   {2, typeInt16},
+                                   {4, typeInt32},
+                                   {5, typeFloat},
                 // TODO:         //{8, &TypeComplex},
-                                   {9, &typeDouble}};
+                                   {9, typeDouble}};
         return tm;
     } // function getTypeMap
 

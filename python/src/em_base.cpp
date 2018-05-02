@@ -73,6 +73,8 @@ void init_submodule_base(py::module &m) {
          .def(py::init<>())
          .def(py::self == py::self)
          .def(py::self != py::self)
+         .def("__hash__", &Type::getId)
+         .def("getId", &Type::getId)
          .def("getName", &Type::getName)
          .def("getSize", &Type::getSize)
          .def("isPod", &Type::isPod)
@@ -84,23 +86,23 @@ void init_submodule_base(py::module &m) {
          .def_static("inferFromString", (Type (*)(const std::string&))
                  &Type::inferFromString);
 
-    m.attr("typeNull") = em::typeNull;
-    m.attr("typeInt8") = em::typeInt8;
-    m.attr("typeUInt8") = em::typeUInt8;
-    m.attr("typeInt16") = em::typeInt16;
-    m.attr("typeUInt16") = em::typeUInt16;
-    m.attr("typeInt32") = em::typeInt32;
-    m.attr("typeUInt32") = em::typeUInt32;
-    m.attr("typeInt64") = em::typeInt64;
-    m.attr("typeUInt64") = em::typeUInt64;
+    m.attr("typeNull") = typeNull;
+    m.attr("typeInt8") = typeInt8;
+    m.attr("typeUInt8") = typeUInt8;
+    m.attr("typeInt16") = typeInt16;
+    m.attr("typeUInt16") = typeUInt16;
+    m.attr("typeInt32") = typeInt32;
+    m.attr("typeUInt32") = typeUInt32;
+    m.attr("typeInt64") = typeInt64;
+    m.attr("typeUInt64") = typeUInt64;
 
-    m.attr("typeFloat") = em::typeFloat;
-    m.attr("typeDouble") = em::typeDouble;
-    m.attr("typeCFloat") = em::typeCFloat;
-    m.attr("typeCDouble") = em::typeCDouble;
+    m.attr("typeFloat") = typeFloat;
+    m.attr("typeDouble") = typeDouble;
+    m.attr("typeCFloat") = typeCFloat;
+    m.attr("typeCDouble") = typeCDouble;
 
-    m.attr("typeBool") = em::typeBool;
-    m.attr("typeString") = em::typeString;
+    m.attr("typeBool") = typeBool;
+    m.attr("typeString") = typeString;
 
     py::class_<ArrayDim>(m, "ArrayDim")
         .def(py::init<>())
@@ -167,7 +169,7 @@ void init_submodule_base(py::module &m) {
              py::arg("index")=0)
         .def("resize", (void (Array::*)(const Array&)) &Array::resize)
         .def("resize", (void (Array::*)(const ArrayDim&, const Type & )) &Array::resize,
-             py::arg("adim"), py::arg("type")=em::typeNull)
+             py::arg("adim"), py::arg("type")=typeNull)
         .def("getDim", &Array::getDim);
 
     py::class_<Object, Type::Container>(m, "Object")

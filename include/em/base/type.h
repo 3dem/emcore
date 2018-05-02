@@ -51,6 +51,10 @@ namespace em
 
         bool operator==(const Type &other) const;
         bool operator!=(const Type &other) const;
+        bool operator<(const Type &other) const;
+
+        /** Return an unique identifier for the Type within a given run. */
+        size_t getId() const;
 
         /** Return the name of the type */
         std::string getName() const;
@@ -249,29 +253,29 @@ namespace em
     using cfloat = std::complex<float>;
     using cdouble = std::complex<double>;
 
-    static const Type typeNull;
-    static const Type& typeInt8= Type::get<int8_t>();
-    static const Type& typeUInt8 = Type::get<uint8_t>();
-    static const Type& typeInt16 = Type::get<int16_t>();
-    static const Type& typeUInt16 = Type::get<uint16_t>();
-    static const Type& typeInt32 = Type::get<int32_t>();
-    static const Type& typeUInt32 = Type::get<uint32_t>();
-    static const Type& typeInt64 = Type::get<int64_t>();
-    static const Type& typeUInt64 = Type::get<uint64_t>();
-    static const Type& typeSize = Type::get<size_t>();
-
-    static const Type& typeFloat = Type::get<float>();
-    static const Type& typeDouble = Type::get<double>();
-    static const Type& typeCFloat = Type::get<cfloat>();
-    static const Type& typeCDouble = Type::get<cdouble>();
-
-    static const Type& typeBool = Type::get<bool>();
-    static const Type& typeString = Type::get<std::string>();
-
-    using TypeMap = std::map<int, const Type *>;
+    using TypeMap = std::map<int, Type>;
 
 #include "type_priv.h"
 
 } // namespace em
+
+static const em::Type typeNull;
+#define  typeInt8 (em::Type::get<int8_t>())
+#define  typeUInt8 (em::Type::get<uint8_t>())
+#define  typeInt16 (em::Type::get<int16_t>())
+#define  typeUInt16 (em::Type::get<uint16_t>())
+#define  typeInt32 (em::Type::get<int32_t>())
+#define  typeUInt32 (em::Type::get<uint32_t>())
+#define  typeInt64 (em::Type::get<int64_t>())
+#define  typeUInt64 (em::Type::get<uint64_t>())
+#define  typeSizeT (em::Type::get<size_t>())
+
+#define  typeFloat (em::Type::get<float>())
+#define  typeDouble (em::Type::get<double>())
+#define  typeCFloat (em::Type::get<cfloat>())
+#define  typeCDouble (em::Type::get<cdouble>())
+
+#define  typeBool (em::Type::get<bool>())
+#define  typeString (em::Type::get<std::string>())
 
 #endif //EM_CORE_TYPE_H

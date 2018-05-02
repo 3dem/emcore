@@ -18,7 +18,7 @@ using namespace em;
 
 TEST(Type, Basic) {
     // Test basic properties of Type singleton instances
-    auto i = em::typeInt32;
+    auto i = typeInt32;
     auto ii = Type::get<uint32_t>();
     auto iii = ii;
     ASSERT_EQ(i.getName(), "int32");
@@ -26,19 +26,19 @@ TEST(Type, Basic) {
     ASSERT_EQ(i.getSize(), sizeof(int));
     std::cout << std::endl << i << std::endl;
 
-    auto f = em::typeFloat;
+    auto f = typeFloat;
     ASSERT_EQ(f.getName(), "float");
     ASSERT_TRUE(f.isPod());
     ASSERT_EQ(f.getSize(), sizeof(float));
     std::cout << f << std::endl;
 
-    auto d = em::typeDouble;
+    auto d = typeDouble;
     ASSERT_EQ(d.getName(), "double");
     ASSERT_TRUE(d.isPod());
     ASSERT_EQ(d.getSize(), sizeof(double));
     std::cout << d << std::endl;
 
-    auto i8 = em::typeInt8;
+    auto i8 = typeInt8;
     ASSERT_EQ(i8.getName(), "int8");
     ASSERT_TRUE(i8.isPod());
     ASSERT_EQ(i8.getSize(), sizeof(int8_t));
@@ -106,9 +106,9 @@ TEST(Type, General) {
     delete [] arrayInt2;
 
     std::cout << "sizeof int8_t: " << sizeof(int8_t) << std::endl;
-    std::cout << "Signed Int8: " << em::typeInt8 << std::endl;
-    std::cout << "Unsigned short: " <<  em::typeUInt16 << std::endl;
-    std::cout << "Int: " <<  em::typeInt32 << std::endl;
+    std::cout << "Signed Int8: " << typeInt8 << std::endl;
+    std::cout << "Unsigned short: " <<  typeUInt16 << std::endl;
+    std::cout << "Int: " <<  typeInt32 << std::endl;
 
     ASSERT_EQ(Type::inferFromString("100"), typeInt32);
     ASSERT_EQ(Type::inferFromString("100.00"), typeFloat);
@@ -130,7 +130,7 @@ TEST(TypeContainer, Basic)
     // Empty container
     Type::Container gc;
     ASSERT_TRUE(gc.getType().isNull());
-    ASSERT_EQ(gc.getType(), em::typeNull);
+    ASSERT_EQ(gc.getType(), typeNull);
     ASSERT_EQ(gc.getData(), nullptr);
 
     // Let's check memory is not deleted after container dtor

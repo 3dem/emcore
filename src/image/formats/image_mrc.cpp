@@ -139,14 +139,14 @@ public:
         memset(&header, 0, MRC_HEADER_SIZE);
 
         // FIXME: Implement more general mechanism of Type matching
-        if (type == em::typeDouble || type == em::typeFloat ||
-            type == em::typeInt32 || type == em::typeUInt32)
+        if (type == typeDouble || type == typeFloat ||
+            type == typeInt32 || type == typeUInt32)
             header.mode = 2;
-        else if (type == em::typeInt16)
+        else if (type == typeInt16)
             header.mode = 1;
-        else if (type == em::typeUInt16)
+        else if (type == typeUInt16)
             header.mode = 6;
-        else if (type == em::typeInt8 || type == em::typeUInt8)
+        else if (type == typeInt8 || type == typeUInt8)
             header.mode = 0;
             // TODO: Implement complex float and double
         else
@@ -253,9 +253,11 @@ public:
 
     virtual const TypeMap & getTypeMap() const override
     {
-        static const TypeMap tm = {{0, &typeInt8}, {1, &typeInt16},
-                                   {2, &typeFloat}, {6, &typeUInt16},
-                                   {101, &typeInt8}};
+        static const TypeMap tm = {{0, typeInt8},
+                                   {1, typeInt16},
+                                   {2, typeFloat},
+                                   {6, typeUInt16},
+                                   {101, typeInt8}};
         // TODO:
         // 3: Complex short
         // 4: Complex float

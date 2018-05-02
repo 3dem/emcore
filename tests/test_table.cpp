@@ -47,7 +47,7 @@ void printTable(Table &table)
 
 Table createTable(size_t nRows)
 {
-    Table table({Column(1, "col1", typeSize),
+    Table table({Column(1, "col1", typeSizeT),
                  Column(2, "col2", typeFloat),
                  Column(3, "col3", typeString)
                 });

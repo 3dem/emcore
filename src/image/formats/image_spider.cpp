@@ -117,7 +117,7 @@ public:
 
         std::cout << "DEBUG: Spider Dimensions: " << dim << std::endl;
 
-        type = em::typeFloat;
+        type = typeFloat;
         pad = (size_t) header.labbyt;
 
         // TODO: Store extra information from file header
@@ -226,7 +226,7 @@ public:
 
     virtual const TypeMap & getTypeMap() const override
     {
-        static const TypeMap tm = {{0, &typeFloat}};
+        static const TypeMap tm = {{0, typeFloat}};
         return tm;
     } // function getTypeMap
 

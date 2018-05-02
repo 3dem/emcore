@@ -460,16 +460,14 @@ void ImageIO::Impl::writeImageData(const size_t index, const Image &image)
 const Type & ImageIO::Impl::getTypeFromMode(int mode) const
 {
     auto tm = getTypeMap();
-    return tm.find(mode) != tm.end() ? *tm[mode] : typeNull;
+    return tm.find(mode) != tm.end() ? tm[mode] : typeNull;
 } // function ImageIO::Impl.getTypeFromMode
 
 int ImageIO::Impl::getModeFromType(const Type &type) const
 {
     for (auto &pair: getTypeMap())
-    {
-        if (type == *pair.second)
+        if (type == pair.second)
             return pair.first;
-    }
 
     return -999;
 } // function ImageIO::Impl.getTypeFromMode

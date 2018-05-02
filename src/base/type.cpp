@@ -19,17 +19,30 @@ Type::Type(Impl *impl)
     impl->size = impl->getSize();
     impl->name = impl->getName();
     impl->ispod = impl->isPod();
+
+    if (impl->name == "int32" || impl->name == "")
+        std::cout << "Type ctor: " << impl->name << " impl: " << impl << std::endl;
 } // Type ctor based on impl
 
 bool Type::operator==(const Type &other) const
 {
     return impl == other.impl;
-}
+} // function Type.operator==
 
 bool Type::operator!=(const Type &other) const
 {
     return impl != other.impl;
-}
+} // function Type.operator!=
+
+bool Type::operator<(const Type &other) const
+{
+    return impl < other.impl;
+} // function Type.operator<
+
+size_t Type::getId() const
+{
+    return (size_t)impl;
+} // function Type.getId
 
 std::string Type::getName() const
 {
