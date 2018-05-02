@@ -86,7 +86,7 @@ public:
 
     inline size_t addColumn(const Column &col)
     {
-        insertColumn(col, columns.size());
+        return insertColumn(col, columns.size());
     }
 
     size_t insertColumn(const Column &col, size_t pos)
@@ -249,11 +249,13 @@ Table::Table(Table &&other) noexcept : Table()
 Table& Table::operator=(const Table &other)
 {
     *impl = *other.impl;
+    return *this;
 } // Table assign operator
 
 Table& Table::operator=(Table &&other) noexcept
 {
     std::swap(impl, other.impl);
+    return *this;
 } // Table Move-assign operator
 
 Table::~Table()
