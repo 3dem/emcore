@@ -91,7 +91,7 @@ namespace em
          */
         virtual const IntTypeMap& getTypeMap() const = 0;
 
-        const Type& getTypeFromMode(int mode) const;
+        Type getTypeFromMode(int mode) const;
         int getModeFromType(const Type &type) const;
 
         /**
