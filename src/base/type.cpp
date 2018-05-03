@@ -147,7 +147,7 @@ bool Type::equals(const void *inputMem1, const void *inputMem2,
 
 std::ostream& em::operator<< (std::ostream &ostrm, const Type &t)
 {
-    ostrm << "(type: " << t.getName() << ", " << t.getSize() << " bytes)";
+    ostrm << "<type: " << t.getName() << ", " << t.getSize() << " bytes>";
     return ostrm;
 }
 

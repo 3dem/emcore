@@ -4,6 +4,8 @@ from base import BaseTest, main
 import em
 
 Column = em.Table.Column
+Row = em.Table.Row
+
 
 class TestTable(BaseTest):
 
@@ -38,9 +40,8 @@ class TestTable(BaseTest):
         self.assertEqual(0, colMap.getIndex(rc1.getId()))
         self.assertEqual(1, colMap.getIndex(rc2.getId()))
 
-        self.assertEqual(Column.NO_INDEX, colMap.getIndex(100))
-        self.assertEqual(Column.NO_INDEX, colMap.getIndex("noColumn"))
-        
+        #self.assertRaises(em.Error, lambda: colMap.getIndex(100))
+        #self.assertRaises(em.Error, lambda: colMap.getIndex("noColumn"))
 
         # Add more columns with and without IDs
         bigId = 100
@@ -84,32 +85,41 @@ class TestTable(BaseTest):
 
         print("Row (before set) >>> ", row)
 
-        row[1].set(3.1416)
-        row[2].set(300)
-        row[3].set("My name")
+        row[1] = 3.1416
+        row[2] = 300
+        row[3] = "My name"
 
         print("Row (after set) >>> ", row)
 
-        # ASSERT_EQ(row[1], row["col1"]);
-        # ASSERT_EQ(row[2], row["col2"]);
-        # ASSERT_EQ(row[3], row["col3"]);
-        #
-        # int x = row[2];
-        # ASSERT_EQ(x, 300);
-        #
-        # //auto row2 = table.createRow();
-        #
-        # Table::Row row3(row);
-        # row3["col2"] = 400;
-        # row3["col3"] = std::string("Other name");
-        # x = row3[2];
-        # ASSERT_EQ(x, 400);
-        #
-        # std::cerr << "Row 3 >>>  " << row3 << std::endl;
-        # //row2 = row;
-        #
-        # table.addRow(row);
-        # table.addRow(row3);
+
+        self.assertAlmostEqual(float(row[1]), 3.1416, 3)
+        self.assertEqual(int(row[2]), 300)
+        self.assertEqual(str(row[3]), "My name")
+
+        self.assertEqual(row[1], row["col1"])
+        self.assertEqual(row[2], row["col2"])
+        self.assertEqual(row[3], row["col3"])
+
+        x = int(row[2])
+        self.assertEqual(x, 300)
+
+        row3 = Row(row)
+        row3["col2"] = 400
+        row3["col3"] = "Other name"
+        x = int(row3[2])
+        self.assertEqual(x, 400)
+
+        print("Row3 >>> ", row3)
+
+        # Check that row was not modified after the copy
+        self.assertAlmostEqual(float(row[1]), 3.1416, 3)
+        self.assertEqual(int(row[2]), 300)
+        self.assertEqual(str(row[3]), "My name")
+
+
+        table.addRow(row);
+        table.addRow(row3);
+
         #
         # for (auto& row: table)
         # {
@@ -119,11 +129,11 @@ class TestTable(BaseTest):
         #
         # printTable(table);
         #
-        # ASSERT_EQ(table.getSize(), 2);
+        # self.assertEqual(table.getSize(), 2);
         # ASSERT_FALSE(table.isEmpty());
         #
         # table.clear();
-        # ASSERT_EQ(table.getSize(), 0);
+        # self.assertEqual(table.getSize(), 0);
         # ASSERT_TRUE(table.isEmpty());
 
 

@@ -108,8 +108,8 @@ TEST(Table, ColumnsBasic)
     ASSERT_EQ(0, colMap.getIndex(rc1.getId()));
     ASSERT_EQ(1, colMap.getIndex(rc2.getId()));
 
-    ASSERT_EQ(Column::NO_INDEX, colMap.getIndex(100));
-    ASSERT_EQ(Column::NO_INDEX, colMap.getIndex("noColumn"));
+    ASSERT_THROW(colMap.getIndex(100), Error);
+    ASSERT_THROW(colMap.getIndex("noColumn"), Error);
 
     // Add more columns with and without IDs
     size_t bigId = 100;

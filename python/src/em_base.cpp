@@ -1,5 +1,6 @@
 #include <string>
 #include <map>
+#include <memory>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
@@ -54,20 +55,28 @@ std::string getTypeFormat(const Type &type)
     THROW_ERROR(std::string("Unsupported type ") + type.toString());
 } // function getTypeFormat
 
-
-/** Build an em::Object from a given Python object */
-Object * buildObject(const py::object &pyobj)
+/** Set the value of a given em::Object from a python object */
+void setObjectValue(const py::object &pyobj, Object &obj)
 {
     if (py::isinstance<py::str>(pyobj))
-        return new Object(pyobj.cast<std::string>());
-    if (py::isinstance<py::int_>(pyobj))
-        return new Object(pyobj.cast<int32_t>());
-    if (py::isinstance<py::float_>(pyobj))
-        return new Object(pyobj.cast<float>());
-
-    THROW_ERROR(std::string("Unsupported object type: ") +
-                (std::string)py::str(pyobj.get_type()));
+        obj = pyobj.cast<std::string>();
+    else if (py::isinstance<py::int_>(pyobj))
+        obj = pyobj.cast<int32_t>();
+    else if (py::isinstance<py::float_>(pyobj))
+        obj = pyobj.cast<float>();
+    else
+        THROW_ERROR(std::string("Unsupported object type: ") +
+                   (std::string)py::str(pyobj.get_type()));
 } // function buildObject
+
+/** Build an em::Object from a given Python object */
+std::unique_ptr<Object> buildObject(const py::object &pyobj)
+{
+    auto obj = new Object();
+    setObjectValue(pyobj, *obj);
+    return std::unique_ptr<Object>(obj);
+} // function buildObject
+
 
 void init_submodule_base(py::module &m) {
 
@@ -189,9 +198,7 @@ void init_submodule_base(py::module &m) {
             .def(py::init(&buildObject))
             .def("set", [](Object &self, const py::object& pyobj)
                         {
-                            Object *obj = buildObject(pyobj);
-                            self = *obj;
-                            delete obj;
+                            setObjectValue(pyobj, self);
                         })
             .def("toString", &Object::toString)
             .def("fromString", &Object::fromString)
@@ -216,18 +223,28 @@ void init_submodule_base(py::module &m) {
             .def("getName", &Table::Column::getName)
             .def("getType", &Table::Column::getType)
             .def("getDescription", &Table::Column::getDescription);
+            //.def("toString", &Table::Column::toString)
+            //.def("__repr__", &Table::Column::toString)
+            //.def("__str__", &Table::Column::toString);
 
     py::class_<Table::Row>(table, "Row")
             .def(py::init<>())
             .def(py::init<const Table::Row&>())
             .def("__getitem__", (const Object& (Table::Row::*)(size_t) const)
                     &Table::Row::operator[])
-            .def("__getitem__", (Object& (Table::Row::*)(size_t))
-                    &Table::Row::operator[])
             .def("__getitem__", (const Object& (Table::Row::*)(const std::string&) const)
                     &Table::Row::operator[])
-            .def("__getitem__", (Object& (Table::Row::*)(const std::string&))
-                    &Table::Row::operator[]);
+            .def("__setitem__", [](Table::Row& self, size_t colId, py::object &pyobj)
+                                {
+                                    setObjectValue(pyobj, self[colId]);
+                                })
+            .def("__setitem__", [](Table::Row& self, const std::string &colName, py::object &pyobj)
+                                {
+                                    setObjectValue(pyobj, self[colName]);
+                                });
+//            .def("toString", &Table::Row::toString)
+//            .def("__repr__", &Table::Row::toString)
+//            .def("__str__", &Table::Row::toString);
 
     table.def(py::init<>())
             .def(py::init<>())
@@ -251,7 +268,7 @@ void init_submodule_base(py::module &m) {
             .def("createRow", &Table::createRow)
             .def("addRow", &Table::addRow);
 //            .def("insertRow", &Table::insertRow)
-//            .def("deleteRow", &Table::deleteRow)
+//            .def("deleteRow", &Table::deleteRow)git st
 //            .def("deleteRows", &Table::deleteRows)
 //            .def("updateRow", &Table::updateRow)
 //            .def("updateRows", &Table::updateRows);
