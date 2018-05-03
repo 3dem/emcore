@@ -13,38 +13,6 @@ using namespace em;
 using Column = Table::Column;
 
 
-void printTable(Table &table)
-{
-    std::cerr << std::endl <<
-              "============== Table ===============" << std::endl;
-    size_t w = 12;
-
-    for (auto it = table.cbegin(); it < table.cend(); ++it)
-    {
-        std::cerr << std::setw(2 * w) << std::right << it->getName()
-                  << std::endl;
-    }
-
-    if (!table.isEmpty())
-    {
-        auto &firstRow = table[0];
-
-        std::vector<int> widths;
-        for (auto &obj: firstRow)
-            widths.push_back(obj.toString().size() + 2);
-
-        int i = 0;
-
-        for (auto &row: table)
-        {
-            i = 0;
-            for (auto &obj: row)
-                std::cerr << std::setw(widths[i++]) << std::right << obj << " ";
-            std::cerr << std::endl;
-        }
-    }
-} // function printTable
-
 Table createTable(size_t nRows)
 {
     Table table({Column(1, "col1", typeSizeT),
@@ -228,8 +196,6 @@ TEST(Table, RemoveColumns)
     ASSERT_EQ(table0.getSize(), 0);
     ASSERT_TRUE(table0.isEmpty());
 
-    StringVector colNames123 = {"col1", "col2", "col3"};
-    StringVector colNames13 = {"col1", "col3"};
     // Check all expected columns are there
     checkColumns(table0);
     // Remove a column from empty table works

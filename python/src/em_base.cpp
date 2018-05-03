@@ -110,6 +110,7 @@ void init_submodule_base(py::module &m) {
     m.attr("typeUInt32") = typeUInt32;
     m.attr("typeInt64") = typeInt64;
     m.attr("typeUInt64") = typeUInt64;
+    m.attr("typeSizeT") = typeSizeT;
 
     m.attr("typeFloat") = typeFloat;
     m.attr("typeDouble") = typeDouble;
@@ -262,6 +263,8 @@ void init_submodule_base(py::module &m) {
             .def("removeColumn", (void (Table::*)(const std::string&)) &Table::removeColumn)
             .def("createRow", &Table::createRow)
             .def("addRow", &Table::addRow)
+            .def("__getitem__", (const Table::Row& (Table::*)(size_t) const)
+                    &Table::operator[])
             .def("toString", &Table::toString)
             .def("__repr__", &Table::toString)
             .def("__str__", &Table::toString);
@@ -273,6 +276,7 @@ void init_submodule_base(py::module &m) {
 //            .def("updateRows", &Table::updateRows);
 
     py::class_<TableIO>(m, "TableIO")
+            .def(py::init<>())
             .def(py::init<const std::string&>())
             .def_static("hasImpl", &TableIO::hasImpl)
             .def_static("registerImpl", &TableIO::registerImpl)

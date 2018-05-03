@@ -1,6 +1,7 @@
 
-from base import BaseTest, main
+import os
 
+from base import BaseTest, main
 import em
 
 Column = em.Table.Column
@@ -8,8 +9,32 @@ Row = em.Table.Row
 
 
 class TestTable(BaseTest):
+    def createTable(self, nRows):
+        table = em.Table([
+            Column(1, "col1", em.typeSizeT),
+            Column(2, "col2", em.typeFloat),
+            Column(3, "col3", em.typeString)
+        ])
 
-    def test_ColumnsBasicbasic(self):
+        row = table.createRow()
+
+        for i in range(nRows):
+            row["col1"] = i;
+            row["col2"] = float(i) / 100;
+            row["col3"] = "image_%03d" % i
+            table.addRow(row);
+
+        return table
+
+    def checkColumns(self, table, indexes=None):
+        indexes = indexes or [0, 1, 2]
+        colNames = ["col1", "col2", "col3"]
+
+        # Check all expected columns are there
+        for i in enumerate(indexes):
+            self.assertEqual(colNames[indexes[i]], table.getColumnByIndex(i).getName())
+
+    def test_ColumnsBasic(self):
 
         c1Name = "firstCol"
 
@@ -120,22 +145,93 @@ class TestTable(BaseTest):
         table.addRow(row);
         table.addRow(row3);
 
-        #
-        # for (auto& row: table)
-        # {
-        #     row["col3"] = std::string("Other name 2");
-        # row["col2"] = (int)row["col2"] / 10;
-        # }
-        #
-        # printTable(table);
-        #
-        # self.assertEqual(table.getSize(), 2);
-        # ASSERT_FALSE(table.isEmpty());
-        #
-        # table.clear();
-        # self.assertEqual(table.getSize(), 0);
-        # ASSERT_TRUE(table.isEmpty());
+        # FIXME: Add binding for the iterator
+        # for row in table:
+        for i in range(table.getSize()):
+            row = table[i]
+            row["col3"] = "Other name 2"
+            row["col2"] = int(row["col2"]) / 10
 
+        print("Table: ", table)
+
+        self.assertEqual(2, table.getSize())
+        self.assertFalse(table.isEmpty())
+
+        table.clear()
+        self.assertEqual(0, table.getSize())
+        self.assertTrue(table.isEmpty())
+
+    def test_Read(self):
+        testDataPath = os.environ.get("EM_TEST_DATA", None)
+
+        self.assertTrue(em.TableIO.hasImpl('star'))
+
+        if testDataPath is not None:
+            root = testDataPath + "relion_tutorial/import/"
+            fn1 = root + "case1/classify3d_small_it038_data.star";
+            print("Reading star: ", fn1)
+
+            t = em.Table([
+                Column(1, "col1", em.typeFloat),
+                Column(2, "col2", em.typeInt16),
+                Column(3, "col3", em.typeString)
+            ])
+
+            tio = em.TableIO()
+
+            self.assertEqual(t.getColumnsSize(), 3);
+            self.assertTrue(t.isEmpty());
+
+            tio.open(fn1)
+            tio.read("images", t)
+
+            refColNames = [
+                "rlnVoltage", "rlnDefocusU", "rlnSphericalAberration",
+                "rlnAmplitudeContrast", "rlnImageName", "rlnNormCorrection",
+                "rlnMicrographName", "rlnGroupNumber", "rlnOriginX",
+                "rlnOriginY", "rlnAngleRot", "rlnAngleTilt", "rlnAnglePsi",
+                "rlnClassNumber", "rlnLogLikeliContribution",
+                "rlnNrOfSignificantSamples", "rlnMaxValueProbDistribution"
+            ]
+
+            for i in range(t.getColumnsSize()):
+                col = t.getColumnByIndex(i)
+                print(col)
+                self.assertEqual(refColNames[i], col.getName())
+
+    def test_Copy(self):
+        n = 10
+        table10 = self.createTable(n)
+        table10copy = em.Table(table10)
+        #self.checkColumns(table10copy)
+        self.assertEqual(table10copy.getSize(), table10.getSize());
+        self.assertEqual(table10copy.getSize(), n);
+
+        colNames = [table10.getColumnByIndex(i).getName()
+                    for i in range(table10.getColumnsSize())]
+
+        for i in range(n):
+            row1 = table10[i];
+            row2 = table10copy[i];
+            for cn in colNames:
+                self.assertEqual(row1[cn], row2[cn]);
+                
+    def test_Read(self):
+        # Let's create a table with no rows
+        table0 = self.createTable(0)
+        self.assertEqual(table0.getSize(), 0)
+        self.assertTrue(table0.isEmpty())
+
+        # Check all expected columns are there
+        # self.checkColumns(table0)
+        # Remove a column from empty table works
+        table0.removeColumn("col2")
+        # self.checkColumns(table0, [0, 2])
+        #
+        table10 = self.createTable(10)
+        # self.checkColumns(table10)
+        table10.removeColumn("col2")
+        # self.checkColumns(table10, [0, 2])
 
 if __name__ == '__main__':
     main()
