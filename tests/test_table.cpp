@@ -135,6 +135,9 @@ TEST(Table, ColumnsBasic)
 
     ASSERT_EQ(colMap.getIndex("forthCol"), c3bindex + 1);
 
+    // Test to print some columns
+    rc3.toStream(std::cout);
+    rc3.toStream(std::cout);
 } // TEST Column.Basic
 
 

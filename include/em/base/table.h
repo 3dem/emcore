@@ -54,6 +54,8 @@ namespace em {
             /** Return the description of this Column */
             std::string getDescription() const;
 
+            void toStream(std::ostream &ostream) const;
+
         private:
             size_t id;
             std::string name;
@@ -99,8 +101,6 @@ namespace em {
             Row& operator=(const Row& other);
             Row& operator=(Row&& other) noexcept;
 
-            // FIXME: Not sure if this method should be placed here
-            // there is not a single way to push to stream a Row
             void toStream(std::ostream &ostream) const;
 
             // TODO: Hide implementation details and implement a proper iterator

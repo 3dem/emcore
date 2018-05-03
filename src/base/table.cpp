@@ -39,6 +39,11 @@ const Type & Table::Column::getType() const { return type; }
 
 std::string Table::Column::getDescription() const { return descr; }
 
+void Table::Column::toStream(std::ostream &ostream) const
+{
+    ostream << "<column: " << type << " >";
+} // function Table::Column.toStream
+
 
 // ========================== Table::Row Implementation ========================
 
@@ -69,14 +74,18 @@ public:
 
     inline size_t getIndex(size_t colId) const
     {
-        return colIntMap.find(colId) != colIntMap.end() ?
-               colIntMap.at(colId) : Column::NO_INDEX;
+        auto it = colIntMap.find(colId);
+        ASSERT_ERROR(it == colIntMap.end(),
+                     std::string("Invalid column id: ") + std::to_string(colId));
+        return it->second;
     }
 
     inline size_t getIndex(const std::string &colName) const
     {
-        return colStrMap.find(colName) != colStrMap.end() ?
-               colStrMap.at(colName) : Column::NO_INDEX;
+        auto it = colStrMap.find(colName);
+        ASSERT_ERROR(it == colStrMap.end(),
+                     std::string("Invalid column name: ") + colName);
+        return it->second;
     }
 
     inline const Column& getColumnByIndex(size_t index) const
