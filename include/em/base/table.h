@@ -55,6 +55,7 @@ namespace em {
             std::string getDescription() const;
 
             void toStream(std::ostream &ostream) const;
+            std::string toString() const;
 
         private:
             size_t id;
@@ -102,6 +103,7 @@ namespace em {
             Row& operator=(Row&& other) noexcept;
 
             void toStream(std::ostream &ostream) const;
+            std::string toString() const;
 
             // TODO: Hide implementation details and implement a proper iterator
             using iterator = std::vector<Object>::iterator;
@@ -152,6 +154,9 @@ namespace em {
 
         /** Return true if the number of rows is 0 */
         bool isEmpty() const;
+
+        void toStream(std::ostream &ostream) const;
+        std::string toString() const;
 
         /** Return the index of the column with this ID */
         size_t getIndex(size_t colId);
@@ -338,7 +343,8 @@ namespace em {
 
 } // namespace em
 
+std::ostream& operator<< (std::ostream &ostream, const em::Table::Column &col);
 std::ostream& operator<< (std::ostream &ostream, const em::Table::Row &row);
-
+std::ostream& operator<< (std::ostream &ostream, const em::Table &table);
 
 #endif //EM_CORE_METADATA_H

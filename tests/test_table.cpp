@@ -137,7 +137,11 @@ TEST(Table, ColumnsBasic)
 
     // Test to print some columns
     rc3.toStream(std::cout);
-    rc3.toStream(std::cout);
+    rc4.toStream(std::cout);
+
+    std::cout << "Column rc3: " << rc3 << std::endl;
+    std::cout << "Column rc4: " << rc4 << std::endl;
+
 } // TEST Column.Basic
 
 
@@ -184,7 +188,8 @@ TEST(Table, Basic)
         row["col2"] = (int)row["col2"] / 10;
     }
 
-    printTable(table);
+    //printTable(table);
+    std::cout << table << std::endl;
 
     ASSERT_EQ(table.getSize(), 2);
     ASSERT_FALSE(table.isEmpty());

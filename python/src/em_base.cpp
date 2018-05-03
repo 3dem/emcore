@@ -41,11 +41,6 @@ std::string getTypeFormat(const Type &type)
             TYPE_FORMAT(double)
     };
 
-    std::cout << "----------------- Type format map: " << std::endl;
-    for (auto& it: typeFormatMap)
-        std::cout << it.first.getName() << " (" << it.first.getId() << ") -> "
-                  << it.second << std::endl;
-
     auto it = typeFormatMap.find(type);
     if (it != typeFormatMap.end())
         return it->second;
@@ -222,10 +217,10 @@ void init_submodule_base(py::module &m) {
             .def("getId", &Table::Column::getId)
             .def("getName", &Table::Column::getName)
             .def("getType", &Table::Column::getType)
-            .def("getDescription", &Table::Column::getDescription);
-            //.def("toString", &Table::Column::toString)
-            //.def("__repr__", &Table::Column::toString)
-            //.def("__str__", &Table::Column::toString);
+            .def("getDescription", &Table::Column::getDescription)
+            .def("toString", &Table::Column::toString)
+            .def("__repr__", &Table::Column::toString)
+            .def("__str__", &Table::Column::toString);
 
     py::class_<Table::Row>(table, "Row")
             .def(py::init<>())
@@ -241,10 +236,10 @@ void init_submodule_base(py::module &m) {
             .def("__setitem__", [](Table::Row& self, const std::string &colName, py::object &pyobj)
                                 {
                                     setObjectValue(pyobj, self[colName]);
-                                });
-//            .def("toString", &Table::Row::toString)
-//            .def("__repr__", &Table::Row::toString)
-//            .def("__str__", &Table::Row::toString);
+                                })
+            .def("toString", &Table::Row::toString)
+            .def("__repr__", &Table::Row::toString)
+            .def("__str__", &Table::Row::toString);
 
     table.def(py::init<>())
             .def(py::init<>())
@@ -266,9 +261,13 @@ void init_submodule_base(py::module &m) {
             .def("removeColumn", (void (Table::*)(size_t)) &Table::removeColumn)
             .def("removeColumn", (void (Table::*)(const std::string&)) &Table::removeColumn)
             .def("createRow", &Table::createRow)
-            .def("addRow", &Table::addRow);
+            .def("addRow", &Table::addRow)
+            .def("toString", &Table::toString)
+            .def("__repr__", &Table::toString)
+            .def("__str__", &Table::toString);
+
 //            .def("insertRow", &Table::insertRow)
-//            .def("deleteRow", &Table::deleteRow)git st
+//            .def("deleteRow", &Table::deleteRow)
 //            .def("deleteRows", &Table::deleteRows)
 //            .def("updateRow", &Table::updateRow)
 //            .def("updateRows", &Table::updateRows);

@@ -41,8 +41,17 @@ std::string Table::Column::getDescription() const { return descr; }
 
 void Table::Column::toStream(std::ostream &ostream) const
 {
-    ostream << "<column: " << type << " >";
+    ostream << "<column "
+            << "id=\"" << id << "\" name=\"" << name << "\" "
+            << "type=\"" << type.getName() << "\" />";
 } // function Table::Column.toStream
+
+std::string Table::Column::toString() const
+{
+    std::stringstream ss;
+    toStream(ss);
+    return ss.str();
+} // function Table::Column.toString
 
 
 // ========================== Table::Row Implementation ========================
@@ -207,20 +216,21 @@ Object& Table::Row::operator[](const std::string &colName)
 
 void Table::Row::toStream(std::ostream &ostream) const
 {
-    size_t i = 0;
-    for (auto &col: impl->parent->impl->columns)
+    ostream << "<row ";
+    for (auto &obj: *const_cast<Row*>(this)) // TODO: add the const obj iterator
     {
-        ostream << col.getName() << ": ";
-        impl->objects[i++].toStream(ostream);
+        obj.toStream(ostream);
         ostream << "\t";
     }
+    ostream << " />";
 } // function Table::Row.toStream
 
-std::ostream& operator<< (std::ostream &ostream, const Table::Row &row)
+std::string Table::Row::toString() const
 {
-    row.toStream(ostream);
-    return ostream;
-} // operator << (Table::Row)
+    std::stringstream ss;
+    toStream(ss);
+    return ss.str();
+} // function Table::Row.toString
 
 Table::Row::iterator Table::Row::begin()
 {
@@ -231,6 +241,7 @@ Table::Row::iterator Table::Row::end()
 {
     return impl->objects.end();
 }
+
 
 // ========================== Table Implementation ========================
 
@@ -289,6 +300,59 @@ bool Table::isEmpty() const
 {
     return impl->rows.empty();
 } // function Table.isEmpty
+
+
+std::ostream& operator<< (std::ostream &ostream, const Table::Column &col)
+{
+    col.toStream(ostream);
+    return ostream;
+} // operator << (Table::Column)
+
+std::ostream& operator<< (std::ostream &ostream, const Table::Row &row)
+{
+    row.toStream(ostream);
+    return ostream;
+} // operator << (Table::Row)
+
+std::ostream& operator<< (std::ostream &ostream, const Table &table)
+{
+    table.toStream(ostream);
+    return ostream;
+} // operator << (Table::Row)
+
+void Table::toStream(std::ostream &ostream) const
+{
+    ostream << "<table name=\"\">" << std::endl
+            << "   <columns>" << std::endl;
+    for (auto &col: impl->columns)
+    {
+        ostream << "      ";
+        col.toStream(ostream);
+        ostream << std::endl;
+    }
+    ostream << "   </columns>" << std::endl
+            << "   <rows>" << std::endl;
+    for (auto &row: *(const_cast<Table*>(this)))
+    {
+        ostream << "      ";
+        for (auto &obj: row)
+        {
+            obj.toStream(ostream);
+            ostream << " ";
+        }
+        //row.toStream(ostream);
+        ostream << std::endl;
+    }
+    ostream << "   </rows>" << std::endl
+            << "</table>" << std::endl;
+} // function Table.toStream
+
+std::string Table::toString() const
+{
+    std::stringstream ss;
+    toStream(ss);
+    return ss.str();
+} // function Table.toString
 
 size_t Table::getIndex(size_t colId)
 {
