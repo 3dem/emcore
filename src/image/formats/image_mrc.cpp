@@ -95,8 +95,6 @@ public:
 
     virtual void readHeader() override
     {
-        std::cout << "DEBUG:ImageIOMrc:readHeader: file " << path << std::endl;
-
         // Try to read the main header from the (already opened) file stream
         if ( fread(&header, MRC_HEADER_SIZE, 1, file) < 1 )
             THROW_SYS_ERROR(std::string("Error reading MRC header in file: ") + path);
