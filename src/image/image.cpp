@@ -281,9 +281,6 @@ void ImageIO::read(size_t index, Image &image)
     bool sameType = (imageType == fileType);
     void * data = nullptr;
 
-    std::cout << "DEBUG:ImageIO::read: imageType: " << imageType << std::endl;
-    std::cout << "DEBUG:ImageIO::read: fileType: " << fileType << std::endl;
-
     // If the image has the same Type as the file
     // we do not need an intermediate buffer, we can read data
     // directly into the image memory
@@ -377,9 +374,6 @@ const char * ImageIO::Impl::getOpenMode(FileMode mode) const
 
 void ImageIO::Impl::openFile()
 {
-    std::cout << "ImageIO::Impl::openFile: mode: " << getOpenMode(fileMode) <<
-              "file: " << path << std::endl;
-
     file = fopen(path.c_str(), getOpenMode(fileMode));
 
     if (file == nullptr)
@@ -400,11 +394,6 @@ void ImageIO::Impl::expandFile()
     // Compute the total size of the file taking into account the general header
     // size and the size of all items (including extra padding per item)
     size_t fileSize = getHeaderSize() + itemSize * dim.n;
-
-    std::cout << "ImageIO::createFile: fileSize: " << fileSize << std::endl;
-    std::cout << "                     itemSize: " << itemSize << std::endl;
-    std::cout << "                     getHeaderSize(): " << getHeaderSize() << std::endl;
-    std::cout << "                     getPadSize(): " << getPadSize() << std::endl;
 
     File::resize(file, fileSize);
     fflush(file);
@@ -457,19 +446,18 @@ void ImageIO::Impl::writeImageData(const size_t index, const Image &image)
 
 } // function ImageIO::Impl::write
 
-const Type & ImageIO::Impl::getTypeFromMode(int mode) const
+Type ImageIO::Impl::getTypeFromMode(int mode) const
 {
     auto tm = getTypeMap();
-    return tm.find(mode) != tm.end() ? *tm[mode] : typeNull;
+    auto it = tm.find(mode);
+    return it != tm.end() ? it->second : typeNull;
 } // function ImageIO::Impl.getTypeFromMode
 
 int ImageIO::Impl::getModeFromType(const Type &type) const
 {
     for (auto &pair: getTypeMap())
-    {
-        if (type == *pair.second)
+        if (type == pair.second)
             return pair.first;
-    }
 
     return -999;
 } // function ImageIO::Impl.getTypeFromMode

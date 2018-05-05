@@ -36,7 +36,6 @@ struct DmTag
             if (child == nullptr)
                 break;
         }
-
         return child;
     }
 
@@ -61,7 +60,6 @@ struct DmTag
             tTypeStr = "ARRAY";
         else if (tagClass == GROUP_ARRAY)
             tTypeStr = "GROUP_ARRAY";
-
 
         ostream << std::setw(6) << parent->nodeId
                 << std::setw(6) << nodeId
@@ -242,7 +240,7 @@ public:
                 tag.size = info[2];
 
                 // We store the image position in file to be read properly
-                tag.values.emplace_back(Object(typeSize));
+                tag.values.emplace_back(Object(typeSizeT));
                 size_t  cpos  = ftell(file);
                 tag.values[0] = cpos;
 
@@ -296,7 +294,6 @@ public:
         }
         return pTag;
     }
-
 
     virtual void readHeader() override
     {
@@ -355,11 +352,7 @@ public:
 
         dim.n = 0;
 
-       // auto pred = [](
-         //       const DmTag &dmtag) { return dmtag.tagName=="DataType"; };
-
         int value;
-
         auto imageData = dataTypeTag->parent;
 
         std::cout << "ImageData: " << imageData->tagName << std::endl;
@@ -391,7 +384,6 @@ public:
         dim.z = 1;
         dim.n = header.nIm;
         type = getTypeFromMode(header.dataType);
-
     } // function readHeader
 
     virtual void writeHeader() override
@@ -399,7 +391,6 @@ public:
         THROW_SYS_ERROR("ImageIODm::writeHeader: Writing in Digital Micrograph "
                                 "format is not supported. If your life depends "
                                 "on it, good luck!!");
-
     } // function writeHeader
 
     virtual size_t getHeaderSize() const override
@@ -407,37 +398,33 @@ public:
         return header.headerSize;
     } // function getHeaderSize
 
-    virtual const TypeMap & getTypeMap() const override
+    virtual const IntTypeMap & getTypeMap() const override
     {
-        static const TypeMap tm = {{2,  &typeInt16},
-                                   {3,  &typeInt32},
-                                   {4,  &typeUInt16},
-                                   {5,  &typeUInt32},
-                                   {6,  &typeFloat},
-                                   {7,  &typeDouble},
-                                   {8,  &typeBool},
-                                   {9,  &typeInt8},
-                                   {10, &typeUInt8},
-                                   {11, &typeUInt64},
-                                   {12, &typeInt64}};
-
+        static const IntTypeMap tm = {{2,  typeInt16},
+                                   {3,  typeInt32},
+                                   {4,  typeUInt16},
+                                   {5,  typeUInt32},
+                                   {6,  typeFloat},
+                                   {7,  typeDouble},
+                                   {8,  typeBool},
+                                   {9,  typeInt8},
+                                   {10, typeUInt8},
+                                   {11, typeUInt64},
+                                   {12, typeInt64}};
         return tm;
     } // function getTypeMap
 
-
     virtual void toStream(std::ostream &ostream, int verbosity) const override
     {
+        ostream << "verbosity normal" << std::endl;
 
-            ostream << "verbosity normal" << std::endl;
+        if (verbosity > 1)
+        {
+            ostream << "--- DM File struct ---" << std::endl;
 
-
-            if (verbosity > 1)
-            {
-                ostream << "--- DM File struct ---" << std::endl;
-
-                for (auto child: rootTag->childs)
-                    child->print(ostream, "");
-            }
+            for (auto child: rootTag->childs)
+                child->print(ostream, "");
+        }
     } // function toStream
 
     virtual ~ImageIODm()

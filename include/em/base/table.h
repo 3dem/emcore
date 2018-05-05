@@ -54,6 +54,9 @@ namespace em {
             /** Return the description of this Column */
             std::string getDescription() const;
 
+            void toStream(std::ostream &ostream) const;
+            std::string toString() const;
+
         private:
             size_t id;
             std::string name;
@@ -96,13 +99,11 @@ namespace em {
             const Object& operator[](const std::string &colName) const;
             Object& operator[](const std::string &colName);
 
-
             Row& operator=(const Row& other);
             Row& operator=(Row&& other) noexcept;
 
-            // FIXME: Not sure if this method should be placed here
-            // there is not a single way to push to stream a Row
             void toStream(std::ostream &ostream) const;
+            std::string toString() const;
 
             // TODO: Hide implementation details and implement a proper iterator
             using iterator = std::vector<Object>::iterator;
@@ -110,12 +111,14 @@ namespace em {
 
             iterator begin();
             iterator end();
+            const_iterator cbegin() const;
+            const_iterator cend() const;
 
         private:
             class Impl;
             Impl * impl = nullptr;
             /** Construction of a Row, given its implementation.
-             * Only accesible by Table.
+             * Only accessible by Table.
              */
              Row(Impl * rowImpl);
 
@@ -140,7 +143,7 @@ namespace em {
         Table& operator=(Table &&other) noexcept;
 
         /** Table constructor based on input columns */
-        Table(std::initializer_list<Column> list);
+        Table(const std::vector<Column> &columns);
 
         /** Destructor for Table */
         virtual ~Table();
@@ -153,6 +156,9 @@ namespace em {
 
         /** Return true if the number of rows is 0 */
         bool isEmpty() const;
+
+        void toStream(std::ostream &ostream) const;
+        std::string toString() const;
 
         /** Return the index of the column with this ID */
         size_t getIndex(size_t colId);
@@ -201,10 +207,10 @@ namespace em {
         void moveColumn(const std::string &colName, size_t pos);
 
         /** Return column iterator at the beginning */
-        const_col_iterator cbegin() const;
+        const_col_iterator cbegin_cols() const;
 
         /** Return column iterator at the end */
-        const_col_iterator cend() const;
+        const_col_iterator cend_cols() const;
 
         /** Return the row at this position */
         const Row& operator[](size_t pos) const;
@@ -239,6 +245,8 @@ namespace em {
 
         iterator begin();
         iterator end();
+        const_iterator cbegin() const;
+        const_iterator cend() const;
 
     private:
         /** Implementation class for Row and Table to use the PIMPL idiom */
@@ -339,7 +347,8 @@ namespace em {
 
 } // namespace em
 
+std::ostream& operator<< (std::ostream &ostream, const em::Table::Column &col);
 std::ostream& operator<< (std::ostream &ostream, const em::Table::Row &row);
-
+std::ostream& operator<< (std::ostream &ostream, const em::Table &table);
 
 #endif //EM_CORE_METADATA_H

@@ -16,6 +16,7 @@ namespace em
 {
     template <class T> class TypeImplT;
 
+
     /**
      *  \ingroup base
      *  The Type class is one of the central pieces of the em-core library.
@@ -51,6 +52,10 @@ namespace em
 
         bool operator==(const Type &other) const;
         bool operator!=(const Type &other) const;
+        bool operator<(const Type &other) const;
+
+        /** Return an unique identifier for the Type within a given run. */
+        size_t getId() const;
 
         /** Return the name of the type */
         std::string getName() const;
@@ -249,26 +254,31 @@ namespace em
     using cfloat = std::complex<float>;
     using cdouble = std::complex<double>;
 
+    // Some shortcuts for Type related maps
+    using TypeVector = std::vector<Type>;
+    using IntTypeMap = std::map<int, Type>;
+    using TypeIntMap = std::map<Type, int>;
+    using StringTypeMap = std::map<std::string, Type>;
+    using TypeStringMap = std::map<Type, std::string>;
+
     static const Type typeNull;
-    static const Type& typeInt8= Type::get<int8_t>();
-    static const Type& typeUInt8 = Type::get<uint8_t>();
-    static const Type& typeInt16 = Type::get<int16_t>();
-    static const Type& typeUInt16 = Type::get<uint16_t>();
-    static const Type& typeInt32 = Type::get<int32_t>();
-    static const Type& typeUInt32 = Type::get<uint32_t>();
-    static const Type& typeInt64 = Type::get<int64_t>();
-    static const Type& typeUInt64 = Type::get<uint64_t>();
-    static const Type& typeSize = Type::get<size_t>();
+    const static Type& typeInt8 = Type::get<int8_t>();
+    const static Type& typeUInt8 = Type::get<uint8_t>();
+    const static Type& typeInt16 = Type::get<int16_t>();
+    const static Type& typeUInt16 = Type::get<uint16_t>();
+    const static Type& typeInt32 = Type::get<int32_t>();
+    const static Type& typeUInt32 = Type::get<uint32_t>();
+    const static Type& typeInt64 = Type::get<int64_t>();
+    const static Type& typeUInt64 = Type::get<uint64_t>();
+    const static Type& typeSizeT = Type::get<size_t>();
 
-    static const Type& typeFloat = Type::get<float>();
-    static const Type& typeDouble = Type::get<double>();
-    static const Type& typeCFloat = Type::get<cfloat>();
-    static const Type& typeCDouble = Type::get<cdouble>();
+    const static Type& typeFloat = Type::get<float>();
+    const static Type& typeDouble = Type::get<double>();
+    const static Type& typeCFloat = Type::get<cfloat>();
+    const static Type& typeCDouble = Type::get<cdouble>();
 
-    static const Type& typeBool = Type::get<bool>();
-    static const Type& typeString = Type::get<std::string>();
-
-    using TypeMap = std::map<int, const Type *>;
+    const static Type& typeBool = Type::get<bool>();
+    const static Type& typeString = Type::get<std::string>();
 
 #include "type_priv.h"
 

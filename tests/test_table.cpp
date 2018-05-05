@@ -13,41 +13,9 @@ using namespace em;
 using Column = Table::Column;
 
 
-void printTable(Table &table)
-{
-    std::cerr << std::endl <<
-              "============== Table ===============" << std::endl;
-    size_t w = 12;
-
-    for (auto it = table.cbegin(); it < table.cend(); ++it)
-    {
-        std::cerr << std::setw(2 * w) << std::right << it->getName()
-                  << std::endl;
-    }
-
-    if (!table.isEmpty())
-    {
-        auto &firstRow = table[0];
-
-        std::vector<int> widths;
-        for (auto &obj: firstRow)
-            widths.push_back(obj.toString().size() + 2);
-
-        int i = 0;
-
-        for (auto &row: table)
-        {
-            i = 0;
-            for (auto &obj: row)
-                std::cerr << std::setw(widths[i++]) << std::right << obj << " ";
-            std::cerr << std::endl;
-        }
-    }
-} // function printTable
-
 Table createTable(size_t nRows)
 {
-    Table table({Column(1, "col1", typeSize),
+    Table table({Column(1, "col1", typeSizeT),
                  Column(2, "col2", typeFloat),
                  Column(3, "col3", typeString)
                 });
@@ -108,8 +76,8 @@ TEST(Table, ColumnsBasic)
     ASSERT_EQ(0, colMap.getIndex(rc1.getId()));
     ASSERT_EQ(1, colMap.getIndex(rc2.getId()));
 
-    ASSERT_EQ(Column::NO_INDEX, colMap.getIndex(100));
-    ASSERT_EQ(Column::NO_INDEX, colMap.getIndex("noColumn"));
+    ASSERT_THROW(colMap.getIndex(100), Error);
+    ASSERT_THROW(colMap.getIndex("noColumn"), Error);
 
     // Add more columns with and without IDs
     size_t bigId = 100;
@@ -134,6 +102,13 @@ TEST(Table, ColumnsBasic)
         ASSERT_EQ(colMap.getIndex(colName), i++);
 
     ASSERT_EQ(colMap.getIndex("forthCol"), c3bindex + 1);
+
+    // Test to print some columns
+    rc3.toStream(std::cout);
+    rc4.toStream(std::cout);
+
+    std::cout << "Column rc3: " << rc3 << std::endl;
+    std::cout << "Column rc4: " << rc4 << std::endl;
 
 } // TEST Column.Basic
 
@@ -181,7 +156,8 @@ TEST(Table, Basic)
         row["col2"] = (int)row["col2"] / 10;
     }
 
-    printTable(table);
+    //printTable(table);
+    std::cout << table << std::endl;
 
     ASSERT_EQ(table.getSize(), 2);
     ASSERT_FALSE(table.isEmpty());
@@ -205,7 +181,7 @@ TEST(Table, Copy)
     {
         auto &row1 = table10[i];
         auto &row2 = table10copy[i];
-        for (auto it = table10.cbegin(); it < table10.cend(); ++it)
+        for (auto it = table10.cbegin_cols(); it < table10.cend_cols(); ++it)
         {
             auto colName = it->getName();
             ASSERT_EQ(row1[colName], row2[colName]);
@@ -220,8 +196,6 @@ TEST(Table, RemoveColumns)
     ASSERT_EQ(table0.getSize(), 0);
     ASSERT_TRUE(table0.isEmpty());
 
-    StringVector colNames123 = {"col1", "col2", "col3"};
-    StringVector colNames13 = {"col1", "col3"};
     // Check all expected columns are there
     checkColumns(table0);
     // Remove a column from empty table works
@@ -254,7 +228,8 @@ TEST(Table, Read)
                 });
         TableIO tio;
 
-        ASSERT_EQ(t.cend() - t.cbegin(), 3);
+        ASSERT_EQ(t.cend_cols() - t.cbegin_cols(), 3);
+        ASSERT_EQ(t.getColumnsSize(), 3);
         ASSERT_TRUE(t.isEmpty());
 
         tio.open(fn1);
@@ -271,11 +246,10 @@ TEST(Table, Read)
                                     "rlnMaxValueProbDistribution"};
 
         int i = 0;
-        for (auto it = t.cbegin(); it < t.cend(); ++it)
+        for (auto it = t.cbegin_cols(); it < t.cend_cols(); ++it)
         {
             auto &col = *it;
             ASSERT_EQ(refColNames[i++], col.getName());
-            std::cout << col.getName() << " type: " << col.getType().getName() << std::endl;
         }
     } // if TEST_DATA
 /*
@@ -306,12 +280,15 @@ TEST(Table, ReadXmd)
         timer.tic();
         tio.read("noname", t);
         timer.toc();
+
+        std::cout << "Size: " << t.getSize() << std::endl;
+
         int i = 0;
-        for (auto it = t.cbegin(); it < t.cend(); ++it)
+        for (auto it = t.cbegin_cols(); it < t.cend_cols(); ++it)
         {
             auto &col = *it;
-            //ASSERT_EQ(refColNames[i++], col.getName());
-            std::cout << col.getName() << " type: " << col.getType().getName() << std::endl;
+            //std::cout << col << std::endl;
+std::cout << "'" << col.getName() << "', ";
         }
         //printTable(t);
     } // if TEST_DATA

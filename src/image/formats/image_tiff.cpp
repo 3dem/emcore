@@ -55,8 +55,7 @@ public:
 
         if (tif == nullptr)
             THROW_SYS_ERROR(std::string("Error opening file ") + path);
-
-    }
+    } // function openFile
 
     /** Close the file for this format.
      */
@@ -117,14 +116,11 @@ public:
         dim.y = vHeader[0].imageLength;
         dim.z = 1;
         dim.n = vHeader.size();
-
         // We obtain single value mode by adding bitspersample and sampleformat
         int mode = vHeader[0].bitsPerSample + vHeader[0].imageSampleFormat;
         type = getTypeFromMode(mode);
-
         // TODO: EMan2 does not write the datatype, using Float by default (do we fix it?)
     }
-
 
     void writeHeader() override
     {
@@ -143,7 +139,6 @@ public:
 
         header.xTiffRes = 1;
         header.yTiffRes = 1;
-
 
         //Write each image in a directory
         for (size_t i = 0; i < dim.n; ++i )
@@ -185,8 +180,8 @@ public:
             char*  tif_buf = nullptr;
             tif_buf = (char*)_TIFFmalloc(writeBuffer);
 
-            /* We create the image to allocate the space in directory to avoid
-               because we don't know how to add the image to directory a posteriori */
+            // We create the image to allocate the space in directory to avoid
+            //   because we don't know how to add the image to directory a posteriori
             for (size_t y = 0; y < header.imageLength; ++y)
                 TIFFWriteScanline(tif, tif_buf, y, 0);
 
@@ -214,9 +209,11 @@ public:
 
         TiffHeader header = vHeader[idx];
 
-        // If samplesPerPixel is higher than 3 it means there are extra samples, as associated alpha data
+        // If samplesPerPixel is higher than 3 it means there are extra samples,
+        // as associated alpha data
         // Greyscale images are usually samplesPerPixel=1
-        // RGB images are usually samplesPerPixel=3 (this is only implemented for untiled 8-bit tiffs)
+        // RGB images are usually samplesPerPixel=3 (this is only implemented
+        // for untiled 8-bit tiffs)
         if (header.samplesPerPixel > 3)
             header.samplesPerPixel = 1;
 
@@ -270,10 +267,8 @@ public:
                 memcpy(data + y*readSize, tif_buf, readSize);
             }
         }
-
         _TIFFfree(tif_buf);
     }
-
 
     void writeImageData(const size_t index, const Image &image) override
     {
@@ -307,22 +302,21 @@ public:
 
         _TIFFfree(tif_buf);
 
-    }
+    } // function writeImageData
 
-
-    const TypeMap &getTypeMap() const override
+    const IntTypeMap &getTypeMap() const override
     {
-        static const TypeMap tm = {{8+SAMPLEFORMAT_UINT, &typeUInt8},
-                                   {8+SAMPLEFORMAT_INT,  &typeInt8},
-                                   {16+SAMPLEFORMAT_UINT, &typeUInt16},
-                                   {16+SAMPLEFORMAT_INT, &typeInt16},
-                                   {32+SAMPLEFORMAT_UINT, &typeUInt32},
-                                   {32+SAMPLEFORMAT_INT, &typeInt32},
-                                   {32+SAMPLEFORMAT_IEEEFP, &typeFloat}};
+        static const IntTypeMap tm = {
+                {8+SAMPLEFORMAT_UINT, typeUInt8},
+                {8+SAMPLEFORMAT_INT,  typeInt8},
+                {16+SAMPLEFORMAT_UINT, typeUInt16},
+                {16+SAMPLEFORMAT_INT, typeInt16},
+                {32+SAMPLEFORMAT_UINT, typeUInt32},
+                {32+SAMPLEFORMAT_INT, typeInt32},
+                {32+SAMPLEFORMAT_IEEEFP, typeFloat}
+        };
         return tm;
-    }
-
-
+    } // function getTypeMap
 
     void setHeaderType(TiffHeader &header) const
     {
@@ -337,18 +331,13 @@ public:
             header.bitsPerSample = 32;
 
         header.imageSampleFormat = (uint16)mode - header.bitsPerSample;
-    }
-
+    } // function setHeaderType
 
     void expandFile() override
     {
         /* Expansion of data has to be implemented at the same time with header
          * as image data has to be included in TIFF Directory when created */
     }
-
-
-protected:
-
 }; // class ImageIOTiff
 
 StringVector tiffExts = {"tif", "tiff"};

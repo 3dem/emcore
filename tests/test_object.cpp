@@ -34,13 +34,13 @@ TEST(Object, Basic)
     // Copy constructor
     em::Object o(1);
     int x = o;
-    ASSERT_EQ(o.getType(), em::typeInt32);
+    ASSERT_EQ(o.getType(), typeInt32);
     ASSERT_EQ(x, 1);
     o = 2;
     ASSERT_EQ(int(o), 2);
 
     em::Object o2(3.5); // Type should be double
-    ASSERT_EQ(o2.getType(), em::typeDouble);
+    ASSERT_EQ(o2.getType(), typeDouble);
     // We can explicitly change the type of a given object
     o2.setType(typeFloat);
     ASSERT_EQ(o2.getType(), typeFloat);

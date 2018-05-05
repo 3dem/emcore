@@ -39,6 +39,20 @@ const Type & Table::Column::getType() const { return type; }
 
 std::string Table::Column::getDescription() const { return descr; }
 
+void Table::Column::toStream(std::ostream &ostream) const
+{
+    ostream << "<column "
+            << "id=\"" << id << "\" name=\"" << name << "\" "
+            << "type=\"" << type.getName() << "\" />";
+} // function Table::Column.toStream
+
+std::string Table::Column::toString() const
+{
+    std::stringstream ss;
+    toStream(ss);
+    return ss.str();
+} // function Table::Column.toString
+
 
 // ========================== Table::Row Implementation ========================
 
@@ -69,14 +83,18 @@ public:
 
     inline size_t getIndex(size_t colId) const
     {
-        return colIntMap.find(colId) != colIntMap.end() ?
-               colIntMap.at(colId) : Column::NO_INDEX;
+        auto it = colIntMap.find(colId);
+        ASSERT_ERROR(it == colIntMap.end(),
+                     std::string("Invalid column id: ") + std::to_string(colId));
+        return it->second;
     }
 
     inline size_t getIndex(const std::string &colName) const
     {
-        return colStrMap.find(colName) != colStrMap.end() ?
-               colStrMap.at(colName) : Column::NO_INDEX;
+        auto it = colStrMap.find(colName);
+        ASSERT_ERROR(it == colStrMap.end(),
+                     std::string("Invalid column name: ") + colName);
+        return it->second;
     }
 
     inline const Column& getColumnByIndex(size_t index) const
@@ -86,7 +104,7 @@ public:
 
     inline size_t addColumn(const Column &col)
     {
-        insertColumn(col, columns.size());
+        return insertColumn(col, columns.size());
     }
 
     size_t insertColumn(const Column &col, size_t pos)
@@ -198,34 +216,46 @@ Object& Table::Row::operator[](const std::string &colName)
 
 void Table::Row::toStream(std::ostream &ostream) const
 {
-    size_t i = 0;
-    for (auto &col: impl->parent->impl->columns)
+    ostream << "<row ";
+    for (auto &obj: *const_cast<Row*>(this))
     {
-        ostream << col.getName() << ": ";
-        impl->objects[i++].toStream(ostream);
+        obj.toStream(ostream);
         ostream << "\t";
     }
+    ostream << " />";
 } // function Table::Row.toStream
 
-std::ostream& operator<< (std::ostream &ostream, const Table::Row &row)
+std::string Table::Row::toString() const
 {
-    row.toStream(ostream);
-    return ostream;
-} // operator << (Table::Row)
+    std::stringstream ss;
+    toStream(ss);
+    return ss.str();
+} // function Table::Row.toString
 
 Table::Row::iterator Table::Row::begin()
 {
     return impl->objects.begin();
-}
+} // function Table::Row.begin
 
 Table::Row::iterator Table::Row::end()
 {
     return impl->objects.end();
-}
+} // function Table::Row.end
+
+Table::Row::const_iterator Table::Row::cbegin() const
+{
+    return impl->objects.cbegin();
+} // function Table::Row.begin
+
+Table::Row::const_iterator Table::Row::cend() const
+{
+    return impl->objects.cend();
+} // function Table::Row.end
+
 
 // ========================== Table Implementation ========================
 
-Table::Table(std::initializer_list<Column> columns): Table()
+Table::Table(const std::vector<Column> &columns): Table()
 {
     for (auto& col: columns)
         impl->addColumn(col);
@@ -249,11 +279,13 @@ Table::Table(Table &&other) noexcept : Table()
 Table& Table::operator=(const Table &other)
 {
     *impl = *other.impl;
+    return *this;
 } // Table assign operator
 
 Table& Table::operator=(Table &&other) noexcept
 {
     std::swap(impl, other.impl);
+    return *this;
 } // Table Move-assign operator
 
 Table::~Table()
@@ -278,6 +310,59 @@ bool Table::isEmpty() const
 {
     return impl->rows.empty();
 } // function Table.isEmpty
+
+
+std::ostream& operator<< (std::ostream &ostream, const Table::Column &col)
+{
+    col.toStream(ostream);
+    return ostream;
+} // operator << (Table::Column)
+
+std::ostream& operator<< (std::ostream &ostream, const Table::Row &row)
+{
+    row.toStream(ostream);
+    return ostream;
+} // operator << (Table::Row)
+
+std::ostream& operator<< (std::ostream &ostream, const Table &table)
+{
+    table.toStream(ostream);
+    return ostream;
+} // operator << (Table::Row)
+
+void Table::toStream(std::ostream &ostream) const
+{
+    ostream << "<table name=\"\">" << std::endl
+            << "   <columns>" << std::endl;
+    for (auto &col: impl->columns)
+    {
+        ostream << "      ";
+        col.toStream(ostream);
+        ostream << std::endl;
+    }
+    ostream << "   </columns>" << std::endl
+            << "   <rows>" << std::endl;
+    for (auto &row: *(const_cast<Table*>(this)))
+    {
+        ostream << "      ";
+        for (auto &obj: row)
+        {
+            obj.toStream(ostream);
+            ostream << " ";
+        }
+        //row.toStream(ostream);
+        ostream << std::endl;
+    }
+    ostream << "   </rows>" << std::endl
+            << "</table>" << std::endl;
+} // function Table.toStream
+
+std::string Table::toString() const
+{
+    std::stringstream ss;
+    toStream(ss);
+    return ss.str();
+} // function Table.toString
 
 size_t Table::getIndex(size_t colId)
 {
@@ -338,6 +423,15 @@ Table::iterator Table::end()
     return impl->rows.end();
 } // function Table.end
 
+Table::const_iterator Table::cbegin() const
+{
+    return impl->rows.cbegin();
+} // function Table.cbegin
+
+Table::const_iterator Table::cend() const
+{
+    return impl->rows.cend();
+} // function Table.cend
 
 const Table::Row& Table::operator[](const size_t pos) const
 {
@@ -418,14 +512,14 @@ void Table::moveColumn(const std::string &colName, size_t pos)
     THROW_ERROR("Not implemented.");
 }
 
-Table::const_col_iterator Table::cbegin() const
+Table::const_col_iterator Table::cbegin_cols() const
 {
-    return impl->columns.begin();
+    return impl->columns.cbegin();
 }
 
-Table::const_col_iterator Table::cend() const
+Table::const_col_iterator Table::cend_cols() const
 {
-    return impl->columns.end();
+    return impl->columns.cend();
 }
 
 // ========================== TableIO Implementation ===========================

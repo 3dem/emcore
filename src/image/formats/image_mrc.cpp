@@ -95,8 +95,6 @@ public:
 
     virtual void readHeader() override
     {
-        std::cout << "DEBUG:ImageIOMrc:readHeader: file " << path << std::endl;
-
         // Try to read the main header from the (already opened) file stream
         if ( fread(&header, MRC_HEADER_SIZE, 1, file) < 1 )
             THROW_SYS_ERROR(std::string("Error reading MRC header in file: ") + path);
@@ -139,14 +137,14 @@ public:
         memset(&header, 0, MRC_HEADER_SIZE);
 
         // FIXME: Implement more general mechanism of Type matching
-        if (type == em::typeDouble || type == em::typeFloat ||
-            type == em::typeInt32 || type == em::typeUInt32)
+        if (type == typeDouble || type == typeFloat ||
+            type == typeInt32 || type == typeUInt32)
             header.mode = 2;
-        else if (type == em::typeInt16)
+        else if (type == typeInt16)
             header.mode = 1;
-        else if (type == em::typeUInt16)
+        else if (type == typeUInt16)
             header.mode = 6;
-        else if (type == em::typeInt8 || type == em::typeUInt8)
+        else if (type == typeInt8 || type == typeUInt8)
             header.mode = 0;
             // TODO: Implement complex float and double
         else
@@ -251,11 +249,15 @@ public:
         return MRC_HEADER_SIZE;
     } // function getHeaderSize
 
-    virtual const TypeMap & getTypeMap() const override
+    virtual const IntTypeMap & getTypeMap() const override
     {
-        static const TypeMap tm = {{0, &typeInt8}, {1, &typeInt16},
-                                   {2, &typeFloat}, {6, &typeUInt16},
-                                   {101, &typeInt8}};
+        static const IntTypeMap tm = {
+               {0, typeInt8},
+               {1, typeInt16},
+               {2, typeFloat},
+               {6, typeUInt16},
+               {101, typeInt8}
+        };
         // TODO:
         // 3: Complex short
         // 4: Complex float
@@ -267,7 +269,6 @@ public:
 
         ostream << "verbosity normal" << std::endl;
 
-
         if (verbosity > 0)
         {
             ostream << "--- MRC File Header ---" << std::endl;
@@ -277,7 +278,6 @@ public:
             std::cout << std::setw(7) << "nz: " << header.nz << std::endl;
             std::cout << std::setw(7) << "nz: " << header.nz << std::endl;
             std::cout << std::setw(7) << "mode: " << header.mode << std::endl;
-
 
             // Variable              Word   Bytes   Description
             int nx;              //  1      1-4     number of columns in 3D data array (fast axis, x dimension)

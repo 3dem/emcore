@@ -89,9 +89,9 @@ namespace em
          * Return a map between the format integer modes and the supported
          * Types for storing images.
          */
-        virtual const TypeMap& getTypeMap() const = 0;
+        virtual const IntTypeMap& getTypeMap() const = 0;
 
-        const Type& getTypeFromMode(int mode) const;
+        Type getTypeFromMode(int mode) const;
         int getModeFromType(const Type &type) const;
 
         /**
