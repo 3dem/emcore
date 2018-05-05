@@ -232,19 +232,17 @@ class TestTable(BaseTest):
                 col = t.getColumnByIndex(i)
                 self.assertEqual(refColNames[i], col.getName())
 
-    def test_Read(self):
+    def test_ReadXmd(self):
         testDataPath = os.environ.get("EM_TEST_DATA", None)
 
         self.assertTrue(em.TableIO.hasImpl('star'))
 
         if testDataPath is not None:
-            root = testDataPath + "relion_tutorial/import/"
-            fn1 = root + "xmipp_tutorial/gold/images200k.xmd"
+            fn1 = testDataPath + "xmipp_tutorial/gold/images200k.xmd"
             print("Reading xmd: ", fn1)
 
             tio = em.TableIO()
             table = em.Table()
-
 
             t = Timer()
             t.tic()
@@ -263,17 +261,9 @@ class TestTable(BaseTest):
                            'ctfVoltage', 'zScore', 'zScoreShape1', 'zScoreShape2',
                            'zScoreSNR1', 'zScoreSNR2', 'zScoreHistogram']
             
-            #     "rlnVoltage", "rlnDefocusU", "rlnSphericalAberration",
-            #     "rlnAmplitudeContrast", "rlnImageName", "rlnNormCorrection",
-            #     "rlnMicrographName", "rlnGroupNumber", "rlnOriginX",
-            #     "rlnOriginY", "rlnAngleRot", "rlnAngleTilt", "rlnAnglePsi",
-            #     "rlnClassNumber", "rlnLogLikeliContribution",
-            #     "rlnNrOfSignificantSamples", "rlnMaxValueProbDistribution"
-            # ]
-            #
-            # for i in range(t.getColumnsSize()):
-            #     col = t.getColumnByIndex(i)
-            #     self.assertEqual(refColNames[i], col.getName())
+            for i in range(table.getColumnsSize()):
+                col = table.getColumnByIndex(i)
+                self.assertEqual(refColNames[i], col.getName())
 
 if __name__ == '__main__':
     main()
