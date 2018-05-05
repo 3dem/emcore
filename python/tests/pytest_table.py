@@ -1,7 +1,7 @@
 
 import os
 
-from base import BaseTest, main
+from base import BaseTest, main, Timer
 import em
 
 Column = em.Table.Column
@@ -9,6 +9,7 @@ Row = em.Table.Row
 
 
 class TestTable(BaseTest):
+
     def createTable(self, nRows):
         table = em.Table([
             Column(1, "col1", em.typeSizeT),
@@ -31,13 +32,12 @@ class TestTable(BaseTest):
         colNames = ["col1", "col2", "col3"]
 
         # Check all expected columns are there
-        for i in enumerate(indexes):
-            self.assertEqual(colNames[indexes[i]], table.getColumnByIndex(i).getName())
+        for i in range(table.getColumnsSize()):
+            self.assertEqual(colNames[indexes[i]],
+                             table.getColumnByIndex(i).getName())
 
     def test_ColumnsBasic(self):
-
         c1Name = "firstCol"
-
         c1 = Column(c1Name, em.typeFloat)
         self.assertEqual(c1.getId(), Column.NO_ID)
         self.assertEqual(c1.getName(), c1Name)
@@ -161,6 +161,40 @@ class TestTable(BaseTest):
         self.assertEqual(0, table.getSize())
         self.assertTrue(table.isEmpty())
 
+    def test_Copy(self):
+        n = 10
+        table10 = self.createTable(n)
+        table10copy = em.Table(table10)
+        self.checkColumns(table10copy)
+        self.assertEqual(table10copy.getSize(), table10.getSize());
+        self.assertEqual(table10copy.getSize(), n);
+
+        colNames = [table10.getColumnByIndex(i).getName()
+                    for i in range(table10.getColumnsSize())]
+
+        for i in range(n):
+            row1 = table10[i];
+            row2 = table10copy[i];
+            for cn in colNames:
+                self.assertEqual(row1[cn], row2[cn]);
+                
+    def test_RemoveColumns(self):
+        # Let's create a table with no rows
+        table0 = self.createTable(0)
+        self.assertEqual(table0.getSize(), 0)
+        self.assertTrue(table0.isEmpty())
+
+        # Check all expected columns are there
+        self.checkColumns(table0)
+        # Remove a column from empty table works
+        table0.removeColumn("col2")
+        self.checkColumns(table0, [0, 2])
+        #
+        table10 = self.createTable(10)
+        self.checkColumns(table10)
+        table10.removeColumn("col2")
+        self.checkColumns(table10, [0, 2])
+
     def test_Read(self):
         testDataPath = os.environ.get("EM_TEST_DATA", None)
 
@@ -196,42 +230,50 @@ class TestTable(BaseTest):
 
             for i in range(t.getColumnsSize()):
                 col = t.getColumnByIndex(i)
-                print(col)
                 self.assertEqual(refColNames[i], col.getName())
 
-    def test_Copy(self):
-        n = 10
-        table10 = self.createTable(n)
-        table10copy = em.Table(table10)
-        #self.checkColumns(table10copy)
-        self.assertEqual(table10copy.getSize(), table10.getSize());
-        self.assertEqual(table10copy.getSize(), n);
-
-        colNames = [table10.getColumnByIndex(i).getName()
-                    for i in range(table10.getColumnsSize())]
-
-        for i in range(n):
-            row1 = table10[i];
-            row2 = table10copy[i];
-            for cn in colNames:
-                self.assertEqual(row1[cn], row2[cn]);
-                
     def test_Read(self):
-        # Let's create a table with no rows
-        table0 = self.createTable(0)
-        self.assertEqual(table0.getSize(), 0)
-        self.assertTrue(table0.isEmpty())
+        testDataPath = os.environ.get("EM_TEST_DATA", None)
 
-        # Check all expected columns are there
-        # self.checkColumns(table0)
-        # Remove a column from empty table works
-        table0.removeColumn("col2")
-        # self.checkColumns(table0, [0, 2])
-        #
-        table10 = self.createTable(10)
-        # self.checkColumns(table10)
-        table10.removeColumn("col2")
-        # self.checkColumns(table10, [0, 2])
+        self.assertTrue(em.TableIO.hasImpl('star'))
+
+        if testDataPath is not None:
+            root = testDataPath + "relion_tutorial/import/"
+            fn1 = root + "xmipp_tutorial/gold/images200k.xmd"
+            print("Reading xmd: ", fn1)
+
+            tio = em.TableIO()
+            table = em.Table()
+
+
+            t = Timer()
+            t.tic()
+
+            tio.open(fn1)
+            tio.read("noname", table)
+
+            t.toc()
+
+            print("Size: ", table.getSize())
+            tio.close()
+
+            refColNames = ['itemId', 'xcoor', 'ycoor', 'image', 'micrograph',
+                           'enabled', 'ctfDefocusU', 'ctfDefocusV',
+                           'ctfDefocusAngle', 'ctfQ0', 'ctfSphericalAberration',
+                           'ctfVoltage', 'zScore', 'zScoreShape1', 'zScoreShape2',
+                           'zScoreSNR1', 'zScoreSNR2', 'zScoreHistogram']
+            
+            #     "rlnVoltage", "rlnDefocusU", "rlnSphericalAberration",
+            #     "rlnAmplitudeContrast", "rlnImageName", "rlnNormCorrection",
+            #     "rlnMicrographName", "rlnGroupNumber", "rlnOriginX",
+            #     "rlnOriginY", "rlnAngleRot", "rlnAngleTilt", "rlnAnglePsi",
+            #     "rlnClassNumber", "rlnLogLikeliContribution",
+            #     "rlnNrOfSignificantSamples", "rlnMaxValueProbDistribution"
+            # ]
+            #
+            # for i in range(t.getColumnsSize()):
+            #     col = t.getColumnByIndex(i)
+            #     self.assertEqual(refColNames[i], col.getName())
 
 if __name__ == '__main__':
     main()
