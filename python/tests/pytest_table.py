@@ -268,7 +268,7 @@ class TestTable(BaseTest):
 
         self.assertTrue(em.TableIO.hasImpl('star'))
 
-        if testDataPath is not None and False:
+        if testDataPath is not None:
             fn1 = testDataPath + "xmipp_tutorial/gold/images200k.xmd"
             print("Reading xmd: ", fn1)
 
