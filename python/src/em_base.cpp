@@ -267,7 +267,11 @@ void init_submodule_base(py::module &m) {
                     &Table::operator[])
             .def("toString", &Table::toString)
             .def("__repr__", &Table::toString)
-            .def("__str__", &Table::toString);
+            .def("__str__", &Table::toString)
+            .def("__iter__", [](const Table& table)
+                                {
+                                    return py::make_iterator(table.cbegin(), table.cend());
+                                });
 
 //            .def("insertRow", &Table::insertRow)
 //            .def("deleteRow", &Table::deleteRow)

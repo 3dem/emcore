@@ -111,6 +111,8 @@ namespace em {
 
             iterator begin();
             iterator end();
+            const_iterator cbegin() const;
+            const_iterator cend() const;
 
         private:
             class Impl;
@@ -205,10 +207,10 @@ namespace em {
         void moveColumn(const std::string &colName, size_t pos);
 
         /** Return column iterator at the beginning */
-        const_col_iterator cbegin() const;
+        const_col_iterator cbegin_cols() const;
 
         /** Return column iterator at the end */
-        const_col_iterator cend() const;
+        const_col_iterator cend_cols() const;
 
         /** Return the row at this position */
         const Row& operator[](size_t pos) const;
@@ -243,6 +245,8 @@ namespace em {
 
         iterator begin();
         iterator end();
+        const_iterator cbegin() const;
+        const_iterator cend() const;
 
     private:
         /** Implementation class for Row and Table to use the PIMPL idiom */

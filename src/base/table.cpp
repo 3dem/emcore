@@ -217,7 +217,7 @@ Object& Table::Row::operator[](const std::string &colName)
 void Table::Row::toStream(std::ostream &ostream) const
 {
     ostream << "<row ";
-    for (auto &obj: *const_cast<Row*>(this)) // TODO: add the const obj iterator
+    for (auto &obj: *const_cast<Row*>(this))
     {
         obj.toStream(ostream);
         ostream << "\t";
@@ -235,12 +235,22 @@ std::string Table::Row::toString() const
 Table::Row::iterator Table::Row::begin()
 {
     return impl->objects.begin();
-}
+} // function Table::Row.begin
 
 Table::Row::iterator Table::Row::end()
 {
     return impl->objects.end();
-}
+} // function Table::Row.end
+
+Table::Row::const_iterator Table::Row::cbegin() const
+{
+    return impl->objects.cbegin();
+} // function Table::Row.begin
+
+Table::Row::const_iterator Table::Row::cend() const
+{
+    return impl->objects.cend();
+} // function Table::Row.end
 
 
 // ========================== Table Implementation ========================
@@ -413,6 +423,15 @@ Table::iterator Table::end()
     return impl->rows.end();
 } // function Table.end
 
+Table::const_iterator Table::cbegin() const
+{
+    return impl->rows.cbegin();
+} // function Table.cbegin
+
+Table::const_iterator Table::cend() const
+{
+    return impl->rows.cend();
+} // function Table.cend
 
 const Table::Row& Table::operator[](const size_t pos) const
 {
@@ -493,14 +512,14 @@ void Table::moveColumn(const std::string &colName, size_t pos)
     THROW_ERROR("Not implemented.");
 }
 
-Table::const_col_iterator Table::cbegin() const
+Table::const_col_iterator Table::cbegin_cols() const
 {
-    return impl->columns.begin();
+    return impl->columns.cbegin();
 }
 
-Table::const_col_iterator Table::cend() const
+Table::const_col_iterator Table::cend_cols() const
 {
-    return impl->columns.end();
+    return impl->columns.cend();
 }
 
 // ========================== TableIO Implementation ===========================

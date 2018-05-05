@@ -181,7 +181,7 @@ TEST(Table, Copy)
     {
         auto &row1 = table10[i];
         auto &row2 = table10copy[i];
-        for (auto it = table10.cbegin(); it < table10.cend(); ++it)
+        for (auto it = table10.cbegin_cols(); it < table10.cend_cols(); ++it)
         {
             auto colName = it->getName();
             ASSERT_EQ(row1[colName], row2[colName]);
@@ -228,7 +228,8 @@ TEST(Table, Read)
                 });
         TableIO tio;
 
-        ASSERT_EQ(t.cend() - t.cbegin(), 3);
+        ASSERT_EQ(t.cend_cols() - t.cbegin_cols(), 3);
+        ASSERT_EQ(t.getColumnsSize(), 3);
         ASSERT_TRUE(t.isEmpty());
 
         tio.open(fn1);
@@ -245,11 +246,10 @@ TEST(Table, Read)
                                     "rlnMaxValueProbDistribution"};
 
         int i = 0;
-        for (auto it = t.cbegin(); it < t.cend(); ++it)
+        for (auto it = t.cbegin_cols(); it < t.cend_cols(); ++it)
         {
             auto &col = *it;
             ASSERT_EQ(refColNames[i++], col.getName());
-            std::cout << col.getName() << " type: " << col.getType().getName() << std::endl;
         }
     } // if TEST_DATA
 /*
@@ -280,12 +280,15 @@ TEST(Table, ReadXmd)
         timer.tic();
         tio.read("noname", t);
         timer.toc();
+
+        std::cout << "Size: " << t.getSize() << std::endl;
+
         int i = 0;
-        for (auto it = t.cbegin(); it < t.cend(); ++it)
+        for (auto it = t.cbegin_cols(); it < t.cend_cols(); ++it)
         {
             auto &col = *it;
-            //ASSERT_EQ(refColNames[i++], col.getName());
-            std::cout << col.getName() << " type: " << col.getType().getName() << std::endl;
+            //std::cout << col << std::endl;
+std::cout << "'" << col.getName() << "', ";
         }
         //printTable(t);
     } // if TEST_DATA
