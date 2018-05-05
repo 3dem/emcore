@@ -204,6 +204,11 @@ void init_submodule_base(py::module &m) {
             .def("__int__", [](const Object &self) { return (int)self; })
             .def("__float__", [](const Object &self) { return (float)self; })
             .def(py::self == py::self)
+            .def("__eq__", [](Object &self, const py::object& pyobj)
+            {
+                auto obj = buildObject(pyobj);
+                return self == *obj;
+            })
             .def(py::self != py::self);
 
     py::class_<Table> table(m, "Table");

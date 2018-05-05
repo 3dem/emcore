@@ -219,6 +219,10 @@ class TestTable(BaseTest):
             tio.open(fn1)
             tio.read("images", t)
 
+            print("Size: ", t.getSize())
+            self.assertEqual(t.getSize(), 79)
+            tio.close()
+
             refColNames = [
                 "rlnVoltage", "rlnDefocusU", "rlnSphericalAberration",
                 "rlnAmplitudeContrast", "rlnImageName", "rlnNormCorrection",
@@ -228,16 +232,43 @@ class TestTable(BaseTest):
                 "rlnNrOfSignificantSamples", "rlnMaxValueProbDistribution"
             ]
 
+            goldValues = [
+                ('rlnGroupNumber',
+                [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+                 17, 18, 19, 20, 21]),
+                ('rlnDefocusU',
+                 [16009.5, 18642.2, 24642.4, 24772.8, 25580.8, 26833.9, 27164.9,
+                  30135.1, 33744.2, 35465.5, 13923.4, 17895.1, 19206.2, 24165.1,
+                  24650.4, 25866.7, 26527.1, 27915.1, 29939.5, 30062.1]),
+                ('rlnImageName',
+                 ['000023@cluster/wind2/win_05883.dat', '000042@cluster/wind2/win_04377.dat',
+                  '000065@cluster/wind2/win_00139.dat', '000038@cluster/wind2/win_04884.dat',
+                  '000046@cluster/wind2/win_02565.dat', '000023@cluster/wind2/win_00161.dat',
+                  '000026@cluster/wind2/win_03758.dat', '000058@cluster/wind2/win_03862.dat',
+                  '000024@cluster/wind2/win_04246.dat', '000073@cluster/wind2/win_02382.dat',
+                  '000021@cluster/wind2/win_04587.dat', '000007@cluster/wind2/win_03186.dat',
+                  '000056@cluster/wind2/win_04919.dat', '000076@cluster/wind2/win_03268.dat',
+                  '000048@cluster/wind2/win_04346.dat', '000073@cluster/wind2/win_03740.dat',
+                  '000036@cluster/wind2/win_04583.dat', '000015@cluster/wind2/win_05453.dat',
+                  '000021@cluster/wind2/win_00846.dat', '000080@cluster/wind2/win_04165.dat'])
+            ]
+
             for i in range(t.getColumnsSize()):
                 col = t.getColumnByIndex(i)
                 self.assertEqual(refColNames[i], col.getName())
+                print(col)
+
+            for label, values in goldValues:
+                mdValues = [row[label] for i, row in enumerate(t) if i < 20]
+                for v1, v2 in zip(values, mdValues):
+                    self.assertEqual(v2, v1)
 
     def test_ReadXmd(self):
         testDataPath = os.environ.get("EM_TEST_DATA", None)
 
         self.assertTrue(em.TableIO.hasImpl('star'))
 
-        if testDataPath is not None:
+        if testDataPath is not None and False:
             fn1 = testDataPath + "xmipp_tutorial/gold/images200k.xmd"
             print("Reading xmd: ", fn1)
 
