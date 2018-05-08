@@ -16,13 +16,12 @@ Object::Object(const Object &other)
 
 Object::Object(Object &&other) noexcept
 {
-    std::swap(impl, other.impl);
-}
+    swap(std::move(other));
+} // Move ctor
 
 Object::Object(const Type & type, void *memory):
-        Type::Container(type, 1, memory)
+        TypedContainer(type, 1, memory)
 {
-
 } // Ctor from type and memory
 
 
@@ -88,6 +87,6 @@ Object& Object::operator=(const Object &other)
 
 Object& Object::operator=(Object &&other) noexcept
 {
-    std::swap(impl, other.impl);
+    swap(std::move(other));
     return *this;
 }

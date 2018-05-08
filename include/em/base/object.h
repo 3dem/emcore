@@ -11,6 +11,7 @@
 #include <cassert>
 
 #include "em/base/type.h"
+#include "em/base/container_priv.h"
 
 
 namespace em
@@ -21,7 +22,7 @@ namespace em
      *
      * An object could contains any type inside.
      */
-    class Object: public Type::Container
+    class Object: public TypedContainer
     {
     public:
         /** Default empty constructor for an Object.

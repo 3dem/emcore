@@ -10,6 +10,7 @@
 #include "em/base/array.h"
 #include "em/image/image.h"
 #include "em/base/timer.h"
+#include "em/base/container_priv.h"
 
 
 
@@ -148,7 +149,7 @@ TEST(Type, Indexing)
 TEST(TypeContainer, Basic)
 {
     // Empty container
-    Type::Container gc;
+    TypedContainer gc;
     ASSERT_TRUE(gc.getType().isNull());
     ASSERT_EQ(gc.getType(), typeNull);
     ASSERT_EQ(gc.getData(), nullptr);
@@ -161,8 +162,8 @@ TEST(TypeContainer, Basic)
 
     {
         auto& t = Type::get<int>();
-        Type::Container gc2(t, n, array);
-        Type::Container gc3(t, n); // should allocate its memory
+        TypedContainer gc2(t, n, array);
+        TypedContainer gc3(t, n); // should allocate its memory
         int * array2 = static_cast<int*>(gc3.getData());
         t.copy(gc2.getData(), gc3.getData(), n);
         for (size_t i = 0; i < n; ++i)

@@ -9,6 +9,7 @@
 #include <string>
 
 #include "em/base/object.h"
+#include "em/base/container_priv.h"
 
 
 namespace em
@@ -78,7 +79,7 @@ namespace em
     /** @ingroup base
      * Four dimensional Array class to manage internal memory and data type.
      */
-    class Array: public Type::Container
+    class Array: public TypedContainer
     {
     public:
         /** Default constructor.

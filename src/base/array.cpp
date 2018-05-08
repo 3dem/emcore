@@ -74,7 +74,7 @@ std::ostream& em::operator<< (std::ostream &ostream, const ArrayDim &adim)
 
 // ===================== Array::Impl Implementation =======================
 
-class Array::Impl: public Type::Container
+class Array::Impl
 {
 public:
     ArrayDim adim;
