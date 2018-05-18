@@ -20,10 +20,6 @@ Type::Type(Impl *impl)
     impl->name = impl->getName();
     impl->ispod = impl->isPod();
     impl->id = impl->getId();
-
-    if (impl->name == "int8")
-        std::cout << "Type::Type: " << *this << " id: " << getId() << std::endl;
-
 } // Type ctor based on impl
 
 bool Type::operator==(const Type &other) const
