@@ -16,22 +16,29 @@ Object::Object(const T& value)
 template <class T>
 Object& Object::operator=(const T& valueIn)
 {
-    // Set the new type from the input value
-    auto& valueType = Type::get<T>();
-    // Only change to the new type when the current type is null
-    if (getType().isNull())
-    {
-        allocate(valueType, 1);
-    }
+    ASSERT_ERROR(isView(), "View objects can not be assigned. ");
+    // Change type and allocate memory if necessary
+    allocate(Type::get<T>(), 1);
+    set(valueIn);
+    return *this;
+} // function Object::operator=
+
+template <class T>
+void Object::set(const T& valueIn)
+{
     auto& type = getType();
+    auto& valueType = Type::get<T>();
+
+    if (type.isNull())
+        allocate(valueType, 1);
+    // Set the new type from the input value
     const void * inputMem = &valueIn;
     auto outputMem = getData();
     if (type == valueType)
         type.copy(inputMem, outputMem, 1);
     else
         type.operate(Type::CAST, inputMem, valueType, outputMem, 1);
-    return *this;
-}
+} // function Object.set
 
 template <class T>
 Object::operator T() const

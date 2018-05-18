@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 
 #include "em/base/error.h"
-#include "em/image/image.h"
+#include "em/base/image.h"
 #include "em/base/legacy.h"
 
 
@@ -50,9 +50,9 @@ TEST(Array, Basic) {
 
     ArrayDim adim(10, 10);
     Array A(adim, typeInt32);
-    ArrayView<int> Av = A.getView<int>();
+    ArrayT<int> Av = A.getView<int>();
 
-    // Check the assignment through the ArrayView class
+    // Check the assignment through the ArrayT class
     Av.assign(11);
     int * ptr = Av.getData();
 
@@ -95,7 +95,7 @@ TEST(Array, Basic) {
     ptr[10] = 15;
 
     Array A2(A);
-    ArrayView<int> Av2 = A2.getView<int>();
+    ArrayT<int> Av2 = A2.getView<int>();
     const int * data2 = Av2.getData();
     for (size_t i = 0; i < adim.getSize(); ++i)
         ASSERT_EQ(data2[i], ptr[i]);
@@ -133,6 +133,22 @@ TEST(Array, Basic) {
     A.resize(ArrayDim(25, 4)); // same number of elements as 10 x 10
     adata1 = A.getData();
     ASSERT_EQ(adata1, adata2);
+
+    // Test empty ctor
+    auto nullType = Type();
+    Array empty;
+    ASSERT_EQ(empty.getType(), nullType);
+    ASSERT_EQ(empty.getDim(), ArrayDim(0, 1, 1, 1));
+    ASSERT_EQ(empty.getData(), nullptr);
+
+    Array tmp = A; // copy ctor
+    ASSERT_EQ(tmp, A);
+    empty = std::move(tmp); // move assign
+    ASSERT_EQ(empty, A);
+    // Now tmp should be empty
+    ASSERT_EQ(tmp.getType(), nullType);
+    ASSERT_EQ(tmp.getDim(), ArrayDim(0, 1, 1, 1));
+    ASSERT_EQ(tmp.getData(), nullptr);
 
 } // TEST(ArrayTest, Constructor)
 
@@ -175,7 +191,8 @@ TEST(Array, IndexingAlias)
     {
         for (size_t i = 1; i <= N; ++i)
         {
-            auto arraySingle = array.getAlias(i);
+            auto arraySingle = array.getView(i);
+            ASSERT_TRUE(arraySingle.isView());
             ASSERT_EQ(arraySingle.getDim(), asdim);
             auto avSingle = arraySingle.getView<float>();
             // Set different values for each individual image
@@ -205,7 +222,7 @@ TEST(Array, IndexingAlias)
     }
 
 
-} // TEST(Array, getAlias)
+} // TEST(Array, getView)
 
 TEST(Array, Legacy)
 {
@@ -227,7 +244,7 @@ TEST(Array, Legacy)
     {
         for (size_t i = 1; i <= N; ++i)
         {
-            auto arraySingle = array.getAlias(i);
+            auto arraySingle = array.getView(i);
             ASSERT_EQ(arraySingle.getDim(), asdim);
             auto avSingle = arraySingle.getView<float>();
             // Set different values for each individual image
@@ -258,4 +275,4 @@ TEST(Array, Legacy)
     }
 
 
-} // TEST(Array, getAlias)
+} // TEST(Array, getView)

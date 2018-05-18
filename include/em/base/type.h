@@ -190,57 +190,7 @@ namespace em
 
         class Impl; // Implementation class that will store type information
 
-        /** @ingroup base
-         *
-         * Generic memory container of a given Type.
-         *
-         */
-        class Container
-        {
-        public:
-            /** Default empty constructor .
-             *
-             * After a GenericContainer instance is created through this constructor,
-             * its Type will be the nullType and it will not contain any data.
-             */
-            Container();
 
-            /** Object constructor where the memory and type are provided.
-             * In this case the Object will not be the "owner" of the memory
-             * and should not free it when it is destroyed.
-             */
-            Container(const Type &type, const size_t n, void *memory=nullptr);
-
-            /** Object class destructor. */
-            virtual ~Container();
-
-            /** Return the Type singleton instance of this object. */
-            const Type & getType() const;
-
-            /** Return a pointer to the memory where this object data is stored. */
-            void * getData();
-            const void * getData() const;
-
-        protected:
-            void allocate(const Type &type, const size_t n, void *memory=nullptr);
-            void deallocate();
-
-            /** Copy or cast the elements from the other Type::Container.
-             * If type of current Container is not null, it will be kept, if not
-             * the type of the other will be used.
-             * @param other The other Type::Container
-             * @param n Number of elements we want to copy
-             * @param singleInput if True, it means that other Containers only
-             * have a single element that will be copied or casted to this
-             * Container. If false, the other Container should have the same
-             * dimensions of this one.
-             */
-            void copyOrCast(const Container &other, size_t n,
-                            bool singleInput=false);
-
-            class Impl;
-            Impl * impl;
-        }; // class Container
 
     private:
         // Type can only be instantiated via the Type<T> static method

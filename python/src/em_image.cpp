@@ -2,7 +2,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pybind11/pytypes.h>
-#include "em/image/image.h"
+#include "em/base/image.h"
 
 namespace py = pybind11;
 

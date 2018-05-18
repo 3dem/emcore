@@ -138,10 +138,10 @@ void init_submodule_base(py::module &m) {
         .def("__str__", &ArrayDim::toString)
         .def(py::self == py::self);
 
-    py::class_<Type::Container>(m, "TypeContainer")
-        .def("getType", &Type::Container::getType);
+    py::class_<TypedContainer>(m, "TypedContainer")
+        .def("getType", &TypedContainer::getType);
 
-    py::class_<Array, Type::Container>(m, "Array", py::buffer_protocol())
+    py::class_<Array, TypedContainer>(m, "Array", py::buffer_protocol())
         .def_buffer([](Array &a) -> py::buffer_info {
             auto &t = a.getType();
             auto adim = a.getDim();
@@ -181,20 +181,22 @@ void init_submodule_base(py::module &m) {
         .def(py::init<>())
         .def(py::init<const ArrayDim&, const Type &>())
         .def(py::init<const Array&>())
-        .def("getAlias", &Array::getAlias,
+        .def("getView", (Array (Array::*)(size_t)) &Array::getView,
              py::arg("index")=0)
         .def("resize", (void (Array::*)(const Array&)) &Array::resize)
         .def("resize", (void (Array::*)(const ArrayDim&, const Type & )) &Array::resize,
              py::arg("adim"), py::arg("type")=typeNull)
         .def("getDim", &Array::getDim);
 
-    py::class_<Object, Type::Container>(m, "Object")
+    py::class_<Object, TypedContainer>(m, "Object")
             .def(py::init<>())
             .def(py::init<const Object&>())
             .def(py::init(&buildObject))
+            .def("set", (void (Object::*)(const Object&)) &Object::set)
             .def("set", [](Object &self, const py::object& pyobj)
                         {
-                            setObjectValue(pyobj, self);
+                            auto obj = buildObject(pyobj);
+                            self.set(*obj);
                         })
             .def("toString", &Object::toString)
             .def("fromString", &Object::fromString)

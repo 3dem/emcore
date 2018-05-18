@@ -9,12 +9,13 @@
 #include <string>
 
 #include "em/base/object.h"
+#include "em/base/container_priv.h"
 
 
 namespace em
 {
     class Type;
-    template <class T> class ArrayView;
+    template <class T> class ArrayT;
 
     /** @ingroup base
      * Simple class to hold an Array dimensions.
@@ -78,7 +79,7 @@ namespace em
     /** @ingroup base
      * Four dimensional Array class to manage internal memory and data type.
      */
-    class Array: public Type::Container
+    class Array: public TypedContainer
     {
     public:
         /** Default constructor.
@@ -109,6 +110,8 @@ namespace em
          */
         Array(const Array &other);
 
+        /** Move constructor */
+        Array(Array &&other);
 
         // Destructor
         virtual ~Array();
@@ -123,6 +126,9 @@ namespace em
          * @return *this
          */
         Array& operator=(const Array &other);
+
+        /** Move assignment */
+        Array& operator=(Array &&other);
 
         /** Assign the value of a single element to the values of the array.
          * If the Array type is the same of the input Object type, then the
@@ -146,7 +152,7 @@ namespace em
         bool operator==(const Array &other) const;
         bool operator!=(const Array &other) const;
 
-        /** Return an "aliased" Array that share the memory with this one.
+        /** Return a View array that share the memory with this one.
          * If index is 0, the new Array will have exactly the same dimensions.
          * If index is between 1 and n, then it will point to a single item
          * but still with the same x, y and z dimensions.
@@ -154,7 +160,7 @@ namespace em
          * a single item.
          * @return Array aliased that share the same memory
          */
-        Array getAlias(size_t index = 0);
+        Array getView(size_t index = 0);
 
         /** Change the dimensions of the current Array.
          * This operation usually imply a new allocation of memory.
@@ -173,7 +179,7 @@ namespace em
         ArrayDim getDim() const;
 
         template <class T>
-        ArrayView<T> getView();
+        ArrayT<T> getView();
 
         // String representation
         virtual void toStream(std::ostream &ostream) const;
@@ -192,12 +198,12 @@ namespace em
      *  View of an Array that is parametrized.
      */
     template <class T>
-    class ArrayView
+    class ArrayT
     {
     public:
-        ArrayView() = default;
-        ArrayView(const ArrayView &aview) = default;
-        ~ArrayView();
+        ArrayT() = default;
+        ArrayT(const ArrayT &aview) = default;
+        ~ArrayT();
 
         std::string toString() const;
         T& operator()(const int x, const int y=0, const int z=0,
@@ -207,13 +213,13 @@ namespace em
         ArrayDim getDim() const;
 
     private:
-        // Only friend class Array can create ArrayView objects
-        ArrayView(const ArrayDim &adim, void * rawMemory);
+        // Only friend class Array can create ArrayT objects
+        ArrayT(const ArrayDim &adim, void * rawMemory);
         class Impl;
         Impl * impl;
 
     friend class Array;
-    }; // class ArrayView<T>
+    }; // class ArrayT<T>
 
 } // namespace em
 

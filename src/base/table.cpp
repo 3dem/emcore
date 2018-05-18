@@ -578,4 +578,4 @@ void TableIO::read(const std::string &tableName, Table &table)
     impl->read(tableName, table);
 } // TableIO.read
 
-#include "formats/table_star.cpp"
+#include "table_formats/table_star.cpp"

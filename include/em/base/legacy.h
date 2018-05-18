@@ -5,7 +5,7 @@
 #ifndef EM_CORE_LEGACY_MACROS_H
 #define EM_CORE_LEGACY_MACROS_H
 
-#include "em/image/image.h"
+#include "image.h"
 
 //======================= From macros.h ====================================
 /** Starting point for Xmipp volume/image

@@ -13,7 +13,7 @@
 #include "em/base/array.h"
 #include "em/base/registry.h"
 #include "em/os/filesystem.h"
-#include "em/image/image_priv.h"
+#include "em/base/image_priv.h"
 
 
 using namespace em;
@@ -484,9 +484,9 @@ size_t ImageIO::fread(FILE *file, Array &array, bool swap)
                  array.getType().getSize(), swap);
 } // function ImageIO::fread
 
-#include "formats/image_mrc.cpp"
-#include "formats/image_spider.cpp"
-#include "formats/image_tiff.cpp"
-#include "formats/image_em.cpp"
-#include "formats/image_dm.cpp"
+#include "image_formats/image_mrc.cpp"
+#include "image_formats/image_spider.cpp"
+#include "image_formats/image_tiff.cpp"
+#include "image_formats/image_em.cpp"
+#include "image_formats/image_dm.cpp"
 

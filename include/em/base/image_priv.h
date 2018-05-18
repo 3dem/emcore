@@ -5,7 +5,7 @@
 #ifndef EM_CORE_IMAGE_PRIV_H
 #define EM_CORE_IMAGE_PRIV_H
 
-#include "em/image/image.h"
+#include "image.h"
 
 
 namespace em

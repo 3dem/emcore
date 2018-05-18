@@ -2,8 +2,8 @@
 #include <functional>
 
 #include "em/base/error.h"
-#include "em/image/image.h"
-#include "em/image/image_priv.h"
+#include "em/base/image.h"
+#include "em/base/image_priv.h"
 
 using namespace em;
 

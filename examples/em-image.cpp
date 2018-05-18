@@ -6,7 +6,7 @@
 
 #include "em/base/error.h"
 #include "em/os/filesystem.h"
-#include "em/image/image.h"
+#include "em/base/image.h"
 #include "em/proc/program.h"
 #include "em/proc/processor.h"
 

@@ -58,7 +58,7 @@ TEST(Main, ObjectLoop) {
 
     ArrayDim adim(10, 10);
     Array A(adim, typeInt32);
-    ArrayView<int> Av = A.getView<int>();
+    ArrayT<int> Av = A.getView<int>();
 
     Av.assign(11);
     Av(3, 3) = 20;
@@ -71,7 +71,7 @@ TEST(Main, ObjectLoop) {
 
     em::Array A2 = A;
 //
-//    ArrayView<int> Av2 = A2.getView<int>();
+//    ArrayT<int> Av2 = A2.getView<int>();
 //
 //    std::cout << Av2.toString() << std::endl;
 

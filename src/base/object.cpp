@@ -16,21 +16,29 @@ Object::Object(const Object &other)
 
 Object::Object(Object &&other) noexcept
 {
-    std::swap(impl, other.impl);
-}
+    swap(std::move(other));
+} // Move ctor
 
 Object::Object(const Type & type, void *memory):
-        Type::Container(type, 1, memory)
+        TypedContainer(type, 1, memory)
 {
-
 } // Ctor from type and memory
 
 
 void Object::setType(const Type & newType)
 {
     if (newType != getType())
-        allocate(newType, 1);
+    {
+        Object o(newType);
+        o.set(*this);
+        swap(std::move(o));
+    }
 } // function Object.setType
+
+Object Object::getView()
+{
+    return Object(getType(), getData());
+} // function Object.getView
 
 void Object::toStream(std::ostream &ostream) const
 {
@@ -82,12 +90,18 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::Object &object)
 
 Object& Object::operator=(const Object &other)
 {
+    allocate(other.getType(), 1);
     copyOrCast(other, 1);
     return *this;
 }
 
 Object& Object::operator=(Object &&other) noexcept
 {
-    std::swap(impl, other.impl);
+    swap(std::move(other));
     return *this;
 }
+
+void Object::set(const Object &other)
+{
+    copyOrCast(other, 1);
+} // function Object.set

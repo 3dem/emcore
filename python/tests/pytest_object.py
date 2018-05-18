@@ -37,33 +37,27 @@ class TestObject(BaseTest):
         f = float(o2)
         self.assertAlmostEqual(f, 1.3)
 
-    # o2 = 5.6f;
-    #
-    # float d, d2 = 5.6 + float(o2)
-    # float d3;
-    #
-    # size_t N = 100;
-    # float values [] = {1.5f, 2.3f, 5.7f, 3.2f, 10.f, 56.f};
-    # std::vector<Object> vobj;
-    #
-    # for (int i = 0; i < N; i++)
-    # {
-    #     d = values[i % 6];
-    # vobj.push_back(Object(d))
-    # }
-    #
-    # for (int i = 0; i < N; ++i)
-    # {
-    #     d = vobj[i];
-    # ASSERT_FLOAT_EQ(d, values[i % 6])
-    # }
-    #
-    # const char * str = "This is a test string";
-    #
-    # Object o3;
-    # o3 = std::string(str)
-    # std::string s2 = o3;
-    # self.assertEqual(s2, str)
+        o2 = em.Object(5.6);
+        d2 = 5.6 + float(o2)
+        N = 100
+        values = [1.5, 2.3, 5.7, 3.2, 10., 56.]
+        vobj = []
+
+        for i in range(N):
+            vobj.append(em.Object(values[i % 6]))
+
+        for i, obj in enumerate(vobj):
+            self.assertAlmostEqual(values[i % 6], float(obj), 5)
+
+        s1 = "This is a test string";
+        o3 = em.Object(s1)
+
+        s2 = str(o3)
+        self.assertEqual(s1, s2)
+
+        # img = em.Image(em.ArrayDim(10, 10), em.typeFloat)
+        # o3 = em.Object(img)
+
     #
     # Image img(ArrayDim(10, 10), typeFloat)
     # auto& typeImage = Type::get<Image>()
