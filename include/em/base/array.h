@@ -110,6 +110,8 @@ namespace em
          */
         Array(const Array &other);
 
+        /** Move constructor */
+        Array(Array &&other);
 
         // Destructor
         virtual ~Array();
@@ -124,6 +126,9 @@ namespace em
          * @return *this
          */
         Array& operator=(const Array &other);
+
+        /** Move assignment */
+        Array& operator=(Array &&other);
 
         /** Assign the value of a single element to the values of the array.
          * If the Array type is the same of the input Object type, then the

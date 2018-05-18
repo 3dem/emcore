@@ -134,6 +134,22 @@ TEST(Array, Basic) {
     adata1 = A.getData();
     ASSERT_EQ(adata1, adata2);
 
+    // Test empty ctor
+    auto nullType = Type();
+    Array empty;
+    ASSERT_EQ(empty.getType(), nullType);
+    ASSERT_EQ(empty.getDim(), ArrayDim(0, 1, 1, 1));
+    ASSERT_EQ(empty.getData(), nullptr);
+
+    Array tmp = A; // copy ctor
+    ASSERT_EQ(tmp, A);
+    empty = std::move(tmp); // move assign
+    ASSERT_EQ(empty, A);
+    // Now tmp should be empty
+    ASSERT_EQ(tmp.getType(), nullType);
+    ASSERT_EQ(tmp.getDim(), ArrayDim(0, 1, 1, 1));
+    ASSERT_EQ(tmp.getData(), nullptr);
+
 } // TEST(ArrayTest, Constructor)
 
 

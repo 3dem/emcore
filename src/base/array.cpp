@@ -102,6 +102,13 @@ Array::Array(const Array &other): Array()
     *this = other;
 } // Copy ctor Array
 
+Array::Array(Array &&other)
+{
+    swap(std::move(other));
+    impl = other.impl;
+    other.impl = nullptr;
+} // Move ctor Array
+
 Array::~Array()
 {
     delete impl;
@@ -113,6 +120,12 @@ Array& Array::operator=(const Array &other)
     copyOrCast(other, impl->adim.getSize());
     return *this;
 } // function Array.operator= Array
+
+Array& Array::operator=(Array &&other)
+{
+    swap(std::move(other));
+    std::swap(impl, other.impl);
+} // function Array.operator= (move)
 
 Array& Array::operator=(const Object &value)
 {
@@ -211,7 +224,7 @@ Array Array::getView(size_t index)
 {
     auto adim = getDim();
     ASSERT_ERROR((index < 0 || index > adim.n),
-                 "Index should be betweeen zero and the number of elements.")
+                 "Index should be between zero and the number of elements.")
 
     void * data = getData();
 
