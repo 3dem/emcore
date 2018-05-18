@@ -147,7 +147,7 @@ namespace em
         bool operator==(const Array &other) const;
         bool operator!=(const Array &other) const;
 
-        /** Return an "aliased" Array that share the memory with this one.
+        /** Return a View array that share the memory with this one.
          * If index is 0, the new Array will have exactly the same dimensions.
          * If index is between 1 and n, then it will point to a single item
          * but still with the same x, y and z dimensions.
@@ -155,7 +155,7 @@ namespace em
          * a single item.
          * @return Array aliased that share the same memory
          */
-        Array getAlias(size_t index = 0);
+        Array getView(size_t index = 0);
 
         /** Change the dimensions of the current Array.
          * This operation usually imply a new allocation of memory.

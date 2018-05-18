@@ -181,7 +181,7 @@ void init_submodule_base(py::module &m) {
         .def(py::init<>())
         .def(py::init<const ArrayDim&, const Type &>())
         .def(py::init<const Array&>())
-        .def("getAlias", &Array::getAlias,
+        .def("getView", (Array (Array::*)(size_t)) &Array::getView,
              py::arg("index")=0)
         .def("resize", (void (Array::*)(const Array&)) &Array::resize)
         .def("resize", (void (Array::*)(const ArrayDim&, const Type & )) &Array::resize,

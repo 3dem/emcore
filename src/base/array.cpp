@@ -207,7 +207,7 @@ bool Array::operator!=(const Array &other) const
 
 
 
-Array Array::getAlias(size_t index)
+Array Array::getView(size_t index)
 {
     auto adim = getDim();
     ASSERT_ERROR((index < 0 || index > adim.n),
@@ -217,14 +217,14 @@ Array Array::getAlias(size_t index)
 
     if (index > 0)
     {
-        adim.n = 1; // Alias to a single item of this array
+        adim.n = 1; // View of a single item of this array
         data = (static_cast<uint8_t *>(data) +
                 (index - 1) * adim.getItemSize() * getType().getSize());
     }
     //TODO: Consider aliasing to a single slice within a volume
 
     return Array(adim, getType(), data);
-} // function Array.getAlias
+} // function Array.getView
 
 ArrayDim Array::getDim() const
 {

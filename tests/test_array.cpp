@@ -175,7 +175,8 @@ TEST(Array, IndexingAlias)
     {
         for (size_t i = 1; i <= N; ++i)
         {
-            auto arraySingle = array.getAlias(i);
+            auto arraySingle = array.getView(i);
+            ASSERT_TRUE(arraySingle.isView());
             ASSERT_EQ(arraySingle.getDim(), asdim);
             auto avSingle = arraySingle.getView<float>();
             // Set different values for each individual image
@@ -205,7 +206,7 @@ TEST(Array, IndexingAlias)
     }
 
 
-} // TEST(Array, getAlias)
+} // TEST(Array, getView)
 
 TEST(Array, Legacy)
 {
@@ -227,7 +228,7 @@ TEST(Array, Legacy)
     {
         for (size_t i = 1; i <= N; ++i)
         {
-            auto arraySingle = array.getAlias(i);
+            auto arraySingle = array.getView(i);
             ASSERT_EQ(arraySingle.getDim(), asdim);
             auto avSingle = arraySingle.getView<float>();
             // Set different values for each individual image
@@ -258,4 +259,4 @@ TEST(Array, Legacy)
     }
 
 
-} // TEST(Array, getAlias)
+} // TEST(Array, getView)
