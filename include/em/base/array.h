@@ -15,7 +15,7 @@
 namespace em
 {
     class Type;
-    template <class T> class ArrayView;
+    template <class T> class ArrayT;
 
     /** @ingroup base
      * Simple class to hold an Array dimensions.
@@ -174,7 +174,7 @@ namespace em
         ArrayDim getDim() const;
 
         template <class T>
-        ArrayView<T> getView();
+        ArrayT<T> getView();
 
         // String representation
         virtual void toStream(std::ostream &ostream) const;
@@ -193,12 +193,12 @@ namespace em
      *  View of an Array that is parametrized.
      */
     template <class T>
-    class ArrayView
+    class ArrayT
     {
     public:
-        ArrayView() = default;
-        ArrayView(const ArrayView &aview) = default;
-        ~ArrayView();
+        ArrayT() = default;
+        ArrayT(const ArrayT &aview) = default;
+        ~ArrayT();
 
         std::string toString() const;
         T& operator()(const int x, const int y=0, const int z=0,
@@ -208,13 +208,13 @@ namespace em
         ArrayDim getDim() const;
 
     private:
-        // Only friend class Array can create ArrayView objects
-        ArrayView(const ArrayDim &adim, void * rawMemory);
+        // Only friend class Array can create ArrayT objects
+        ArrayT(const ArrayDim &adim, void * rawMemory);
         class Impl;
         Impl * impl;
 
     friend class Array;
-    }; // class ArrayView<T>
+    }; // class ArrayT<T>
 
 } // namespace em
 

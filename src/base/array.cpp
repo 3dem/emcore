@@ -282,12 +282,12 @@ std::string Array::toString() const
 } // function Array.toString
 
 template <class T>
-ArrayView<T> Array::getView()
+ArrayT<T> Array::getView()
 {
     // Check the type is the same of the object
     assert(getType() == Type::get<T>());
 
-    return ArrayView<T>(impl->adim, getData());
+    return ArrayT<T>(impl->adim, getData());
 } // function Array.getView
 
 std::ostream& em::operator<< (std::ostream &ostream, const Array &array)
@@ -296,9 +296,9 @@ std::ostream& em::operator<< (std::ostream &ostream, const Array &array)
     return ostream;
 }
 
-// ===================== ArrayView Implementation =======================
+// ===================== ArrayT Implementation =======================
 template <class T>
-class ArrayView<T>::Impl
+class ArrayT<T>::Impl
 {
 public:
     T * data;
@@ -312,34 +312,34 @@ public:
         xy = adim.getSliceSize();
         xyz = adim.getItemSize();
     }
-}; // class ArrayView::Impl
+}; // class ArrayT::Impl
 
 #define GET_DATA() impl->data
 
 template <class T>
-ArrayView<T>::ArrayView(const ArrayDim &adim, void * rawMemory)
+ArrayT<T>::ArrayT(const ArrayDim &adim, void * rawMemory)
 {
     impl = new Impl(adim, rawMemory);
-} // Ctor ArrayView
+} // Ctor ArrayT
 
 template <class T>
-void ArrayView<T>::assign(const T &value)
+void ArrayT<T>::assign(const T &value)
 {
     T *ptr = GET_DATA();
     size_t n = impl->adim.getSize();
 
     for (size_t i = 0; i < n; ++i, ++ptr)
         *ptr = value;
-} // function ArrayView.assign
+} // function ArrayT.assign
 
 template <class T>
-ArrayView<T>::~ArrayView()
+ArrayT<T>::~ArrayT()
 {
     delete impl;
 }
 
 template <class T>
-T& ArrayView<T>::operator()(int x, int y, int z, size_t n)
+T& ArrayT<T>::operator()(int x, int y, int z, size_t n)
 {
     ASSERT_ERROR(!getDim().isValidIndex(x, y, z, n),
                  "Invalid indexes for this array. ");
@@ -347,10 +347,10 @@ T& ArrayView<T>::operator()(int x, int y, int z, size_t n)
     T *ptr = GET_DATA();
     ptr += (n - 1) * impl->xyz + z * impl->xy + y * impl->adim.x + x;
     return *ptr;
-} // function ArrayView.operator()
+} // function ArrayT.operator()
 
 template <class T>
-std::string ArrayView<T>::toString() const
+std::string ArrayT<T>::toString() const
 {
     std::stringstream ss;
 
@@ -370,16 +370,16 @@ std::string ArrayView<T>::toString() const
     ss << "]";
 
     return ss.str();
-} // function ArrayView.toString
+} // function ArrayT.toString
 
 template <class T>
-T* ArrayView<T>::getData()
+T* ArrayT<T>::getData()
 {
     return GET_DATA();
-} // function ArrayView.getData
+} // function ArrayT.getData
 
 template <class T>
-ArrayDim ArrayView<T>::getDim() const
+ArrayDim ArrayT<T>::getDim() const
 {
     return impl->adim;
 } // getDim
@@ -388,26 +388,26 @@ ArrayDim ArrayView<T>::getDim() const
 // ================ Explicit instantiations of Templates =======================
 // This allows to implement template code in the .cpp
 
-template em::ArrayView<int8_t > em::Array::getView();
-template em::ArrayView<uint8_t > em::Array::getView();
-template em::ArrayView<int16_t > em::Array::getView();
-template em::ArrayView<uint16_t > em::Array::getView();
-template em::ArrayView<int32_t > em::Array::getView();
-template em::ArrayView<uint32_t > em::Array::getView();
+template em::ArrayT<int8_t > em::Array::getView();
+template em::ArrayT<uint8_t > em::Array::getView();
+template em::ArrayT<int16_t > em::Array::getView();
+template em::ArrayT<uint16_t > em::Array::getView();
+template em::ArrayT<int32_t > em::Array::getView();
+template em::ArrayT<uint32_t > em::Array::getView();
 
-template em::ArrayView<float> em::Array::getView();
-template em::ArrayView<double> em::Array::getView();
-template em::ArrayView<cfloat> em::Array::getView();
-template em::ArrayView<cdouble> em::Array::getView();
+template em::ArrayT<float> em::Array::getView();
+template em::ArrayT<double> em::Array::getView();
+template em::ArrayT<cfloat> em::Array::getView();
+template em::ArrayT<cdouble> em::Array::getView();
 
-template class em::ArrayView<int8_t>;
-template class em::ArrayView<uint8_t>;
-template class em::ArrayView<int16_t>;
-template class em::ArrayView<uint16_t>;
-template class em::ArrayView<int32_t>;
-template class em::ArrayView<uint32_t>;
+template class em::ArrayT<int8_t>;
+template class em::ArrayT<uint8_t>;
+template class em::ArrayT<int16_t>;
+template class em::ArrayT<uint16_t>;
+template class em::ArrayT<int32_t>;
+template class em::ArrayT<uint32_t>;
 
-template class em::ArrayView<float>;
-template class em::ArrayView<double>;
-template class em::ArrayView<cfloat>;
-template class em::ArrayView<cdouble>;
+template class em::ArrayT<float>;
+template class em::ArrayT<double>;
+template class em::ArrayT<cfloat>;
+template class em::ArrayT<cdouble>;

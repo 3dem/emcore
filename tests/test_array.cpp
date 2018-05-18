@@ -50,9 +50,9 @@ TEST(Array, Basic) {
 
     ArrayDim adim(10, 10);
     Array A(adim, typeInt32);
-    ArrayView<int> Av = A.getView<int>();
+    ArrayT<int> Av = A.getView<int>();
 
-    // Check the assignment through the ArrayView class
+    // Check the assignment through the ArrayT class
     Av.assign(11);
     int * ptr = Av.getData();
 
@@ -95,7 +95,7 @@ TEST(Array, Basic) {
     ptr[10] = 15;
 
     Array A2(A);
-    ArrayView<int> Av2 = A2.getView<int>();
+    ArrayT<int> Av2 = A2.getView<int>();
     const int * data2 = Av2.getData();
     for (size_t i = 0; i < adim.getSize(); ++i)
         ASSERT_EQ(data2[i], ptr[i]);
