@@ -8,7 +8,7 @@
 #include "em/base/error.h"
 #include "em/base/object.h"
 #include "em/base/array.h"
-#include "em/image/image.h"
+#include "em/base/image.h"
 #include "em/base/timer.h"
 #include "em/base/container_priv.h"
 

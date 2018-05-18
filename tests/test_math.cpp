@@ -7,7 +7,7 @@
 
 #include "em/os/filesystem.h"
 #include "em/math/functions.h"
-#include "em/image/image.h"
+#include "em/base/image.h"
 #include "em/base/legacy.h"
 
 

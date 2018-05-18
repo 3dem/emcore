@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 
 #include "em/base/error.h"
-#include "em/image/image.h"
+#include "em/base/image.h"
 #include "em/base/legacy.h"
 
 

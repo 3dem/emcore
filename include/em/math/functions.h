@@ -7,17 +7,17 @@
 
 namespace em
 {
-/** Class representing a 1D or 2D gaussian function at a given point.
- *
- * For the 1D case the operator() will return the value of a univariate
- * gaussian function at the point x.
- *
- * For the 2D case operator() will return the value of a multivariate (2D)
- * gaussian function at the point (x,y) when the X axis of the gaussian is
- * rotated ang (counter-clockwise) radians (the angle is positive when measured
- * from the universal X to the gaussian X).
- * X and Y are supposed to be independent.
- */
+    /** Class representing a 1D or 2D gaussian function at a given point.
+     *
+     * For the 1D case the operator() will return the value of a univariate
+     * gaussian function at the point x.
+     *
+     * For the 2D case operator() will return the value of a multivariate (2D)
+     * gaussian function at the point (x,y) when the X axis of the gaussian is
+     * rotated ang (counter-clockwise) radians (the angle is positive when measured
+     * from the universal X to the gaussian X).
+     * X and Y are supposed to be independent.
+     */
     template<class T>
     class GaussianFunc
     {
