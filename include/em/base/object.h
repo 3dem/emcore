@@ -62,6 +62,8 @@ namespace em
         template <class T> Object(const T &valueIn);
 
         /** Assign operator to store an given value.
+         * The object will change its type (and do memory allocation) if
+         * necessary to accommodate the new value.
          *
          * @tparam T template type of the input value.
          * @param valueIn Value that will define the internal content of the object.
@@ -69,6 +71,15 @@ namespace em
          */
         template <class T> Object& operator=(const T &valueIn);
         Object& operator=(const Object &other);
+
+        /** Set the internal value of the object.
+         * The internal type will be preserved and the input value will be
+         * converted if necessary.
+         * @tparam T
+         * @param valueIn
+         */
+        template <class T> void set(const T &valueIn);
+        void set(const Object &other);
 
         /** Move assign. */
         Object& operator=(Object &&other) noexcept;
@@ -78,6 +89,9 @@ namespace em
 
         // Extract the value
         template<class T> operator T() const;
+
+        /** Return a View of this object. */
+        Object getView();
 
         /** Push the value of the Object to the output stream */
         void toStream(std::ostream &ostream) const;

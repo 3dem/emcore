@@ -25,11 +25,16 @@ TEST(Object, Basic)
 
     eo = 1; // Now this object should change its type to typeInt32
     ASSERT_EQ(eo.getType(), typeInt32);
-    // When the object type is not null, it should not
-    // change its type and just try to convert to the underlying type.
+
+    // After assignment, an object will change its type if necessary
     eo = 2.2f;
-    ASSERT_EQ(eo.getType(), typeInt32);
-    ASSERT_EQ((int)eo, (int)2.2f);
+    ASSERT_EQ(eo.getType(), typeFloat);
+    ASSERT_EQ(eo, 2.2f);
+    ASSERT_EQ(eo, Object(2.2f));
+
+    // We can explicitly change its type, internal value will be converted
+    eo.setType(typeInt32);
+    ASSERT_EQ(eo, (int)2.2f);
 
     // Copy constructor
     em::Object o(1);
@@ -44,12 +49,12 @@ TEST(Object, Basic)
     // We can explicitly change the type of a given object
     o2.setType(typeFloat);
     ASSERT_EQ(o2.getType(), typeFloat);
-    o2 = 1.3; // Still the type should be float and not double
-    ASSERT_EQ(o2.getType(), typeFloat);
+    o2 = 1.3; // Now type should be double again
+    ASSERT_EQ(o2.getType(), typeDouble);
     float f = o2;
     ASSERT_FLOAT_EQ(f, 1.3f);
 
-    o2 = 5.6f;
+    o2.set(5.6f);
 
     float d, d2 = 5.6 + float(o2);
     float d3;
@@ -79,7 +84,6 @@ TEST(Object, Basic)
 
     Image img(ArrayDim(10, 10), typeFloat);
     auto& typeImage = Type::get<Image>();
-    o3.setType(typeImage);
     o3 = img;
     ASSERT_EQ(o3.getType(), typeImage);
     Image img2 = o3;

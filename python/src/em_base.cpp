@@ -192,9 +192,11 @@ void init_submodule_base(py::module &m) {
             .def(py::init<>())
             .def(py::init<const Object&>())
             .def(py::init(&buildObject))
+            .def("set", (void (Object::*)(const Object&)) &Object::set)
             .def("set", [](Object &self, const py::object& pyobj)
                         {
-                            setObjectValue(pyobj, self);
+                            auto obj = buildObject(pyobj);
+                            self.set(*obj);
                         })
             .def("toString", &Object::toString)
             .def("fromString", &Object::fromString)

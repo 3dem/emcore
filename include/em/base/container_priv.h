@@ -45,34 +45,40 @@ namespace em
 
         inline const void *getData() const { return data; }
 
+        /** Return True if this container is a View, i.e, it does not own
+         * the memory but points to some existing memory location.
+         */
+        inline bool isView() const { return view; }
+
+        /** Return the amount of memory that is being used. */
+        inline size_t getMemorySize() const { return size * type.getSize(); }
+
     protected:
         void allocate(const Type &type, const size_t n, void *memory = nullptr)
         {
+            ASSERT_ERROR(view, "Views can not allocate memory");
+
             // If the type have the same size and we are going to allocate the
             // same number of elements, then we will use the same amount of
             // memory, so there is not need for a new allocation if we own the memory
-            if (data != nullptr && size > 0 && type.isTriviallyCopyable()
-                && size * this->type.getSize() == n * type.getSize())
+            if (data != nullptr && type.isTriviallyCopyable()
+                && getMemorySize() == n * type.getSize())
             {
                 this->type = type; // set new type and return, not allocation needed
                 return;
             }
 
-            deallocate(); // deallocate using previous type
+            deallocate(); // deallocate using previous type info
             this->type = type;
+            this->size = n;
 
-            if (memory == nullptr)
-            {
-                size = n;
-                data = type.allocate(n);
-            }
-            else
-                data = memory;
+            view = (memory != nullptr);
+            data = (view ? memory : type.allocate(n));
         } // function allocate
 
         void deallocate()
         {
-            if (size)
+            if (!view & size > 0)
             {
                 type.deallocate(data, size);
                 size = 0;
@@ -118,6 +124,7 @@ namespace em
         size_t size = 0;
         void * data = nullptr;
         Type type;
+        bool view = false;
     }; // class TypedContainer
 
 } // namespace em
