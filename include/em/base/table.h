@@ -275,11 +275,6 @@ namespace em {
          */
         using ImplBuilder = Impl* (*)();
 
-        /** Constants for open files. */
-        static const int READ_ONLY = 0;
-        static const int READ_WRITE = 1;
-        static const int TRUNCATE = 2;
-
         /**
          * Empty constructor for TableIO.
          * In this case the newly created instance will have no format

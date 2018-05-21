@@ -12,6 +12,7 @@
 #include "em/base/string.h"
 #include "em/base/object.h"
 #include "em/base/array.h"
+#include "em/os/filesystem.h"
 
 
 namespace em
@@ -117,8 +118,6 @@ namespace em
     std::ostream& operator<< (std::ostream &ostream, const em::Image &image);
     std::istream& operator>> (std::istream &istream, em::Image &image);
 
-    using FileMode = uint8_t;
-
     /** @ingroup image
      * Class that will take care of read/write images from/to file.
      *
@@ -141,10 +140,7 @@ namespace em
          */
         using ImplBuilder = Impl* (*)();
 
-        /** Constants for open files. */
-        static const FileMode READ_ONLY = 0;
-        static const FileMode READ_WRITE = 1;
-        static const FileMode TRUNCATE = 2;
+
 
         /**
          * Empty constructor for ImageIO.
@@ -193,7 +189,8 @@ namespace em
         ArrayDim getDim() const;
 
         // TODO: DOCUMENT
-        void open(const std::string &path, const FileMode mode=READ_ONLY);
+        void open(const std::string &path,
+                  const File::Mode mode=File::Mode::READ_ONLY);
         // TODO: DOCUMENT
         void close();
 

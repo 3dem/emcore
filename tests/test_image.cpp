@@ -103,7 +103,7 @@ TEST(ImageMrcIO, Read)
                 snprintf (suffix, 4, "%03d", (int)i);
                 imgFn = std::string("image") + suffix + ".mrc";
                 std::cout << ">>> Writing image: " << imgFn << std::endl;
-                mrcIO2.open(imgFn, ImageIO::TRUNCATE);
+                mrcIO2.open(imgFn,  File::Mode::TRUNCATE);
                 mrcIO2.createFile(imgDim, img.getType());
                 mrcIO2.write(1, img);
                 mrcIO2.close();
@@ -191,13 +191,13 @@ TEST(ImageIO, Create)
         std::string fn;
         // Write a single image
         fn = "image-single." + ext;
-        imgio.open(fn.c_str(), ImageIO::TRUNCATE);
+        imgio.open(fn.c_str(),  File::Mode::TRUNCATE);
         imgio.createFile(ArrayDim(DIM, DIM, 1, 1), typeFloat);
         imgio.close();
 
         // Write a stack of images
         fn = "image-stack." + ext;
-        imgio.open(fn.c_str(), ImageIO::TRUNCATE);
+        imgio.open(fn.c_str(),  File::Mode::TRUNCATE);
         imgio.createFile(ArrayDim(DIM, DIM, 1, 100), typeFloat);
 
         Image img(ArrayDim(DIM, DIM, 1, 1), typeFloat);

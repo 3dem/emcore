@@ -10,7 +10,6 @@
 
 namespace em
 {
-
     /**
      * Class to contain some static functions for File utility.
      */
@@ -18,6 +17,9 @@ namespace em
     {
     public:
         static void resize(FILE *file, size_t size);
+
+        /** Enum to simplify the options to open files */
+        enum Mode { READ_ONLY = 0, READ_WRITE = 1, TRUNCATE = 2 };
 
     }; // class File
 

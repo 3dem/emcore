@@ -74,7 +74,6 @@ protected:
             ASSERT_ERROR(line.empty(),
                          "There are empty lines after columns and before data");
 
-            // TODO: Infer the Column types from the first data line
             StringVector tokens = String::split(line.c_str());
             int i = 0;
 
@@ -100,7 +99,6 @@ protected:
         }
     } // function readTable
 
-    void readLoopColumns(std::ifstream &ifs, Table &table);
     void readColumns(std::ifstream &ifs, Table &table)
     {
 
