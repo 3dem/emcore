@@ -6,11 +6,9 @@
 #include <fstream> // the good one
 #include <sstream>
 
-#include "em/base/string.h"
 #include "em/base/registry.h"
 #include "em/base/table.h"
 #include "em/base/table_priv.h"
-#include "em/os/filesystem.h"
 
 
 using namespace em;
@@ -559,17 +557,25 @@ TableIO::~TableIO()
     delete impl;
 }
 
-void TableIO::open(const std::string &path)
+void TableIO::open(const std::string &path, File::Mode mode)
 {
     delete impl;  // Does it make sense to reuse impl?
     impl = getTableIORegistry()->buildImpl(Path::getExtension(path));
-    impl->open(path);
+    impl->path = path;
+    impl->fileMode = mode;
+
+    // If the file does not exists and mode is  File::Mode::READ_WRITE
+    // switch automatically to TRUNCATE mode
+    if (mode ==  File::Mode::READ_WRITE and !Path::exists(path))
+        impl->fileMode =  File::Mode::TRUNCATE;
+
+    impl->openFile();
 } // function TableIO.open
 
 void TableIO::close()
 {
     ASSERT_ERROR(impl == nullptr, "Invalid operation, implementation is null.");
-    impl->close();
+    impl->closeFile();
 } // function TableIO.close
 
 void TableIO::read(const std::string &tableName, Table &table)
@@ -577,5 +583,16 @@ void TableIO::read(const std::string &tableName, Table &table)
     ASSERT_ERROR(impl == nullptr, "Invalid operation, implementation is null.");
     impl->read(tableName, table);
 } // TableIO.read
+
+
+void TableIO::Impl::openFile()
+{
+    file = fopen(path.c_str(), File::modeToString(fileMode));
+} // function TableIO::Impl.openFile
+
+void TableIO::Impl::closeFile()
+{
+    fclose(file);
+} // function TableIO::Impl.closeFile
 
 #include "table_formats/table_star.cpp"

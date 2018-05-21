@@ -14,17 +14,6 @@ public:
     FILE* file = nullptr; // Keep a file handler
     std::string line; // Used for parsing the star file lines
 
-    virtual void open(const std::string &path) override
-    {
-        this->path = path;
-        file = fopen(path.c_str(), "r");
-    } // function open
-
-    virtual void close() override
-    {
-        fclose(file);
-    } // function close
-
     virtual void read(const std::string &tableName, Table &table) override
     {
         table.clear();

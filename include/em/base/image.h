@@ -32,7 +32,7 @@ namespace em
         enum Index
         {
             NONE = -1, ///< Index not set
-            ALL = 0,   ///< All indexes availables
+            ALL = 0,   ///< All indexes available
             FIRST = 1  ///< The first index
         };
 

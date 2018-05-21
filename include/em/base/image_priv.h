@@ -65,7 +65,7 @@ namespace em
          * Return the string file open mode from our numerical
          * open mode value. This could be format-specific.
          */
-        const char * getOpenMode(File::Mode mode) const;
+        const char * getModeString() const;
 
         /** Open the file for this format. The path and mode
          * should be set before calling this function.

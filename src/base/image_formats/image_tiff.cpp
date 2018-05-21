@@ -51,7 +51,7 @@ public:
         // We must check if this warning are necessary
         //TIFFSetWarningHandler(NULL); // Switch off warning messages
 
-        tif = TIFFOpen(path.c_str(), getOpenMode(fileMode));
+        tif = TIFFOpen(path.c_str(), getModeString());
 
         if (tif == nullptr)
             THROW_SYS_ERROR(std::string("Error opening file ") + path);

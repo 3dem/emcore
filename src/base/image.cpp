@@ -353,23 +353,14 @@ size_t ImageIO::Impl::getImageSize() const
     return dim.getItemSize() * type.getSize() + getPadSize();
 } // function ImageIO::Impl::getImageSize
 
-const char * ImageIO::Impl::getOpenMode(File::Mode mode) const
+const char * ImageIO::Impl::getModeString() const
 {
-    const char * openMode = "r";
-
-    switch (mode)
-    {
-        case  File::Mode::READ_WRITE:
-            openMode = "r+"; break;  // FIXME: File must exits
-        case  File::Mode::TRUNCATE:
-            openMode = "w"; break;
-    }
-    return openMode;
-} // function ImageIO::Impl::getOpenMode
+    return File::modeToString(fileMode);
+} // function ImageIO::Impl::getModeString
 
 void ImageIO::Impl::openFile()
 {
-    file = fopen(path.c_str(), getOpenMode(fileMode));
+    file = fopen(path.c_str(), getModeString());
 
     if (file == nullptr)
         THROW_SYS_ERROR(std::string("Error opening file: ") + path);

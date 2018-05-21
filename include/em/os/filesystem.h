@@ -21,6 +21,13 @@ namespace em
         /** Enum to simplify the options to open files */
         enum Mode { READ_ONLY = 0, READ_WRITE = 1, TRUNCATE = 2 };
 
+        /** Return the C equivalent from our file open modes.
+         * READ_ONLY = 'r'
+         * READ_WRITE = 'r+'
+         * TRUNCATE = 'w'
+         */
+        static const char * modeToString(Mode mode);
+
     }; // class File
 
     class Path
