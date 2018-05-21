@@ -41,6 +41,16 @@ TEST(String, split)
     ASSERT_EQ(String::split("123  456 789"), StringVector({"123", "456", "789"}));
 } // TEST(String, trim)
 
+TEST(String, join)
+{
+    ASSERT_EQ(String::join({}), "");
+    ASSERT_EQ(String::join({"a"}), "a");
+    ASSERT_EQ(String::join({"a", "b", "c"}), "abc");
+    ASSERT_EQ(String::join({}, '/'), "");
+    ASSERT_EQ(String::join({"a"}, '/'), "a");
+    ASSERT_EQ(String::join({"a", "b", "c"}, '/'), "a/b/c");
+} // TEST(String, trim)
+
 TEST(String, toNumber)
 {
     ASSERT_EQ(String::toInt("100"), 100);
