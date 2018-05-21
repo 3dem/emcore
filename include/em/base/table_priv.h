@@ -25,8 +25,10 @@ namespace em
     protected:
         virtual void openFile();
         virtual void closeFile();
+        // TODO: Document
         virtual void read(const std::string &tableName, Table &table) = 0;
-
+        // TODO: Document
+        virtual void write(const std::string &tableName, const Table &table) = 0;
 
         friend class TableIO;
     }; // class TableIO::Impl

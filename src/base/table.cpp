@@ -584,6 +584,12 @@ void TableIO::read(const std::string &tableName, Table &table)
     impl->read(tableName, table);
 } // TableIO.read
 
+void TableIO::write(const std::string &tableName, const Table &table)
+{
+    ASSERT_ERROR(impl == nullptr, "Invalid operation, implementation is null.");
+    impl->write(tableName, table);
+} // TableIO.write
+
 
 void TableIO::Impl::openFile()
 {
