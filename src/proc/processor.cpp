@@ -79,7 +79,7 @@ void ImageMathProc::process(const Image &input, Image &output)
 void ImageMathProc::process(Image &image)
 {
     // Just initialize with the proper type
-    Type::Operation op = (*this)[OPERATION];
+    Type::Operation op = (*this)[OPERATION].get<Type::Operation>();
     auto &operand = (*this)[OPERAND];
 
     switch (op)

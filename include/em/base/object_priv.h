@@ -41,7 +41,7 @@ void Object::set(const T& valueIn)
 } // function Object.set
 
 template <class T>
-Object::operator T() const
+T Object::get() const
 {
     // Check the type is the same of the object
     auto& type = getType();

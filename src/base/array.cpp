@@ -125,6 +125,7 @@ Array& Array::operator=(Array &&other)
 {
     swap(std::move(other));
     std::swap(impl, other.impl);
+    return *this;
 } // function Array.operator= (move)
 
 Array& Array::operator=(const Object &value)

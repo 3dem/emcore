@@ -78,7 +78,7 @@ namespace em
 
         void deallocate()
         {
-            if (!view & size > 0)
+            if (!view && size > 0)
             {
                 type.deallocate(data, size);
                 size = 0;

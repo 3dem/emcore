@@ -203,8 +203,8 @@ void init_submodule_base(py::module &m) {
             .def("setType", &Object::setType)
             .def("__repr__", &Object::toString)
             .def("__str__", &Object::toString)
-            .def("__int__", [](const Object &self) { return (int)self; })
-            .def("__float__", [](const Object &self) { return (float)self; })
+            .def("__int__", [](const Object &self) { return self.get<int>(); })
+            .def("__float__", [](const Object &self) { return self.get<float>(); })
             .def(py::self == py::self)
             .def("__eq__", [](Object &self, const py::object& pyobj)
             {

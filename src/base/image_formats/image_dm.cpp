@@ -226,7 +226,7 @@ public:
                 // We store the special tag which we assume contains the image
                 // information, i.e, the one that has 'Datatype' as name and
                 // is not 23, which seems to be the thumbnail image
-                if (tag.tagName == "DataType" && (int)tag.values[0] != 23)
+                if (tag.tagName == "DataType" && tag.values[0].get<int>() != 23)
                     dataTypeTag = pTag;
             }
             else if(ninfo == 3 && info[0]==20)   // Tag array
@@ -358,22 +358,21 @@ public:
         std::cout << "ImageData: " << imageData->tagName << std::endl;
 
         auto child = imageData->getChild("Data");
-        header.headerSize = (size_t) child->values[0];
+        header.headerSize = child->values[0].get<size_t>();
         header.dataType = child->dataType;
 
         child = imageData->getChild("Dimensions");
-        header.nx = child->childs[0]->values[0];
-        header.ny = child->childs[1]->values[0];
+        header.nx = child->childs[0]->values[0].get<int>();
+        header.ny = child->childs[1]->values[0].get<int>();
         header.nIm = (child->childs.size() > 2 ) ?
-                       (int)child->childs[2]->values[0] : 1;
+                       child->childs[2]->values[0].get<int>() : 1;
 
         child = imageData->parent->getChild({"ImageTags", "Acquisition",
                                              "Frame", "CCD","Pixel Size (um)"});
         if ( child != nullptr )
         {
-            header.pixelHeight = (double)child->values[0]*1e4;
-            header.pixelWidth = (double)child->values[1]*1e4;
-
+            header.pixelHeight = child->values[0].get<double>() * 1e4;
+            header.pixelWidth = child->values[1].get<double>() * 1e4;
         }
         else
             header.pixelHeight = header.pixelWidth = 0;
