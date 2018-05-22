@@ -11,13 +11,26 @@ namespace em
     class TableIO::Impl
     {
     public:
+        // Store the name of the file that was read/written
         std::string path;
 
-        virtual void open(const std::string &path) = 0;
-        virtual void close() = 0;
-        virtual void read(const std::string &tableName, Table &table) = 0;
+        // Mode in which the file was open
+        File::Mode fileMode = File::Mode::READ_ONLY;
+
+        // Keep a file handler to the image file
+        FILE* file = nullptr;
 
         virtual ~Impl() {};
+
+    protected:
+        virtual void openFile();
+        virtual void closeFile();
+        // TODO: Document
+        virtual void read(const std::string &tableName, Table &table) = 0;
+        // TODO: Document
+        virtual void write(const std::string &tableName, const Table &table) = 0;
+
+        friend class TableIO;
     }; // class TableIO::Impl
 
 } // namespace em

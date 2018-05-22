@@ -11,6 +11,7 @@
 #include "em/base/type.h"
 #include "em/base/object.h"
 #include "em/base/string.h"
+#include "em/os/filesystem.h"
 
 
 namespace em {
@@ -275,11 +276,6 @@ namespace em {
          */
         using ImplBuilder = Impl* (*)();
 
-        /** Constants for open files. */
-        static const int READ_ONLY = 0;
-        static const int READ_WRITE = 1;
-        static const int TRUNCATE = 2;
-
         /**
          * Empty constructor for TableIO.
          * In this case the newly created instance will have no format
@@ -326,7 +322,9 @@ namespace em {
                                  ImplBuilder builder);
 
         // TODO: DOCUMENT
-        void open(const std::string &path); //, const FileMode mode=READ_ONLY);
+        void open(const std::string &path,
+                  const File::Mode mode=File::Mode::READ_ONLY);
+
         // TODO: DOCUMENT
         void close();
 

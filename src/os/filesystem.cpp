@@ -7,6 +7,8 @@
 #include <sys/stat.h>
 
 #include "em/os/filesystem.h"
+#include "em/base/error.h"
+
 
 using namespace em;
 
@@ -18,6 +20,20 @@ void File::resize(FILE *file, size_t size)
     int fno = fileno(file);
     ftruncate(fno, size);
 } // function File::resizeFile
+
+const char* File::modeToString(Mode mode)
+{
+    const char * openMode = "r";
+
+    switch (mode)
+    {
+        case  File::Mode::READ_WRITE:
+            openMode = "r+"; break;
+        case  File::Mode::TRUNCATE:
+            openMode = "w"; break;
+    }
+    return openMode;
+} // function File::modeToString
 
 
 // ===================== File methods Implementation =======================

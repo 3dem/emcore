@@ -208,11 +208,22 @@ TEST(Table, RemoveColumns)
     checkColumns(table10, {0, 2});
 } // TEST Row.RemoveColumns
 
-TEST(Table, Read)
+TEST(Table, ReadStar)
 {
-    auto testDataPath = getenv("EM_TEST_DATA");
+
 
     ASSERT_TRUE(TableIO::hasImpl("star"));
+
+    Table t({Column(1, "col1", typeFloat),
+         Column(2, "col2", typeInt16),
+         Column(3, "col3", typeString)
+        });
+
+    ASSERT_EQ(t.cend_cols() - t.cbegin_cols(), 3);
+    ASSERT_EQ(t.getColumnsSize(), 3);
+    ASSERT_TRUE(t.isEmpty());
+
+    auto testDataPath = getenv("EM_TEST_DATA");
 
     if (testDataPath != nullptr)
     {
@@ -222,18 +233,10 @@ TEST(Table, Read)
         std::string fn1 = root + "case1/classify3d_small_it038_data.star";
         std::cout << "Reading star: " << fn1 << std::endl;
 
-        Table t({Column(1, "col1", typeFloat),
-                 Column(2, "col2", typeInt16),
-                 Column(3, "col3", typeString)
-                });
         TableIO tio;
-
-        ASSERT_EQ(t.cend_cols() - t.cbegin_cols(), 3);
-        ASSERT_EQ(t.getColumnsSize(), 3);
-        ASSERT_TRUE(t.isEmpty());
-
         tio.open(fn1);
         tio.read("images", t);
+        tio.close();
 
         StringVector refColNames = {"rlnVoltage", "rlnDefocusU",
                                     "rlnSphericalAberration", "rlnAmplitudeContrast",
@@ -257,6 +260,68 @@ TEST(Table, Read)
    xmipp_tutorial/gold/images200k.xmd
  */
 } // TEST Table.Read
+
+TEST(Table, WriteStar)
+{
+    auto table10 = createTable(10);
+    TableIO tio;
+    tio.open("test-write.star", File::Mode::TRUNCATE);
+    tio.write("Particles1", table10);
+    std::string str;
+
+    for (auto &row: table10)
+    {
+        row["col1"] = row["col1"].get<int>() * 10;
+        row["col2"] = row["col2"].get<float>() * 10 + 0.5;
+        row["col3"] = String::join({row["col3"].toString(), ".mrc"});
+    }
+    tio.write("Particles2", table10);
+    tio.close();
+
+    auto testDataPath = getenv("EM_TEST_DATA");
+    if (testDataPath != nullptr)
+    {
+        std::string root(testDataPath);
+        root += "relion_tutorial/import/";
+
+        std::string fn1 = root + "case1/classify3d_small_it038_data.star";
+        std::cout << "Reading star: " << fn1 << std::endl;
+
+        TableIO tio;
+        Table t;
+        tio.open(fn1);
+        tio.read("images", t);
+        tio.close();
+
+        StringVector refColNames = {"rlnVoltage", "rlnDefocusU",
+                                    "rlnSphericalAberration", "rlnAmplitudeContrast",
+                                    "rlnImageName", "rlnNormCorrection",
+                                    "rlnMicrographName", "rlnGroupNumber",
+                                    "rlnOriginX", "rlnOriginY", "rlnAngleRot",
+                                    "rlnAngleTilt", "rlnAnglePsi",
+                                    "rlnClassNumber", "rlnLogLikeliContribution",
+                                    "rlnNrOfSignificantSamples",
+                                    "rlnMaxValueProbDistribution"};
+
+        int i = 0;
+        for (auto it = t.cbegin_cols(); it < t.cend_cols(); ++it)
+        {
+            auto &col = *it;
+            ASSERT_EQ(refColNames[i++], col.getName());
+        }
+
+        t.removeColumn("rlnVoltage");
+        t.removeColumn("rlnDefocusU");
+        t.removeColumn("rlnSphericalAberration");
+        t.removeColumn("rlnAmplitudeContrast");
+
+        tio.open("images-less-cols.star", File::Mode::TRUNCATE);
+        tio.write("images", t);
+        tio.close();
+
+    } // if TEST_DATA
+
+}
 
 TEST(Table, ReadXmd)
 {

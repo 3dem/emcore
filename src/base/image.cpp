@@ -149,10 +149,10 @@ void Image::write(const ImageLocation &location) const
     ImageIO imgio;
 
     if (Path::exists(location.path))
-        imgio.open(location.path, ImageIO::READ_WRITE);
+        imgio.open(location.path,  File::Mode::READ_WRITE);
     else
     {
-        imgio.open(location.path, ImageIO::TRUNCATE);
+        imgio.open(location.path,  File::Mode::TRUNCATE);
         imgio.createFile(getDim(), getType());
     }
 
@@ -202,21 +202,21 @@ ImageIO::Impl::~Impl()
 {
 }
 
-void ImageIO::open(const std::string &path, const FileMode mode)
+void ImageIO::open(const std::string &path, const File::Mode mode)
 {
     delete impl;  // Does it make sense to reuse impl?
     impl = getImageIORegistry()->buildImpl(Path::getExtension(path));
     impl->path = path;
     impl->fileMode = mode;
 
-    // If the file does not exists and mode is READ_WRITE
+    // If the file does not exists and mode is  File::Mode::READ_WRITE
     // switch automatically to TRUNCATE mode
-    if (mode == READ_WRITE and !Path::exists(path))
-        impl->fileMode = TRUNCATE;
+    if (mode ==  File::Mode::READ_WRITE and !Path::exists(path))
+        impl->fileMode =  File::Mode::TRUNCATE;
 
     impl->openFile();
 
-    if (impl->fileMode != TRUNCATE)
+    if (impl->fileMode !=  File::Mode::TRUNCATE)
         impl->readHeader();
 } // function ImageIO.open
 
@@ -232,7 +232,7 @@ void ImageIO::close()
 void ImageIO::createFile(const ArrayDim &adim, const Type & type)
 {
     ASSERT_ERROR(type.isNull(), "Input type can not be null. ");
-    ASSERT_ERROR(impl->fileMode != TRUNCATE,
+    ASSERT_ERROR(impl->fileMode !=  File::Mode::TRUNCATE,
                  "ImageIO::createFile can only be used with TRUNCATE mode.");
     // TODO: Check that the format supports this Type
     impl->dim = adim;
@@ -309,9 +309,6 @@ void ImageIO::write(size_t index, const Image &image)
     if (index == ImageLocation::ALL)
         index = ImageLocation::FIRST;
 
-//    std::cerr << "ImageIO::write: type: " << *type << std::endl;
-//    std::cerr << "ImageIO::write: image.getType(): " << *image.getType() << std::endl;
-
     ASSERT_ERROR(image.getType() != type,
                  "Type cast not implemented. Now image should have the same "
                  "type.")
@@ -356,25 +353,14 @@ size_t ImageIO::Impl::getImageSize() const
     return dim.getItemSize() * type.getSize() + getPadSize();
 } // function ImageIO::Impl::getImageSize
 
-const char * ImageIO::Impl::getOpenMode(FileMode mode) const
+const char * ImageIO::Impl::getModeString() const
 {
-    const char * openMode = "r";
-
-    switch (mode)
-    {
-        case ImageIO::READ_WRITE:
-            openMode = "r+"; break;  // FIXME: File must exits
-        case ImageIO::TRUNCATE:
-            openMode = "w"; break;
-    }
-
-    return openMode;
-} // function ImageIO::Impl::getOpenMode
-
+    return File::modeToString(fileMode);
+} // function ImageIO::Impl::getModeString
 
 void ImageIO::Impl::openFile()
 {
-    file = fopen(path.c_str(), getOpenMode(fileMode));
+    file = fopen(path.c_str(), getModeString());
 
     if (file == nullptr)
         THROW_SYS_ERROR(std::string("Error opening file: ") + path);

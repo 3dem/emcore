@@ -213,6 +213,13 @@ void init_submodule_base(py::module &m) {
             })
             .def(py::self != py::self);
 
+    py::class_<File> file(m, "File");
+    py::enum_<File::Mode>(file, "Mode")
+            .value("READ_ONLY", File::Mode::READ_ONLY)
+            .value("READ_WRITE", File::Mode::READ_WRITE)
+            .value("TRUNCATE", File::Mode::TRUNCATE)
+            .export_values();
+
     py::class_<Table> table(m, "Table");
 
     py::class_<Table::Column>(table, "Column")
@@ -291,7 +298,8 @@ void init_submodule_base(py::module &m) {
             .def(py::init<const std::string&>())
             .def_static("hasImpl", &TableIO::hasImpl)
             .def_static("registerImpl", &TableIO::registerImpl)
-            .def("open", &TableIO::open)
+            .def("open", &TableIO::open,
+                 py::arg("filename"), py::arg("mode")=File::Mode::READ_ONLY)
             .def("close", &TableIO::close)
             .def("read", &TableIO::read);
             //.def("write", &TableIO::write);

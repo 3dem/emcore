@@ -10,20 +10,8 @@ using namespace em;
 
 class TableIOStar: public TableIO::Impl
 {
-public:
-    FILE* file = nullptr; // Keep a file handler
+protected:
     std::string line; // Used for parsing the star file lines
-
-    virtual void open(const std::string &path) override
-    {
-        this->path = path;
-        file = fopen(path.c_str(), "r");
-    } // function open
-
-    virtual void close() override
-    {
-        fclose(file);
-    } // function close
 
     virtual void read(const std::string &tableName, Table &table) override
     {
@@ -49,7 +37,6 @@ public:
         } // while
     } // function read
 
-protected:
     void readTable(std::ifstream &ifs, Table &table)
     {
         // Read all lines until EOF or first non-empty line
@@ -74,7 +61,6 @@ protected:
             ASSERT_ERROR(line.empty(),
                          "There are empty lines after columns and before data");
 
-            // TODO: Infer the Column types from the first data line
             StringVector tokens = String::split(line.c_str());
             int i = 0;
 
@@ -100,7 +86,6 @@ protected:
         }
     } // function readTable
 
-    void readLoopColumns(std::ifstream &ifs, Table &table);
     void readColumns(std::ifstream &ifs, Table &table)
     {
 
@@ -113,6 +98,25 @@ protected:
         for (auto& obj: row)
             obj.fromStream(ss);
     } // function parseLine
+
+    virtual void write(const std::string &tableName, const Table &table) override
+    {
+        fprintf(file, "\ndata_%s\n", tableName.c_str());
+        fprintf(file, "loop_\n");
+        Object counter = Object(typeInt16);
+        int c = 0;
+
+        for (auto it = table.cbegin_cols(); it < table.cend_cols(); ++it, ++c)
+            fprintf(file, "_%s #%d\n", it->getName().c_str(), c);
+
+        for (auto rowIt = table.cbegin(); rowIt < table.cend(); ++rowIt)
+        {
+            for (auto objIt = rowIt->cbegin(); objIt < rowIt->cend(); ++objIt)
+                fprintf(file, "%s ", objIt->toString().c_str());
+            fprintf(file, "\n");
+        }
+        fprintf(file, "\n");
+    } // function write
 
 }; // class TableIOStar
 

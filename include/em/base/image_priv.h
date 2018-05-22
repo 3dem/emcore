@@ -20,7 +20,7 @@ namespace em
         std::string path;
 
         // Mode in which the file was open
-        FileMode fileMode = ImageIO::READ_ONLY;
+        File::Mode fileMode = File::Mode::READ_ONLY;
 
         // Keep a file handler to the image file
         FILE* file = nullptr;
@@ -65,7 +65,7 @@ namespace em
          * Return the string file open mode from our numerical
          * open mode value. This could be format-specific.
          */
-        const char * getOpenMode(FileMode mode) const;
+        const char * getModeString() const;
 
         /** Open the file for this format. The path and mode
          * should be set before calling this function.

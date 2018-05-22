@@ -39,6 +39,22 @@ StringVector String::split(const char *str, const char sep)
     return result;
 } // function String::split
 
+std::string String::join(StringVector input, const char sep)
+{
+    if (input.empty())
+        return "";
+
+    std::string result(input[0]);
+    for (auto it = input.cbegin() + 1; it < input.cend(); ++it)
+    {
+        if (sep)
+            result += sep;
+        result += *it;
+    }
+
+    return result;
+} // function String::join
+
 // Define a convenience macro to use sscanf,
 // str and retval should be defined
 #define SCAN_NUMBER(type, format) type retval; char dummy; \
