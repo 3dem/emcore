@@ -271,8 +271,8 @@ TEST(Table, WriteStar)
 
     for (auto &row: table10)
     {
-        row["col1"] = int(row["col1"]) * 10;
-        row["col2"] = float(row["col2"]) * 10 + 0.5;
+        row["col1"] = row["col1"].get<int>() * 10;
+        row["col2"] = row["col2"].get<float>() * 10 + 0.5;
         row["col3"] = String::join({row["col3"].toString(), ".mrc"});
     }
     tio.write("Particles2", table10);

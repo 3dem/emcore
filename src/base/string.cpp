@@ -41,14 +41,17 @@ StringVector String::split(const char *str, const char sep)
 
 std::string String::join(StringVector input, const char sep)
 {
-    std::string result(input[0]);
+    if (input.empty())
+        return "";
 
+    std::string result(input[0]);
     for (auto it = input.cbegin() + 1; it < input.cend(); ++it)
     {
         if (sep)
             result += sep;
         result += *it;
     }
+
     return result;
 } // function String::join
 

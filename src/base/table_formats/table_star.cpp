@@ -99,7 +99,7 @@ protected:
             obj.fromStream(ss);
     } // function parseLine
 
-    virtual void write(const std::string &tableName, const Table &table)
+    virtual void write(const std::string &tableName, const Table &table) override
     {
         fprintf(file, "\ndata_%s\n", tableName.c_str());
         fprintf(file, "loop_\n");
