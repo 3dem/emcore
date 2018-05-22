@@ -29,20 +29,20 @@ TEST(Object, Basic)
     // After assignment, an object will change its type if necessary
     eo = 2.2f;
     ASSERT_EQ(eo.getType(), typeFloat);
-    ASSERT_EQ(eo, 2.2f);
+    ASSERT_FLOAT_EQ(eo.get<float>(), 2.2f);
     ASSERT_EQ(eo, Object(2.2f));
 
     // We can explicitly change its type, internal value will be converted
     eo.setType(typeInt32);
-    ASSERT_EQ(eo, (int)2.2f);
+    ASSERT_EQ(eo.get<int>(), (int)2.2f);
 
     // Copy constructor
     em::Object o(1);
-    int x = o;
+    int x = o.get<int>();
     ASSERT_EQ(o.getType(), typeInt32);
     ASSERT_EQ(x, 1);
     o = 2;
-    ASSERT_EQ(int(o), 2);
+    ASSERT_EQ(o.get<int>(), 2);
 
     em::Object o2(3.5); // Type should be double
     ASSERT_EQ(o2.getType(), typeDouble);
@@ -51,12 +51,12 @@ TEST(Object, Basic)
     ASSERT_EQ(o2.getType(), typeFloat);
     o2 = 1.3; // Now type should be double again
     ASSERT_EQ(o2.getType(), typeDouble);
-    float f = o2;
+    float f = o2.get<float>();
     ASSERT_FLOAT_EQ(f, 1.3f);
 
     o2.set(5.6f);
 
-    float d, d2 = 5.6 + float(o2);
+    float d, d2 = 5.6 + o2.get<float>();
     float d3;
 
     size_t N = 100;
@@ -71,7 +71,7 @@ TEST(Object, Basic)
 
     for (int i = 0; i < N; ++i)
     {
-        d = vobj[i];
+        d = vobj[i].get<float>();
         ASSERT_FLOAT_EQ(d, values[i % 6]);
     }
 
@@ -79,14 +79,14 @@ TEST(Object, Basic)
 
     Object o3;
     o3 = std::string(str);
-    std::string s2 = o3;
+    auto s2 = o3.get<std::string>();
     ASSERT_EQ(s2, str);
 
     Image img(ArrayDim(10, 10), typeFloat);
     auto& typeImage = Type::get<Image>();
     o3 = img;
     ASSERT_EQ(o3.getType(), typeImage);
-    Image img2 = o3;
+    Image img2 = o3.get<Image>();
 
     // Test copy and equality
     Object oo3 = std::string("One string");
@@ -121,11 +121,11 @@ TEST(Object, Parsing)
     std::stringstream ss(pi);
     o1.fromStream(ss);
     o2.fromString(pi);
-    ASSERT_FLOAT_EQ((double)o1, 3.14159);
-    ASSERT_FLOAT_EQ((double)o2, 3.14159);
+    ASSERT_FLOAT_EQ(o1.get<double>(), 3.14159);
+    ASSERT_FLOAT_EQ(o2.get<double>(), 3.14159);
     ASSERT_EQ(o1.toString(), pi);
     // FIXME: The following Object comparision throws an exception
-    // ASSERT_FLOAT_EQ(o1, o2);
+    ASSERT_FLOAT_EQ(o1.get<double>(), o2.get<double>());
     std::cout << o1.toString() << std::endl;
 } // TEST Object.Parsing
 
@@ -136,14 +136,14 @@ TEST(Object, Cast)
     Object o1 = value;
     ASSERT_EQ(o1.getType(), typeUInt64);
 
-    uint64_t value2 = o1;
+    auto value2 = o1.get<uint64_t>();
     ASSERT_EQ(value, value2);
 
-    size_t value3 = (size_t) o1;
+    auto value3 = o1.get<size_t>();
     ASSERT_EQ(value, value3);
 
-    size_t value4 = (int64_t) o1;
+    auto value4 = o1.get<uint64_t>();
     ASSERT_EQ(value, value4);
 
-    ASSERT_TRUE((bool)o1);
+    ASSERT_TRUE(o1.get<bool>());
 } // TEST Object.Parsing

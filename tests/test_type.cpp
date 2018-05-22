@@ -95,7 +95,7 @@ TEST(Type, General) {
     ASSERT_FLOAT_EQ(refValue, d1);
     // Parse from stream into an Object (initialized to double)
     typeDouble.fromStream(ss, o1.getData(), 1);
-    ASSERT_FLOAT_EQ(refValue, (double)o1);
+    ASSERT_FLOAT_EQ(refValue, o1.get<double>());
 
     for (size_t i = 0; i < n; i++)
         ASSERT_EQ(arrayInt[i], arrayInt2[i]);
@@ -172,7 +172,6 @@ TEST(TypeContainer, Basic)
 
     for (size_t i = 0; i < n; ++i)
         ASSERT_EQ(array[i], i);
-
 
 } // TEST Container.Basic
 

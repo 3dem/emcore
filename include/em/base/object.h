@@ -88,7 +88,7 @@ namespace em
         bool operator!=(const Object &other) const;
 
         // Extract the value
-        template<class T> operator T() const;
+        template<class T> T get() const;
 
         /** Return a View of this object. */
         Object getView();

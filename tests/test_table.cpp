@@ -133,7 +133,7 @@ TEST(Table, Basic)
     ASSERT_EQ(row[2], row["col2"]);
     ASSERT_EQ(row[3], row["col3"]);
 
-    int x = row[2];
+    int x = row[2].get<int>();
     ASSERT_EQ(x, 300);
 
     //auto row2 = table.createRow();
@@ -141,7 +141,7 @@ TEST(Table, Basic)
     Table::Row row3(row);
     row3["col2"] = 400;
     row3["col3"] = std::string("Other name");
-    x = row3[2];
+    x = row3[2].get<int>();
     ASSERT_EQ(x, 400);
 
     std::cerr << "Row 3 >>>  " << row3 << std::endl;
@@ -153,7 +153,7 @@ TEST(Table, Basic)
     for (auto& row: table)
     {
         row["col3"] = std::string("Other name 2");
-        row["col2"] = (int)row["col2"] / 10;
+        row["col2"] = row["col2"].get<int>() / 10;
     }
 
     //printTable(table);

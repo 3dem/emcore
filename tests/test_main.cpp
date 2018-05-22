@@ -22,7 +22,7 @@ TEST(Main, ObjectLoop) {
     Object o2(d);
     ASSERT_EQ(o2.getType(), typeFloat);
 
-    float d2 = 5.6 + float(o2);
+    float d2 = 5.6 + o2.get<float>();
     float d3;
 
     std::cout << "d2 = " << d2 << std::endl;
@@ -36,7 +36,7 @@ TEST(Main, ObjectLoop) {
     {
         o2 = values[i % 6];
         d /= 5.f;
-        d2 = 500.6 + float(o2);
+        d2 = 500.6 + o2.get<float>();
         d3 = d2 / 100.f;
     }
 
