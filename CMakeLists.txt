@@ -37,9 +37,11 @@ set(EXAMPLE_PATH "${PROJECT_PATH}/examples")
 set(DOC_PATH      "${PROJECT_PATH}/docs")
 set(EXT_PATH      "${PROJECT_PATH}/libs")
 
-include_directories(AFTER "${INCLUDE_PATH}")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-#file(GLOB HEADER_FILES "${INCLUDE_PATH}/*/*.h") # This is not necessary
+MESSAGE( STATUS "Module path: " ${CMAKE_MODULE_PATH} )
+
+include_directories(AFTER "${INCLUDE_PATH}")
 
 # File lists definitions
 file(GLOB SOURCE_FILES "${SRC_PATH}/*/*.cpp")
@@ -101,6 +103,17 @@ set_property(TARGET em-core PROPERTY SUFFIX "")
 #############################
 # TODO: FIND OR COMPILE FFTW
 set(EXT_LIBRARIES ${EXT_LIBRARIES} fftw3 fftw3f)
+
+#############################
+#  SQlite3
+#############################
+find_package (sqlite3)
+if (SQLITE3_FOUND)
+    #include_directories(${SQLITE3_INCLUDE_DIRS})
+    #set(EXT_LIBRARIES ${EXT_LIBRARIES} ${SQLITE3_LIBRARIES})
+    MESSAGE( STATUS "SQLite3 library: " ${SQLITE3_LIBRARIES} )
+    MESSAGE( STATUS "SQLite3 include: " ${SQLITE3_INCLUDE_DIRS} )
+endif (SQLITE3_FOUND)
 
 
 target_link_libraries( em-core ${EXT_LIBRARIES} )
