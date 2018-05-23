@@ -25,6 +25,8 @@ namespace em
     protected:
         virtual void openFile();
         virtual void closeFile();
+
+        virtual StringVector getTableNames() const = 0;
         // TODO: Document
         virtual void read(const std::string &tableName, Table &table) = 0;
         // TODO: Document

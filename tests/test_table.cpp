@@ -210,8 +210,6 @@ TEST(Table, RemoveColumns)
 
 TEST(Table, ReadStar)
 {
-
-
     ASSERT_TRUE(TableIO::hasImpl("star"));
 
     Table t({Column(1, "col1", typeFloat),
@@ -260,6 +258,33 @@ TEST(Table, ReadStar)
    xmipp_tutorial/gold/images200k.xmd
  */
 } // TEST Table.Read
+
+TEST(Table, ReadWriteStarSingleRow)
+{
+    auto testDataPath = getenv("EM_TEST_DATA");
+
+    if (testDataPath != nullptr)
+    {
+        std::string root(testDataPath);
+        root += "relion_tutorial/import/";
+
+        std::string fn1 = root + "case1/classify3d_small_it038_optimiser.star";
+        std::cout << "Reading star: " << fn1 <<
+        std::endl;
+
+        TableIO tio;
+        Table t;
+        tio.open(fn1);
+        tio.read("optimiser_general", t);
+        tio.close();
+        ASSERT_EQ(t.getColumnsSize(), 52);
+        ASSERT_EQ(t.getSize(), 1);
+
+        tio.open("test-written-row.star", File::Mode::TRUNCATE);
+        tio.write("my_optimiser", t);
+        tio.close();
+    }
+} // TEST ReadSingleRow
 
 TEST(Table, WriteStar)
 {
@@ -320,8 +345,33 @@ TEST(Table, WriteStar)
         tio.close();
 
     } // if TEST_DATA
-
 }
+
+TEST(Table, ReadStarMultipleTables)
+{
+    auto testDataPath = getenv("EM_TEST_DATA");
+    if (testDataPath != nullptr)
+    {
+        std::string root(testDataPath);
+        root += "relion_tutorial/import/";
+
+        std::string fn1 = root + "case1/classify3d_small_it038_sampling.star";
+        std::cout << "Reading star: " << fn1 << std::endl;
+
+        TableIO tio;
+        Table t;
+        tio.open(fn1);
+        int c = 0;
+        StringVector goldNames = {"sampling_general", "sampling_directions"};
+        for (auto &name: tio.getTableNames())
+        {
+            std::cout << "table: " << name << std::endl;
+            ASSERT_EQ(name, goldNames[c++]);
+        }
+        tio.close();
+    }
+}
+
 
 TEST(Table, ReadXmd)
 {

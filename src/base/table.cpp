@@ -559,6 +559,7 @@ TableIO::~TableIO()
 
 void TableIO::open(const std::string &path, File::Mode mode)
 {
+
     delete impl;  // Does it make sense to reuse impl?
     impl = getTableIORegistry()->buildImpl(Path::getExtension(path));
     impl->path = path;
@@ -566,11 +567,22 @@ void TableIO::open(const std::string &path, File::Mode mode)
 
     // If the file does not exists and mode is  File::Mode::READ_WRITE
     // switch automatically to TRUNCATE mode
-    if (mode ==  File::Mode::READ_WRITE and !Path::exists(path))
-        impl->fileMode =  File::Mode::TRUNCATE;
+    auto newFile = !Path::exists(path);
+
+    if (mode ==  File::Mode::READ_WRITE and newFile)
+        impl->fileMode = File::Mode::TRUNCATE;
+
+    ASSERT_ERROR(newFile && impl->fileMode != File::Mode::TRUNCATE,
+                 String::join({"Filename does not exists: ", path}));
 
     impl->openFile();
 } // function TableIO.open
+
+StringVector TableIO::getTableNames() const
+{
+    ASSERT_ERROR(impl == nullptr, "Invalid operation, implementation is null.");
+    return impl->getTableNames();
+} // function TableIO.getColumnNames
 
 void TableIO::close()
 {
