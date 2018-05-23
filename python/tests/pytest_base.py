@@ -59,7 +59,7 @@ class TestArray(BaseTest):
 
         a[:, :] = 0
 
-        print a
+        print(a)
 
         """
             ArrayDim adim(10, 10);

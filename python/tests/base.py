@@ -30,4 +30,4 @@ class Timer():
         return prettyDelta(datetime.now()-self._dt)
 
     def toc(self, message='Elapsed:'):
-        print message, self.getToc()
+        print(message, self.getToc())
