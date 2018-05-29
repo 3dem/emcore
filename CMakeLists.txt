@@ -109,10 +109,10 @@ set(EXT_LIBRARIES ${EXT_LIBRARIES} fftw3 fftw3f)
 #############################
 find_package (sqlite3)
 if (SQLITE3_FOUND)
-    #include_directories(${SQLITE3_INCLUDE_DIRS})
-    #set(EXT_LIBRARIES ${EXT_LIBRARIES} ${SQLITE3_LIBRARIES})
     MESSAGE( STATUS "SQLite3 library: " ${SQLITE3_LIBRARIES} )
     MESSAGE( STATUS "SQLite3 include: " ${SQLITE3_INCLUDE_DIRS} )
+    include_directories(${SQLITE3_INCLUDE_DIRS})
+    set(EXT_LIBRARIES ${EXT_LIBRARIES} ${SQLITE3_LIBRARIES})
 endif (SQLITE3_FOUND)
 
 
