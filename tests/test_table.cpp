@@ -370,7 +370,7 @@ TEST(Table, ReadStarMultipleTables)
         }
         tio.close();
     }
-}
+} // TEST(Table.ReadStarMultipleTables)
 
 
 TEST(Table, ReadXmd)
@@ -402,13 +402,35 @@ TEST(Table, ReadXmd)
         for (auto it = t.cbegin_cols(); it < t.cend_cols(); ++it)
         {
             auto &col = *it;
-            //std::cout << col << std::endl;
-std::cout << "'" << col.getName() << "', ";
+            std::cout << "'" << col.getName() << "', ";
         }
-        //printTable(t);
     } // if TEST_DATA
-    /*
-     * relion_tutorial/import/case1/classify3d_small_it038_data.star
-
-     */
 } // TEST Table.ReadXmd
+
+
+TEST(Table, ReadSqlite)
+{
+    auto testDataPath = getenv("EM_TEST_DATA");
+    if (testDataPath != nullptr)
+    {
+        std::string fn1(testDataPath);
+        fn1 += "/3d_analysis/particles.sqlite";
+
+        std::cout << "Reading sqlite: " << fn1 << std::endl;
+
+        TableIO tio;
+        Table t;
+        tio.open(fn1);
+        int c = 0;
+        StringVector goldNames = {"Properties", "Classes", "Objects"};
+        for (auto &name: tio.getTableNames())
+        {
+            std::cout << "table: " << name << std::endl;
+            ASSERT_EQ(name, goldNames[c++]);
+        }
+        tio.read("Properties", t);
+        std::cout << t << std::endl;
+
+        tio.close();
+    }
+} // TEST(Table, ReadSqlite)

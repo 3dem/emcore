@@ -15,8 +15,6 @@ protected:
 
     virtual void read(const std::string &tableName, Table &table) override
     {
-        table.clear();
-
         std::ifstream ifs(path.data(), std::ios_base::in);
         ifs.seekg(0);
         size_t lineCount = 0;
