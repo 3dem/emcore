@@ -457,6 +457,15 @@ size_t Table::addColumn(const Column &col)
     return impl->addColumn(col);
 } // function Table.addColumn
 
+size_t Table::addColumn(const std::string &colName, const Type &colType)
+{
+    ASSERT_ERROR(!isEmpty(),
+                 "A default value should be provided when add a column "
+                 "to a non-empty table.");
+
+    return impl->addColumn(Column(colName, colType));
+} // function Table.addColumn
+
 size_t Table::addColumn(const Column &col, const Object &defaultValue)
 {
     ASSERT_ERROR(col.getType() != defaultValue.getType(),
@@ -593,6 +602,7 @@ void TableIO::close()
 void TableIO::read(const std::string &tableName, Table &table)
 {
     ASSERT_ERROR(impl == nullptr, "Invalid operation, implementation is null.");
+    table.clear();
     impl->read(tableName, table);
 } // TableIO.read
 
@@ -614,3 +624,4 @@ void TableIO::Impl::closeFile()
 } // function TableIO::Impl.closeFile
 
 #include "table_formats/table_star.cpp"
+#include "table_formats/table_sqlite.cpp"
