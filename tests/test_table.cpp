@@ -414,7 +414,7 @@ TEST(Table, ReadSqlite)
     if (testDataPath != nullptr)
     {
         std::string fn1(testDataPath);
-        fn1 += "/3d_analysis/particles.sqlite";
+        fn1 += "/xmipp_tutorial/particles/BPV_particles.sqlite";
 
         std::cout << "Reading sqlite: " << fn1 << std::endl;
 

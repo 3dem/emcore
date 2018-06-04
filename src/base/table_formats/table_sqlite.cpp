@@ -9,21 +9,27 @@
 using namespace em;
 
 
+#define SQLITE3_STR(text) reinterpret_cast<const char*>(text)
+#define SQLITE3_NOT_NULL(stmt, col) sqlite3_column_type(stmt, col) != SQLITE_NULL
+
 using setObjectFunc = void (*)(Object &obj, sqlite3_stmt* stmt, int col);
 
 void setObjectFromText(Object& obj, sqlite3_stmt* stmt, int col)
 {
-    obj.set(std::string(reinterpret_cast<const char*>(sqlite3_column_text(stmt, col))));
+    if (SQLITE3_NOT_NULL(stmt, col))
+        obj.set(std::string(SQLITE3_STR(sqlite3_column_text(stmt, col))));
 }
 
 void setObjectFromInt(Object& obj, sqlite3_stmt* stmt, int col)
 {
-    obj.set(sqlite3_column_int(stmt, col));
+    if (SQLITE3_NOT_NULL(stmt, col))
+        obj.set(sqlite3_column_int(stmt, col));
 }
 
 void setObjectFromFloat(Object& obj, sqlite3_stmt* stmt, int col)
 {
-    obj.set(sqlite3_column_double(stmt, col));
+    if (SQLITE3_NOT_NULL(stmt, col))
+        obj.set(sqlite3_column_double(stmt, col));
 }
 
 void setObjectFromNull(Object& obj, sqlite3_stmt* stmt, int col)
@@ -71,8 +77,7 @@ protected:
         StringVector names;
         int step;
         while ((step = sqlite3_step(stmt)) == SQLITE_ROW)
-            names.emplace_back(reinterpret_cast<const char*>(
-                                       sqlite3_column_text(stmt, 0)));
+            names.emplace_back(SQLITE3_STR(sqlite3_column_text(stmt, 0)));
 
         sqlite3_finalize(stmt);
 
@@ -83,7 +88,10 @@ protected:
     {
         char *err_msg = nullptr;
         sqlite3_stmt *stmt;
-        auto sql = String::join({"SELECT * FROM ", tableName});
+
+        // Retrieve column names and the types for this table
+
+        auto sql = String::join({"PRAGMA table_info(", tableName, ")"});
         int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, 0);
 
         if (rc != SQLITE_OK )
@@ -93,14 +101,29 @@ protected:
                                       "\nQuery: ", sql, "\nError: ", err_msg}));
         }
 
-        int nCols = sqlite3_column_count(stmt);
-        funcs.clear();
-
-        for (int i = 0; i < nCols; ++i)
-            table.addColumn(sqlite3_column_name(stmt, i),
-                            getTypeFromSqlite(sqlite3_column_type(stmt, i)));
-
         int step;
+        funcs.clear(); // clean this to be filled after each col type
+        while ((step = sqlite3_step(stmt)) == SQLITE_ROW)
+        {
+            auto colName = SQLITE3_STR(sqlite3_column_text(stmt, 1));
+            auto colType = getTypeFromSqlite(stmt, 2);
+            table.addColumn(colName, colType);
+        }
+
+        // Retrieve row values
+
+        sql = String::join({"SELECT * FROM ", tableName});
+        sqlite3_finalize(stmt);
+
+        rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, 0);
+
+        if (rc != SQLITE_OK )
+        {
+            sqlite3_free(err_msg);
+            THROW_ERROR(String::join({"Error reading table: ", tableName,
+                                      "\nQuery: ", sql, "\nError: ", err_msg}));
+        }
+
         auto row = table.createRow();
 
         while ((step = sqlite3_step(stmt)) == SQLITE_ROW)
@@ -111,6 +134,7 @@ protected:
                 funcs[i](obj, stmt, i);
                 ++i;
             }
+            table.addRow(row);
         }
 
         sqlite3_finalize(stmt);
@@ -123,26 +147,27 @@ protected:
     /** Return the em::Type from a given SQLite type.
      * Each call to this function will also store the function that
      * will be used to retrieve the object */
-    virtual em::Type getTypeFromSqlite(int sqliteType)
+    virtual em::Type getTypeFromSqlite(sqlite3_stmt* stmt, int typeCol)
     {
-        switch (sqliteType)
+        auto typeStr = std::string(SQLITE3_STR(sqlite3_column_text(stmt, typeCol)));
+
+        if (typeStr == "TEXT" || typeStr == "DATE")
         {
-            case SQLITE3_TEXT:
-                funcs.push_back(setObjectFromText);
-                return em::typeString;
-            case SQLITE_INTEGER:
-                funcs.push_back(setObjectFromInt);
-                return em::typeInt32;
-            case SQLITE_FLOAT:
-                funcs.push_back(setObjectFromFloat);
-                return em::typeFloat;
-            case SQLITE_NULL:
-                funcs.push_back(setObjectFromNull);
-                return em::typeNull;
-            default:
-                THROW_ERROR(String::join({"Unsupported SQLite type",
-                                          std::to_string(sqliteType)}));
+            funcs.push_back(setObjectFromText);
+            return em::typeString;
         }
+        else if (typeStr == "INTEGER")
+        {
+            funcs.push_back(setObjectFromInt);
+            return em::typeInt32;
+        }
+        else if (typeStr == "FLOAT" || typeStr == "REAL")
+        {
+            funcs.push_back(setObjectFromFloat);
+            return em::typeFloat;
+        }
+
+        THROW_ERROR(String::join({"Unsupported SQLite type", typeStr}));
     } // function getTypeFromSqlite
 
 }; // class TableIOStar
