@@ -39,6 +39,10 @@ TEST(ImageIO, Impl)
     ASSERT_TRUE(ImageIO::hasImpl("mrc"));
     ASSERT_TRUE(ImageIO::hasImpl("mrcs"));
     ImageIO mrcIO = ImageIO("mrc");
+
+    ASSERT_TRUE(ImageIO::hasImpl("img"));
+    ASSERT_TRUE(ImageIO::hasImpl("hed"));
+    ImageIO imagicIO = ImageIO("img");
 } // TEST(ImageIO, Impl)
 
 
@@ -176,6 +180,48 @@ TEST(ImageSpiderIO, Read)
 
 } // TEST(ImageSpiderIO, Read)
 
+TEST(ImageIOImagic, Read)
+{
+    ImageIO imagicIO = ImageIO("hed");
+    // ASSERT_EQ(imagicIO.getName(), "hed");
+
+    ImageLocation loc;
+    std::map<std::string, ArrayDim> fileDims;
+
+    auto testDataPath = getenv("EM_TEST_DATA");
+
+    if (testDataPath != nullptr)
+    {
+        try {
+            std::string root(testDataPath);
+
+            fileDims["BPV_1386_ptcls.hed"] = ArrayDim(100, 100, 1, 1);
+
+            for (auto &pair: fileDims)
+            {
+                Image img;
+                loc.index = 1;
+                loc.path = root + pair.first;
+                std::cout << ">>> Reading image: " << loc << std::endl;
+
+                img.read(loc);
+                std::cout << img << std::endl;
+            }
+
+            imagicIO.close();
+        }
+        catch (Error &err)
+        {
+            std::cout << err << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "Skipping image format tests, EM_TEST_DATA not defined in "
+                     "environment. " << std::endl;
+    }
+
+} // TEST(ImageMrcIO, Read)
 
 TEST(ImageIO, Create)
 {

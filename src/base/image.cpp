@@ -475,4 +475,5 @@ size_t ImageIO::fread(FILE *file, Array &array, bool swap)
 #include "image_formats/image_tiff.cpp"
 #include "image_formats/image_em.cpp"
 #include "image_formats/image_dm.cpp"
+#include "image_formats/image_imagic.cpp"
 
