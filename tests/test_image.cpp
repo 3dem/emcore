@@ -195,12 +195,12 @@ TEST(ImageIOImagic, Read)
         try {
             std::string root(testDataPath);
 
-            fileDims["BPV_1386_ptcls.hed"] = ArrayDim(100, 100, 1, 1);
+            fileDims["BPV_1387_ptcls.hed"] = ArrayDim(100, 100, 1, 1);
 
             for (auto &pair: fileDims)
             {
                 Image img;
-                loc.index = 1;
+                loc.index = 0;
                 loc.path = root + pair.first;
                 std::cout << ">>> Reading image: " << loc << std::endl;
 
@@ -226,7 +226,7 @@ TEST(ImageIOImagic, Read)
 TEST(ImageIO, Create)
 {
 
-    StringVector exts = {"mrc", "spi"};
+    StringVector exts = {"mrc", "spi", "img"};
     const size_t DIM = 16; // 128
 
     for (auto ext: exts)
@@ -251,8 +251,10 @@ TEST(ImageIO, Create)
         av.assign(200);
         imgio.write(1, img);
         imgio.close();
-
     }
+
+
+
 } // TEST(ImageIO, Create)
 
 

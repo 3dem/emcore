@@ -158,44 +158,111 @@ struct ImagicHeader
 class ImageIOImagic: public em::ImageIO::Impl
 {
 public:
-    ImagicHeader header;
+    std::vector<ImagicHeader> headers;
     FILE * imageFile = nullptr;
     std::string imagePath;
 
     virtual void readHeader() override
     {
-        // Try to read the main header from the (already opened) file stream
-        if ( fread(&header, IMAGIC_HEADER_SIZE, 1, file) < 1 )
-            THROW_SYS_ERROR(std::string("Error reading IMAGIC header in file: ") + path);
+        size_t n, index = 0;
+        ImagicHeader header;
+        do
+        {
+            // Try to read the main header from the (already opened) file stream
+            if (fseek(file, index  * IMAGIC_HEADER_SIZE, SEEK_SET) != 0)
+                THROW_SYS_ERROR("Could not 'fseek' in file. ");
 
-        dim.x = header.ixlp;
-        dim.y = header.iylp;
-        dim.z = 1;
-        dim.n = header.ifol + 1;
+            if (fread(&header, IMAGIC_HEADER_SIZE, 1, file) < 1)
+                THROW_SYS_ERROR(std::string("Error reading IMAGIC header in file: ") + path);
 
-        int key = -1;
-        if (strstr(header.type, "PACK"))
-            key = 0;
-        else if (strstr(header.type,"INTG"))
-            key = 1;
-        else if (strstr(header.type,"REAL"))
-            key = 3;
-        else if (strstr(header.type,"COMP"))
-            key = 4;
-        else if (strstr(header.type,"LONG"))
-            key = 2;
+            if (index == 0)
+            {
+                dim.x = header.ixlp;
+                dim.y = header.iylp;
+                dim.z = 1;
+                dim.n = header.ifol + 1;
 
-        type = getTypeFromMode(key);
-        ASSERT_ERROR(type.isNull(), "Unknown IMAGIC type mode.");
+                int mode = -1;
+                if (strstr(header.type, "PACK"))
+                    mode = 0;
+                else if (strstr(header.type,"INTG"))
+                    mode = 1;
+                else if (strstr(header.type,"REAL"))
+                    mode = 3;
+                else if (strstr(header.type,"COMP"))
+                    mode = 4;
+                else if (strstr(header.type,"LONG"))
+                    mode = 2;
+
+                type = getTypeFromMode(mode);
+                ASSERT_ERROR(type.isNull(), "Unknown IMAGIC type mode.");
+            }
+
+            index++;
+            headers.push_back(header);
+        }
+        while (index < dim.n);
 
     } // function readHeader
 
     virtual void writeHeader() override
     {
-        memset(&header, 0, IMAGIC_HEADER_SIZE);
+        if (dim.z > 1)
+             THROW_SYS_ERROR(std::string("Error writing header. IMAGIC format does not support volumes. File: ") + path);
+
+        size_t index = 1;
+        auto mode = getModeFromType(type);
+        char dtype[4];
+
+        switch(mode){
+        case 0:
+            memcpy(dtype, "PACK", 4);
+        break;
+        case 1:
+            memcpy(dtype, "INTG", 4);
+        break;
+        case 2:
+            memcpy(dtype, "LONG", 4);
+        break;
+        case 3:
+            memcpy(dtype, "REAL", 4);
+        break;
+        case 4:
+            memcpy(dtype, "COMP", 4);
+        break;
+        default:
+            THROW_SYS_ERROR(std::string("Unsuported data type for IMAGIC format."));
+        }
+
+        for (auto &header:headers)
+        {
+            header.imn = index;
+            header.ifol = (index == 1 ? dim.n - 1: 0);
+            header.nblocks = (index == 1 ? dim.n : 1);
+            header.iylp = dim.x;
+            header.ixlp = dim.y;
+            strncpy(header.type, dtype, 4);
+
+            //TODO[pedrohv]: Implements others. See: "The values that must be set are shown with a blue background"
+            //                                  https://www.imagescience.de/formats.html
+            //header.nmonth =
+            //header.nday =
+            //header.nyear =
+            //header.nhour =
+            //header.nminut =
+            //header.nsec =
+            //header.type =
+            //header.izlp =
+            //header.imavers = ????
+            fseek(file, IMAGIC_HEADER_SIZE * (index - 1), SEEK_SET);
+            fwrite(&header, IMAGIC_HEADER_SIZE, 1, file);
+            index++;
+        }
 
     } // function writeHeader
 
+    // Reimplementes from ImageIO::Impl.
+    // First index is 1
     void readImageData(const size_t index, Image &image)
     {
         size_t itemSize = getImageSize(); // Size of an item containing the padSize
@@ -205,15 +272,34 @@ public:
         size_t itemPos = itemSize * (index - 1) + padSize;
 
         if (fseek(imageFile, itemPos, SEEK_SET) != 0)
-            THROW_SYS_ERROR("Could not 'fseek' in file. ");
+            THROW_SYS_ERROR("Could not 'fseek' in image file. ");
 
         // FIXME: change this to read by chunks when we change this
         // approach, right now only read a big chunk of one item size
 
         if (::fread(image.getData(), readSize, 1, imageFile) != 1)
-            THROW_SYS_ERROR("Could not 'fread' data from file. ");
+            THROW_SYS_ERROR("Could not 'fread' data from image file. ");
 
     } // function readImageData
+
+    // Reimplementes from ImageIO::Impl.
+    // First index is 1
+    void writeImageData(const size_t index, const Image &image)
+    {
+        size_t itemSize = getImageSize();
+        size_t padSize = getPadSize();
+        size_t writeSize = itemSize - padSize;
+        size_t itemPos = itemSize * (index - 1) + padSize;
+
+        std::cerr << "ImageIO::Impl::write: itemPos: " << itemPos << std::endl;
+        std::cerr << "ImageIO::Impl::write: itemSize: " << itemSize << std::endl;
+
+        if (fseek(imageFile, itemPos, SEEK_SET) != 0)
+            THROW_SYS_ERROR("Could not 'fseek' in image file. ");
+
+        fwrite(image.getData(), writeSize, 1, imageFile);
+
+    } // function ImageIO::Impl::write
 
     virtual size_t getHeaderSize() const override
     {
@@ -232,11 +318,6 @@ public:
         // 4: Complex float
         return tm;
     } // function getTypeMap
-
-    /*size_t getImageSize() const override
-    {
-        return header.rsize;
-    } // function getImageSize*/
 
     virtual void toStream(std::ostream &ostream, int verbosity) const override
     {
@@ -281,6 +362,30 @@ public:
             THROW_SYS_ERROR(std::string("Error opening file ") + imagePath);
     } // function openFile
 
+    void closeFile()
+    {
+        Impl::closeFile();
+        fclose(imageFile);
+    }
+
+    void expandFile()
+    {
+        // Compute the size of one item, taking into account its x, y, z dimensions
+        // and the size of the type that will be used
+        size_t itemSize = getImageSize();
+
+        // Compute the total size of the file taking into account the general header
+        // size and the size of all items (including extra padding per item)
+        size_t fileSize = itemSize * dim.n;
+
+        File::resize(imageFile, fileSize);
+        fflush(imageFile);
+
+        //TODO[pedrohv]: Resize header file??
+        //fileSize = getHeaderSize();
+        //File::resize(file, fileSize);
+        //fflush(file);
+    } // function expandFile
 }; // class ImageIOImagic
 
 StringVector imagicExts = {"hed", "img"};
