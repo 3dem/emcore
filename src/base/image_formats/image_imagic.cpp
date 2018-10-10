@@ -345,7 +345,11 @@ public:
     void closeFile()
     {
         Impl::closeFile();
-        fclose(imageFile);
+        if (imageFile != nullptr)
+        {
+            fclose(imageFile);
+            imageFile = nullptr;
+        }
     }
 
     void expandFile()

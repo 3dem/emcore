@@ -222,10 +222,10 @@ void ImageIO::open(const std::string &path, const File::Mode mode)
 
 void ImageIO::close()
 {
-    if (impl != nullptr && impl->file != nullptr)
+
+    if (impl != nullptr)
     {
-        fclose(impl->file);
-        impl->file = nullptr;
+        impl->closeFile();
     }
 } // function ImageIO.close
 
@@ -368,7 +368,11 @@ void ImageIO::Impl::openFile()
 
 void ImageIO::Impl::closeFile()
 {
-    fclose(file);
+    if (file != nullptr)
+    {
+        fclose(file);
+        file = nullptr;
+    }
 } // function ImageIO::Impl::closeFile
 
 void ImageIO::Impl::expandFile()
