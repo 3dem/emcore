@@ -195,20 +195,33 @@ TEST(ImageIOImagic, Read)
         try {
             std::string root(testDataPath);
 
-            fileDims["BPV_1387_ptcls.hed"] = ArrayDim(100, 100, 1, 1);
+            fileDims["xmipp_tutorial/particles/BPV_1386_ptcls.img"] = ArrayDim(500, 500, 1, 29);
+
+            char suffix[4];
+            std::string imgFn;
+            ArrayDim imgDim(500, 500, 1, 1);
 
             for (auto &pair: fileDims)
             {
-                Image img;
-                loc.index = 0;
-                loc.path = root + pair.first;
-                std::cout << ">>> Reading image: " << loc << std::endl;
+                for (size_t index = 1; index <= pair.second.n; index++)
+                {
+                    Image img;
+                    loc.index = index;
+                    loc.path = root + pair.first;
+                    std::cout << ">>> Reading image: " << loc << std::endl;
+                    img.read(loc);
+                    std::cout << ">>> Image: " << img;
+                    //write
+                    snprintf (suffix, 4, "%03d", (int)index);
+                    imgFn = std::string("image") + suffix + ".hed";
+                    std::cout << ">>> Writing image: " << imgFn << std::endl;
 
-                img.read(loc);
-                std::cout << img << std::endl;
+                    imagicIO.open(imgFn, File::Mode::TRUNCATE);
+                    imagicIO.createFile(imgDim, img.getType());
+                    imagicIO.write(1, img);
+                    imagicIO.close();
+                }
             }
-
-            imagicIO.close();
         }
         catch (Error &err)
         {
