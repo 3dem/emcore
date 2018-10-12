@@ -81,3 +81,8 @@ std::string Path::getExtension(const std::string &path)
     size_t pos = fn.find_last_of('.');
     return pos == std::string::npos ? "" : fn.substr(pos+1, path.size());
 } // function Path::getExtension
+
+std::string Path::removeExtension(const std::string &path)
+{
+    return path.substr(0, path.find_last_of('.'));
+}
