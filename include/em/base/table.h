@@ -326,10 +326,11 @@ namespace em {
         void open(const std::string &path,
                   const File::Mode mode=File::Mode::READ_ONLY);
 
-        StringVector getTableNames() const;
-
         // TODO: DOCUMENT
         void close();
+
+        // TODO: DOCUMENT
+        StringVector getTableNames() const;
 
         // TODO: DOCUMENT
         void read(const std::string &tableName, Table &table);

@@ -301,6 +301,7 @@ void init_submodule_base(py::module &m) {
             .def("open", &TableIO::open,
                  py::arg("filename"), py::arg("mode")=File::Mode::READ_ONLY)
             .def("close", &TableIO::close)
+            .def("getTableNames", &TableIO::getTableNames)
             .def("read", &TableIO::read);
             //.def("write", &TableIO::write);
 } // em/base sub-module definition
