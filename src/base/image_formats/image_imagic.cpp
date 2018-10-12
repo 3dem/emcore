@@ -172,8 +172,8 @@ public:
 
         dim.x = header.ixlp;
         dim.y = header.iylp;
-        dim.z = 1;
-        dim.n = header.ifol + 1;
+        dim.z = header.izlp;
+        dim.n = header.i4lp;
 
         int mode = -1;
         if (strstr(header.type, "PACK"))
@@ -194,8 +194,8 @@ public:
     virtual void writeHeader() override
     {
         // FIXME: Review again the specification, I think it does support volumes
-        if (dim.z > 1)
-             THROW_SYS_ERROR(std::string("Error writing header. IMAGIC format does not support volumes. File: ") + path);
+//        if (dim.z > 1)
+//             THROW_SYS_ERROR(std::string("Error writing header. IMAGIC format does not support volumes. File: ") + path);
 
         auto mode = getModeFromType(type);
         char dtype[4];
@@ -225,6 +225,8 @@ public:
         header.nblocks = dim.n;
         header.iylp = dim.x;
         header.ixlp = dim.y;
+        header.izlp = dim.z;
+        header.i4lp = dim.n;
         strncpy(header.type, dtype, 4);
 
         //TODO[pedrohv]: Implements others. See: "The values that must be set are shown with a blue background"
@@ -241,7 +243,7 @@ public:
         header.nhour = t->tm_hour;
         header.nminut = t->tm_min;
         header.nsec = t->tm_sec;
-        header.izlp = 1;
+
         //header.imavers = ????
         //FIXME[pedrohv]: Implements all headers data
         fwrite(&header, IMAGIC_HEADER_SIZE, 1, headerFile);
