@@ -294,9 +294,9 @@ public:
             THROW_SYS_ERROR(std::string("Error opening file ") + headerPath);
     } // function openFile
 
-    void closeFile()
+    void closeFile() override
     {
-        Impl::closeFile();
+        em::ImageIO::Impl::closeFile();
         if (headerFile != nullptr)
         {
             fclose(headerFile);
@@ -304,7 +304,7 @@ public:
         }
     }
 
-    void expandFile()
+    void expandFile() override
     {
         // Compute the size of one item, taking into account its x, y, z dimensions
         // and the size of the type that will be used
