@@ -1,8 +1,10 @@
 #include <iomanip>
 
 #include "em/base/error.h"
+#include "em/os/filesystem.h"
 #include "em/base/image.h"
 #include "em/base/image_priv.h"
+
 
 using namespace em;
 
@@ -159,13 +161,13 @@ class ImageIOImagic: public em::ImageIO::Impl
 {
 public:
     ImagicHeader header; // main header
-    FILE * imageFile = nullptr;
-    std::string imagePath;
+    FILE * headerFile = nullptr;  // Keep an extra file handler for the header
+    std::string headerPath;  // Keep the path of the header file
 
     virtual void readHeader() override
     {
         // Try to read the main header from the (already opened) file stream
-        if (fread(&header, IMAGIC_HEADER_SIZE, 1, file) < 1)
+        if (fread(&header, IMAGIC_HEADER_SIZE, 1, headerFile) < 1)
             THROW_SYS_ERROR(std::string("Error reading IMAGIC header in file: ") + path);
 
         dim.x = header.ixlp;
@@ -191,6 +193,7 @@ public:
 
     virtual void writeHeader() override
     {
+        // FIXME: Review again the specification, I think it does support volumes
         if (dim.z > 1)
              THROW_SYS_ERROR(std::string("Error writing header. IMAGIC format does not support volumes. File: ") + path);
 
@@ -214,7 +217,7 @@ public:
             memcpy(dtype, "COMP", 4);
         break;
         default:
-            THROW_SYS_ERROR(std::string("Unsupported data type for IMAGIC format."));
+            THROW_SYS_ERROR("Unsupported data type for IMAGIC format.");
         }
 
         header.imn = 1;
@@ -226,6 +229,9 @@ public:
 
         //TODO[pedrohv]: Implements others. See: "The values that must be set are shown with a blue background"
         //                                  https://www.imagescience.de/formats.html
+
+        //TODO: If this code is repeated in other places, consider a Function/Class
+        // that can be placed in timer.h in our base module
         time_t timer;
         time ( &timer );
         tm* t = localtime(&timer);
@@ -238,53 +244,8 @@ public:
         header.izlp = 1;
         //header.imavers = ????
         //FIXME[pedrohv]: Implements all headers data
-        fwrite(&header, IMAGIC_HEADER_SIZE, 1, file);
+        fwrite(&header, IMAGIC_HEADER_SIZE, 1, headerFile);
     } // function writeHeader
-
-    // Reimplementes from ImageIO::Impl.
-    // First index is 1
-    void readImageData(const size_t index, Image &image)
-    {
-        size_t itemSize = getImageSize(); // Size of an item containing the padSize
-        size_t padSize = getPadSize();
-        size_t readSize = itemSize - padSize;
-        // Compute the position of the item data in the file given its size
-        size_t itemPos = itemSize * (index - 1) + padSize;
-
-        if (fseek(imageFile, itemPos, SEEK_SET) != 0)
-            THROW_SYS_ERROR("Could not 'fseek' in image file. ");
-
-        // FIXME: change this to read by chunks when we change this
-        // approach, right now only read a big chunk of one item size
-
-        if (::fread(image.getData(), readSize, 1, imageFile) != 1)
-            THROW_SYS_ERROR("Could not 'fread' data from image file. ");
-
-    } // function readImageData
-
-    // Reimplementes from ImageIO::Impl.
-    // First index is 1
-    void writeImageData(const size_t index, const Image &image)
-    {
-        size_t itemSize = getImageSize();
-        size_t padSize = getPadSize();
-        size_t writeSize = itemSize - padSize;
-        size_t itemPos = itemSize * (index - 1) + padSize;
-
-        std::cerr << "ImageIO::Impl::write: itemPos: " << itemPos << std::endl;
-        std::cerr << "ImageIO::Impl::write: itemSize: " << itemSize << std::endl;
-
-        if (fseek(imageFile, itemPos, SEEK_SET) != 0)
-            THROW_SYS_ERROR("Could not 'fseek' in image file. ");
-
-        fwrite(image.getData(), writeSize, 1, imageFile);
-
-    } // function ImageIO::Impl::write
-
-    virtual size_t getHeaderSize() const override
-    {
-        return IMAGIC_HEADER_SIZE;
-    } // function getHeaderSize
 
     virtual const IntTypeMap & getTypeMap() const override
     {
@@ -309,46 +270,35 @@ public:
      */
     void openFile() override
     {
-        // We must check if path is for header or image data.
-        // Always path is for header file
+        auto ext = Path::getExtension(path);
 
-        auto index = path.rfind(".hed");
-        auto length = path.size();
+        if (ext != "hed" && ext != "img")
+            THROW_ERROR(std::string("Invalid IMAGIC extension: ") + ext);
 
-        if (index == length - 4)
-        {
-            imagePath = path.substr(0, index) + ".img";
-        }
-        else
-        {
-            index = path.rfind(".img");
-            if (index == length - 4)
-            {
-                imagePath = path;
-                path = path.substr(0, index) + ".hed";
-            }
-            else
-                THROW_SYS_ERROR(std::string("Invalid file extension: ") + path);
-        }
+        auto base = Path::removeExtension(path);
+        // Keep path always for image file (.img)
+        // and headerPath for the header file (.hed)
+        path = base + ".img";
+        headerPath = base + ".hed";
 
         file = fopen(path.c_str(), getModeString());
 
         if (file == nullptr)
             THROW_SYS_ERROR(std::string("Error opening file: ") + path);
 
-        imageFile = fopen(imagePath.c_str(), getModeString());
+        headerFile = fopen(headerPath.c_str(), getModeString());
 
-        if (imageFile == nullptr)
-            THROW_SYS_ERROR(std::string("Error opening file ") + imagePath);
+        if (headerFile == nullptr)
+            THROW_SYS_ERROR(std::string("Error opening file ") + headerPath);
     } // function openFile
 
     void closeFile()
     {
         Impl::closeFile();
-        if (imageFile != nullptr)
+        if (headerFile != nullptr)
         {
-            fclose(imageFile);
-            imageFile = nullptr;
+            fclose(headerFile);
+            headerFile = nullptr;
         }
     }
 
@@ -362,12 +312,12 @@ public:
         // size and the size of all items (including extra padding per item)
         size_t fileSize = itemSize * dim.n;
 
-        File::resize(imageFile, fileSize);
-        fflush(imageFile);
-
-        fileSize = getHeaderSize() * dim.n;
         File::resize(file, fileSize);
         fflush(file);
+
+        fileSize = IMAGIC_HEADER_SIZE * dim.n;
+        File::resize(headerFile, fileSize);
+        fflush(headerFile);
     } // function expandFile
 }; // class ImageIOImagic
 
