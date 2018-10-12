@@ -214,7 +214,7 @@ public:
             memcpy(dtype, "COMP", 4);
         break;
         default:
-            THROW_SYS_ERROR(std::string("Unsuported data type for IMAGIC format."));
+            THROW_SYS_ERROR(std::string("Unsupported data type for IMAGIC format."));
         }
 
         header.imn = 1;
