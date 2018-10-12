@@ -44,8 +44,7 @@ public:
 
     virtual StringVector getCommands() const override
     {
-        return {"create", "add", "sub", "mul", "div", "shift", "rotate",
-                "flip", "scale"};
+        return {};
     }
 
 protected:
@@ -97,7 +96,20 @@ void EmTableProgram::readArgs()
     std::cout << " Reading table: " << inputTable << std::endl;
     tio.read(inputTable, t);
 
-    std::cout << t << std::endl;
+    if (hasArg("<output>"))
+    {
+        outputFn = getValue("<output>");
+        std::cout << " Writing table: " << inputTable << " to: "
+                  << outputFn << std::endl;
+        auto tio2 = TableIO();
+        tio2.open(outputFn, File::TRUNCATE);
+        tio2.write(inputTable, t);
+    }
+    else
+    {
+        std::cout << "  count: " << t.getSize() << std::endl;
+    }
+
 } // function EmTableProgram.readArgs
 
 int EmTableProgram::run()
