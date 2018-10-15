@@ -17,7 +17,7 @@ static const char USAGE[] =
         R"(em-image.
 
     Usage:
-      em-image (<input> | create <xdim> [<ydim> [<zdim>]])
+      em-image (<input> | create <xdim> [<ydim> [<zdim>]] | [--formats])
                        [(add|sub|mul|div) <file_or_value>         |
                          flip (x|y|z)                             |
                          crop <left> [<top> [<right> [<bottom>]]] |
@@ -31,13 +31,15 @@ static const char USAGE[] =
                         (lowpass|highpass) <freq>                 |
                         (bandpass <low_freq> <high_freq>)
                        ]... [<output>]
+                       [--oformat <oformat>]
 
     Options:
-      <input>       An input file or a pattern matching many files.
-      <output>      An output file or a suffix when many files are produced.
-      -h --help     Show this screen.
-      --version     Show version.
-      --otype       Output file type
+      <input>     An input file or a pattern matching many files.
+      <output>    An output file or a suffix when many files are produced.
+      -h --help   Show this screen.
+      --version   Show version.
+      --formats   Print the list of available image formats
+      --oformat <oformat>  Specify the output format (e.g 'mrc' or 'mrc:int8')
 )";
 
 
@@ -80,18 +82,57 @@ private:
 // ---------------------- Implementation -------------------------------
 int EmImageProgram::run()
 {
-    if (outputFn.empty())
-        return 0;
-
-    Image image;
-
-    for (auto& path: inputList)
+    if (hasArg("--formats"))
     {
-        //TODO: Check if using the ImageIO makes any difference
-        image.read(path);
-        if (pipeProc.getSize() > 0)
-            pipeProc.process(image);
-        image.write(outputFn);
+        std::cout << "Supported formats: " << std::endl;
+
+        for (const auto& kv: ImageIO::getFormatTypes())
+            std::cout << kv.first << std::endl;
+    }
+
+
+    Image inputImage, outputImage;
+    ImageIO inputIO, outputIO;
+
+    auto doProcess = pipeProc.getSize() > 0;
+    auto hasOutput = hasArg("<output>");
+
+    ASSERT_ERROR(doProcess && !hasOutput,
+                 "Please provide output option.")
+
+    if (doProcess)  // Do some processing on the images
+    {
+        THROW_ERROR("Right now only using em-image for conversions. "
+                            "Processing will come soon!!!");
+
+//        for (auto& path: inputList)
+//        {
+//            imgIO.open(path);
+//            imgIO.read(1, inputImage);
+//            pipeProc.process(inputImage, outputImage);
+//            //imgIO.write();
+//        }
+    }
+    else if (hasOutput)  // Convert input
+    {
+        std::cout << "has output..." << std::endl;
+
+        if (hasArg("--oformat"))
+        {
+            std::cout << "oformat: " << getValue("--oformat") << std::endl;
+        }
+        for (auto& path: inputList)
+        {
+            //TODO: Check if using the ImageIO makes any difference
+//            image.read(path);
+//            if (pipeProc.getSize() > 0)
+//                pipeProc.process(image);
+//            image.write(outputFn);
+        }
+    }
+    else  // Just print information about the input images
+    {
+
     }
 
     return 0;
@@ -104,18 +145,25 @@ void EmImageProgram::readArgs()
 
     if (hasArg("<input>"))
     {
+
         inputFn = getValue("<input>");
         std::cout << std::setw(10) << std::right << "Input: "
                   << inputFn << std::endl;
 
-        // TODO: Allow to input a pattern and glob all files that match it
+        if (inputFn.find('*') != std::string::npos ||
+            inputFn.find('?') != std::string::npos)
+        {
+            Glob glob(inputFn);
 
-        inputList.push_back(inputFn);
+            ASSERT_ERROR(glob.getSize() == 0,
+                         "There are not files matching input pattern.");
+        }
+        else
+        {
+            inputList.push_back(inputFn);
 
-        for (auto& path: inputList)
-            ASSERT_ERROR(!Path::exists(path),
-                         std::string("Input path '") + path +
-                         "' does not exists!!!");
+            ASSERT_ERROR(!Path::exists(inputFn), "Input path does not exists!!!");
+        }
     }
 
     auto& args = getArgList();
@@ -133,27 +181,25 @@ void EmImageProgram::readArgs()
         //else TODO: handle when the processor can not be constructed.
     }
 
-    if (hasArg("<output>"))
-    {
-        outputFn = getValue("<output>");
-        std::cout << std::setw(10) << std::right << "Output: "
-                  << outputFn << std::endl;
-    }
-    else
-    {
-        std::cout << "pipeProc.getSize: " << pipeProc.getSize() << std::endl;
-
-        // Handle the case when the output is not defined
-        ASSERT_ERROR(pipeProc.getSize() > 0,
-                     "Output should be specified if performing any operation.")
-        ImageIO imgIO;
-
-        for (auto& path: inputList)
-        {
-            imgIO.open(path);
-            imgIO.toStream(std::cout, 2);
-        }
-    }
+//    if ()
+//    {
+//        outputFn = getValue("<output>");
+//        std::cout << std::setw(10) << std::right << "Output: "
+//                  << outputFn << std::endl;
+//    }
+//    else
+//    {
+//        // Handle the case when the output is not defined
+//        ASSERT_ERROR(pipeProc.getSize() > 0,
+//                     "Output should be specified if performing any operation.")
+//        ImageIO imgIO;
+//
+//        for (auto& path: inputList)
+//        {
+//            imgIO.open(path);
+//            imgIO.toStream(std::cout, 2);
+//        }
+//    }
 
 } // function EmImageProgram.readArgs
 
