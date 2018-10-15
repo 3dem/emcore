@@ -6,8 +6,13 @@
 #include <cstdio>
 #include <sys/stat.h>
 
+//FIXME Check in which OS glob works
+#include <glob.h>
+
 #include "em/os/filesystem.h"
 #include "em/base/error.h"
+
+
 
 
 using namespace em;
@@ -85,4 +90,40 @@ std::string Path::getExtension(const std::string &path)
 std::string Path::removeExtension(const std::string &path)
 {
     return path.substr(0, path.find_last_of('.'));
+}
+
+class Glob::Impl
+{
+public:
+    glob_t results;
+
+    ~Impl()
+    {
+        globfree(&results);
+    }
+};
+
+
+Glob::Glob(const std::string &pattern)
+{
+    impl = new Impl();
+    glob(pattern.c_str(), 0, 0, &impl->results);
+}
+
+Glob::~Glob()
+{
+    delete impl;
+}
+
+size_t Glob::getSize() const
+{
+    return impl->results.gl_pathc;
+}
+
+std::string Glob::getResult(size_t i) const
+{
+    if (i < 0 || i >= getSize())
+        THROW_ERROR("Invalid index");
+
+    return impl->results.gl_pathv[i];
 }

@@ -45,6 +45,33 @@ namespace em
         static int remove(const std::string &path);
     }; // class Path
 
+    /**
+     * Class to wrap the glob function and present a nicer API.
+     */
+     class Glob
+     {
+     public:
+         /** Object constructor based on a pattern. */
+         Glob(const std::string& pattern);
+
+         /** Destructor to clean internal data */
+         ~Glob();
+
+         /** Return the number of matched files.
+          * It will return 0 if not file was matched.
+          */
+         size_t getSize() const;
+
+         /** Return the a given result.
+          * Valid indexes will between 0 and getSize()-1
+          */
+          std::string getResult(size_t i) const;
+
+     private:
+         class Impl;
+         Impl* impl; // pointer to implementation
+     };
+
 
 } // namespace em
 
