@@ -176,6 +176,18 @@ bool em::ImageIO::registerImpl(const StringVector &extOrNames,
     return getImageIORegistry()->registerImpl(extOrNames, builder);
 } // function registerImageIOImpl
 
+ImageIO::FormatTypes ImageIO::getFormatTypes()
+{
+    FormatTypes dict;
+
+    for (const auto& kv: getImageIORegistry()->getMap())
+    {
+        dict[kv.first] = {};
+    }
+
+    return dict;
+}
+
 bool ImageIO::hasImpl(const std::string &extension)
 {
     return getImageIORegistry()->hasImpl(extension);
@@ -222,7 +234,6 @@ void ImageIO::open(const std::string &path, const File::Mode mode)
 
 void ImageIO::close()
 {
-
     if (impl != nullptr)
     {
         impl->closeFile();
