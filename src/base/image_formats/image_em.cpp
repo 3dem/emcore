@@ -105,7 +105,7 @@ public:
             THROW_SYS_ERROR(
                     std::string("Error reading EM header in file: ") + path);
 
-        // endian: If machine is SGI, OS-9 or MAC: Big Endian, otherwise Litle Endian
+        // If machine is SGI, OS-9 or MAC: Big Endian, otherwise Little Endian
         // Check Machine endianess
         bool isLE = Type::isLittleEndian();
 
@@ -149,12 +149,13 @@ public:
 
     virtual const IntTypeMap & getTypeMap() const override
     {
-        static const IntTypeMap tm = {{1, typeInt8},
-                                   {2, typeInt16},
-                                   {4, typeInt32},
-                                   {5, typeFloat},
-                // TODO:         //{8, &TypeComplex},
-                                   {9, typeDouble}};
+        static const IntTypeMap tm = {
+               {1, typeInt8},
+               {2, typeInt16},
+               {4, typeInt32},
+               {5, typeFloat},
+// TODO:         //{8, &TypeComplex},
+               {9, typeDouble}};
         return tm;
     } // function getTypeMap
 
