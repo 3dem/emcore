@@ -31,6 +31,11 @@ namespace em
         /** Join many input strings into one, using a separator character */
         static std::string join(StringVector input, const char sep = 0);
 
+        /** Replace all occurrences of a substring and return a new string. */
+        static std::string replace(const std::string& input,
+                                   const std::string& oldSubString,
+                                   const std::string& newSubString);
+
         /** Convert a string to integer */
         static int toInt(const char *str);
 
