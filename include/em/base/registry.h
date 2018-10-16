@@ -36,6 +36,8 @@ namespace em
         {
             for (auto &extOrName: extOrNames)
                 registryMap[extOrName] = newImplBuilder;
+
+            uniqueMap[extOrNames[0]] = newImplBuilder;
             return true;
         }
 
@@ -80,13 +82,12 @@ namespace em
             return implBuilder();
         }
 
-        const BuilderMap& getMap()
-        {
-            return registryMap;
-        }
+        const BuilderMap& getMap() { return registryMap; }
+        const BuilderMap& getUniqueMap() { return uniqueMap; }
 
     private:
          BuilderMap registryMap;
+         BuilderMap  uniqueMap;  // only store once per implementation alias
 
     }; // class ImplRegistry
 
