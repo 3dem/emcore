@@ -116,7 +116,7 @@ Array::~Array()
 
 Array& Array::operator=(const Array &other)
 {
-    impl->adim = other.getDim();
+    resize(other);
     copyOrCast(other, impl->adim.getSize());
     return *this;
 } // function Array.operator= Array
@@ -128,11 +128,20 @@ Array& Array::operator=(Array &&other)
     return *this;
 } // function Array.operator= (move)
 
-Array& Array::operator=(const Object &value)
+void Array::copy(const Array &other, const Type &type)
+{
+    auto& thisType = getType();
+    auto& finalType = type.isNull() ? (thisType.isNull() ? other.getType()
+                                                         : thisType )
+                                    : type;
+    resize(other.getDim(), finalType);
+    copyOrCast(other, impl->adim.getSize());
+} // function Array.copy
+
+void Array::set(const Object &value)
 {
     copyOrCast(value, impl->adim.getSize(), true);
-    return *this;
-} // function Array.operator= Object
+} // function Array.set Object
 
 Array& Array::operator+=(const Array &other)
 {
@@ -218,8 +227,6 @@ bool Array::operator!=(const Array &other) const
 {
     return !(*this == other);
 } // function Array.operator!=
-
-
 
 Array Array::getView(size_t index)
 {

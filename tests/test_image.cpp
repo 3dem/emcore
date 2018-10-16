@@ -337,7 +337,7 @@ TEST(Image, Performance)
             // FIXME: Why the following line does not work
             //img3 = Object(100);
             Array * array = &img3;
-            *array = 100;
+            array->set(100);
             t.toc("IMAGE assign value");
             ASSERT_EQ(img2, img3);
 
