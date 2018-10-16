@@ -23,7 +23,7 @@ option(BUILD_PYBIND "Build library with Python binding support" OFF)
 # Build static library
 option(BUILD_STATIC "Build static library." OFF)
 
-string(TIMESTAMP EM_CORE_TIMESTAMP "%d-%m-%y %H:%M:%S")
+string(TIMESTAMP EM_CORE_TIMESTAMP "%Y-%m-%d %H:%M:%S")
 
 add_definitions(-DEM_CORE_VERSION="em-core v${PROJECT_VERSION}") # To be used in c++ code
 add_definitions(-DEM_CORE_TIMESTAMP="build ${EM_CORE_TIMESTAMP}")
