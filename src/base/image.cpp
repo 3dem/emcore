@@ -331,11 +331,15 @@ void ImageIO::read(size_t index, Image &image)
 
 void ImageIO::write(size_t index, const Image &image)
 {
-    auto type = impl->type;
+    auto& type = impl->type;
 
     // FIXME: Check what to do with ALL as index
     if (index == ImageLocation::ALL)
         index = ImageLocation::FIRST;
+
+    if (type.isNull())
+        // FIXME: I think we don't need to always create the file, check it!!!
+        createFile(image.getDim(), image.getType());
 
     ASSERT_ERROR(image.getType() != type,
                  "Type cast not implemented. Now image should have the same "
