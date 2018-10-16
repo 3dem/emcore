@@ -87,9 +87,15 @@ int EmImageProgram::run()
         std::cout << "Supported formats: " << std::endl;
 
         for (const auto& kv: ImageIO::getFormatTypes())
-            std::cout << kv.first << std::endl;
-    }
+        {
+            std::cout << kv.first << ": ";
+            for (const auto& type: kv.second)
+                std::cout << type.getName() << " ";
+            std::cout << std::endl;
+        }
 
+        return;
+    }
 
     Image inputImage, outputImage;
     ImageIO inputIO, outputIO;

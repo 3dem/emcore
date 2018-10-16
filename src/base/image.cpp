@@ -6,6 +6,7 @@
 #include <sstream>
 #include <cassert>
 #include <vector>
+#include <algorithm>
 
 #include "em/base/error.h"
 #include "em/base/log.h"
@@ -180,9 +181,25 @@ ImageIO::FormatTypes ImageIO::getFormatTypes()
 {
     FormatTypes dict;
 
-    for (const auto& kv: getImageIORegistry()->getMap())
+    for (const auto& kv: getImageIORegistry()->getUniqueMap())
     {
         dict[kv.first] = {};
+        auto& vector = dict[kv.first];
+
+        auto impl = kv.second();
+
+        for (const auto& kv2: impl->getTypeMap())
+            vector.push_back(kv2.second);
+
+        std::sort(vector.begin(), vector.end(),
+                  [](const Type& t1, const Type& t2)
+                  {
+                      if (t1.getSize() == t2.getSize())
+                      {
+                          return t1.getName() < t2.getName();
+                      }
+                      else return t1.getSize() < t2.getSize();
+                  });
     }
 
     return dict;
