@@ -94,7 +94,7 @@ int EmImageProgram::run()
             std::cout << std::endl;
         }
 
-        return;
+        return 0;
     }
 
     Image inputImage, outputImage;
@@ -127,13 +127,15 @@ int EmImageProgram::run()
         {
             std::cout << "oformat: " << getValue("--oformat") << std::endl;
         }
+
         for (auto& path: inputList)
         {
-            //TODO: Check if using the ImageIO makes any difference
-//            image.read(path);
-//            if (pipeProc.getSize() > 0)
-//                pipeProc.process(image);
-//            image.write(outputFn);
+            inputIO.open(path);
+            inputIO.read(1, inputImage);
+
+            outputIO.open(getValue("<output>"), File::TRUNCATE);
+            outputImage.copy(inputImage, typeInt8);
+            outputIO.write(1, outputImage);
         }
     }
     else  // Just print information about the input images
