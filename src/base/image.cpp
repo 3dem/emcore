@@ -352,12 +352,11 @@ void ImageIO::toStream(std::ostream &ostream, int verbosity) const
 {
     if (verbosity > 0)
     {
-        ostream << " -- File info --" << std::endl;
-        ostream << "Dimensions: " << impl->dim << std::endl;
-        ostream << "Type: " << impl->type << std::endl;
-        ostream << "Header size: " << impl->getHeaderSize() << std::endl;
-        ostream << "Pad size: " << impl->getPadSize() << std::endl;
-        ostream << "Swap: " << impl->swap << std::endl;
+        ostream << " --- File:  " << impl->path << " ---" << std::endl
+                << "Dimensions: " << impl->dim << " " << impl->type << std::endl
+                << "Header size: " << impl->getHeaderSize() << " (main) "
+                << impl->getPadSize() << " (per image),  "
+                << "Swap: " << impl->swap << std::endl;
 
         if (verbosity > 1)
             impl->toStream(std::cout, verbosity);

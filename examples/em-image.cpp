@@ -80,71 +80,7 @@ private:
 
 
 // ---------------------- Implementation -------------------------------
-int EmImageProgram::run()
-{
-    if (hasArg("--formats"))
-    {
-        std::cout << "Supported formats: " << std::endl;
 
-        for (const auto& kv: ImageIO::getFormatTypes())
-        {
-            std::cout << kv.first << ": ";
-            for (const auto& type: kv.second)
-                std::cout << type.getName() << " ";
-            std::cout << std::endl;
-        }
-
-        return 0;
-    }
-
-    Image inputImage, outputImage;
-    ImageIO inputIO, outputIO;
-
-    auto doProcess = pipeProc.getSize() > 0;
-    auto hasOutput = hasArg("<output>");
-
-    ASSERT_ERROR(doProcess && !hasOutput,
-                 "Please provide output option.")
-
-    if (doProcess)  // Do some processing on the images
-    {
-        THROW_ERROR("Right now only using em-image for conversions. "
-                            "Processing will come soon!!!");
-
-//        for (auto& path: inputList)
-//        {
-//            imgIO.open(path);
-//            imgIO.read(1, inputImage);
-//            pipeProc.process(inputImage, outputImage);
-//            //imgIO.write();
-//        }
-    }
-    else if (hasOutput)  // Convert input
-    {
-        std::cout << "has output..." << std::endl;
-
-        if (hasArg("--oformat"))
-        {
-            std::cout << "oformat: " << getValue("--oformat") << std::endl;
-        }
-
-        for (auto& path: inputList)
-        {
-            inputIO.open(path);
-            inputIO.read(1, inputImage);
-
-            outputIO.open(getValue("<output>"), File::TRUNCATE);
-            outputImage.copy(inputImage, typeInt8);
-            outputIO.write(1, outputImage);
-        }
-    }
-    else  // Just print information about the input images
-    {
-
-    }
-
-    return 0;
-} // function EmImageProgram.run
 
 void EmImageProgram::readArgs()
 {
@@ -162,6 +98,8 @@ void EmImageProgram::readArgs()
             inputFn.find('?') != std::string::npos)
         {
             Glob glob(inputFn);
+            for (size_t i = 0; i < glob.getSize(); ++i)
+                inputList.push_back(glob.getResult(i));
 
             ASSERT_ERROR(glob.getSize() == 0,
                          "There are not files matching input pattern.");
@@ -176,8 +114,8 @@ void EmImageProgram::readArgs()
 
     auto& args = getArgList();
 
-    std::cout << std::setw(10) << std::right << "Commands: "
-              << args.size() << std::endl;
+//    std::cout << std::setw(10) << std::right << "Commands: "
+//              << args.size() << std::endl;
 
     std::string cmdName;
 
@@ -236,6 +174,77 @@ ImageProcessor* EmImageProgram::getProcessorFromArg(const Program::Argument& arg
 
     return nullptr;
 }
+
+int EmImageProgram::run()
+{
+    if (hasArg("--formats"))
+    {
+        std::cout << "Supported formats: " << std::endl;
+
+        for (const auto& kv: ImageIO::getFormatTypes())
+        {
+            std::cout << kv.first << ": ";
+            for (const auto& type: kv.second)
+                std::cout << type.getName() << " ";
+            std::cout << std::endl;
+        }
+
+        return 0;
+    }
+
+    Image inputImage, outputImage;
+    ImageIO inputIO, outputIO;
+
+    auto doProcess = pipeProc.getSize() > 0;
+    auto hasOutput = hasArg("<output>");
+
+    ASSERT_ERROR(doProcess && !hasOutput,
+                 "Please provide output option.")
+
+    if (doProcess)  // Do some processing on the images
+    {
+        THROW_ERROR("Right now only using em-image for conversions. "
+                            "Processing will come soon!!!");
+
+//        for (auto& path: inputList)
+//        {
+//            imgIO.open(path);
+//            imgIO.read(1, inputImage);
+//            pipeProc.process(inputImage, outputImage);
+//            //imgIO.write();
+//        }
+    }
+    else if (hasOutput)  // Convert input
+    {
+        std::cout << "has output..." << std::endl;
+
+        if (hasArg("--oformat"))
+        {
+            std::cout << "oformat: " << getValue("--oformat") << std::endl;
+        }
+
+        for (auto& path: inputList)
+        {
+            inputIO.open(path);
+            inputIO.read(1, inputImage);
+
+            outputIO.open(getValue("<output>"), File::TRUNCATE);
+            outputImage.copy(inputImage, typeFloat);
+            outputIO.write(1, outputImage);
+        }
+    }
+    else  // Just print information about the input images
+    {
+        for (const auto& path: inputList)
+        {
+            inputIO.open(path);
+            std::cout << inputIO << std::endl;
+            inputIO.close();
+        }
+    }
+
+    return 0;
+} // function EmImageProgram.run
 
 
 int main (int argc, const char **argv)
