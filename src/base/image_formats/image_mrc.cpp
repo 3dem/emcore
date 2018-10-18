@@ -92,6 +92,7 @@ class ImageIOMrc: public em::ImageIO::Impl
 {
 public:
     MrcHeader header;
+    bool isMrc2014 = true;
 
     virtual void readHeader() override
     {
@@ -123,6 +124,8 @@ public:
             dim.z = header.mz;
             dim.n = header.nz / header.mz;
         }
+
+        isMrc2014 = header.nversion / 10 == 2014;
 
         type = getTypeFromMode(header.mode);
         ASSERT_ERROR(type.isNull(), "Unknown MRC type mode.");
@@ -197,6 +200,8 @@ public:
         header.nsymbt = 0;
         header.nlabl = 10; // FIXME: or zero?
 
+        header.nversion = 20140;  // Let's write in 2014 specification
+
         fwrite(&header, MRC_HEADER_SIZE, 1, file);
 
         // FIXME: consider swap
@@ -252,6 +257,14 @@ public:
     virtual const IntTypeMap & getTypeMap() const override
     {
         static const IntTypeMap tm = {
+                {0, typeUInt8},  // before MRC2014, mode 0 was uint8
+                {1, typeInt16},
+                {2, typeFloat},
+                {6, typeUInt16},
+                {101, typeInt8}
+        };
+
+        static const IntTypeMap tm2014 = {
                {0, typeInt8},
                {1, typeInt16},
                {2, typeFloat},
@@ -261,54 +274,20 @@ public:
         // TODO:
         // 3: Complex short
         // 4: Complex float
-        return tm;
+        return isMrc2014 ? tm2014 : tm;
     } // function getTypeMap
 
     virtual void toStream(std::ostream &ostream, int verbosity) const override
     {
-
-        ostream << "verbosity normal" << std::endl;
-
         if (verbosity > 0)
         {
             ostream << "--- MRC File Header ---" << std::endl;
-
             std::cout << std::setw(7) << "nx: " << header.nx << std::endl;
             std::cout << std::setw(7) << "ny: " << header.ny << std::endl;
             std::cout << std::setw(7) << "nz: " << header.nz << std::endl;
             std::cout << std::setw(7) << "nz: " << header.nz << std::endl;
             std::cout << std::setw(7) << "mode: " << header.mode << std::endl;
-
-            // Variable              Word   Bytes   Description
-            int nx;              //  1      1-4     number of columns in 3D data array (fast axis, x dimension)
-            int ny;              //  2      5-8     number of rows in 3D data array (medium axis, y dimension)
-            int nz;              //  3	    9-12	number of sections in 3D data array (slow axis, z*n dimension)
-            int mode;            //  4      13-16   0  8-bit signed integer (range -127 to 127)
-            //                 1  16-bit signed integer
-            //                 2  32-bit signed real (float)
-            //                 3  transform: complex 16-bit integers
-            //                 4  transform: complex 32-bit reals
-            //                 6  16-bit unsigned integer
-            //               101  4-bit values
-            //                    (non-standard: http://bio3d.colorado.edu/imod/betaDoc/mrc_format.txt)
-            int nxstart;         //  5      17-20   location of first column in unit cell
-            int nystart;         //  6      21-24   location of first row in unit cell
-            int nzstart;         //  7      25-28   location of first section in unit cell
-            int mx;              //  8      29-32   sampling along X axis of unit cell
-            int my;              //  9      33-36   sampling along Y axis of unit cell
-            int mz;              //  10     37-40   sampling along Z axis of unit cell (z dimension in EM)
-            //                 MRC2014: For EM, where there is no unit cell, MZ represents the number of
-            //                 sections in a single volume. For a volume stack, NZ/MZ will be the
-            //                 number of volumes in the stack. For images, MZ = 1.
-            float cella[3];      // 11-13   41-52   cell dimensions in Angstroms
-            float cellb[3];      // 14-16   53-64   cell angles in degrees
-            int mapc;            // 17      65-68	axis corresp to cols (1,2,3 for X,Y,Z)
-            int mapr;            // 18      69-72	axis corresp to rows (1,2,3 for X,Y,Z)
-            int maps;            // 19      73-76	axis corresp to sections (1,2,3 for X,Y,Z)
-
-            float dmin;          // 20      77-80   minimum density value
-            float dmax;          // 21      81-84   maximum density value
-            float dmean;         // 22      85-88   mean density value
+            std::cout << std::setw(7) << "nversion: " << header.nversion << std::endl;
         }
     } // function toStream
 
