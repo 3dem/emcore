@@ -32,6 +32,7 @@ static const char USAGE[] =
                         (bandpass <low_freq> <high_freq>)
                        ]... [<output>]
                        [--oformat <oformat>]
+                       [--stats]
 
     Options:
       <input>     An input file or a pattern matching many files.
@@ -229,16 +230,27 @@ int EmImageProgram::run()
             inputIO.read(1, inputImage);
 
             outputIO.open(getValue("<output>"), File::TRUNCATE);
-            outputImage.copy(inputImage, typeFloat);
-            outputIO.write(1, outputImage);
+            //outputImage.copy(inputImage, typeFloat);
+            outputIO.write(1, inputImage);
         }
     }
     else  // Just print information about the input images
     {
+        auto hasStats = hasArg("--stats");
+        Stats stats;
+
         for (const auto& path: inputList)
         {
             inputIO.open(path);
-            std::cout << inputIO << std::endl;
+            std::cout << std::endl;
+            inputIO.toStream(std::cout, 2);
+
+            if (hasStats)
+            {
+                inputIO.read(1, inputImage);
+                stats.compute(inputImage);
+                std::cout << "Stats: " << stats << std::endl;
+            }
             inputIO.close();
         }
     }

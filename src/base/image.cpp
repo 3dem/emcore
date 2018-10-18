@@ -418,18 +418,11 @@ void ImageIO::Impl::expandFile()
 
     File::resize(file, fileSize);
     fflush(file);
-
 } // function ImageIO::Impl::expandFile
 
-void ImageIO::Impl::readImageHeader(const size_t index, Image &image)
-{
+void ImageIO::Impl::readImageHeader(const size_t index, Image &image) {}
 
-}
-
-void ImageIO::Impl::writeImageHeader(const size_t index, const Image &image)
-{
-
-}
+void ImageIO::Impl::writeImageHeader(const size_t index, const Image &image) {}
 
 void ImageIO::Impl::readImageData(const size_t index, Image &image)
 {
@@ -447,7 +440,6 @@ void ImageIO::Impl::readImageData(const size_t index, Image &image)
 
     if (::fread(image.getData(), readSize, 1, file) != 1)
         THROW_SYS_ERROR("Could not 'fread' data from file. ");
-
 }
 
 void ImageIO::Impl::writeImageData(const size_t index, const Image &image)
