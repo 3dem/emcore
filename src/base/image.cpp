@@ -326,7 +326,7 @@ void ImageIO::read(size_t index, Image &image)
     // If we have read the image into the internal buffer image due to
     // a different datatype, we need to cast now to the output image
     if (!sameType)
-        image = impl->image;
+        image.copy(impl->image);
 } // function ImageIO::read
 
 void ImageIO::write(size_t index, const Image &image)
