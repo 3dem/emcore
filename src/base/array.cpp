@@ -400,6 +400,12 @@ T* ArrayT<T>::getData()
 } // function ArrayT.getData
 
 template <class T>
+const T* ArrayT<T>::getData() const
+{
+    return GET_DATA();
+}
+
+template <class T>
 ArrayDim ArrayT<T>::getDim() const
 {
     return impl->adim;
@@ -415,6 +421,8 @@ template em::ArrayT<int16_t > em::Array::getView();
 template em::ArrayT<uint16_t > em::Array::getView();
 template em::ArrayT<int32_t > em::Array::getView();
 template em::ArrayT<uint32_t > em::Array::getView();
+template em::ArrayT<int64_t > em::Array::getView();
+template em::ArrayT<uint64_t > em::Array::getView();
 
 template em::ArrayT<float> em::Array::getView();
 template em::ArrayT<double> em::Array::getView();
@@ -427,6 +435,8 @@ template class em::ArrayT<int16_t>;
 template class em::ArrayT<uint16_t>;
 template class em::ArrayT<int32_t>;
 template class em::ArrayT<uint32_t>;
+template class em::ArrayT<int64_t>;
+template class em::ArrayT<uint64_t>;
 
 template class em::ArrayT<float>;
 template class em::ArrayT<double>;

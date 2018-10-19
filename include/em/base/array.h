@@ -219,6 +219,7 @@ namespace em
                       const size_t n=1);
         void assign(const T &value);
         T * getData();
+        const T* getData() const;
         ArrayDim getDim() const;
 
     private:

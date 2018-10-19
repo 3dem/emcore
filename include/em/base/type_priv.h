@@ -304,9 +304,7 @@ DEFINE_TYPENAME(uint64_t, "uint64");
 // but they are for Linux (Ubuntu 16.04)
 #ifdef __APPLE__
 DEFINE_TYPENAME(size_t, "size_t");
-
 #endif
-
 
 DEFINE_TYPENAME(bool, "bool");
 DEFINE_TYPENAME(std::string, "string");
