@@ -2,10 +2,14 @@
 // Created by Jose Miguel de la Rosa Trevin on 2017-10-15.
 //
 
-
+#include <random>
 #include "gtest/gtest.h"
 
 #include "em/proc/processor.h"
+#include "em/proc/stats.h"
+#include "em/math/functions.h"
+#include "em/base/timer.h"
+
 
 
 
@@ -83,3 +87,49 @@ TEST(ImageOperator, Basic)
     }
 } // TEST ImageOperator.Basic
 
+TEST(Stats, Basic)
+{
+    size_t xdim = 1000;
+     Array array(ArrayDim(xdim, xdim), typeFloat);
+    int c = 1;
+    array.set(c);
+    auto s1 = Stats::compute(array);
+ASSERT_FLOAT_EQ(s1.min, c);
+ASSERT_FLOAT_EQ(s1.max, c);
+ASSERT_FLOAT_EQ(s1.mean, c);
+ASSERT_FLOAT_EQ(s1.std, 0);
+
+    std::default_random_engine gen;
+    std::normal_distribution<float> dist(5.0,2.0);
+
+    auto data = array.getView<float>().getData();
+    for (size_t i = 0; i < array.getDim().getSize(); ++i)
+        data[i] = dist(gen);
+
+    Timer t;
+    t.tic();
+    s1 = Stats::compute(array);
+//ASSERT_EQ(s1.min, c);
+//ASSERT_EQ(s1.max, c);
+float error = 0.01;
+ASSERT_NEAR(s1.mean, 5.0, error);
+ASSERT_NEAR(s1.std, 2.0, error);
+
+    t.toc("computed stats (ALL)");
+
+    t.tic();
+    s1 = Stats::compute(array, Stats::MIN_MAX);
+    t.toc("computed stats (MIN_MAX)");
+
+    // Assing 1, 2, 3, 4, 5 to the first values
+    data[0] = 1;
+    data[1] = 2;
+    data[2] = 3;
+    data[3] = 4;
+    data[4] = 5;
+    s1 = Stats::compute(typeFloat, data, 5);
+ASSERT_FLOAT_EQ(s1.min, 1);
+ASSERT_FLOAT_EQ(s1.max, 5);
+ASSERT_FLOAT_EQ(s1.mean, 3);
+ASSERT_NEAR(s1.std, 1.4142, error);
+}

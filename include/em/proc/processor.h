@@ -88,19 +88,6 @@ namespace em
         virtual void process(Image &inputOutput) override ;
     }; // class ImageMathProc
 
-
-    //TODO: Check if Stats class should be placed somewhere else
-    /** Computing min, max, avg and std on a given Array. */
-    struct Stats
-    {
-        /** Compute min, max, avg and std on the input array */
-        void compute(const Array& array);
-
-        double min, max, mean, std;
-    };
-
-    std::ostream& operator<< (std::ostream &ostrm, const Stats &s);
-
 } // namespace em
 
 #endif //EM_CORE_PROCESSOR_H

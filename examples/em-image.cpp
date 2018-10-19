@@ -9,7 +9,7 @@
 #include "em/base/image.h"
 #include "em/proc/program.h"
 #include "em/proc/processor.h"
-
+#include "em/proc/stats.h"
 
 using namespace em;
 
@@ -248,7 +248,7 @@ int EmImageProgram::run()
             if (hasStats)
             {
                 inputIO.read(1, inputImage);
-                stats.compute(inputImage);
+                stats = Stats::compute(inputImage);
                 std::cout << "Stats: " << stats << std::endl;
             }
             inputIO.close();
