@@ -2,6 +2,7 @@
 // Created by josem on 11/7/17.
 //
 
+#include "em/base/string.h"
 #include "em/proc/processor.h"
 
 using namespace em;
@@ -104,43 +105,71 @@ void ImageMathProc::process(Image &image)
 
 // -------------- Stats Implementation ---------------------------
 
-void Stats::compute(const Array &array)
+template <typename T>
+void computeStats(Stats& s, const Array& array)
 {
-    //FIXME: Now using a copy of the array in float to simplify code
-    // this could be implemented at Type level and save the extra copy
-    // that is being used now
-    Array arrayFloat;
-    arrayFloat.copy(array, typeFloat);
+    auto& type = Type::get<T>();
+
+    if (array.getType() != type)
+        THROW_ERROR("Mismatch types of the array and the template.");
 
     auto dim = array.getDim();
-    auto const data = static_cast<const float *>(arrayFloat.getData());
+    // Cast away const-ness, we promess not to modify the array content ;)
+    Array * arrayPtr = const_cast<Array*>(&array);
+    auto const data = arrayPtr->getView<T>().getData();
     auto size = dim.getSize();
 
-    min = max = data[0];
-    std = mean = 0;
+    s.min = s.max = data[0];
+    s.std = s.mean = 0;
 
     for (size_t i = 0; i < size; ++i)
     {
         double v = data[i];
-        if (v < min)
-            min = v;
-        else if (v > max)
-            max = v;
-        mean += v;
-        std += v * v;
+        if (v < s.min)
+            s.min = v;
+        else if (v > s.max)
+            s.max = v;
+        s.mean += v;
+        s.std += v * v;
     }
 
     if (size > 1)
     {
-        mean /= size;
-        std = std / size - mean * mean;
-        std *= size / (size - 1);
+        s.mean /= size;
+        s.std = s.std / size - s.mean * s.mean;
+        s.std *= size / (size - 1);
 
         // Foreseeing numerical instabilities
-        std = sqrt(static_cast< double >(abs(std)));
+        s.std = sqrt(static_cast< double >(abs(s.std)));
     }
     else
-        std = 0;
+        s.std = 0;
+}
+
+//template <typename T, typename... Args>
+//void computeStats(Stats& s, const Array& array)
+//{
+//    return computeStats<T>(s, array) if (array.getType() == Type::get<T>())
+//};
+
+
+void Stats::compute(const Array &array)
+{
+    auto& arrayType = array.getType();
+
+#define OPERATE_IF_TYPE(type) if (arrayType == Type::get<type>()) return computeStats<type>(*this, array)
+    OPERATE_IF_TYPE(float);
+    OPERATE_IF_TYPE(double);
+    OPERATE_IF_TYPE(int8_t);
+    OPERATE_IF_TYPE(uint8_t);
+    OPERATE_IF_TYPE(int16_t);
+    OPERATE_IF_TYPE(uint16_t);
+    OPERATE_IF_TYPE(int32_t);
+    OPERATE_IF_TYPE(uint32_t);
+    OPERATE_IF_TYPE(int64_t);
+    OPERATE_IF_TYPE(uint64_t);
+    THROW_ERROR(std::string("Operate has not been implemented for type: ") + arrayType.getName());
+#undef OPERATE_IF_TYPE
 } // Stats.compute
 
 std::ostream& em::operator<< (std::ostream &ostrm, const Stats &s)
