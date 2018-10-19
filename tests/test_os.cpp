@@ -9,6 +9,7 @@
 #include <iostream>
 #include "gtest/gtest.h"
 
+#include "em/base/string.h"
 #include "em/os/filesystem.h"
 
 
@@ -66,3 +67,28 @@ TEST(Path, Basic) {
 
     ASSERT_EQ(Path::getExtension("a.b.c"), "c");
 } // TEST Path.Basic
+
+
+TEST(Glob, Basic) {
+    auto testDataPath = getenv("EM_TEST_DATA");
+
+    if (testDataPath != nullptr)
+    {
+        std::string root(testDataPath);
+        std::string p1 = root + "/xmipp_tutorial/micrographs/BPV_*.mrc";
+        Glob g1(p1);
+        std::string suffixes[] = {"1386", "1387", "1388"};
+
+        ASSERT_EQ(g1.getSize(), 3);
+        for (size_t i = 0; i < g1.getSize(); i++)
+            ASSERT_EQ(g1.getResult(i), String::replace(p1, "*", suffixes[i]));
+
+        for (size_t i = 0; i < g1.getSize(); i++)
+            std::cout << g1.getResult(i) << std::endl;
+    }
+    else
+    {
+        std::cout << "Glob test can not be run: EM_TEST_DATA not defined in "
+                     "environment. " << std::endl;
+    }
+}

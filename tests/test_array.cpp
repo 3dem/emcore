@@ -60,7 +60,7 @@ TEST(Array, Basic) {
         ASSERT_EQ(11, ptr[i]);
 
     // Now test the assignment through the Array class directly
-    A = 22;
+    A.set(22);
     for (size_t i = 0; i < adim.getSize(); ++i)
         ASSERT_EQ(22, ptr[i]);
 
@@ -101,7 +101,7 @@ TEST(Array, Basic) {
         ASSERT_EQ(data2[i], ptr[i]);
 
     Array A3(adim, typeFloat);
-    A3 = A;
+    A3.copy(A);
     ASSERT_EQ(A3.getType(), typeFloat);
     auto data3f = static_cast<const float *>(A3.getData());
     for (size_t i = 0; i < adim.getSize(); ++i)
@@ -149,6 +149,15 @@ TEST(Array, Basic) {
     ASSERT_EQ(tmp.getType(), nullType);
     ASSERT_EQ(tmp.getDim(), ArrayDim(0, 1, 1, 1));
     ASSERT_EQ(tmp.getData(), nullptr);
+
+    // Create a new array with same dimensions as A, but with typeFloat
+    Array A5(A.getDim(), em::typeFloat);
+    A5 = A;
+    // After assignment, then A5 type should be the same of A
+    ASSERT_EQ(A5.getType(), A.getType());
+    // We can make a copy of A elements but using float
+    A5.copy(A, em::typeFloat);
+    ASSERT_EQ(A5.getType(), em::typeFloat);
 
 } // TEST(ArrayTest, Constructor)
 

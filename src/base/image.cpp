@@ -6,6 +6,7 @@
 #include <sstream>
 #include <cassert>
 #include <vector>
+#include <algorithm>
 
 #include "em/base/error.h"
 #include "em/base/log.h"
@@ -176,6 +177,34 @@ bool em::ImageIO::registerImpl(const StringVector &extOrNames,
     return getImageIORegistry()->registerImpl(extOrNames, builder);
 } // function registerImageIOImpl
 
+ImageIO::FormatTypes ImageIO::getFormatTypes()
+{
+    FormatTypes dict;
+
+    for (const auto& kv: getImageIORegistry()->getUniqueMap())
+    {
+        dict[kv.first] = {};
+        auto& vector = dict[kv.first];
+
+        auto impl = kv.second();
+
+        for (const auto& kv2: impl->getTypeMap())
+            vector.push_back(kv2.second);
+
+        std::sort(vector.begin(), vector.end(),
+                  [](const Type& t1, const Type& t2)
+                  {
+                      if (t1.getSize() == t2.getSize())
+                      {
+                          return t1.getName() < t2.getName();
+                      }
+                      else return t1.getSize() < t2.getSize();
+                  });
+    }
+
+    return dict;
+}
+
 bool ImageIO::hasImpl(const std::string &extension)
 {
     return getImageIORegistry()->hasImpl(extension);
@@ -222,10 +251,9 @@ void ImageIO::open(const std::string &path, const File::Mode mode)
 
 void ImageIO::close()
 {
-    if (impl != nullptr && impl->file != nullptr)
+    if (impl != nullptr)
     {
-        fclose(impl->file);
-        impl->file = nullptr;
+        impl->closeFile();
     }
 } // function ImageIO.close
 
@@ -298,16 +326,20 @@ void ImageIO::read(size_t index, Image &image)
     // If we have read the image into the internal buffer image due to
     // a different datatype, we need to cast now to the output image
     if (!sameType)
-        image = impl->image;
+        image.copy(impl->image);
 } // function ImageIO::read
 
 void ImageIO::write(size_t index, const Image &image)
 {
-    auto type = impl->type;
+    auto& type = impl->type;
 
     // FIXME: Check what to do with ALL as index
     if (index == ImageLocation::ALL)
         index = ImageLocation::FIRST;
+
+    if (type.isNull())
+        // FIXME: I think we don't need to always create the file, check it!!!
+        createFile(image.getDim(), image.getType());
 
     ASSERT_ERROR(image.getType() != type,
                  "Type cast not implemented. Now image should have the same "
@@ -320,12 +352,11 @@ void ImageIO::toStream(std::ostream &ostream, int verbosity) const
 {
     if (verbosity > 0)
     {
-        ostream << " -- File info --" << std::endl;
-        ostream << "Dimensions: " << impl->dim << std::endl;
-        ostream << "Type: " << impl->type << std::endl;
-        ostream << "Header size: " << impl->getHeaderSize() << std::endl;
-        ostream << "Pad size: " << impl->getPadSize() << std::endl;
-        ostream << "Swap: " << impl->swap << std::endl;
+        ostream << " --- File:  " << impl->path << " ---" << std::endl
+                << "Dimensions: " << impl->dim << " " << impl->type << std::endl
+                << "Header size: " << impl->getHeaderSize() << " (main) "
+                << impl->getPadSize() << " (per image),  "
+                << "Swap: " << impl->swap << std::endl;
 
         if (verbosity > 1)
             impl->toStream(std::cout, verbosity);
@@ -368,7 +399,11 @@ void ImageIO::Impl::openFile()
 
 void ImageIO::Impl::closeFile()
 {
-    fclose(file);
+    if (file != nullptr)
+    {
+        fclose(file);
+        file = nullptr;
+    }
 } // function ImageIO::Impl::closeFile
 
 void ImageIO::Impl::expandFile()
@@ -383,18 +418,11 @@ void ImageIO::Impl::expandFile()
 
     File::resize(file, fileSize);
     fflush(file);
-
 } // function ImageIO::Impl::expandFile
 
-void ImageIO::Impl::readImageHeader(const size_t index, Image &image)
-{
+void ImageIO::Impl::readImageHeader(const size_t index, Image &image) {}
 
-}
-
-void ImageIO::Impl::writeImageHeader(const size_t index, const Image &image)
-{
-
-}
+void ImageIO::Impl::writeImageHeader(const size_t index, const Image &image) {}
 
 void ImageIO::Impl::readImageData(const size_t index, Image &image)
 {
@@ -412,7 +440,6 @@ void ImageIO::Impl::readImageData(const size_t index, Image &image)
 
     if (::fread(image.getData(), readSize, 1, file) != 1)
         THROW_SYS_ERROR("Could not 'fread' data from file. ");
-
 }
 
 void ImageIO::Impl::writeImageData(const size_t index, const Image &image)
@@ -475,4 +502,5 @@ size_t ImageIO::fread(FILE *file, Array &array, bool swap)
 #include "image_formats/image_tiff.cpp"
 #include "image_formats/image_em.cpp"
 #include "image_formats/image_dm.cpp"
+#include "image_formats/image_imagic.cpp"
 

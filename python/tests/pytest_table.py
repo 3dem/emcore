@@ -202,7 +202,7 @@ class TestTable(BaseTest):
 
         if testDataPath is not None:
             root = testDataPath + "relion_tutorial/import/"
-            fn1 = root + "case1/classify3d_small_it038_data.star";
+            fn1 = root + "case1/classify3d_small_it038_data.star"
             print("Reading star: ", fn1)
 
             t = em.Table([
@@ -262,6 +262,24 @@ class TestTable(BaseTest):
                 mdValues = [row[label] for i, row in enumerate(t) if i < 20]
                 for v1, v2 in zip(values, mdValues):
                     self.assertEqual(v2, v1)
+
+    def test_ReadSingleRow(self):
+        testDataPath = os.environ.get("EM_TEST_DATA", None)
+
+        self.assertTrue(em.TableIO.hasImpl('star'))
+
+        if testDataPath is not None:
+            root = testDataPath + "relion_tutorial/import/"
+            fn1 = root + "case1/classify3d_small_it038_optimiser.star"
+            print("Reading star: ", fn1)
+
+            tio = em.TableIO()
+            tio.open(fn1)
+            t = em.Table()
+            tio.read("optimiser_general", t)
+            tio.close()
+            self.assertEqual(t.getColumnsSize(), 52)
+            self.assertEqual(t.getSize(), 1)
 
     def test_ReadXmd(self):
         testDataPath = os.environ.get("EM_TEST_DATA", None)

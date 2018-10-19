@@ -186,6 +186,7 @@ namespace em {
          * @param col Column to be added
          */
         size_t addColumn(const Column &col);
+        size_t addColumn(const std::string &colName, const Type& colType);
 
         // TODO: Check if it is better to put the default value
         // as part of the column
@@ -327,6 +328,9 @@ namespace em {
 
         // TODO: DOCUMENT
         void close();
+
+        // TODO: DOCUMENT
+        StringVector getTableNames() const;
 
         // TODO: DOCUMENT
         void read(const std::string &tableName, Table &table);

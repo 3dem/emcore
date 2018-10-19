@@ -21,6 +21,8 @@ namespace em
     {
     public:
         using BuilderFuncPtr = T* (*)();
+        using BuilderMap = std::map<std::string, BuilderFuncPtr>;
+
         /**
          * Register an ImageIO class to be available for reading/writing images.
          * The class will be accessible via the ImageIO name and the extensions
@@ -34,6 +36,8 @@ namespace em
         {
             for (auto &extOrName: extOrNames)
                 registryMap[extOrName] = newImplBuilder;
+
+            uniqueMap[extOrNames[0]] = newImplBuilder;
             return true;
         }
 
@@ -78,8 +82,12 @@ namespace em
             return implBuilder();
         }
 
+        const BuilderMap& getMap() { return registryMap; }
+        const BuilderMap& getUniqueMap() { return uniqueMap; }
+
     private:
-        std::map<std::string, BuilderFuncPtr> registryMap;
+         BuilderMap registryMap;
+         BuilderMap  uniqueMap;  // only store once per implementation alias
 
     }; // class ImplRegistry
 

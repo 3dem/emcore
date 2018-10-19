@@ -2,6 +2,7 @@
 // Created by josem on 11/7/17.
 //
 
+#include "em/base/string.h"
 #include "em/proc/processor.h"
 
 using namespace em;
@@ -100,3 +101,4 @@ void ImageMathProc::process(Image &image)
             THROW_ERROR("Unsupported operation.");
     } // switch
 } // function ImageMathProc.process
+

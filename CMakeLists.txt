@@ -17,13 +17,13 @@ option(BUILD_DOCS "Build the doxygen documentation" OFF)
 # Add option to decide if build tiff or not, useful when the library is not detected
 option(BUILD_TIFF "Build library with TIFF support" ON)
 # Build docopt or not
-option(BUILD_DOCOPT "Build library with docopt support" OFF)
+option(BUILD_DOCOPT "Build library with docopt support" ON)
 # Build Python binding or not
 option(BUILD_PYBIND "Build library with Python binding support" OFF)
 # Build static library
 option(BUILD_STATIC "Build static library." OFF)
 
-string(TIMESTAMP EM_CORE_TIMESTAMP "%d-%m-%y %H:%M:%S")
+string(TIMESTAMP EM_CORE_TIMESTAMP "%Y-%m-%d %H:%M:%S")
 
 add_definitions(-DEM_CORE_VERSION="em-core v${PROJECT_VERSION}") # To be used in c++ code
 add_definitions(-DEM_CORE_TIMESTAMP="build ${EM_CORE_TIMESTAMP}")
@@ -37,9 +37,11 @@ set(EXAMPLE_PATH "${PROJECT_PATH}/examples")
 set(DOC_PATH      "${PROJECT_PATH}/docs")
 set(EXT_PATH      "${PROJECT_PATH}/libs")
 
-include_directories(AFTER "${INCLUDE_PATH}")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-#file(GLOB HEADER_FILES "${INCLUDE_PATH}/*/*.h") # This is not necessary
+MESSAGE( STATUS "Module path: " ${CMAKE_MODULE_PATH} )
+
+include_directories(AFTER "${INCLUDE_PATH}")
 
 # File lists definitions
 file(GLOB SOURCE_FILES "${SRC_PATH}/*/*.cpp")
@@ -50,22 +52,21 @@ include(ExternalProject)
 
 set(EXT_LIBRARIES ) # Defined empty to be fullfiled, if necessary
 
+
 ###################################
 # External libraries to be included
 ###################################
 if (BUILD_DOCOPT)
     set(DOCOPT_PATH "${EXT_PATH}/docopt")
-
-        if ( NOT EXISTS ${DOCOPT_PATH}/docopt.cpp )
-            MESSAGE( STATUS " Update submodule" )
-            execute_process(COMMAND git submodule update --init ${DOCOPT_PATH} )
-        endif()
-
+    if ( NOT EXISTS ${DOCOPT_PATH}/docopt.cpp )
+        execute_process(COMMAND git submodule update --init ${DOCOPT_PATH} )
+    endif()
     include_directories(AFTER "${DOCOPT_PATH}")
     list(APPEND SOURCE_FILES "${DOCOPT_PATH}/docopt.cpp")
 else ()
     list(REMOVE_ITEM EXAMPLE_FILES "${EXAMPLE_PATH}/em-image.cpp")
 endif()
+
 
 ################################
 # External system libraries
@@ -88,13 +89,15 @@ endif ()
 
 if (BUILD_STATIC)
     add_library(em-core STATIC ${SOURCE_FILES} ${HEADER_FILES})
+    set_property(TARGET em-core PROPERTY OUTPUT_NAME "emcore.a")
 else()
     add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES})
+    set_property(TARGET em-core PROPERTY OUTPUT_NAME "emcore.so")
 endif()
 
 set_property(TARGET em-core PROPERTY PREFIX "lib")
-set_property(TARGET em-core PROPERTY OUTPUT_NAME "emcore.so")
 set_property(TARGET em-core PROPERTY SUFFIX "")
+
 
 #############################
 #  FFTW3
@@ -102,6 +105,17 @@ set_property(TARGET em-core PROPERTY SUFFIX "")
 # TODO: FIND OR COMPILE FFTW
 set(EXT_LIBRARIES ${EXT_LIBRARIES} fftw3 fftw3f)
 
+
+#############################
+#  SQlite3
+#############################
+find_package (sqlite3)
+if (SQLITE3_FOUND)
+    MESSAGE( STATUS "SQLite3 library: " ${SQLITE3_LIBRARIES} )
+    MESSAGE( STATUS "SQLite3 include: " ${SQLITE3_INCLUDE_DIRS} )
+    include_directories(${SQLITE3_INCLUDE_DIRS})
+    set(EXT_LIBRARIES ${EXT_LIBRARIES} ${SQLITE3_LIBRARIES})
+endif (SQLITE3_FOUND)
 
 target_link_libraries( em-core ${EXT_LIBRARIES} )
 

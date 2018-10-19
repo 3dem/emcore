@@ -55,6 +55,31 @@ std::string String::join(StringVector input, const char sep)
     return result;
 } // function String::join
 
+std::string String::replace(const std::string &input,
+                            const std::string &oldSubString,
+                            const std::string &newSubString)
+{
+    size_t index = 0;
+    size_t nOld = oldSubString.size();
+    size_t nNew = newSubString.size();
+    std::string output(input);
+
+    while (true) {
+        /* Locate the substring to replace. */
+        index = output.find(oldSubString, index);
+        if (index == std::string::npos)
+            break;
+
+        /* Make the replacement. */
+        output.replace(index, nOld, newSubString);
+
+        /* Advance index forward so the next iteration doesn't pick it up as well. */
+        index += nNew;
+    }
+
+    return output;
+} // function String::replace
+
 // Define a convenience macro to use sscanf,
 // str and retval should be defined
 #define SCAN_NUMBER(type, format) type retval; char dummy; \

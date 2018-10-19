@@ -94,7 +94,7 @@ namespace em
         }
 
         /** Copy or cast the elements from the other Type::TypedContainer.
-         * If type of current TypedContainer is not null, it will be kept,
+         * If the type of current TypedContainer is not null, it will be kept,
          * if not the type of the other will be used.
          * @param other The other Type::TypedContainer
          * @param n Number of elements we want to copy

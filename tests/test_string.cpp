@@ -87,3 +87,23 @@ TEST(String, toNumber)
     ASSERT_THROW(String::toLongInt(""), Error);
 
 } // TEST(String, toNumber)
+
+TEST(String, replace)
+{
+    std::string test1 = "Replace aaa by bbb will have more bbb";
+
+    ASSERT_EQ(String::replace(test1, "aaa", "bbb"),
+              "Replace bbb by bbb will have more bbb");
+
+    ASSERT_EQ(String::replace(test1, "bbb", "aaa"),
+              "Replace aaa by aaa will have more aaa");
+
+    ASSERT_EQ(String::replace(test1, "bbb", "b"),
+              "Replace aaa by b will have more b");
+
+    ASSERT_EQ(String::replace(test1, "bbb", ""),
+              "Replace aaa by  will have more ");
+
+    ASSERT_EQ(String::replace(test1, "ccc", "b"), test1);
+
+} // TEST(String, trim)

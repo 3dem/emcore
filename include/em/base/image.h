@@ -134,13 +134,13 @@ namespace em
          * formats */
         class Impl;
 
+        using FormatTypes = std::map<std::string, std::vector<Type>>;
+
         /** Used when registering new Impl classes.
          * The ImplBuilder is a function that should return a pointer to
          * a newly created implementation.
          */
         using ImplBuilder = Impl* (*)();
-
-
 
         /**
          * Empty constructor for ImageIO.
@@ -184,6 +184,11 @@ namespace em
          */
          static bool registerImpl(const StringVector &extOrNames,
                                   ImplBuilder builder);
+
+        /** Return a dictionary with image format names as key and
+         * the values will be a list with supported datatypes.
+         */
+        static FormatTypes getFormatTypes();
 
         /** Return the dimensions of the file opened. */
         ArrayDim getDim() const;

@@ -39,6 +39,10 @@ TEST(ImageIO, Impl)
     ASSERT_TRUE(ImageIO::hasImpl("mrc"));
     ASSERT_TRUE(ImageIO::hasImpl("mrcs"));
     ImageIO mrcIO = ImageIO("mrc");
+
+    ASSERT_TRUE(ImageIO::hasImpl("img"));
+    ASSERT_TRUE(ImageIO::hasImpl("hed"));
+    ImageIO imagicIO = ImageIO("img");
 } // TEST(ImageIO, Impl)
 
 
@@ -176,11 +180,66 @@ TEST(ImageSpiderIO, Read)
 
 } // TEST(ImageSpiderIO, Read)
 
+TEST(ImageIOImagic, Read)
+{
+    ImageIO imagicIO = ImageIO("hed");
+    // ASSERT_EQ(imagicIO.getName(), "hed");
+
+    ImageLocation loc;
+    std::map<std::string, ArrayDim> fileDims;
+
+    auto testDataPath = getenv("EM_TEST_DATA");
+
+    if (testDataPath != nullptr)
+    {
+        try {
+            std::string root(testDataPath);
+
+            fileDims["xmipp_tutorial/particles/BPV_1386_ptcls.img"] = ArrayDim(500, 500, 1, 29);
+
+            char suffix[4];
+            std::string imgFn;
+            ArrayDim imgDim(500, 500, 1, 1);
+
+            for (auto &pair: fileDims)
+            {
+                for (size_t index = 1; index <= pair.second.n; index++)
+                {
+                    Image img;
+                    loc.index = index;
+                    loc.path = root + pair.first;
+                    std::cout << ">>> Reading image: " << loc << std::endl;
+                    img.read(loc);
+                    std::cout << ">>> Image: " << img;
+                    //write
+                    snprintf (suffix, 4, "%03d", (int)index);
+                    imgFn = std::string("image") + suffix + ".hed";
+                    std::cout << ">>> Writing image: " << imgFn << std::endl;
+
+                    imagicIO.open(imgFn, File::Mode::TRUNCATE);
+                    imagicIO.createFile(imgDim, img.getType());
+                    imagicIO.write(1, img);
+                    imagicIO.close();
+                }
+            }
+        }
+        catch (Error &err)
+        {
+            std::cout << err << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "Skipping image format tests, EM_TEST_DATA not defined in "
+                     "environment. " << std::endl;
+    }
+
+} // TEST(ImageMrcIO, Read)
 
 TEST(ImageIO, Create)
 {
 
-    StringVector exts = {"mrc", "spi"};
+    StringVector exts = {"mrc", "spi", "img"};
     const size_t DIM = 16; // 128
 
     for (auto ext: exts)
@@ -205,8 +264,10 @@ TEST(ImageIO, Create)
         av.assign(200);
         imgio.write(1, img);
         imgio.close();
-
     }
+
+
+
 } // TEST(ImageIO, Create)
 
 
@@ -276,7 +337,7 @@ TEST(Image, Performance)
             // FIXME: Why the following line does not work
             //img3 = Object(100);
             Array * array = &img3;
-            *array = 100;
+            array->set(100);
             t.toc("IMAGE assign value");
             ASSERT_EQ(img2, img3);
 

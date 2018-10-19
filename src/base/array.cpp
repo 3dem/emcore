@@ -116,7 +116,7 @@ Array::~Array()
 
 Array& Array::operator=(const Array &other)
 {
-    impl->adim = other.getDim();
+    resize(other);
     copyOrCast(other, impl->adim.getSize());
     return *this;
 } // function Array.operator= Array
@@ -128,11 +128,20 @@ Array& Array::operator=(Array &&other)
     return *this;
 } // function Array.operator= (move)
 
-Array& Array::operator=(const Object &value)
+void Array::copy(const Array &other, const Type &type)
+{
+    auto& thisType = getType();
+    auto& finalType = type.isNull() ? (thisType.isNull() ? other.getType()
+                                                         : thisType )
+                                    : type;
+    resize(other.getDim(), finalType);
+    copyOrCast(other, impl->adim.getSize());
+} // function Array.copy
+
+void Array::set(const Object &value)
 {
     copyOrCast(value, impl->adim.getSize(), true);
-    return *this;
-} // function Array.operator= Object
+} // function Array.set Object
 
 Array& Array::operator+=(const Array &other)
 {
@@ -218,8 +227,6 @@ bool Array::operator!=(const Array &other) const
 {
     return !(*this == other);
 } // function Array.operator!=
-
-
 
 Array Array::getView(size_t index)
 {
@@ -393,6 +400,12 @@ T* ArrayT<T>::getData()
 } // function ArrayT.getData
 
 template <class T>
+const T* ArrayT<T>::getData() const
+{
+    return GET_DATA();
+}
+
+template <class T>
 ArrayDim ArrayT<T>::getDim() const
 {
     return impl->adim;
@@ -408,6 +421,8 @@ template em::ArrayT<int16_t > em::Array::getView();
 template em::ArrayT<uint16_t > em::Array::getView();
 template em::ArrayT<int32_t > em::Array::getView();
 template em::ArrayT<uint32_t > em::Array::getView();
+template em::ArrayT<int64_t > em::Array::getView();
+template em::ArrayT<uint64_t > em::Array::getView();
 
 template em::ArrayT<float> em::Array::getView();
 template em::ArrayT<double> em::Array::getView();
@@ -420,6 +435,8 @@ template class em::ArrayT<int16_t>;
 template class em::ArrayT<uint16_t>;
 template class em::ArrayT<int32_t>;
 template class em::ArrayT<uint32_t>;
+template class em::ArrayT<int64_t>;
+template class em::ArrayT<uint64_t>;
 
 template class em::ArrayT<float>;
 template class em::ArrayT<double>;

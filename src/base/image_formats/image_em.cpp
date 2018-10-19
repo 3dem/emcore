@@ -105,10 +105,10 @@ public:
             THROW_SYS_ERROR(
                     std::string("Error reading EM header in file: ") + path);
 
-        // endian: If machine is SGI, OS-9 or MAC: Big Endian, otherwise Litle Endian
-        // Check Machine endianess
         bool isLE = Type::isLittleEndian();
 
+        // If machine is SGI, OS-9 or MAC: Big Endian, otherwise Little Endian
+        // Check Machine endianess
         if (header.machine == 0 || header.machine == 3 || header.machine == 5)
             swap = isLE;
         else if (header.machine == 1 || header.machine == 2 ||
@@ -137,9 +137,21 @@ public:
 
     virtual void writeHeader() override
     {
-        THROW_SYS_ERROR("ImageIOEm::writeHEader: Writing in EM format is not "
-                                "supported. If your life depends on it, please"
-                                " contact em-core team.");
+        // Set everything with zeros
+        memset(&header, 0, EM_HEADER_SIZE);
+        header.datatype = (char) getModeFromType(type);
+
+        header.xdim = (int) dim.x;
+        header.ydim = (int) dim.y;
+        header.zdim = (int) dim.z;
+
+        //FIXME: Do we need to check about endianess and machine?
+
+        //FIXME: Use proper machine code, now hard-coded PC
+        header.machine = (char) 6;
+
+        fwrite(&header, EM_HEADER_SIZE, 1, file);
+
     } // function writeHeader
 
     virtual size_t getHeaderSize() const override
@@ -149,12 +161,13 @@ public:
 
     virtual const IntTypeMap & getTypeMap() const override
     {
-        static const IntTypeMap tm = {{1, typeInt8},
-                                   {2, typeInt16},
-                                   {4, typeInt32},
-                                   {5, typeFloat},
-                // TODO:         //{8, &TypeComplex},
-                                   {9, typeDouble}};
+        static const IntTypeMap tm = {
+               {1, typeInt8},
+               {2, typeInt16},
+               {4, typeInt32},
+               {5, typeFloat},
+// TODO:         //{8, &TypeComplex},
+               {9, typeDouble}};
         return tm;
     } // function getTypeMap
 

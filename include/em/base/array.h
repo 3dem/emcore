@@ -117,18 +117,27 @@ namespace em
         virtual ~Array();
 
         /** Assign other Array to this one. This operation will resize the
-         * current Array to have the same dimensions of the other Array. If the
-         * type of this Array is null, then the type of other will be used.
-         * After resizing, all elements will be copied/casted to the resulting
-         * array memory.
+         * current Array to have the same type and dimensions of the other Array.
+         * After the asignment both Array should be equal.
          *
          * @param other Other Array from which the elements will be assigned
          * @return *this
          */
-        Array& operator=(const Array &other);
+        Array& operator=(const Array& other);
 
         /** Move assignment */
-        Array& operator=(Array &&other);
+        Array& operator=(Array&& other);
+
+        /** Copy all the elements from the given array.
+         * The calling array will be resized to have the same dimensions
+         * of the input array. All elements from the input array will be copied or
+         * casted to the output.
+         * @param other Other Array from which the elements will be copied
+         * @param type If is typeNull, then the current type of the output array
+         * will be used. If it is also null, then the input array type will be
+         * used.
+         */
+         void copy(const Array& other, const Type& type=typeNull);
 
         /** Assign the value of a single element to the values of the array.
          * If the Array type is the same of the input Object type, then the
@@ -136,7 +145,7 @@ namespace em
          * @param value Input Object with the value that will be assigned
          * @return *this
          */
-        Array& operator=(const Object &value);
+        void set(const Object &value);
 
         // Implement some arithmetic operators using as input another
         // Array and single Object value.
@@ -168,7 +177,7 @@ namespace em
          * If the current array does not have a type yet, then the input type
          * should be different from typeNull.
          */
-        void resize(const ArrayDim &adim, const Type & type=typeNull);
+        void resize(const ArrayDim& adim, const Type& type=typeNull);
 
         /** Resize the array based on the dimensions and the type of the
          * input Array.
@@ -210,6 +219,7 @@ namespace em
                       const size_t n=1);
         void assign(const T &value);
         T * getData();
+        const T* getData() const;
         ArrayDim getDim() const;
 
     private:
