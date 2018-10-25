@@ -180,6 +180,40 @@ TEST(ImageSpiderIO, Read)
 
 } // TEST(ImageSpiderIO, Read)
 
+TEST(ImageIOPng, Read)
+{
+    ImageIO pngIO = ImageIO("png");
+    auto testDataPath = getenv("EM_TEST_DATA");
+
+    if (testDataPath != nullptr)
+    {
+        try
+        {
+            ImageLocation loc;
+            loc.path = std::string(testDataPath) + "/8bits.png";
+            loc.index = 1;
+            Image img;
+            img.read(loc);
+            std::cout << ">>> Image: " << img;
+
+            auto path = std::string(testDataPath) + "/8bits-copy.png";
+
+            std::cout << ">>> Writing image: " << path << std::endl;
+
+            pngIO.open(path, File::Mode::TRUNCATE);
+            pngIO.createFile(img.getDim(), img.getType());
+            pngIO.write(1, img);
+            pngIO.close();
+
+            std::cout << ">>> Write image done." << std::endl;
+        }
+        catch(Error &error)
+        {
+            std::cout << error<< std::endl;
+        }
+    }
+}
+
 TEST(ImageIOImagic, Read)
 {
     ImageIO imagicIO = ImageIO("hed");

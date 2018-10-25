@@ -14,10 +14,10 @@ option(BUILD_EXAMPLES "Build all examples." OFF)
 option(BUILD_TESTS "Build all tests." OFF)
 # Add option to build the doxygen documentation, turn on with 'cmake -DBUILD_DOCS=ON'
 option(BUILD_DOCS "Build the doxygen documentation" OFF)
-# Add option to decide if build tiff or not, useful when the library is not detected
+# Add option to decide if build tiff or not, useful when Ftion(BUILD_DOCOPT "Build library with docopt support" ON)
 option(BUILD_TIFF "Build library with TIFF support" ON)
-# Build docopt or not
-option(BUILD_DOCOPT "Build library with docopt support" ON)
+# Add option to decide if build png or not
+option(BUILD_PNG "Build library with PNG support" ON)
 # Build Python binding or not
 option(BUILD_PYBIND "Build library with Python binding support" OFF)
 # Build static library
@@ -85,7 +85,19 @@ else ()
 endif ()
 
 #find_package(JPEG)
-#find_package(PNG)
+find_package(PNG)
+if (PNG_FOUND AND BUILD_PNG)
+
+    include_directories(${PNG_INCLUDE_DIRS})
+    set(EXT_LIBRARIES ${EXT_LIBRARIES} ${PNG_LIBRARIES})
+
+    MESSAGE( STATUS "PNG library: " ${PNG_LIBRARIES} )
+    MESSAGE( STATUS "PNG include: " ${PNG_INCLUDE_DIRS} )
+
+else ()
+    MESSAGE( STATUS "PNG NOT FOUND." )
+    list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_png.cpp")
+endif ()
 
 if (BUILD_STATIC)
     add_library(em-core STATIC ${SOURCE_FILES} ${HEADER_FILES})
