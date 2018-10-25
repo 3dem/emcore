@@ -37,7 +37,12 @@ StringVector String::split(const char *str, const char sep)
     } while (0 != *str++);
 
     return result;
-} // function String::split
+} // function String::split (char*)
+
+StringVector String::split(const std::string &input, const char sep)
+{
+    return split(input.c_str(), sep);
+} // function String::split (string)
 
 std::string String::join(StringVector input, const char sep)
 {

@@ -27,6 +27,7 @@ namespace em
 
         /** Split the string into tokens */
         static StringVector split(const char *str, const char sep = ' ');
+        static StringVector split(const std::string &input, const char sep = ' ');
 
         /** Join many input strings into one, using a separator character */
         static std::string join(StringVector input, const char sep = 0);
