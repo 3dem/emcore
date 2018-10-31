@@ -15,7 +15,7 @@ using namespace em;
 
 /**
  * Inherit properties from base ImageIO::Impl and add information
- * specific for PNG format (e.g, the ImagicHeader struct)
+ * specific for PNG format
  */
 class ImageIOPng: public em::ImageIO::Impl
 {
@@ -119,6 +119,9 @@ public:
 
     virtual void readImageData(const size_t index, Image& image) override
     {
+        if (index != 1)
+            THROW_SYS_ERROR(std::string("Index out of bounds."));
+
         png_byte bitDepth = png_get_bit_depth(pngReadPtr, readInfoPtr);
 
         if (bitDepth < 8)// for PNG_COLOR_TYPE_GRAY
@@ -142,6 +145,9 @@ public:
 
     virtual void writeImageData(const size_t index, const Image &image) override
     {
+        if (index != 1)
+            THROW_SYS_ERROR(std::string("Index out of bounds."));
+
         auto data1 = static_cast<const uint8_t*>(image.getData());
         png_uint_32 i, rowBytes = dim.x * (getModeFromType(type) == 16 ? 2 : 1);
         png_byte row[rowBytes];
