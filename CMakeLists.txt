@@ -18,6 +18,8 @@ option(BUILD_DOCS "Build the doxygen documentation" OFF)
 option(BUILD_TIFF "Build library with TIFF support" ON)
 # Add option to decide if build png or not
 option(BUILD_PNG "Build library with PNG support" ON)
+# Add option to decide if build jpeg or not
+option(BUILD_JPEG "Build library with JPEG support" ON)
 # Build Python binding or not
 option(BUILD_PYBIND "Build library with Python binding support" OFF)
 # Build static library
@@ -84,7 +86,19 @@ else ()
     list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_tiff.cpp")
 endif ()
 
-#find_package(JPEG)
+find_package(JPEG)
+if (JPEG_FOUND AND BUILD_JPEG)
+    include_directories(${JPEG_INCLUDE_DIR})
+    set(EXT_LIBRARIES ${EXT_LIBRARIES} ${JPEG_LIBRARIES})
+
+    MESSAGE( STATUS "JPEG library: " ${JPEG_LIBRARIES} )
+    MESSAGE( STATUS "JPEG include: " ${JPEG_INCLUDE_DIR} )
+
+else ()
+    MESSAGE( STATUS "JPEG NOT FOUND." )
+    list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_jpeg.cpp")
+endif ()
+
 find_package(PNG)
 if (PNG_FOUND AND BUILD_PNG)
 

@@ -214,6 +214,40 @@ TEST(ImageIOPng, Read)
     }
 }
 
+TEST(ImageIOJpeg, Read)
+{
+    ImageIO jpegIO = ImageIO("jpg");
+    auto testDataPath = getenv("EM_TEST_DATA");
+
+    if (testDataPath != nullptr)
+    {
+        try
+        {
+            ImageLocation loc;
+            loc.path = std::string(testDataPath) + "/1-GRAY-8bits.jpg";
+            loc.index = 1;
+            Image img;
+            img.read(loc);
+            std::cout << ">>> Image: " << img;
+
+            auto path = std::string(testDataPath) + "/1-GRAY-8bits-copy.jpg";
+
+            std::cout << ">>> Writing image: " << path << std::endl;
+
+            jpegIO.open(path, File::Mode::TRUNCATE);
+            jpegIO.createFile(img.getDim(), img.getType());
+            jpegIO.write(1, img);
+            jpegIO.close();
+
+            std::cout << ">>> Write image done." << std::endl;
+        }
+        catch(Error &error)
+        {
+            std::cout << error<< std::endl;
+        }
+    }
+}
+
 TEST(ImageIOImagic, Read)
 {
     ImageIO imagicIO = ImageIO("hed");
