@@ -149,7 +149,7 @@ public:
             THROW_SYS_ERROR(std::string("Index out of bounds."));
 
         auto data1 = static_cast<const uint8_t*>(image.getData());
-        png_uint_32 i, rowBytes = dim.x * (getModeFromType(type) == 16 ? 2 : 1);
+        png_uint_32 i, rowBytes = dim.x * type.getSize();
         png_byte row[rowBytes];
 
         for (i = 0; i < dim.y; i++)
@@ -169,7 +169,7 @@ public:
                {2, typeUInt8},
                {4, typeUInt8},
                {8, typeUInt8},
-               {16, typeInt16}
+               {16, typeUInt16}
         };
 
         return tm;
