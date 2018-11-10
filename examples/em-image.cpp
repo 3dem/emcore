@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <iomanip>
+#include <set>
+#include <utility>
 #include <math.h>
 
 #include "em/base/error.h"
@@ -70,6 +72,8 @@ protected:
 private:
     std::string inputFn = "";
     std::string outputFn = "";
+    std::string outputFormat;
+    Type outputType;
     ImagePipeProc pipeProc;
     StringVector inputList;
 
@@ -77,6 +81,17 @@ private:
                         size_t startIndex, size_t endIndex);
 
     ImageProcessor* getProcessorFromArg(const Program::Argument& arg);
+
+    /**
+     * Parse the output string (path:format:type) where the values can be separated by :
+     * First value should be the path, second and third can be the format and type
+     * Both format and type are optional and the order can be interchanged.
+     * If not provided, the empty string will be returned
+     * @return A vector with the different parts. If the format is provided, it
+     * will be in the second position. If the type is provided, it will be in the
+     * third position.
+     */
+    void parseOutputString();
 }; // class EmImageProgram
 
 
@@ -176,25 +191,109 @@ ImageProcessor* EmImageProgram::getProcessorFromArg(const Program::Argument& arg
     return nullptr;
 }
 
+/** Helper function to throw errors related to formats */
+void throwFormatError(StringVector msgParts)
+{
+    msgParts.push_back("\nRun 'em-image --formats' to check valid formats.");
+    THROW_ERROR(String::join(msgParts));
+}
+
+void EmImageProgram::parseOutputString()
+{
+    auto formatTypes = ImageIO::getFormatTypes();
+    StringTypeMap typeNames = {{"int8", typeInt8},
+                               {"uint8", typeUInt8},
+                               {"int16", typeInt16},
+                               {"uint16", typeUInt16},
+                               {"int32", typeInt32},
+                               {"uint32", typeUInt32},
+                               {"int64", typeInt64},
+                               {"uint64", typeUInt64},
+                               {"float", typeFloat},
+                               {"double", typeDouble}};
+
+    auto parts = String::split(getValue("<output>"), ':');
+    auto n = parts.size();
+
+    if (n == 3)
+    {
+        // Nothing else to do here, format is already in second position
+        if (formatTypes.find(parts[1]) != formatTypes.end()) {}
+            // Now we need to switch the positions to put format in second position
+        else if (formatTypes.find(parts[2]) != formatTypes.end())
+            std::swap(parts[1], parts[2]);
+        else
+            throwFormatError({"Format can not be found in position 2 (",
+                              parts[1], ") or 3 (", parts[2], ")"});
+
+        if (typeNames.find(parts[2]) == typeNames.end())
+            throwFormatError({"Invalid type name (", parts[2], ")"});
+    }
+    else if (n == 2)
+    {
+        if (formatTypes.find(parts[1]) != formatTypes.end())
+            parts.push_back(Path::getExtension(parts[0]));  // empty type
+        else if (typeNames.find(parts[1]) != typeNames.end())
+            parts.insert(parts.begin() + 1, "");  // empty format in second position
+        else
+            throwFormatError({"Format or type can not be found in "
+                              "position 2 (", parts[1], ")."});
+    }
+    else if (n == 1)
+    {
+        parts.push_back("");  // empty format
+        parts.push_back("");  // empty type
+    }
+    else
+        THROW_ERROR("The output should not have more than two : characters");
+
+    outputFn = parts[0];
+    outputFormat = parts[1];
+
+    if (outputFormat.empty())
+    {
+        // Infer the format from the output or input files
+        auto ext = Path::getExtension(outputFn);
+        outputFormat = ext.empty() ? Path::getExtension(inputList[0]) : ext;
+    }
+
+    if (parts[2].empty())
+    {
+        ImageIO imgio;
+        imgio.open(inputList[0]);
+        outputType = imgio.getType();
+        imgio.close();
+    }
+    else
+    {
+        auto it = typeNames.find(parts[2]);
+        if (it == typeNames.end())
+            throwFormatError({"Invalid output type (", parts[2], ")"});
+        outputType = it->second;
+
+    }
+} // function EmImageProgram.parseOutputString
+
 int EmImageProgram::run()
 {
+    auto formatTypes = ImageIO::getFormatTypes();
+
     if (hasArg("--formats"))
     {
         std::cout << "Supported formats: " << std::endl;
 
-        for (const auto& kv: ImageIO::getFormatTypes())
+        for (const auto& kv: formatTypes)
         {
             std::cout << kv.first << ": ";
             for (const auto& type: kv.second)
                 std::cout << type.getName() << " ";
             std::cout << std::endl;
         }
-
         return 0;
     }
 
     Image inputImage, outputImage;
-    ImageIO inputIO, outputIO;
+    ImageIO inputIO;
 
     auto doProcess = pipeProc.getSize() > 0;
     auto hasOutput = hasArg("<output>");
@@ -217,19 +316,22 @@ int EmImageProgram::run()
     }
     else if (hasOutput)  // Convert input
     {
-        std::cout << "has output..." << std::endl;
 
-        if (hasArg("--oformat"))
-        {
-            std::cout << "oformat: " << getValue("--oformat") << std::endl;
-        }
+        parseOutputString();
+        std::cout << "Output " << std::endl
+                  << "     file: " << outputFn << std::endl
+                  << "   format: " << outputFormat << std::endl
+                  << "     type: " << outputType.getName() << std::endl;
+
+        ImageIO outputIO(outputFormat);
 
         for (auto& path: inputList)
         {
             inputIO.open(path);
             inputIO.read(1, inputImage);
 
-            outputIO.open(getValue("<output>"), File::TRUNCATE);
+            outputIO.open(outputFn, File::TRUNCATE);
+            if
             //outputImage.copy(inputImage, typeFloat);
             outputIO.write(1, inputImage);
         }

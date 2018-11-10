@@ -177,6 +177,20 @@ bool em::ImageIO::registerImpl(const StringVector &extOrNames,
     return getImageIORegistry()->registerImpl(extOrNames, builder);
 } // function registerImageIOImpl
 
+bool ImageIO::hasImpl(const std::string &extension)
+{
+    return getImageIORegistry()->hasImpl(extension);
+} // function hasIO
+
+std::vector<Type> ImageIO::getImplTypes(const std::string &extOrName)
+{
+    auto impl = getImageIORegistry()->buildImpl(extOrName);
+    auto types = impl->getTypes();
+    delete impl;
+
+    return types;
+} // function ImageIO::getImplTypes
+
 ImageIO::FormatTypes ImageIO::getFormatTypes()
 {
     FormatTypes dict;
@@ -188,27 +202,11 @@ ImageIO::FormatTypes ImageIO::getFormatTypes()
 
         auto impl = kv.second();
 
-        for (const auto& kv2: impl->getTypeMap())
-            vector.push_back(kv2.second);
 
-        std::sort(vector.begin(), vector.end(),
-                  [](const Type& t1, const Type& t2)
-                  {
-                      if (t1.getSize() == t2.getSize())
-                      {
-                          return t1.getName() < t2.getName();
-                      }
-                      else return t1.getSize() < t2.getSize();
-                  });
     }
 
     return dict;
 }
-
-bool ImageIO::hasImpl(const std::string &extension)
-{
-    return getImageIORegistry()->hasImpl(extension);
-} // function hasIO
 
 ImageIO::ImageIO()
 {
@@ -230,6 +228,26 @@ ImageIO::~ImageIO()
 ImageIO::Impl::~Impl()
 {
 }
+
+TypeVector ImageIO::Impl::getTypes() const
+{
+    TypeVector types;
+
+    for (const auto& kv2: getTypeMap())
+        types.push_back(kv2.second);
+
+    std::sort(types.begin(), types.end(),
+              [](const Type& t1, const Type& t2)
+              {
+                  if (t1.getSize() == t2.getSize())
+                  {
+                      return t1.getName() < t2.getName();
+                  }
+                  else return t1.getSize() < t2.getSize();
+              });
+
+    return types;
+} // function ImageIO::Impl.getTypes
 
 void ImageIO::open(const std::string &path, const File::Mode mode)
 {
@@ -277,10 +295,19 @@ void ImageIO::expandFile(const size_t ndim)
 
 ArrayDim ImageIO::getDim() const
 {
+    // TODO: Check also that if the impl is not null, still the file is opened
     ASSERT_ERROR(impl == nullptr, "File has not been opened. ");
 
     return impl->dim;
-}
+} // function ImageIO.getDim
+
+Type ImageIO::getType() const
+{
+    // TODO: Check also that if the impl is not null, still the file is opened
+    ASSERT_ERROR(impl == nullptr, "File has not been opened. ");
+
+    return impl->type;
+} // function ImageIO.getType
 
 void ImageIO::read(size_t index, Image &image)
 {

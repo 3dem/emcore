@@ -43,6 +43,9 @@ namespace em
 
         virtual ~Impl();
 
+        /** Return a list of the supported types of this implementation. */
+        TypeVector getTypes() const;
+
     protected:
         /** Read the main header of an image file */
         virtual void readHeader() = 0;
