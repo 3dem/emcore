@@ -20,8 +20,9 @@ namespace em
         /** Default empty constructor. None of the parameters are set. */
         ImageProcessor() = default;
 
-        /** Allow to pass the parameters in the constructor. */
-        ImageProcessor(std::initializer_list<std::pair<std::string, Object>>);
+        /** Set processor parameters.
+         */
+        void setParams(std::initializer_list<std::pair<std::string, Object>>);
 
         /** Apply the operation defined by this Processor to the input
          * image and store the result in the output image.
@@ -39,6 +40,11 @@ namespace em
 
     protected:
         ObjectDict params;
+
+        /** This method should be overriden to make some validations after
+         * the setParams is called.
+         */
+        virtual void validateParams() {}
 
     }; // class ImageProcessor
 
@@ -65,8 +71,7 @@ namespace em
      }; // class ImagePipeProc
 
 
-    /** Processor to perform some basic image operations such as:
-     * addition, subtraction, multiplication and division
+    /** Processor to scale images
      */
     class ImageMathProc: public ImageProcessor
     {
@@ -87,6 +92,23 @@ namespace em
          */
         virtual void process(Image &inputOutput) override ;
     }; // class ImageMathProc
+
+
+    /** Processor to perform some basic image operations such as:
+     * addition, subtraction, multiplication and division
+     */
+    class ImageScaleProc: public ImageProcessor
+    {
+    public:
+        /** Scale input image and store the new one in output.
+         * The output image will have the dimension defined by param "newdim"
+         */
+        virtual void process(const Image &input, Image &output) override ;
+
+        /** Apply the scale and store the output in the same input image.
+         */
+        virtual void process(Image &inputOutput) override ;
+    }; // class ImageScaleProc
 
 } // namespace em
 

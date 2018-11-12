@@ -133,3 +133,44 @@ ASSERT_FLOAT_EQ(s1.max, 5);
 ASSERT_FLOAT_EQ(s1.mean, 3);
 ASSERT_NEAR(s1.std, 1.4142, error);
 }
+
+TEST(ImageScaleProc, Basic)
+{
+    ImageMathProc imgOp;
+    ImageLocation loc;
+    std::map<std::string, ArrayDim> fileDims;
+    auto testDataPath = getenv("EM_TEST_DATA");
+
+    if (testDataPath != nullptr)
+    {
+        try
+        {
+            std::string root(testDataPath);
+            root += "emx/alignment/testAngles/";
+
+            fileDims["sphere_128.vol"] = ArrayDim(128, 128, 128, 1);
+            fileDims["proj.spi"] = ArrayDim(128, 128, 1, 1);
+
+            std::string micFn(testDataPath);
+            micFn += "/relion_tutorial/micrographs/006.mrc";
+
+            Image img, out;
+            img.read(micFn);
+            ImageScaleProc imgScaleProc;
+            imgScaleProc.setParams({{"newdim", 512}});
+            imgScaleProc.process(img, out);
+            std::cout << "New dims: " << out.getDim() << std::endl;
+            out.write(ImageLocation("006_512px.mrc"));
+
+        }
+        catch (Error &err)
+        {
+            std::cout << err << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "Skipping image processing tests, EM_TEST_DATA not "
+        "defined in environment. " << std::endl;
+    }
+} // TEST ImageOperator.Basic

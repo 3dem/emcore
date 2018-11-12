@@ -4,18 +4,20 @@
 
 #include "em/base/string.h"
 #include "em/proc/processor.h"
+#include "../../include/em/proc/fft.h"
 
 using namespace em;
 
-ImageProcessor::ImageProcessor(
+void ImageProcessor::setParams(
         std::initializer_list<std::pair<std::string, Object>> list)
 {
-    std::cout << "ImageProcessor, initializing from list:" << std::endl;
     for (auto& pair: list)
     {
         std::cout << "  " << pair.first << " -> " << pair.second << std::endl;
         (*this)[pair.first] = pair.second;
     }
+
+    validateParams();
 } // ImageProcessor ctor
 
 Object& ImageProcessor::operator[](const std::string &key)
@@ -55,9 +57,7 @@ void ImagePipeProc::process(const Image &input, Image &output)
 void ImagePipeProc::process(Image &inputOutput)
 {
     for (auto proc: processors)
-    {
         proc->process(inputOutput);
-    }
 } // function ImagePipeProc.process
 
 
@@ -69,19 +69,15 @@ const std::string ImageMathProc::OPERAND = "operand";
 
 void ImageMathProc::process(const Image &input, Image &output)
 {
-    output.resize(input);
     output = input;
-    std::cout << "input: " << input << std::endl;
-    std::cout << "output: " << output << std::endl;
-
     process(output);
 }
 
 void ImageMathProc::process(Image &image)
 {
     // Just initialize with the proper type
-    Type::Operation op = (*this)[OPERATION].get<Type::Operation>();
-    auto &operand = (*this)[OPERAND];
+    Type::Operation op = params[OPERATION].get<Type::Operation>();
+    auto &operand = params[OPERAND];
 
     switch (op)
     {
@@ -101,4 +97,26 @@ void ImageMathProc::process(Image &image)
             THROW_ERROR("Unsupported operation.");
     } // switch
 } // function ImageMathProc.process
+
+
+// -------------- ImageMathProc Implementation ---------------------------
+
+void ImageScaleProc::process(const Image &input, Image &output)
+{
+    FourierTransformer ft;
+    auto newdim = params["newdim"].get<int>();
+
+    // Check if we need to convert always
+    Image tmp;
+    tmp.copy(input, typeFloat);
+
+    ft.scale(tmp, output, newdim);
+} // function ImageScaleProc.process
+
+void ImageScaleProc::process(Image &image)
+{
+    Image tmp;
+    process(image, tmp);
+    std::swap(image, tmp);  // Move the result to image
+} // function ImageScaleProc.process
 

@@ -183,11 +183,12 @@ ImageProcessor* EmImageProgram::getProcessorFromArg(const Program::Argument& arg
         std::cout << ">>> Cmd: " << cmdName << ", op: " << (char)op << std::endl;
 
     if (op != Type::NO_OP)
-        return new ImageMathProc({{ImageMathProc::OPERATION, op},
-                                  {ImageMathProc::OPERAND,
-                                   String::toFloat(arg.get(1))}
-                                 });
-
+    {
+        auto imgProc = new ImageMathProc();
+        imgProc->setParams({{ImageMathProc::OPERATION, op},
+                           {ImageMathProc::OPERAND, arg.getFloat(1)}
+                           });
+    }
     return nullptr;
 }
 
@@ -299,22 +300,9 @@ int EmImageProgram::run()
     auto hasOutput = hasArg("<output>");
 
     ASSERT_ERROR(doProcess && !hasOutput,
-                 "Please provide output option.")
+                 "Please provide output value.");
 
-    if (doProcess)  // Do some processing on the images
-    {
-        THROW_ERROR("Right now only using em-image for conversions. "
-                            "Processing will come soon!!!");
-
-//        for (auto& path: inputList)
-//        {
-//            imgIO.open(path);
-//            imgIO.read(1, inputImage);
-//            pipeProc.process(inputImage, outputImage);
-//            //imgIO.write();
-//        }
-    }
-    else if (hasOutput)  // Convert input
+    if (hasOutput)  // Convert input
     {
 
         parseOutputString();
@@ -330,9 +318,11 @@ int EmImageProgram::run()
             inputIO.open(path);
             inputIO.read(1, inputImage);
 
+            if (doProcess)
+                pipeProc.process(inputImage, outputImage);
+
             outputIO.open(outputFn, File::TRUNCATE);
-            if
-            //outputImage.copy(inputImage, typeFloat);
+            outputImage.copy(inputImage, outputType);
             outputIO.write(1, inputImage);
         }
     }
