@@ -39,6 +39,7 @@ void init_submodule_image(py::module &m) {
         .def(py::init<const std::string&>())
         .def_static("hasImpl", &ImageIO::hasImpl)
         .def("getDim", &ImageIO::getDim)
+        .def("getType", &ImageIO::getType)
         .def("open", &ImageIO::open)
         .def("close", &ImageIO::close)
         .def("createFile", &ImageIO::createFile)
