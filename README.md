@@ -40,3 +40,13 @@ For the moment, we need to pass a variable to cmake where the em-core library is
 cmake ../relion-devel-tcblab/ -DGUI=OFF -DCUDA=OFF -DALTCPU=OFF \
 -DEMCORE_ROOT_PATH=/home/dari/Projects/emcore/em-core/
 ```
+
+### Specifying a different Python version (REVIEW)
+If you have more than one Python installed in your system, maybe it is useful to specify which one you want to use. 
+In the following example it will point to the Python installed via Anaconda.
+
+```
+cmake .. -DEMCORE_ROOT_PATH=$HOME/work/development/em-core \
+-DPYTHON_LIBRARIES=~/installs/anaconda2/lib/libpython2.7.so \
+-DPYTHON_EXECUTABLE=~/installs/anaconda2/bin/python2.7
+```
