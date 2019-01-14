@@ -128,9 +128,14 @@ set_property(TARGET em-core PROPERTY SUFFIX "")
 #############################
 #  FFTW3
 #############################
-# TODO: FIND OR COMPILE FFTW
-set(EXT_LIBRARIES ${EXT_LIBRARIES} fftw3 fftw3f)
+find_package(FFTW)
 
+if (FFTW_FOUND)
+    message(STATUS "FFTW3 library: " ${FFTW_LIB} ${FFTWF_LIB})
+    message(STATUS "FFTW3 include: " ${FFTW_INCLUDES})
+    include_directories(${FFTW_INCLUDES})
+    set(EXT_LIBRARIES ${EXT_LIBRARIES} ${FFTW_LIB} ${FFTWF_LIB})
+endif(FFTW_FOUND)
 
 #############################
 #  SQlite3
