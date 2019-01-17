@@ -182,17 +182,17 @@ void copyData(Array *big, Array *small, int x, int y, int z, bool smallToBig)
     }
 }
 
-void Array::copyFrom(const Array &input, int x, int y, int z)
+void Array::patch(const Array &input, int x, int y, int z)
 {
     auto inputPtr = const_cast<Array*>(&input);
     copyData(this, inputPtr, x, y, z, true);
-} // function Array.copyFrom
+} // function Array.patch
 
-void Array::copyTo(Array &output, int x, int y, int z) const
+void Array::extract(const Array &input, int x, int y, int z)
 {
-    auto thisPtr = const_cast<Array*>(this);
-    copyData(thisPtr, &output, x, y, z, false);
-} // function Array.copyTo
+    auto inputPtr = const_cast<Array*>(&input);
+    copyData(this, inputPtr, x, y, z, false);
+} // function Array.extract
 
 void Array::set(const Object &value)
 {

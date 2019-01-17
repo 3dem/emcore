@@ -118,7 +118,7 @@ namespace em
 
         /** Assign other Array to this one. This operation will resize the
          * current Array to have the same type and dimensions of the other Array.
-         * After the asignment both Array should be equal.
+         * After the assignment both Array should be equal.
          *
          * @param other Other Array from which the elements will be assigned
          * @return *this
@@ -151,17 +151,15 @@ namespace em
          * @param y Y index where to start the copy (default 0)
          * @param z Z index where to start the copy (default 0)
          */
-        void copyFrom(const Array& input, int x=0, int y=0, int z=0);
+        void patch(const Array& input, int x=0, int y=0, int z=0);
 
-        /** Copy all elements from this array to the output one from a given index.
-         * It is assumed that the output array has smaller dimensions than
-         * this array. Moreover, the index for start the copy plus the
-         * dimensions of the output array should still be inside this array.
+        /** Copy all elements from the input array to this one from a given index.
+         * It is assumed that this array has smaller dimensions than the input.
+         * Moreover, the index for start the copy plus the
+         * dimensions of this array should still be inside the input array.
          * Both input array and this array should have proper type and dimensions.
-         * This operation is similar to copyFrom, but the copy is made from
-         * this array to the output array.
          */
-         void copyTo(Array& output, int x=0, int y=0, int z=0) const;
+         void extract(const Array& input, int x=0, int y=0, int z=0);
 
         /** Assign the value of a single element to the values of the array.
          * If the Array type is the same of the input Object type, then the

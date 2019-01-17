@@ -315,9 +315,9 @@ TEST(Array, copyFromTo)
     auto data = static_cast<const int16_t *>(a.getData());
     a1.set(10);
 
-    // Let's test copyFrom (patch)
-    a.copyFrom(a1);
-    a.copyFrom(a1, 0, 6);
+    // Let's test patch
+    a.patch(a1);
+    a.patch(a1, 0, 6);
 
     //std::cout << "array (after): \n" << a << std::endl;
 
@@ -330,15 +330,15 @@ TEST(Array, copyFromTo)
     }
 
     // Test out of bounds conditions
-    EXPECT_THROW(a.copyFrom(a1, 0, 7), Error);
-    EXPECT_THROW(a.copyFrom(a1, 7, 0), Error);
+    EXPECT_THROW(a.patch(a1, 0, 7), Error);
+    EXPECT_THROW(a.patch(a1, 7, 0), Error);
 
     ArrayDim adim2(DIM+1, DIM+1);
     Array a2(adim2, typeFloat);
 
     a2.set(0);
     // Test that it also works when casting the elements
-    a2.copyFrom(a, 1, 1);
+    a2.patch(a, 1, 1);
     auto data2 = static_cast<const float*>(a2.getData());
 
     for (int i = 0; i < N; ++i)
@@ -350,7 +350,7 @@ TEST(Array, copyFromTo)
         ASSERT_EQ(data[i], (int)data2[j]);
     }
 
-// Test the other way around copyTo (extract)
+// Test the other way around extract
     Array b1(a1);
     Array b2 = b1;
     b1.set(0);
@@ -361,13 +361,13 @@ TEST(Array, copyFromTo)
     for (int y = 0; y < DIM; y += dim)
         for (int x = 0; x < DIM; x += dim)
         {
-            a.copyTo(b1, x, y);
+            b1.extract(a, x, y);
             b2.set(data[y * DIM + x]);
             ASSERT_EQ(b1, b2);
         }
 
     b1.resize(ArrayDim(DIM, 2));
-    a.copyTo(b1, 0, 5);
+    b1.extract(a, 0, 5);
     auto b1Data = static_cast<const int16_t *>(b1.getData());
 
     for (int y = 5; y < 7; y ++)
@@ -376,7 +376,7 @@ TEST(Array, copyFromTo)
 
     // Create an alias of b1 but in column format
     auto b1Alias = Array(ArrayDim(2, DIM), t, b1.getData());
-    a.copyTo(b1Alias, 5, 0);
+    b1Alias.extract(a, 5, 0);
 
     for (int y = 0; y < DIM; y ++)
         for (int x = 5; x < 7; x++)
