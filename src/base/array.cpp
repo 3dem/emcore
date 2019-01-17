@@ -138,6 +138,62 @@ void Array::copy(const Array &other, const Type &type)
     copyOrCast(other, impl->adim.getSize());
 } // function Array.copy
 
+/** Copy a patch using an small image, a bigger one and a position.
+ *
+ */
+
+void copyData(Array *big, Array *small, int x, int y, int z, bool smallToBig)
+{
+    auto inType = small->getType();
+    auto inTypeSize = inType.getSize();
+    auto outType = big->getType();
+    auto outTypeSize = outType.getSize();
+    auto inDim = small->getDim();
+    auto outDim = big->getDim();
+
+    ASSERT_ERROR(inType.isNull() || outType.isNull(),
+                 "Both images should have non null type.")
+
+    ASSERT_ERROR(x + inDim.x > outDim.x || y + inDim.y > outDim.y,
+                 "Input image dimensions should fit inside the output image "
+                         "from the starting position for the copy.")
+
+    auto n = inDim.x;
+    auto inJump = n * inTypeSize;
+    auto outJump = outDim.x * outTypeSize;
+    auto inData = small->getDataAsChar();
+    auto outData = big->getDataAsChar() + (x * outTypeSize + y * outJump);
+
+    if (!smallToBig)  // Change order of input/output
+    {
+        std::swap(inData, outData);
+        std::swap(inType, outType);
+        std::swap(inJump, outJump);
+    }
+
+    for (size_t j = 0; j < inDim.y; ++j)
+    {
+        if (inType == outType)
+            outType.copy(inData, outData, n);
+        else
+            outType.operate(Type::CAST, inData, inType, outData, n);
+        inData += inJump;
+        outData += outJump;
+    }
+}
+
+void Array::copyFrom(const Array &input, int x, int y, int z)
+{
+    auto inputPtr = const_cast<Array*>(&input);
+    copyData(this, inputPtr, x, y, z, true);
+} // function Array.copyFrom
+
+void Array::copyTo(Array &output, int x, int y, int z) const
+{
+    auto thisPtr = const_cast<Array*>(this);
+    copyData(thisPtr, &output, x, y, z, false);
+} // function Array.copyTo
+
 void Array::set(const Object &value)
 {
     copyOrCast(value, impl->adim.getSize(), true);

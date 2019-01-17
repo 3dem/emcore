@@ -139,6 +139,30 @@ namespace em
          */
          void copy(const Array& other, const Type& type=typeNull);
 
+        /** Copy all elements from the input array from a given index.
+         * It is assumed that the input array has smaller dimensions than
+         * this array. Moreover, the index for start the copy plus the
+         * dimensions of the input array, should still be inside this array.
+         * Both input array and this array should have proper type and dimensions.
+         * This operation is similar to copyTo, but the copy is done from
+         * the input array to this array.
+         * @param input Input array, small than this array.
+         * @param x X index where to start the copy
+         * @param y Y index where to start the copy (default 0)
+         * @param z Z index where to start the copy (default 0)
+         */
+        void copyFrom(const Array& input, int x=0, int y=0, int z=0);
+
+        /** Copy all elements from this array to the output one from a given index.
+         * It is assumed that the output array has smaller dimensions than
+         * this array. Moreover, the index for start the copy plus the
+         * dimensions of the output array should still be inside this array.
+         * Both input array and this array should have proper type and dimensions.
+         * This operation is similar to copyFrom, but the copy is made from
+         * this array to the output array.
+         */
+         void copyTo(Array& output, int x=0, int y=0, int z=0) const;
+
         /** Assign the value of a single element to the values of the array.
          * If the Array type is the same of the input Object type, then the
          * elements will be copied. If not, they will be casted.
