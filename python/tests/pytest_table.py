@@ -91,6 +91,41 @@ class TestTable(BaseTest):
 
         self.assertEqual(colMap.getIndex("forthCol"), c3bindex + 1)
 
+    def test_TableRowSetValue(self):
+        table = em.Table([
+            Column(1, "col1", em.typeFloat),
+            Column(2, "col2", em.typeInt16),
+            Column(3, "col3", em.typeString)
+        ])
+
+        for i, t in enumerate([(1, "col1", em.typeFloat),
+                               (2, "col2", em.typeInt16),
+                               (3, "col3", em.typeString)]):
+            col = table.getColumnByIndex(i)
+            self.assertEqual(t[0], col.getId())
+            self.assertEqual(t[1], col.getName())
+            self.assertEqual(t[2], col.getType())
+
+        row = table.createRow()
+
+        print("Row (before set) >>> ", row)
+
+        # Define some constants values to set and check
+        NAMES = ['My name', 'Second name', 'Yet another name']
+        FLOATS = [3.1416]
+        INTS = [300, 400]
+
+        row[1] = FLOATS[0]
+        row[2] = INTS[0]
+        row[3] = NAMES[0]
+
+        print("Adding row to table...")
+        table.addRow(row);
+
+        print("Accessing row by index. ")
+        row2 = table[0]
+
+
     def test_TableBasic(self):
         table = em.Table([
             Column(1, "col1", em.typeFloat),
@@ -110,52 +145,75 @@ class TestTable(BaseTest):
 
         print("Row (before set) >>> ", row)
 
-        row[1] = 3.1416
-        row[2] = 300
-        row[3] = "My name"
+        # Define some constants values to set and check
+        NAMES = ['My name', 'Second name', 'Yet another name']
+        FLOATS = [3.1416]
+        INTS = [300, 400]
+
+        row[1] = FLOATS[0]
+        row[2] = INTS[0]
+        row[3] = NAMES[0]
 
         print("Row (after set) >>> ", row)
 
+        # Check values are properly set
+        self.assertAlmostEqual(float(row[1]), FLOATS[0], 3)
+        self.assertEqual(int(row[2]), INTS[0])
+        self.assertEqual(str(row[3]), NAMES[0])
 
-        self.assertAlmostEqual(float(row[1]), 3.1416, 3)
-        self.assertEqual(int(row[2]), 300)
-        self.assertEqual(str(row[3]), "My name")
-
+        # Check we get same values using Column IDs or Names
         self.assertEqual(row[1], row["col1"])
         self.assertEqual(row[2], row["col2"])
         self.assertEqual(row[3], row["col3"])
 
+        # Check we can retrieve values in normal variables
         x = int(row[2])
-        self.assertEqual(x, 300)
+        self.assertEqual(x, INTS[0])
 
-        row3 = Row(row)
-        row3["col2"] = 400
-        row3["col3"] = "Other name"
-        x = int(row3[2])
-        self.assertEqual(x, 400)
+        # Lets add another row, based on first one, but with some changes
+        row2 = Row(row)
+        row2["col2"] = INTS[1]
+        row2["col3"] = NAMES[1]
 
-        print("Row3 >>> ", row3)
+        x = int(row2[2])
+        self.assertEqual(x, INTS[1])
+
+        print("Row2 >>> ", row2)
 
         # Check that row was not modified after the copy
-        self.assertAlmostEqual(float(row[1]), 3.1416, 3)
-        self.assertEqual(int(row[2]), 300)
-        self.assertEqual(str(row[3]), "My name")
+        self.assertAlmostEqual(float(row[1]), FLOATS[0], 3)
+        self.assertEqual(int(row[2]), INTS[0])
+        self.assertEqual(str(row[3]), NAMES[0])
 
-
+        # Let's add both rows to the table
         table.addRow(row);
-        table.addRow(row3);
+        table.addRow(row2);
 
+        # Set all names with the same value and divide by 10 the integer one
         # FIXME: Add binding for the iterator
         # for row in table:
         for i in range(table.getSize()):
             row = table[i]
-            row["col3"] = "Other name 2"
+            row["col3"] = NAMES[2]
             row["col2"] = int(row["col2"]) / 10
 
         print("Table: ", table)
 
         self.assertEqual(2, table.getSize())
         self.assertFalse(table.isEmpty())
+
+        # Check row values are as expected (using iterator)
+        for i, row in enumerate(table):
+            self.assertAlmostEqual(row["col1"], FLOATS[0], 3)
+            self.assertEqual(row["col2"], INTS[i]/10)
+            self.assertEqual(row["col3"], NAMES[2])
+
+        # Check row values are as expected (using indexing)
+        for i in range(table.getSize()):
+            row = table[i]
+            self.assertAlmostEqual(row["col1"], FLOATS[0], 3)
+            self.assertEqual(row["col2"], INTS[i]/10)
+            self.assertEqual(row["col3"], NAMES[2])
 
         table.clear()
         self.assertEqual(0, table.getSize())
@@ -313,6 +371,7 @@ class TestTable(BaseTest):
             for i in range(table.getColumnsSize()):
                 col = table.getColumnByIndex(i)
                 self.assertEqual(refColNames[i], col.getName())
+
 
 if __name__ == '__main__':
     main()

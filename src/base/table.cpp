@@ -165,12 +165,14 @@ Table::Row::Row(Impl *rowImpl): impl(rowImpl) {}
 
 Table::Row::Row(const Row &other)
 {
+    std::cout << "Table::Row: COPY ctor..." << std::endl;
     impl = new Impl();
     *impl = *(other.impl);
 } // Copy ctor
 
 Table::Row::Row(Row &&other) noexcept
 {
+    std::cout << "Table::Row: MOVE ctor..." << std::endl;
     std::swap(impl, other.impl);
 } // Move ctor
 
