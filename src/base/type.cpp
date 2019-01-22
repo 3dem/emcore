@@ -141,6 +141,11 @@ bool Type::equals(const void *inputMem1, const void *inputMem2,
     return impl->equals(inputMem1, inputMem2, count);
 } // function Type.equals
 
+int Type::compare(const void *inputMem1, const void *inputMem2) const
+{
+    return impl->compare(inputMem1, inputMem2);
+} // function Type.comnpare
+
 std::ostream& em::operator<< (std::ostream &ostrm, const Type &t)
 {
     ostrm << "<type: " << t.getName() << ", " << t.getSize() << " bytes>";

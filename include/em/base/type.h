@@ -174,8 +174,12 @@ namespace em
         void fromStream(std::istream &stream, void *outputMem,
                         size_t count) const;
 
+        // TODO: DOCUMENT
         bool equals(const void *inputMem1, const void *inputMem2,
                     size_t count) const;
+
+        // TODO: Document
+        int compare(const void *inputMem1, const void *inputMem2) const;
 
         /** Swap the bytes order
          *

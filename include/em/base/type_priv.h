@@ -41,6 +41,8 @@ public:
     virtual bool equals(const void *inputMem1,
                         const void *inputMem2,
                         size_t count) const NOT_IMPLEMENTED;
+    virtual int compare(const void *inputMem1,
+                        const void *inputMem2) const NOT_IMPLEMENTED;
 
     size_t id;
     size_t size;
@@ -285,6 +287,12 @@ class TypeImplT: public TypeImplBaseT<T>
 template <> class TypeImplT<type>: public TypeImplBaseT<type> { \
 public: \
     virtual std::string getName() const override { return name; } \
+    virtual int compare(const void *inputMem1, const void *inputMem2) const override\
+    {\
+        auto val1 = *static_cast<const type *>(inputMem1);\
+        auto val2 = *static_cast<const type *>(inputMem2);\
+    return (val1 < val2) ? -1 : (val1 > val2 ? 1 : 0);\
+    }\
 }
 
 DEFINE_TYPENAME(float, "float");
@@ -310,5 +318,30 @@ DEFINE_TYPENAME(bool, "bool");
 DEFINE_TYPENAME(std::string, "string");
 
 #undef DEFINE_TYPENAME
+
+//--------------- Some custom implementations for complex float and double ------------------
+
+template <> class TypeImplT<std::complex<float>>: public TypeImplBaseT<std::complex<float>>
+{
+public:
+    virtual std::string getName() const override { return "cfloat"; }
+    virtual int compare(const void *inputMem1, const void *inputMem2) const override
+    {
+        THROW_ERROR(std::string("compare is not possible for type: ") + getName());
+        return 0;
+    }
+};
+
+template <> class TypeImplT<std::complex<double>>: public TypeImplBaseT<std::complex<double>>
+{
+public:
+    virtual std::string getName() const override { return "cdouble"; }
+    virtual int compare(const void *inputMem1, const void *inputMem2) const override
+    {
+        THROW_ERROR(std::string("compare is not possible for type: ") + getName());
+        return 0;
+    }
+};
+
 
 #endif //EM_CORE_TYPE_PRIV_H_H

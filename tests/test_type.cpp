@@ -47,6 +47,9 @@ TEST(Type, Basic) {
 
     std::cout << em::Type::get<size_t>() << std::endl;
     std::cout << em::Type::get<uint64_t>() << std::endl;
+
+    auto cf = typeCFloat;
+    std::cout << cf << std::endl;
 }
 
 TEST(Type, General) {
@@ -124,6 +127,21 @@ TEST(Type, General) {
 
 } // TEST(Type, General)
 
+TEST(Type, Compare)
+{
+    int ints[] = {1, 1, 2, 3, 4};
+    Object o(ints[0]);
+    auto t = o.getType();
+
+    ASSERT_EQ(t.compare(ints, ints+1), 0);
+    ASSERT_EQ(t.compare(ints, ints+2), -1);
+    ASSERT_EQ(t.compare(ints+2, ints+1), 1);
+
+    float f1 = 1.5;
+    float f2 = 0.5;
+
+    ASSERT_EQ(typeFloat.compare(&f1, &f2), 1);
+} // TEST Type.compare
 
 TEST(Type, Indexing)
 {
