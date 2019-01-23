@@ -86,6 +86,8 @@ namespace em
 
         bool operator==(const Object &other) const;
         bool operator!=(const Object &other) const;
+        bool operator>(const Object &other) const;
+        bool operator<(const Object &other) const;
 
         // Extract the value
         template<class T> T get() const;
