@@ -147,30 +147,21 @@ TEST(ImageScaleProc, Basic)
         {
             std::string root(testDataPath);
 
-            fileDims["sphere_128.vol"] = ArrayDim(128, 128, 128, 1);
-            fileDims["proj.spi"] = ArrayDim(128, 128, 1, 1);
-
             std::string micFn = root + "/relion_tutorial/micrographs/006.mrc";
 
             Image img, out;
             img.read(micFn);
             ImageScaleProc imgScaleProc;
-            imgScaleProc.setParams({{"newdim", 512}});
+            imgScaleProc.setParams({{"newdim_x", 512}});
             imgScaleProc.process(img, out);
             std::cout << "New dims: " << out.getDim() << std::endl;
             out.write(ImageLocation("006_512px.mrc"));
 
             micFn = root + "/xmipp_tutorial/micrographs/BPV_1386.mrc";
-            Image img2, img3;
+            Image img2;
             img2.read(micFn);
-
-            auto dim = img2.getDim();
-            auto m = std::max(dim.x, dim.y);
-            img3.resize(ArrayDim(m, m), img2.getType());
-            img3.set(0);
-            img3.patch(img2);
-            imgScaleProc.setParams({{"newdim", 1024}});
-            imgScaleProc.process(img3, out);
+            imgScaleProc.setParams({{"newdim_x", 1024}});
+            imgScaleProc.process(img2, out);
             out.write(ImageLocation("BPV_1387_1024px.mrc"));
         }
         catch (Error &err)

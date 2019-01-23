@@ -130,9 +130,6 @@ void EmImageProgram::readArgs()
 
     auto& args = getArgList();
 
-//    std::cout << std::setw(10) << std::right << "Commands: "
-//              << args.size() << std::endl;
-
     std::string cmdName;
 
     for (auto& a: args)
@@ -169,6 +166,7 @@ ImageProcessor* EmImageProgram::getProcessorFromArg(const Program::Argument& arg
 {
     std::string cmdName = arg.toString();
     Type::Operation op = Type::NO_OP;
+    ImageProcessor *imgProc = nullptr;
 
     // Check first if the argument is for a basic arithmetic operation
     if (cmdName == "add")
@@ -182,14 +180,32 @@ ImageProcessor* EmImageProgram::getProcessorFromArg(const Program::Argument& arg
 
         std::cout << ">>> Cmd: " << cmdName << ", op: " << (char)op << std::endl;
 
-    if (op != Type::NO_OP)
+    if (op != Type::NO_OP)  // Case of an arithmetic operation
     {
-        auto imgProc = new ImageMathProc();
-        imgProc->setParams({{ImageMathProc::OPERATION, op},
-                           {ImageMathProc::OPERAND, arg.getFloat(1)}
-                           });
+        imgProc = new ImageMathProc({{ImageMathProc::OPERATION, op},
+                                     {ImageMathProc::OPERAND, arg.getFloat(1)}});
     }
-    return nullptr;
+    else
+    {
+        if (cmdName == "scale")
+        {
+            auto arg1 = arg.get(1);
+            ObjectDict params;
+
+            if (arg1 == "angpix")
+                params = {{"angpix_old", arg.getFloat(2)},
+                          {"angpix_new", arg.getFloat(3)}};
+            else if (arg1 == "x")
+                params = {{"newdim_x", arg.getFloat(2)}};
+            else if (arg1 == "y")
+                params = {{"newdim_y", arg.getFloat(2)}};
+            else
+                params = {{"factor", arg.getFloat(1)}};
+
+            imgProc = new ImageScaleProc(params);
+        }
+    }
+    return imgProc;
 }
 
 /** Helper function to throw errors related to formats */
@@ -322,8 +338,9 @@ int EmImageProgram::run()
                 pipeProc.process(inputImage, outputImage);
 
             outputIO.open(outputFn, File::TRUNCATE);
-            outputImage.copy(inputImage, outputType);
+            inputImage.copy(outputImage, outputType);
             outputIO.write(1, inputImage);
+            outputIO.close();
         }
     }
     else  // Just print information about the input images
