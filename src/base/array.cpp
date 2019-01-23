@@ -151,12 +151,12 @@ void copyData(Array *big, Array *small, int x, int y, int z, bool smallToBig)
     auto inDim = small->getDim();
     auto outDim = big->getDim();
 
-    ASSERT_ERROR(inType.isNull() || outType.isNull(),
-                 "Both images should have non null type.")
-
     ASSERT_ERROR(x + inDim.x > outDim.x || y + inDim.y > outDim.y,
                  "Input image dimensions should fit inside the output image "
                          "from the starting position for the copy.")
+
+    ASSERT_ERROR(inType.isNull() || outType.isNull(),
+                 "Both images should have non null type.")
 
     auto n = inDim.x;
     auto inJump = n * inTypeSize;
@@ -170,6 +170,7 @@ void copyData(Array *big, Array *small, int x, int y, int z, bool smallToBig)
         std::swap(inType, outType);
         std::swap(inJump, outJump);
     }
+
 
     for (size_t j = 0; j < inDim.y; ++j)
     {
@@ -191,7 +192,7 @@ void Array::patch(const Array &input, int x, int y, int z)
 void Array::extract(const Array &input, int x, int y, int z)
 {
     auto inputPtr = const_cast<Array*>(&input);
-    copyData(this, inputPtr, x, y, z, false);
+    copyData(inputPtr, this, x, y, z, false);
 } // function Array.extract
 
 void Array::set(const Object &value)
