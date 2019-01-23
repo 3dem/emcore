@@ -185,13 +185,23 @@ namespace em
          static bool registerImpl(const StringVector &extOrNames,
                                   ImplBuilder builder);
 
+        /**
+         * Return the types supported by a given format implementation.
+         * An exception will be raised if the implementation can not be found,
+         * so user needs to check that hasImpl returns true for this input.
+         */
+         static std::vector<Type> getImplTypes(const std::string &extOrName);
+
         /** Return a dictionary with image format names as key and
          * the values will be a list with supported datatypes.
          */
         static FormatTypes getFormatTypes();
 
-        /** Return the dimensions of the file opened. */
+        /** Return the dimensions of the opened file. */
         ArrayDim getDim() const;
+
+        /** Return the type of the opened file */
+        Type getType() const;
 
         // TODO: DOCUMENT
         void open(const std::string &path,

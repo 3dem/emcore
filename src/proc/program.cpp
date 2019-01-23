@@ -10,6 +10,7 @@
 
 #include <em/base/type.h>
 #include "em/proc/program.h"
+#include "../../include/em/proc/program.h"
 
 using namespace em;
 
@@ -84,6 +85,11 @@ const char* Program::Argument::get(size_t pos) const
                  "Position is greater than the number of argument values");
     return argv[pos];
 }
+
+float Program::Argument::getFloat(size_t pos) const
+{
+    return String::toFloat(get(pos));
+} // function Program::Argument::getFloat
 
 std::string Program::Argument::toString() const
 {

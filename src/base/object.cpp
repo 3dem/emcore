@@ -82,6 +82,24 @@ bool Object::operator!=(const Object &other) const
    return ! (*this == other);
 } // function Object.operator!=
 
+bool Object::operator>(const Object &other) const
+{
+    auto& type = getType();
+    if (type != other.getType() || type.isNull())
+        return false;
+
+    return type.compare(getData(), other.getData()) > 0;
+} // function Object.operator>
+
+bool Object::operator<(const Object &other) const
+{
+    auto& type = getType();
+    if (type != other.getType() || type.isNull())
+        return false;
+
+    return type.compare(getData(), other.getData()) < 0;
+} // function Object.operator<
+
 std::ostream& em::operator<< (std::ostream &ostream, const em::Object &object)
 {
     object.toStream(ostream);

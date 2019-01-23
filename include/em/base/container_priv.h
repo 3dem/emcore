@@ -45,6 +45,13 @@ namespace em
 
         inline const void *getData() const { return data; }
 
+        /** Return a pointer to the memory where this object data is stored
+         * as a char (1 byte type). This is useful for memory arithmetic
+         * based on the type size. */
+        inline uint8_t* getDataAsChar() { return static_cast<uint8_t *>(data); }
+
+        inline const uint8_t * getDataAsChar() const { return static_cast<const uint8_t *>(data); }
+
         /** Return True if this container is a View, i.e, it does not own
          * the memory but points to some existing memory location.
          */

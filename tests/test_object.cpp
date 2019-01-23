@@ -32,6 +32,11 @@ TEST(Object, Basic)
     ASSERT_FLOAT_EQ(eo.get<float>(), 2.2f);
     ASSERT_EQ(eo, Object(2.2f));
 
+    Object eo2 = 3.2f;
+    ASSERT_TRUE(eo2 > eo);
+    ASSERT_TRUE(eo < eo2);
+
+
     // We can explicitly change its type, internal value will be converted
     eo.setType(typeInt32);
     ASSERT_EQ(eo.get<int>(), (int)2.2f);
@@ -43,6 +48,11 @@ TEST(Object, Basic)
     ASSERT_EQ(x, 1);
     o = 2;
     ASSERT_EQ(o.get<int>(), 2);
+
+    // Test comparison of integers
+    ASSERT_EQ(o, eo);
+    o = 10;
+    ASSERT_TRUE(o > eo);
 
     em::Object o2(3.5); // Type should be double
     ASSERT_EQ(o2.getType(), typeDouble);

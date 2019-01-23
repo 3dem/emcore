@@ -37,6 +37,9 @@ namespace em
             /** Return the value of the argument in a given position */
             const char * get(size_t pos = 1) const;
 
+            /** Return the value of the argument as a float */
+            float getFloat(size_t pos = 1) const;
+
             /** Return the value of the argument in a given position
              * but casted to a given type.
              */

@@ -230,7 +230,6 @@ TEST(Array, IndexingAlias)
         std::cerr << e << std::endl;
     }
 
-
 } // TEST(Array, getView)
 
 TEST(Array, Legacy)
@@ -283,5 +282,104 @@ TEST(Array, Legacy)
         std::cerr << e << std::endl;
     }
 
-
 } // TEST(Array, getView)
+
+TEST(Array, copyFromTo)
+{
+    size_t DIM = 9; // sudoku test array
+    size_t dim = DIM / 3;
+    size_t N = DIM * DIM;
+    // Create an Array with 10 elements to test aliasing single images
+    ArrayDim adim(DIM, DIM);
+
+    std::vector<int16_t > v = {1, 1, 1, 2, 2, 2, 3, 3, 3,
+                          1, 1, 1, 2, 2, 2, 3, 3, 3,
+                          1, 1, 1, 2, 2, 2, 3, 3, 3,
+                          4, 4, 4, 5, 5, 5, 6, 6, 6,
+                          4, 4, 4, 5, 5, 5, 6, 6, 6,
+                          4, 4, 4, 5, 5, 5, 6, 6, 6,
+                          7, 7, 7, 8, 8, 8, 9, 9, 9,
+                          7, 7, 7, 8, 8, 8, 9, 9, 9,
+                          7, 7, 7, 8, 8, 8, 9, 9, 9};
+
+
+    auto& t = typeInt16;
+
+    Array a(adim, t);
+    t.copy(v.data(), a.getData(), N);
+
+    //std::cout << "array: \n" << a << std::endl;
+
+    Array a1(ArrayDim(dim, dim), t);
+
+    auto data = static_cast<const int16_t *>(a.getData());
+    a1.set(10);
+
+    // Let's test patch
+    a.patch(a1);
+    a.patch(a1, 0, 6);
+
+    //std::cout << "array (after): \n" << a << std::endl;
+
+    int16_t goldValue;
+
+    for (int i = 0; i < N; ++i)
+    {
+        goldValue = (v[i] == 1 or v[i] == 7)? 10 : v[i];
+        ASSERT_EQ(data[i], goldValue);
+    }
+
+    // Test out of bounds conditions
+    EXPECT_THROW(a.patch(a1, 0, 7), Error);
+    EXPECT_THROW(a.patch(a1, 7, 0), Error);
+
+    ArrayDim adim2(DIM+1, DIM+1);
+    Array a2(adim2, typeFloat);
+
+    a2.set(0);
+    // Test that it also works when casting the elements
+    a2.patch(a, 1, 1);
+    auto data2 = static_cast<const float*>(a2.getData());
+
+    for (int i = 0; i < N; ++i)
+    {
+        int y = i / DIM + 1;
+        int x = i % DIM + 1;
+        int j = y * (DIM + 1) + x;
+
+        ASSERT_EQ(data[i], (int)data2[j]);
+    }
+
+// Test the other way around extract
+    Array b1(a1);
+    Array b2 = b1;
+    b1.set(0);
+    b2.set(0);
+    ASSERT_NE(a1, b1);
+    ASSERT_NE(a1, b2);
+
+    for (int y = 0; y < DIM; y += dim)
+        for (int x = 0; x < DIM; x += dim)
+        {
+            b1.extract(a, x, y);
+            b2.set(data[y * DIM + x]);
+            ASSERT_EQ(b1, b2);
+        }
+
+    b1.resize(ArrayDim(DIM, 2));
+    b1.extract(a, 0, 5);
+    auto b1Data = static_cast<const int16_t *>(b1.getData());
+
+    for (int y = 5; y < 7; y ++)
+        for (int x = 0; x < DIM; x++)
+            ASSERT_EQ(data[y * DIM + x], b1Data[(y-5) * DIM + x]);
+
+    // Create an alias of b1 but in column format
+    auto b1Alias = Array(ArrayDim(2, DIM), t, b1.getData());
+    b1Alias.extract(a, 5, 0);
+
+    for (int y = 0; y < DIM; y ++)
+        for (int x = 5; x < 7; x++)
+            ASSERT_EQ(data[y * DIM + x], b1Data[y * 2 + x - 5]);
+
+} // TEST Array.copyFromTo

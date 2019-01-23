@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream> // the good one
 #include <sstream>
+#include <algorithm> // sorting the table
 
 #include "em/base/registry.h"
 #include "em/base/table.h"
@@ -296,6 +297,16 @@ void Table::clear()
     delete impl;
     impl = new Impl();
 } // function Table.clear
+
+void Table::sort(const StringVector &columnName)
+{
+    std::sort(impl->rows.begin(), impl->rows.end(),
+              [&columnName](const Row &lhs, const Row &rhs)
+              {
+                  auto& colName = columnName[0];
+                  return lhs[colName] < rhs[colName];
+              });
+} // function Table.sort
 
 // ---------------- Row related methods ------------------------
 
