@@ -3,6 +3,7 @@
 //
 
 #include <iomanip>
+#include <random>
 #include "gtest/gtest.h"
 
 #include "em/base/table.h"
@@ -189,6 +190,7 @@ TEST(Table, Copy)
     }
 } // Test Table.Copy
 
+
 TEST(Table, RemoveColumns)
 {
     // Let's create a table with no rows
@@ -207,6 +209,7 @@ TEST(Table, RemoveColumns)
     table10.removeColumn("col2");
     checkColumns(table10, {0, 2});
 } // TEST Row.RemoveColumns
+
 
 TEST(Table, ReadStar)
 {
@@ -434,3 +437,49 @@ TEST(Table, ReadSqlite)
         tio.close();
     }
 } // TEST(Table, ReadSqlite)
+
+
+TEST(Table, Sort)
+{
+    size_t N = 10000;
+
+    auto t = createTable(N);
+
+    // TODO: Create a simple wrapper to uniform random distribution
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_real_distribution<double> dist(1.0, 10.0);
+
+    std::vector<double> v;
+
+    for (int i = 0; i < N; ++i)
+    {
+        v.push_back(dist(mt));
+        t[i]["col2"].set(v[i]);
+    }
+
+    Timer timer;
+    timer.tic();
+
+    std::sort(v.begin(), v.end());
+
+    timer.toc("Sorted vector");
+
+    timer.tic();
+    t.sort({"col2"});
+    timer.toc("Sorted table by float");
+
+    for (int i = 0; i < N; ++i)
+    {
+        //std::cout << v[i] << " ";
+        float f = t[i]["col2"].get<float>();
+        ASSERT_FLOAT_EQ(v[i], f);
+    }
+    std::cout << std::endl;
+
+    timer.tic();
+    t.sort({"col3"});
+    //std::cout << t << std::endl;
+timer.toc("Sorted table by string");
+
+}

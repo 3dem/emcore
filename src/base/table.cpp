@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream> // the good one
 #include <sstream>
+#include <algorithm> // sorting the table
 
 #include "em/base/registry.h"
 #include "em/base/table.h"
@@ -165,14 +166,12 @@ Table::Row::Row(Impl *rowImpl): impl(rowImpl) {}
 
 Table::Row::Row(const Row &other)
 {
-    std::cout << "Table::Row: COPY ctor..." << std::endl;
     impl = new Impl();
     *impl = *(other.impl);
 } // Copy ctor
 
 Table::Row::Row(Row &&other) noexcept
 {
-    std::cout << "Table::Row: MOVE ctor..." << std::endl;
     std::swap(impl, other.impl);
 } // Move ctor
 
@@ -298,6 +297,16 @@ void Table::clear()
     delete impl;
     impl = new Impl();
 } // function Table.clear
+
+void Table::sort(const StringVector &columnName)
+{
+    std::sort(impl->rows.begin(), impl->rows.end(),
+              [&columnName](const Row &lhs, const Row &rhs)
+              {
+                  auto& colName = columnName[0];
+                  return lhs[colName] < rhs[colName];
+              });
+} // function Table.sort
 
 // ---------------- Row related methods ------------------------
 

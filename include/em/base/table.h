@@ -245,6 +245,12 @@ namespace em {
         size_t updateRows(const std::string &operation,
                           const std::string &queryStr);
 
+        // TODO: We can extend the columnName input string to allow
+        // more columns and ASC/DESC
+        /** Sort the table by a given column name.
+         */
+         void sort(const StringVector &columnName);
+
         iterator begin();
         iterator end();
         const_iterator cbegin() const;
