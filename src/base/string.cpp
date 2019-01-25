@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <algorithm>
 
 #include "em/base/error.h"
 #include "em/base/string.h"
@@ -111,3 +112,22 @@ long long int String::toLongInt(const char *str)
     SCAN_NUMBER(long long int, "%lld%c");
 } // function String::toLongInt
 
+// According to:
+// https://stackoverflow.com/questions/313970/how-to-convert-stdstring-to-lower-case
+// the following implementations of toUpper and toLower will only work for ASCII chars
+
+std::string String::toUpper(const std::string &input)
+{
+    auto output = input;
+    std::transform(output.begin(), output.end(), output.begin(),
+                   [](unsigned char c){ return std::toupper(c); });
+    return output;
+} // String::toUpper
+
+std::string String::toLower(const std::string &input)
+{
+    auto output = input;
+    std::transform(output.begin(), output.end(), output.begin(),
+                   [](unsigned char c){ return std::tolower(c); });
+    return output;
+} // String::toUpper
