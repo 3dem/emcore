@@ -477,9 +477,20 @@ TEST(Table, Sort)
     }
     std::cout << std::endl;
 
-    timer.tic();
-    t.sort({"col3"});
     //std::cout << t << std::endl;
-timer.toc("Sorted table by string");
+
+    timer.tic(); // Sort by string column
+    t.sort({"col3"});
+    timer.toc("Sorted table by string");
+
+    // Sorting descendent
+    t.sort({"col2 DESC"});
+    //std::cout << t << std::endl;
+    for (int i = 0; i < N; ++i)
+    {
+        //std::cout << v[i] << " ";
+        float f = t[i]["col2"].get<float>();
+        ASSERT_FLOAT_EQ(v[N-i-1], f);
+    }
 
 }

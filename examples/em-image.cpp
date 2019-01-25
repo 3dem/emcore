@@ -189,7 +189,7 @@ ImageProcessor* EmImageProgram::getProcessorFromArg(const Program::Argument& arg
     {
         if (cmdName == "scale")
         {
-            auto arg1 = arg.get(1);
+            auto arg1 = arg.getString(1);
             ObjectDict params;
 
             if (arg1 == "angpix")
