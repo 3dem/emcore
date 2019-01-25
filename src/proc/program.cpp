@@ -91,6 +91,11 @@ float Program::Argument::getFloat(size_t pos) const
     return String::toFloat(get(pos));
 } // function Program::Argument::getFloat
 
+std::string Program::Argument::getString(size_t pos) const
+{
+    return std::string(get(pos));
+}
+
 std::string Program::Argument::toString() const
 {
     return argv[0];

@@ -49,6 +49,10 @@ namespace em
         /** Convert a string to a long int */
         static long long int toLongInt(const char *str);
 
+        /** Convert a string to upper and lower case */
+        static std::string toUpper(const std::string &input);
+        static std::string toLower(const std::string &input);
+
     }; // class String
 
 

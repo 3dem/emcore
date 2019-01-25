@@ -107,3 +107,17 @@ TEST(String, replace)
     ASSERT_EQ(String::replace(test1, "ccc", "b"), test1);
 
 } // TEST(String, trim)
+
+TEST(String, toLowerUpper)
+{
+    ASSERT_EQ(String::toLower("ABC"), "abc");
+    ASSERT_EQ(String::toLower("ABC123abc"), "abc123abc");
+    ASSERT_EQ(String::toLower("aBcD"), "abcd");
+    ASSERT_EQ(String::toLower("abcd"), "abcd");
+
+    ASSERT_EQ(String::toUpper("ABC"), "ABC");
+    ASSERT_EQ(String::toUpper("ABC123abc"), "ABC123ABC");
+    ASSERT_EQ(String::toUpper("aBcD"), "ABCD");
+    ASSERT_EQ(String::toUpper("abcd"), "ABCD");
+
+} // TEST(String, toNumber)

@@ -277,6 +277,7 @@ void init_submodule_base(py::module &m) {
             .def("removeColumn", (void (Table::*)(const std::string&)) &Table::removeColumn)
             .def("createRow", &Table::createRow)
             .def("addRow", &Table::addRow)
+            .def("sort", &Table::sort)
             .def("__getitem__", (Table::Row& (Table::*)(size_t)) &Table::operator[],
                  py::return_value_policy::reference)
             .def("toString", &Table::toString)

@@ -298,13 +298,44 @@ void Table::clear()
     impl = new Impl();
 } // function Table.clear
 
+/** Simple struct to parse column name and order (ASC or DESC) */
+struct ColumnOrder
+{
+    std::string columnName;
+    bool ascending;
+
+    ColumnOrder(const std::string &columnString)
+    {
+        auto parts = String::split(columnString);
+        auto n = parts.size();
+
+        ASSERT_ERROR(n > 2, "More than two arguments as part of column sorting");
+
+        columnName = parts[0];
+        ascending = true;
+
+        if (n == 2)
+        {
+            auto order = String::toUpper(parts[1]);
+            if (order == "DESC")
+                ascending = false;
+            else
+                ASSERT_ERROR(order != "ASC",
+                             "Either ASC or DESC are accepted as column sorting.");
+        }
+    }
+};
+
 void Table::sort(const StringVector &columnName)
 {
+    auto co = ColumnOrder(columnName[0]);
+
     std::sort(impl->rows.begin(), impl->rows.end(),
-              [&columnName](const Row &lhs, const Row &rhs)
+              [&co](const Row &lhs, const Row &rhs)
               {
-                  auto& colName = columnName[0];
-                  return lhs[colName] < rhs[colName];
+                  auto& colName = co.columnName;
+                  return co.ascending ? lhs[colName] < rhs[colName] :
+                                        lhs[colName] > rhs[colName];
               });
 } // function Table.sort
 

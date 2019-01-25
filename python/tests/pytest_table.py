@@ -1,5 +1,6 @@
 
 import os
+import random
 
 from base import BaseTest, main, Timer
 import em
@@ -371,6 +372,37 @@ class TestTable(BaseTest):
             for i in range(table.getColumnsSize()):
                 col = table.getColumnByIndex(i)
                 self.assertEqual(refColNames[i], col.getName())
+
+    def test_Sort(self):
+        N = 10000
+
+        t = self.createTable(N)
+        v = [random.uniform(1.0, 10.0) for i in range(N)]
+
+        for i, row in enumerate(t):
+            row["col2"] = v[i]
+
+        timer = Timer()
+        timer.tic()
+        v.sort()
+        timer.toc("Sorted vector")
+
+        timer.tic();
+        t.sort(["col2"]);
+        timer.toc("Sorted table by float")
+
+        for i, row in enumerate(t):
+            self.assertAlmostEqual(row['col2'], v[i])
+
+        timer.tic(); # Sort by string column
+        t.sort(["col3"]);
+        timer.toc("Sorted table by string");
+
+        # Sorting descendent
+        t.sort(["col2 DESC"]);
+        for i, row in enumerate(t):
+            self.assertAlmostEqual(row['col2'], v[N-i-1])
+
 
 
 if __name__ == '__main__':
