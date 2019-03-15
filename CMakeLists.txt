@@ -168,7 +168,7 @@ if (BUILD_EXAMPLES)
 
         add_executable(${_target} ${_file})
         target_link_libraries(${_target} em-core ${EXT_LIBRARIES})
-
+        install(TARGETS ${_target} DESTINATION bin)
     endforeach()
 
 endif()
@@ -263,6 +263,17 @@ if(BUILD_PYBIND)
 
     target_link_libraries(em PRIVATE em-core)
 
+    if (BUILD_STATIC)
+        set_property(TARGET em PROPERTY OUTPUT_NAME "em.a")
+    else()
+        set_property(TARGET em PROPERTY OUTPUT_NAME "em.so")
+    endif()
+
+    set_property(TARGET em PROPERTY PREFIX "")
+    set_property(TARGET em PROPERTY SUFFIX "")
+
+    install(TARGETS em DESTINATION lib)
+
     # Find all test under /tests folder and add them as test-cases
     enable_testing()
     file(GLOB PYBIND_TEST_FILES "${PYBIND_TESTS_PATH}/pytest_*.py")
@@ -276,3 +287,6 @@ if(BUILD_PYBIND)
     endforeach()
 
 endif(BUILD_PYBIND)
+
+install(TARGETS em-core DESTINATION lib)
+install(DIRECTORY ${INCLUDE_PATH}/em DESTINATION include)
