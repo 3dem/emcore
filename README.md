@@ -50,3 +50,12 @@ cmake .. -DEMCORE_ROOT_PATH=$HOME/work/development/em-core \
 -DPYTHON_LIBRARIES=~/installs/anaconda2/lib/libpython2.7.so \
 -DPYTHON_EXECUTABLE=~/installs/anaconda2/bin/python2.7
 ```
+
+### Specify path of Conda environment to CMAKE:
+```
+export CMAKE_PREFIX_PATH=/home/josem/installs/devel/miniconda3/envs/py27-emqt/
+# Also remote build artifacts:
+cd build
+rm *
+cmake ...
+```
