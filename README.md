@@ -50,6 +50,7 @@ cmake .. -DEMCORE_ROOT_PATH=$HOME/work/development/em-core \
 -DPYTHON_LIBRARIES=~/installs/anaconda2/lib/libpython2.7.so \
 -DPYTHON_EXECUTABLE=~/installs/anaconda2/bin/python2.7
 ```
+## Troubleshooting
 
 ### Specify path of Conda environment to CMAKE:
 ```
@@ -59,3 +60,15 @@ cd build
 rm *
 cmake ...
 ```
+### Specifying a different search root (e.g Kino's machine at LMB)
+```
+cd build
+rm *
+cmake3 .. -DBUILD_TESTS=ON -DBUILD_DOCS=ON -DBUILD_EXAMPLES=ON \
+  -DCMAKE_BUILD_TYPE=Debug -DBUILD_DOCOPT=ON -DBUILD_PYBIND=ON \
+  -DCMAKE_FIND_ROOT_PATH=~/opt/anaconda3/ \
+  -DCMAKE_C_COMPILER=/public/gcc/7_2_0/bin/gcc \
+  -DCMAKE_CXX_COMPILER=/public/gcc/7_2_0/bin/g++
+```
+
+
