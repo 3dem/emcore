@@ -35,9 +35,8 @@ class TestTable(BaseTest):
         colNames = ["col1", "col2", "col3"]
 
         # Check all expected columns are there
-        for i in range(table.getColumnsSize()):
-            self.assertEqual(colNames[indexes[i]],
-                             table.getColumnByIndex(i).getName())
+        for i, col in enumerate(table.iterColumns()):
+            self.assertEqual(colNames[indexes[i]], col.getName())
 
     def test_ColumnsBasic(self):
         c1Name = "firstCol"
@@ -192,11 +191,7 @@ class TestTable(BaseTest):
         table.addRow(row);
         table.addRow(row2);
 
-        # Set all names with the same value and divide by 10 the integer one
-        # FIXME: Add binding for the iterator
-        # for row in table:
-        for i in range(table.getSize()):
-            row = table[i]
+        for row in table:
             row["col3"] = NAMES[2]
             row["col2"] = int(row["col2"]) / 10
 
@@ -230,8 +225,7 @@ class TestTable(BaseTest):
         self.assertEqual(table10copy.getSize(), table10.getSize());
         self.assertEqual(table10copy.getSize(), n);
 
-        colNames = [table10.getColumnByIndex(i).getName()
-                    for i in range(table10.getColumnsSize())]
+        colNames = [col.getName() for col in table10.iterColumns()]
 
         for i in range(n):
             row1 = table10[i];
@@ -314,8 +308,7 @@ class TestTable(BaseTest):
                   '000021@cluster/wind2/win_00846.dat', '000080@cluster/wind2/win_04165.dat'])
             ]
 
-            for i in range(t.getColumnsSize()):
-                col = t.getColumnByIndex(i)
+            for i, col in enumerate(t.iterColumns()):
                 self.assertEqual(refColNames[i], col.getName())
                 print(col)
 
