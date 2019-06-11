@@ -70,7 +70,7 @@ namespace em {
 
         using ColumnVector = std::vector<Column>;
         using col_iterator = ColumnVector::iterator;
-        using const_col_iterator = ColumnVector ::const_iterator;
+        using const_col_iterator = ColumnVector::const_iterator;
 
         /**
          * Class to hold key-value pairs. Keys will be either string or integer

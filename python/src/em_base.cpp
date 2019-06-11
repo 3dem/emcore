@@ -275,6 +275,8 @@ void init_submodule_base(py::module &m) {
             .def("insertColumn", (size_t (Table::*)(const Table::Column&, size_t, const Object&)) &Table::insertColumn)
             .def("removeColumn", (void (Table::*)(size_t)) &Table::removeColumn)
             .def("removeColumn", (void (Table::*)(const std::string&)) &Table::removeColumn)
+            .def("iterColumns", [](const Table& table)
+                                    { return py::make_iterator(table.cbegin_cols(), table.cend_cols()); })
             .def("createRow", &Table::createRow)
             .def("addRow", &Table::addRow)
             .def("sort", &Table::sort)

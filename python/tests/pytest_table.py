@@ -1,4 +1,6 @@
 
+from __future__ import print_function
+
 import os
 import random
 
@@ -369,12 +371,21 @@ class TestTable(BaseTest):
                            'ctfVoltage', 'zScore', 'zScoreShape1', 'zScoreShape2',
                            'zScoreSNR1', 'zScoreSNR2', 'zScoreHistogram']
             
+            # Get column by index
             for i in range(table.getColumnsSize()):
                 col = table.getColumnByIndex(i)
                 self.assertEqual(refColNames[i], col.getName())
 
+            # Iterate through the columns
+            for i, col1 in enumerate(table.iterColumns()):
+                col2 = table.getColumnByIndex(i)
+                self.assertEqual(refColNames[i], col1.getName())
+                self.assertEqual(refColNames[i], col2.getName())
+                self.assertEqual(col1, col2)
+
+
     def test_Sort(self):
-        N = 10000
+        N = 100000
 
         t = self.createTable(N)
         v = [random.uniform(1.0, 10.0) for i in range(N)]
