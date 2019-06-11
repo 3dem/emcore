@@ -1,6 +1,6 @@
 
 from __future__ import print_function
-from future.utils import iteritems
+
 import os
 
 from base import BaseTest, main
@@ -50,7 +50,7 @@ class TestImageIO(BaseTest):
                         vol1Name: vol1Dim
                         }
 
-            for fn, dim in iteritems(fileDims):
+            for fn, dim in fileDims.items():
                 img = em.Image()
                 loc = em.ImageLocation(os.path.join(testDataPath, fn), 1)
                 print(">>> Reading image: ", loc.path)
