@@ -266,17 +266,12 @@ class TestTable(BaseTest):
                 Column(3, "col3", em.typeString)
             ])
 
-            tio = em.TableIO()
-
             self.assertEqual(t.getColumnsSize(), 3);
             self.assertTrue(t.isEmpty());
 
-            tio.open(fn1)
-            tio.read("images", t)
-
+            t.read("images", fn1)
             print("Size: ", t.getSize())
             self.assertEqual(t.getSize(), 79)
-            tio.close()
 
             refColNames = [
                 "rlnVoltage", "rlnDefocusU", "rlnSphericalAberration",
@@ -327,11 +322,8 @@ class TestTable(BaseTest):
             fn1 = root + "case1/classify3d_small_it038_optimiser.star"
             print("Reading star: ", fn1)
 
-            tio = em.TableIO()
-            tio.open(fn1)
             t = em.Table()
-            tio.read("optimiser_general", t)
-            tio.close()
+            t.read("optimiser_general", fn1)
             self.assertEqual(t.getColumnsSize(), 52)
             self.assertEqual(t.getSize(), 1)
 

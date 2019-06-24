@@ -251,6 +251,25 @@ namespace em {
          */
          void sort(const StringVector &columnName);
 
+        /** Shortcut function to read a table from file without the need
+         * to explicitly instantiating a TableIO object. After calling
+         * this function, the current table will be populated.
+         * @param tableName Name of the table that will be read
+         * @param path Path to the table file, the type of reader will
+         *  be inferred from the filename extension
+         */
+         void read(const std::string &tableName, const std::string &path);
+
+        /**
+         * Shortcut function to read a table from file without the need
+         * to explicitly instantiating a TableIO object. After calling
+         * this function, the current table will be populated.
+         * @param path Path to the table file, the type of reader will
+         *  be inferred from the filename extension
+         */
+        void read(const std::string &path);
+
+
         iterator begin();
         iterator end();
         const_iterator cbegin() const;

@@ -280,6 +280,8 @@ void init_submodule_base(py::module &m) {
             .def("createRow", &Table::createRow)
             .def("addRow", &Table::addRow)
             .def("sort", &Table::sort)
+            .def("read", (void (Table::*)(const std::string&, const std::string&)) &Table::read)
+            .def("read", (void (Table::*)(const std::string&)) &Table::read)
             .def("__getitem__", (Table::Row& (Table::*)(size_t)) &Table::operator[],
                  py::return_value_policy::reference)
             .def("toString", &Table::toString)

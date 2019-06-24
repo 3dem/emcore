@@ -339,6 +339,26 @@ void Table::sort(const StringVector &columnName)
               });
 } // function Table.sort
 
+void Table::read(const std::string &tableName, const std::string &path)
+{
+    auto tio = TableIO();
+    tio.open(path);
+    tio.read(tableName, *this);
+    tio.close();
+} // function Table.read
+
+void Table::read(const std::string &path)
+{
+    auto tio = TableIO();
+    // FIXME: Implement a way to read first table by default in TableIO
+    // FIXME: it can be more efficient since the whole file will not be parsed
+    auto tableName = tio.getTableNames()[0];
+    tio.open(path);
+    tio.read(tableName, *this);
+    tio.close();
+} // function Table.read
+
+
 // ---------------- Row related methods ------------------------
 
 size_t Table::getSize() const

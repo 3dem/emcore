@@ -215,14 +215,15 @@ TEST(Table, ReadStar)
 {
     ASSERT_TRUE(TableIO::hasImpl("star"));
 
-    Table t({Column(1, "col1", typeFloat),
+    Table table(
+        {Column(1, "col1", typeFloat),
          Column(2, "col2", typeInt16),
          Column(3, "col3", typeString)
         });
 
-    ASSERT_EQ(t.cend_cols() - t.cbegin_cols(), 3);
-    ASSERT_EQ(t.getColumnsSize(), 3);
-    ASSERT_TRUE(t.isEmpty());
+    ASSERT_EQ(table.cend_cols() - table.cbegin_cols(), 3);
+    ASSERT_EQ(table.getColumnsSize(), 3);
+    ASSERT_TRUE(table.isEmpty());
 
     auto testDataPath = getenv("EM_TEST_DATA");
 
@@ -234,10 +235,7 @@ TEST(Table, ReadStar)
         std::string fn1 = root + "case1/classify3d_small_it038_data.star";
         std::cout << "Reading star: " << fn1 << std::endl;
 
-        TableIO tio;
-        tio.open(fn1);
-        tio.read("images", t);
-        tio.close();
+        table.read("images", fn1);
 
         StringVector refColNames = {"rlnVoltage", "rlnDefocusU",
                                     "rlnSphericalAberration", "rlnAmplitudeContrast",
@@ -250,7 +248,7 @@ TEST(Table, ReadStar)
                                     "rlnMaxValueProbDistribution"};
 
         int i = 0;
-        for (auto it = t.cbegin_cols(); it < t.cend_cols(); ++it)
+        for (auto it = table.cbegin_cols(); it < table.cend_cols(); ++it)
         {
             auto &col = *it;
             ASSERT_EQ(refColNames[i++], col.getName());
@@ -315,11 +313,8 @@ TEST(Table, WriteStar)
         std::string fn1 = root + "case1/classify3d_small_it038_data.star";
         std::cout << "Reading star: " << fn1 << std::endl;
 
-        TableIO tio;
         Table t;
-        tio.open(fn1);
-        tio.read("images", t);
-        tio.close();
+        t.read("images", fn1);
 
         StringVector refColNames = {"rlnVoltage", "rlnDefocusU",
                                     "rlnSphericalAberration", "rlnAmplitudeContrast",
@@ -398,6 +393,7 @@ TEST(Table, ReadXmd)
         timer.tic();
         tio.read("noname", t);
         timer.toc();
+        tio.close();
 
         std::cout << "Size: " << t.getSize() << std::endl;
 
