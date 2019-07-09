@@ -235,6 +235,9 @@ TEST(Table, ReadStar)
         std::string fn1 = root + "case1/classify3d_small_it038_data.star";
         std::cout << "Reading star: " << fn1 << std::endl;
 
+        auto table0 = Table();
+        table0.read(fn1);  // Test default read of first table
+
         table.read("images", fn1);
 
         StringVector refColNames = {"rlnVoltage", "rlnDefocusU",

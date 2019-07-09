@@ -250,67 +250,76 @@ class TestTable(BaseTest):
         table10.removeColumn("col2")
         self.checkColumns(table10, [0, 2])
 
+
     def test_Read(self):
         testDataPath = os.environ.get("EM_TEST_DATA", None)
-
         self.assertTrue(em.TableIO.hasImpl('star'))
+        if testDataPath is None:
+            return
 
-        if testDataPath is not None:
-            root = testDataPath + "relion_tutorial/import/"
-            fn1 = root + "case1/classify3d_small_it038_data.star"
-            print("Reading star: ", fn1)
+        root = testDataPath + "relion_tutorial/import/"
+        fn1 = root + "case1/classify3d_small_it038_data.star"
+        print("Reading star: ", fn1)
 
-            t = em.Table([
-                Column(1, "col1", em.typeFloat),
-                Column(2, "col2", em.typeInt16),
-                Column(3, "col3", em.typeString)
-            ])
+        tio = em.TableIO()
+        tio.open(fn1)
+        tableNames = tio.getTableNames()
+        print("Tables: ", tableNames)
+        tio.close()
+        t = em.Table()
+        t.read(fn1)  # should read first table by default
 
-            self.assertEqual(t.getColumnsSize(), 3);
-            self.assertTrue(t.isEmpty());
+        t = em.Table([
+            Column(1, "col1", em.typeFloat),
+            Column(2, "col2", em.typeInt16),
+            Column(3, "col3", em.typeString)
+        ])
 
-            t.read("images", fn1)
-            print("Size: ", t.getSize())
-            self.assertEqual(t.getSize(), 79)
+        self.assertEqual(t.getColumnsSize(), 3);
+        self.assertTrue(t.isEmpty());
 
-            refColNames = [
-                "rlnVoltage", "rlnDefocusU", "rlnSphericalAberration",
-                "rlnAmplitudeContrast", "rlnImageName", "rlnNormCorrection",
-                "rlnMicrographName", "rlnGroupNumber", "rlnOriginX",
-                "rlnOriginY", "rlnAngleRot", "rlnAngleTilt", "rlnAnglePsi",
-                "rlnClassNumber", "rlnLogLikeliContribution",
-                "rlnNrOfSignificantSamples", "rlnMaxValueProbDistribution"
-            ]
+        t.read("images", fn1)
+        print("Size: ", t.getSize())
+        self.assertEqual(t.getSize(), 79)
 
-            goldValues = [
-                ('rlnGroupNumber',
-                [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
-                 17, 18, 19, 20, 21]),
-                ('rlnDefocusU',
-                 [16009.5, 18642.2, 24642.4, 24772.8, 25580.8, 26833.9, 27164.9,
-                  30135.1, 33744.2, 35465.5, 13923.4, 17895.1, 19206.2, 24165.1,
-                  24650.4, 25866.7, 26527.1, 27915.1, 29939.5, 30062.1]),
-                ('rlnImageName',
-                 ['000023@cluster/wind2/win_05883.dat', '000042@cluster/wind2/win_04377.dat',
-                  '000065@cluster/wind2/win_00139.dat', '000038@cluster/wind2/win_04884.dat',
-                  '000046@cluster/wind2/win_02565.dat', '000023@cluster/wind2/win_00161.dat',
-                  '000026@cluster/wind2/win_03758.dat', '000058@cluster/wind2/win_03862.dat',
-                  '000024@cluster/wind2/win_04246.dat', '000073@cluster/wind2/win_02382.dat',
-                  '000021@cluster/wind2/win_04587.dat', '000007@cluster/wind2/win_03186.dat',
-                  '000056@cluster/wind2/win_04919.dat', '000076@cluster/wind2/win_03268.dat',
-                  '000048@cluster/wind2/win_04346.dat', '000073@cluster/wind2/win_03740.dat',
-                  '000036@cluster/wind2/win_04583.dat', '000015@cluster/wind2/win_05453.dat',
-                  '000021@cluster/wind2/win_00846.dat', '000080@cluster/wind2/win_04165.dat'])
-            ]
+        refColNames = [
+            "rlnVoltage", "rlnDefocusU", "rlnSphericalAberration",
+            "rlnAmplitudeContrast", "rlnImageName", "rlnNormCorrection",
+            "rlnMicrographName", "rlnGroupNumber", "rlnOriginX",
+            "rlnOriginY", "rlnAngleRot", "rlnAngleTilt", "rlnAnglePsi",
+            "rlnClassNumber", "rlnLogLikeliContribution",
+            "rlnNrOfSignificantSamples", "rlnMaxValueProbDistribution"
+        ]
 
-            for i, col in enumerate(t.iterColumns()):
-                self.assertEqual(refColNames[i], col.getName())
-                print(col)
+        goldValues = [
+            ('rlnGroupNumber',
+            [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+             17, 18, 19, 20, 21]),
+            ('rlnDefocusU',
+             [16009.5, 18642.2, 24642.4, 24772.8, 25580.8, 26833.9, 27164.9,
+              30135.1, 33744.2, 35465.5, 13923.4, 17895.1, 19206.2, 24165.1,
+              24650.4, 25866.7, 26527.1, 27915.1, 29939.5, 30062.1]),
+            ('rlnImageName',
+             ['000023@cluster/wind2/win_05883.dat', '000042@cluster/wind2/win_04377.dat',
+              '000065@cluster/wind2/win_00139.dat', '000038@cluster/wind2/win_04884.dat',
+              '000046@cluster/wind2/win_02565.dat', '000023@cluster/wind2/win_00161.dat',
+              '000026@cluster/wind2/win_03758.dat', '000058@cluster/wind2/win_03862.dat',
+              '000024@cluster/wind2/win_04246.dat', '000073@cluster/wind2/win_02382.dat',
+              '000021@cluster/wind2/win_04587.dat', '000007@cluster/wind2/win_03186.dat',
+              '000056@cluster/wind2/win_04919.dat', '000076@cluster/wind2/win_03268.dat',
+              '000048@cluster/wind2/win_04346.dat', '000073@cluster/wind2/win_03740.dat',
+              '000036@cluster/wind2/win_04583.dat', '000015@cluster/wind2/win_05453.dat',
+              '000021@cluster/wind2/win_00846.dat', '000080@cluster/wind2/win_04165.dat'])
+        ]
 
-            for label, values in goldValues:
-                mdValues = [row[label] for i, row in enumerate(t) if i < 20]
-                for v1, v2 in zip(values, mdValues):
-                    self.assertEqual(v2, v1)
+        for i, col in enumerate(t.iterColumns()):
+            self.assertEqual(refColNames[i], col.getName())
+            print(col)
+
+        for label, values in goldValues:
+            mdValues = [row[label] for i, row in enumerate(t) if i < 20]
+            for v1, v2 in zip(values, mdValues):
+                self.assertEqual(v2, v1)
 
     def test_ReadSingleRow(self):
         testDataPath = os.environ.get("EM_TEST_DATA", None)

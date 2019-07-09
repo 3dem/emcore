@@ -352,8 +352,8 @@ void Table::read(const std::string &path)
     auto tio = TableIO();
     // FIXME: Implement a way to read first table by default in TableIO
     // FIXME: it can be more efficient since the whole file will not be parsed
-    auto tableName = tio.getTableNames()[0];
     tio.open(path);
+    auto tableName = tio.getTableNames()[0];
     tio.read(tableName, *this);
     tio.close();
 } // function Table.read
