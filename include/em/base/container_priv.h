@@ -58,7 +58,7 @@ namespace em
         inline bool isView() const { return view; }
 
         /** Return the amount of memory that is being used. */
-        inline size_t getMemorySize() const { return size * type.getSize(); }
+        inline size_t getDataSize() const { return size * type.getSize(); }
 
     protected:
         void allocate(const Type &type, const size_t n, void *memory = nullptr)
@@ -69,7 +69,7 @@ namespace em
             // same number of elements, then we will use the same amount of
             // memory, so there is not need for a new allocation if we own the memory
             if (data != nullptr && type.isTriviallyCopyable()
-                && getMemorySize() == n * type.getSize())
+                && getDataSize() == n * type.getSize())
             {
                 this->type = type; // set new type and return, not allocation needed
                 return;

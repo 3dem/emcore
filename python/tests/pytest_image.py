@@ -45,18 +45,20 @@ class TestImageIO(BaseTest):
             vol1Name = "resmap/t20s_proteasome_full.map"
             vol1Dim = em.ArrayDim(300, 300, 300, 1)
 
-            fileDims = {micName: micDim,
-                        stackName: stackDim,
-                        vol1Name: vol1Dim
+            fileDims = {micName: (micDim, 87008256),
+                        stackName: (stackDim, 65536), # 128 * 128 * 4
+                        vol1Name: (vol1Dim, 108000000)
                         }
 
-            for fn, dim in fileDims.items():
+            for fn, (dim, size) in fileDims.items():
                 img = em.Image()
                 loc = em.ImageLocation(os.path.join(testDataPath, fn), 1)
                 print(">>> Reading image: ", loc.path)
                 img.read(loc)
                 dim.n = 1
                 self.assertEqual(img.getDim(), dim)
+                self.assertEqual(img.getDataSize(), size)
+
 
             # Test that we can read also from string
             # that will be converted to ImageLocation

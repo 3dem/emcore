@@ -139,7 +139,8 @@ void init_submodule_base(py::module &m) {
         .def(py::self == py::self);
 
     py::class_<TypedContainer>(m, "TypedContainer")
-        .def("getType", &TypedContainer::getType);
+        .def("getType", &TypedContainer::getType)
+        .def("getDataSize", &TypedContainer::getDataSize);
 
     py::class_<Array, TypedContainer>(m, "Array", py::buffer_protocol())
         .def_buffer([](Array &a) -> py::buffer_info {
