@@ -41,6 +41,9 @@ set(EXAMPLE_PATH "${PROJECT_PATH}/examples")
 set(DOC_PATH      "${PROJECT_PATH}/docs")
 set(EXT_PATH      "${PROJECT_PATH}/libs")
 
+# Test the following
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 MESSAGE( STATUS "Module path: " ${CMAKE_MODULE_PATH} )
