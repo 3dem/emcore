@@ -192,8 +192,11 @@ namespace em
          */
          static std::vector<Type> getImplTypes(const std::string &extOrName);
 
-        /** Return a dictionary with image format names as key and
-         * the values will be a list with supported datatypes.
+        /**
+         * Return all the datatype types supported by each of the image formats
+         * registered with IO implementation.
+         * The result is a map where the keys are unique format names
+         * and the value is a list with suppoted datatypes.
          */
         static FormatTypes getFormatTypes();
 

@@ -323,7 +323,7 @@ public:
     } // function expandFile
 }; // class ImageIOImagic
 
-StringVector imagicExts = {"hed", "img"};
+StringVector imagicExts = {"imagic", "hed", "img"};
 
 REGISTER_IMAGE_IO(imagicExts, ImageIOImagic);
 

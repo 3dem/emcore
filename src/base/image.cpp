@@ -165,6 +165,21 @@ void Image::write(const ImageLocation &location) const
 
 using ImageIOImplRegistry = ImplRegistry<ImageIO::Impl>;
 
+
+/** Helper function to sort a given vector of types. */
+void sortTypeVector(TypeVector &typesVector)
+{
+    std::sort(typesVector.begin(), typesVector.end(),
+              [](const Type& t1, const Type& t2)
+              {
+                  if (t1.getSize() == t2.getSize())
+                  {
+                      return t1.getName() < t2.getName();
+                  }
+                  else return t1.getSize() < t2.getSize();
+              });
+} // function sortTypeVector
+
 ImageIOImplRegistry * getImageIORegistry()
 {
     static ImageIOImplRegistry registry;
@@ -197,16 +212,14 @@ ImageIO::FormatTypes ImageIO::getFormatTypes()
 
     for (const auto& kv: getImageIORegistry()->getUniqueMap())
     {
-        dict[kv.first] = {};
-        auto& vector = dict[kv.first];
-
+        auto& vector = dict[kv.first] = {};  // empty vector
         auto impl = kv.second();
-
-
+        for (const auto& kv2: impl->getTypeMap())
+            vector.push_back(kv2.second);
+        sortTypeVector(vector);
     }
-
     return dict;
-}
+} // ImageIO::getFormatTypes
 
 ImageIO::ImageIO()
 {
@@ -229,6 +242,7 @@ ImageIO::Impl::~Impl()
 {
 }
 
+
 TypeVector ImageIO::Impl::getTypes() const
 {
     TypeVector types;
@@ -236,15 +250,7 @@ TypeVector ImageIO::Impl::getTypes() const
     for (const auto& kv2: getTypeMap())
         types.push_back(kv2.second);
 
-    std::sort(types.begin(), types.end(),
-              [](const Type& t1, const Type& t2)
-              {
-                  if (t1.getSize() == t2.getSize())
-                  {
-                      return t1.getName() < t2.getName();
-                  }
-                  else return t1.getSize() < t2.getSize();
-              });
+    sortTypeVector(types);
 
     return types;
 } // function ImageIO::Impl.getTypes

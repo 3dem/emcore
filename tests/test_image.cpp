@@ -43,6 +43,19 @@ TEST(ImageIO, Impl)
     ASSERT_TRUE(ImageIO::hasImpl("img"));
     ASSERT_TRUE(ImageIO::hasImpl("hed"));
     ImageIO imagicIO = ImageIO("img");
+
+    auto formatTypes = ImageIO::getFormatTypes();
+    ASSERT_EQ(ImageIO::getImplTypes("spider"), formatTypes["spider"]);
+    ASSERT_EQ(ImageIO::getImplTypes("mrc"), formatTypes["mrc"]);
+    ASSERT_EQ(ImageIO::getImplTypes("img"), formatTypes["imagic"]);
+
+for (const auto& kv: formatTypes)
+{
+std::cout << kv.first << ": ";
+for (const auto& type: kv.second)
+std::cout << type.getName() << " ";
+std::cout << std::endl;
+}
 } // TEST(ImageIO, Impl)
 
 

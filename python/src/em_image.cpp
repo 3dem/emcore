@@ -1,7 +1,10 @@
 #include <string>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pybind11/pytypes.h>
+#include <pybind11/stl.h>
+
 #include "em/base/image.h"
 
 namespace py = pybind11;
@@ -38,6 +41,8 @@ void init_submodule_image(py::module &m) {
         .def(py::init<>())
         .def(py::init<const std::string&>())
         .def_static("hasImpl", &ImageIO::hasImpl)
+        .def_static("getImplTypes", &ImageIO::getImplTypes)
+        .def_static("getFormatTypes", &ImageIO::getFormatTypes)
         .def("getDim", &ImageIO::getDim)
         .def("getType", &ImageIO::getType)
         .def("open", &ImageIO::open)

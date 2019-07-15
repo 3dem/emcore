@@ -29,6 +29,12 @@ class TestImageIO(BaseTest):
         spiderIO = em.ImageIO('spi')
         mrcIO = em.ImageIO('mrc')
 
+        formatTypes = em.ImageIO.getFormatTypes()
+        print("formatTypes: %s" % formatTypes)
+        self.assertEqual(em.ImageIO.getImplTypes("spider"), formatTypes["spider"])
+        self.assertEqual(em.ImageIO.getImplTypes("mrc"), formatTypes["mrc"])
+        self.assertEqual(em.ImageIO.getImplTypes("img"), formatTypes["imagic"])
+
     def test_readMrc(self):
         mrcIO = em.ImageIO('mrc')
 
