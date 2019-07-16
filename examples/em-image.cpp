@@ -332,16 +332,26 @@ int EmImageProgram::run()
         for (auto& path: inputList)
         {
             inputIO.open(path);
-            inputIO.read(1, inputImage);
-
-            if (doProcess)
-                pipeProc.process(inputImage, outputImage);
-
             outputIO.open(outputFn, File::TRUNCATE);
-            inputImage.copy(outputImage, outputType);
-            outputIO.write(1, inputImage);
+
+            auto adim = inputIO.getDim();
+            outputIO.createFile(adim, outputType);
+
+            for (int i = 1; i <= adim.n; ++i)
+            {
+                std::cout << "Reading " << i << " from " << path << std::endl;
+                inputIO.read(i, inputImage);
+
+                if (doProcess)
+                    pipeProc.process(inputImage, outputImage);
+
+                outputImage.copy(inputImage, outputType);
+                std::cout << "Writing " << i << " to " << outputFn << std::endl;
+                outputIO.write(i, outputImage);
+            }
+            inputIO.close();
             outputIO.close();
-        }
+        } // Loop over all input files
     }
     else  // Just print information about the input images
     {
