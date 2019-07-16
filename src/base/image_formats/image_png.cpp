@@ -14,10 +14,10 @@ using namespace em;
 
 
 /**
- * Inherit properties from base ImageIO::Impl and add information
+ * Inherit properties from base ImageFile::Impl and add information
  * specific for PNG format
  */
-class ImageIOPng: public em::ImageIO::Impl
+class ImageIOPng: public em::ImageFile::Impl
 {
 public:
     png_infop readInfoPtr = nullptr;

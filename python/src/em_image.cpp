@@ -37,19 +37,19 @@ void init_submodule_image(py::module &m) {
         .def("read", &Image::read)
         .def("write", &Image::write);
 
-    py::class_<ImageIO>(m, "ImageIO")
+    py::class_<ImageFile>(m, "ImageFile")
         .def(py::init<>())
         .def(py::init<const std::string&>())
-        .def_static("hasImpl", &ImageIO::hasImpl)
-        .def_static("getImplTypes", &ImageIO::getImplTypes)
-        .def_static("getFormatTypes", &ImageIO::getFormatTypes)
-        .def("getDim", &ImageIO::getDim)
-        .def("getType", &ImageIO::getType)
-        .def("open", &ImageIO::open)
-        .def("close", &ImageIO::close)
-        .def("createFile", &ImageIO::createFile)
-        .def("expandFile", &ImageIO::expandFile)
-        .def("read", &ImageIO::read)
-        .def("write", &ImageIO::write);
+        .def_static("hasImpl", &ImageFile::hasImpl)
+        .def_static("getImplTypes", &ImageFile::getImplTypes)
+        .def_static("getFormatTypes", &ImageFile::getFormatTypes)
+        .def("getDim", &ImageFile::getDim)
+        .def("getType", &ImageFile::getType)
+        .def("open", &ImageFile::open)
+        .def("close", &ImageFile::close)
+        .def("createFile", &ImageFile::createFile)
+        .def("expandFile", &ImageFile::expandFile)
+        .def("read", &ImageFile::read)
+        .def("write", &ImageFile::write);
 
 } // em/image sub-module definition

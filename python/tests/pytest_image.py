@@ -25,18 +25,18 @@ class TestImageIO(BaseTest):
 
     def test_impl(self):
         for ext in ['mrc', 'mrcs', 'spi', 'spider']:
-            self.assertTrue(em.ImageIO.hasImpl(ext))
-        spiderIO = em.ImageIO('spi')
-        mrcIO = em.ImageIO('mrc')
+            self.assertTrue(em.ImageFile.hasImpl(ext))
+        spiderIO = em.ImageFile('spi')
+        mrcIO = em.ImageFile('mrc')
 
-        formatTypes = em.ImageIO.getFormatTypes()
+        formatTypes = em.ImageFile.getFormatTypes()
         print("formatTypes: %s" % formatTypes)
-        self.assertEqual(em.ImageIO.getImplTypes("spider"), formatTypes["spider"])
-        self.assertEqual(em.ImageIO.getImplTypes("mrc"), formatTypes["mrc"])
-        self.assertEqual(em.ImageIO.getImplTypes("img"), formatTypes["imagic"])
+        self.assertEqual(em.ImageFile.getImplTypes("spider"), formatTypes["spider"])
+        self.assertEqual(em.ImageFile.getImplTypes("mrc"), formatTypes["mrc"])
+        self.assertEqual(em.ImageFile.getImplTypes("img"), formatTypes["imagic"])
 
     def test_readMrc(self):
-        mrcIO = em.ImageIO('mrc')
+        mrcIO = em.ImageFile('mrc')
 
         testDataPath = os.environ.get("EM_TEST_DATA", None)
 

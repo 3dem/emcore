@@ -85,10 +85,10 @@ struct MrcHeader
 
 
 /**
- * Inherit properties from base ImageIO::Impl and add information
+ * Inherit properties from base ImageFile::Impl and add information
  * specific for MRC format (e.g, the MrcHeader struct)
  */
-class ImageIOMrc: public em::ImageIO::Impl
+class ImageIOMrc: public em::ImageFile::Impl
 {
 public:
     MrcHeader header;
@@ -216,7 +216,7 @@ public:
     virtual void readImageData(const size_t index, Image& image) override
     {
         if (header.mode != 101)
-            ImageIO::Impl::readImageData(index, image);
+            ImageFile::Impl::readImageData(index, image);
         else // special non-standard 101 mode of 4 bits
         {
             // Correct the itemSize for the 101 mode

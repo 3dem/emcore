@@ -92,10 +92,10 @@ namespace em
 
         /** Read image data from a given location.
          * This function is a shortcut to easily read an image from a location
-         * without using the ImageIO class.
+         * without using the ImageFile class.
          * The file will be open before data is read and closed after it.
          * If you want to read multiple images from the same file, it
-         * would be better to first open the file explicitly using ImageIO,
+         * would be better to first open the file explicitly using ImageFile,
          * read all the images and then close the file.
          * @param location Input image location (index range and path) to be read
          */
@@ -103,7 +103,7 @@ namespace em
 
         /** Write the image data into a file location.
          * This function is a shortcut to easily write an image without
-         * using the ImageIO class.
+         * using the ImageFile class.
          * @param location Input location where the image will be written.
          */
         void write(const ImageLocation &location) const;
@@ -121,20 +121,20 @@ namespace em
     /** @ingroup image
      * Class that will take care of read/write images from/to file.
      *
-     * Internally, the ImageIO class holds a pointer to ImageIO::Impl class,
+     * Internally, the ImageFile class holds a pointer to ImageFile::Impl class,
      * that contains the details about how to open files and read the images
      * data. This class contains some basic functionality that is shared
-     * among some formats. The ImageIO::Impl class should be extended to provide
+     * among some formats. The ImageFile::Impl class should be extended to provide
      * support for other formats.
      */
-    class ImageIO
+    class ImageFile
     {
     public:
-        /** Implementation sub-class, it should be overriden to support other
+        /** Implementation sub-class, it should be overwritten to support other
          * formats */
         class Impl;
 
-        using FormatTypes = std::map<std::string, std::vector<Type>>;
+        using FormatTypes = std::map<std::string, TypeVector>;
 
         /** Used when registering new Impl classes.
          * The ImplBuilder is a function that should return a pointer to
@@ -143,7 +143,7 @@ namespace em
         using ImplBuilder = Impl* (*)();
 
         /**
-         * Empty constructor for ImageIO.
+         * Empty constructor for ImageFile.
          * In this case the newly created instance will have no format
          * implementation associated to read/write formats. Then, when the
          * open() method is called to open a file, the format implementation
@@ -151,36 +151,36 @@ namespace em
          * raise an exception if called without having opened a file and,
          * therefore, without having an underlying format implementation.
          */
-        ImageIO();
+        ImageFile();
 
         /**
-         * Constructor to build a new ImageIO instance given its name or
+         * Constructor to build a new ImageFile instance given its name or
          * an extension related to the format implementation. The provided
          * input string should be the key associated to a know format
          * implementation. If not, an exception will be thrown. If the format
-         * implementation is associated to the ImageIO instance, it will not
+         * implementation is associated to the ImageFile instance, it will not
          * change when calling the open() method. This allow to read/write
          * images with unknown (or non-standard) file extensions.
          *
-         * @param extOrName Input string representing either the ImageIO name
+         * @param extOrName Input string representing either the ImageFile name
          * or one of the extensions registered for it.
          */
-        ImageIO(const std::string &extOrName);
+        ImageFile(const std::string &extOrName);
 
         /**
-         * Check if some ImageIO implementation is registered for a given name
+         * Check if some ImageFile implementation is registered for a given name
          * or extension.
          *
-         * @param extOrName Input string representing either the ImageIO name
+         * @param extOrName Input string representing either the ImageFile name
          * or one of the extensions registered.
-         * @return Return True if there is any ImageIO registered.
+         * @return Return True if there is any ImageFile registered.
          */
         static bool hasImpl(const std::string &extOrName);
 
         /**
-         * Register a new ImageIO implementation.
+         * Register a new ImageFile implementation.
          * This function should not be used unless you are developing an
-         * implementation for a new ImageIO format.
+         * implementation for a new ImageFile format.
          */
          static bool registerImpl(const StringVector &extOrNames,
                                   ImplBuilder builder);
@@ -190,13 +190,13 @@ namespace em
          * An exception will be raised if the implementation can not be found,
          * so user needs to check that hasImpl returns true for this input.
          */
-         static std::vector<Type> getImplTypes(const std::string &extOrName);
+         static TypeVector getImplTypes(const std::string &extOrName);
 
         /**
          * Return all the datatype types supported by each of the image formats
          * registered with IO implementation.
          * The result is a map where the keys are unique format names
-         * and the value is a list with suppoted datatypes.
+         * and the value is a list with supported datatypes.
          */
         static FormatTypes getFormatTypes();
 
@@ -244,7 +244,7 @@ namespace em
          */
         void toStream(std::ostream &ostream, int verbosity=1) const;
 
-        ~ImageIO();
+        ~ImageFile();
 
         /**
          * Read from file and swap the data if needed
@@ -272,9 +272,9 @@ namespace em
         // Pointer to implementation class, PIMPL idiom
         Impl* impl = nullptr;
 
-    }; // class ImageIO
+    }; // class ImageFile
 
-    std::ostream& operator<< (std::ostream &ostream, const em::ImageIO &t);
+    std::ostream& operator<< (std::ostream &ostream, const em::ImageFile &t);
 
 } // em namespace
 

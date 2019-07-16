@@ -30,24 +30,24 @@ TEST(ImageLocation, Basic)
 } // TEST(ImageLocation, Basic)
 
 
-TEST(ImageIO, Impl)
+TEST(ImageFile, Impl)
 {
-    ASSERT_TRUE(ImageIO::hasImpl("spi"));
-    ASSERT_TRUE(ImageIO::hasImpl("spider"));
-    ImageIO spiderIO = ImageIO("spi");
+    ASSERT_TRUE(ImageFile::hasImpl("spi"));
+    ASSERT_TRUE(ImageFile::hasImpl("spider"));
+    ImageFile spiderIO = ImageFile("spi");
 
-    ASSERT_TRUE(ImageIO::hasImpl("mrc"));
-    ASSERT_TRUE(ImageIO::hasImpl("mrcs"));
-    ImageIO mrcIO = ImageIO("mrc");
+    ASSERT_TRUE(ImageFile::hasImpl("mrc"));
+    ASSERT_TRUE(ImageFile::hasImpl("mrcs"));
+    ImageFile mrcIO = ImageFile("mrc");
 
-    ASSERT_TRUE(ImageIO::hasImpl("img"));
-    ASSERT_TRUE(ImageIO::hasImpl("hed"));
-    ImageIO imagicIO = ImageIO("img");
+    ASSERT_TRUE(ImageFile::hasImpl("img"));
+    ASSERT_TRUE(ImageFile::hasImpl("hed"));
+    ImageFile imagicIO = ImageFile("img");
 
-    auto formatTypes = ImageIO::getFormatTypes();
-    ASSERT_EQ(ImageIO::getImplTypes("spider"), formatTypes["spider"]);
-    ASSERT_EQ(ImageIO::getImplTypes("mrc"), formatTypes["mrc"]);
-    ASSERT_EQ(ImageIO::getImplTypes("img"), formatTypes["imagic"]);
+    auto formatTypes = ImageFile::getFormatTypes();
+    ASSERT_EQ(ImageFile::getImplTypes("spider"), formatTypes["spider"]);
+    ASSERT_EQ(ImageFile::getImplTypes("mrc"), formatTypes["mrc"]);
+    ASSERT_EQ(ImageFile::getImplTypes("img"), formatTypes["imagic"]);
 
 for (const auto& kv: formatTypes)
 {
@@ -56,7 +56,7 @@ for (const auto& type: kv.second)
 std::cout << type.getName() << " ";
 std::cout << std::endl;
 }
-} // TEST(ImageIO, Impl)
+} // TEST(ImageFile, Impl)
 
 
 TEST(Image, Constructor)
@@ -73,7 +73,7 @@ TEST(Image, Constructor)
 
 TEST(ImageMrcIO, Read)
 {
-    ImageIO mrcIO = ImageIO("mrc");
+    ImageFile mrcIO = ImageFile("mrc");
     // ASSERT_EQ(mrcIO.getName(), "mrc");
 
     ImageLocation loc;
@@ -105,9 +105,9 @@ TEST(ImageMrcIO, Read)
         }
 
         // Use mrcIO2 for writing individual images
-        ImageIO mrcIO2 = ImageIO("mrc");
+        ImageFile mrcIO2 = ImageFile("mrc");
         // Use mrcIO3 for write another stack
-        ImageIO mrcIO3 = ImageIO("mrc");
+        ImageFile mrcIO3 = ImageFile("mrc");
 
         mrcIO.open(root + stackFn);
         Image img;
@@ -152,8 +152,8 @@ TEST(ImageMrcIO, Read)
 TEST(ImageSpiderIO, Read)
 {
 
-    ASSERT_TRUE(ImageIO::hasImpl("spider"));
-    ImageIO spiIO = ImageIO("spi");
+    ASSERT_TRUE(ImageFile::hasImpl("spider"));
+    ImageFile spiIO = ImageFile("spi");
     //ASSERT_EQ(spiIO->getName(), "spider");
 
 
@@ -202,7 +202,7 @@ TEST(ImageSpiderIO, Read)
 
 TEST(ImageIOPng, Read)
 {
-    ImageIO pngIO = ImageIO("png");
+    ImageFile pngIO = ImageFile("png");
     auto testDataPath = getenv("EM_TEST_DATA");
 
     if (testDataPath != nullptr)
@@ -236,7 +236,7 @@ TEST(ImageIOPng, Read)
 
 TEST(ImageIOJpeg, Read)
 {
-    ImageIO jpegIO = ImageIO("jpg");
+    ImageFile jpegIO = ImageFile("jpg");
     auto testDataPath = getenv("EM_TEST_DATA");
 
     if (testDataPath != nullptr)
@@ -270,7 +270,7 @@ TEST(ImageIOJpeg, Read)
 
 TEST(ImageIOImagic, Read)
 {
-    ImageIO imagicIO = ImageIO("hed");
+    ImageFile imagicIO = ImageFile("hed");
     // ASSERT_EQ(imagicIO.getName(), "hed");
 
     ImageLocation loc;
@@ -324,7 +324,7 @@ TEST(ImageIOImagic, Read)
 
 } // TEST(ImageMrcIO, Read)
 
-TEST(ImageIO, Create)
+TEST(ImageFile, Create)
 {
 
     StringVector exts = {"mrc", "spi", "img"};
@@ -332,7 +332,7 @@ TEST(ImageIO, Create)
 
     for (auto ext: exts)
     {
-        ImageIO imgio = ImageIO(ext);
+        ImageFile imgio = ImageFile(ext);
         std::cout << "Using IO: " << ext << std::endl;
 
         std::string fn;
@@ -356,7 +356,7 @@ TEST(ImageIO, Create)
 
 
 
-} // TEST(ImageIO, Create)
+} // TEST(ImageFile, Create)
 
 
 TEST(Image, Performance)

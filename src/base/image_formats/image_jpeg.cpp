@@ -15,10 +15,10 @@ using namespace em;
 
 
 /**
- * Inherit properties from base ImageIO::Impl and add information
+ * Inherit properties from base ImageFile::Impl and add information
  * specific for JPEG format
  */
-class ImageIOJpeg: public em::ImageIO::Impl
+class ImageIOJpeg: public em::ImageFile::Impl
 {
 public:
     jpeg_decompress_struct dInfo;
@@ -144,7 +144,7 @@ public:
 
     virtual void closeFile() override
     {
-        em::ImageIO::Impl::closeFile();
+        em::ImageFile::Impl::closeFile();
 
         jpeg_destroy_decompress(&dInfo);
         jpeg_destroy_compress(&cInfo);

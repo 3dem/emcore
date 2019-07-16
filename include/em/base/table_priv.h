@@ -38,7 +38,7 @@ namespace em
 } // namespace em
 
 
-// The following macro can be used as a shortcut to register new ImageIO subclasses
+// The following macro can be used as a shortcut to register new ImageFile subclasses
 #define REGISTER_TABLE_IO(extensions, ioClassName) \
     TableIO::Impl * new___##ioClassName(){ return new ioClassName(); } \
     bool reg___##ioClassName = em::TableIO::registerImpl(extensions, new___##ioClassName)

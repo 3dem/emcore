@@ -11,9 +11,9 @@
 namespace em
 {
     /** Helper class to store information about image file.
-     * This class can only be used from ImageIO class.
+     * This class can only be used from ImageFile class.
      */
-    class ImageIO::Impl
+    class ImageFile::Impl
     {
     public:
         // Store the name of the file that was read/written
@@ -39,7 +39,7 @@ namespace em
 
         Image image; ///< Temporary image used as buffer to read from disk
 
-        friend class ImageIO;
+        friend class ImageFile;
 
         virtual ~Impl();
 
@@ -105,14 +105,14 @@ namespace em
          */
         virtual void toStream(std::ostream &ostream, int verbosity=1) const;
 
-    }; // class ImageIO::Impl
+    }; // class ImageFile::Impl
 
 } // em namespace
 
 
-// The following macro can be used as a shortcut to register new ImageIO subclasses
+// The following macro can be used as a shortcut to register new ImageFile subclasses
 #define REGISTER_IMAGE_IO(extensions, ioClassName) \
-    ImageIO::Impl * new___##ioClassName(){ return new ioClassName(); } \
-    bool reg___##ioClassName = em::ImageIO::registerImpl(extensions, new___##ioClassName)
+    ImageFile::Impl * new___##ioClassName(){ return new ioClassName(); } \
+    bool reg___##ioClassName = em::ImageFile::registerImpl(extensions, new___##ioClassName)
 
 #endif //EM_CORE_IMAGE_PRIV_H

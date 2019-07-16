@@ -125,7 +125,7 @@ std::function< size_t(size_t*, size_t, FILE*, bool) > freadSwapLong;
  * Inherit properties from base ImageIOImpl and add information
  * specific for DM3/4 formats
  */
-class ImageIODm: public em::ImageIO::Impl
+class ImageIODm: public em::ImageFile::Impl
 {
 public:
     // File information attributes
@@ -149,7 +149,7 @@ public:
     // Read a single object from file
     void freadObject(Object &object)
     {
-        ImageIO::fread(file, object.getData(), 1, object.getType().getSize(),
+        ImageFile::fread(file, object.getData(), 1, object.getType().getSize(),
                        swap);
     }
 
@@ -165,7 +165,7 @@ public:
         unsigned short int ltName;
 
         fread(&cTag, 1, 1, file); // Identification tag: 20 = tag dir,  21 = tag
-        ImageIO::fread(file, &ltName, 1, 2, isLE); // Length of the tag name
+        ImageFile::fread(file, &ltName, 1, 2, isLE); // Length of the tag name
 
         tag.tagType = int(cTag);
 
@@ -300,7 +300,7 @@ public:
         // Check Machine endianness
         isLE = Type::isLittleEndian();
 
-        ImageIO::fread(file, &version, 1, 4, isLE);
+        ImageFile::fread(file, &version, 1, 4, isLE);
 
         /* Main difference between v3 and v4 is that lentype is 4 and8 bytes
          * so we select the proper function to store it in a int64_t type.
@@ -312,7 +312,7 @@ public:
             ([](size_t *data, size_t count, FILE *file, bool swap) -> size_t
                     {
                         int32_t tmp[count];
-                        auto bytes = ImageIO::fread(file, &tmp, count, 4, swap);
+                        auto bytes = ImageFile::fread(file, &tmp, count, 4, swap);
                         for (size_t i = 0; i < count; ++i)
                             data[i] = (size_t) (tmp[i]);
                         return bytes;
@@ -324,7 +324,7 @@ public:
                                                              FILE *, bool)>>
             ([](size_t *data, size_t count, FILE *file, bool swap) -> size_t
                     {
-                        return ImageIO::fread(file, data, count, 8, swap);
+                        return ImageFile::fread(file, data, count, 8, swap);
                     });
         }
         else
@@ -334,7 +334,7 @@ public:
 
 
         freadSwapLong(&rootlen, 1, file, isLE);
-        ImageIO::fread(file, &byteOrder, 1, 4, isLE);
+        ImageFile::fread(file, &byteOrder, 1, 4, isLE);
 
         // Set swap mode from endiannes and file byteorder
         swap = (isLE ^ byteOrder);
@@ -377,7 +377,7 @@ public:
         else
             header.pixelHeight = header.pixelWidth = 0;
 
-        // Setting the ImageIO header info
+        // Setting the ImageFile header info
         dim.x = header.nx;
         dim.y = header.ny;
         dim.z = 1;

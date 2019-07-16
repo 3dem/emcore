@@ -88,10 +88,10 @@ struct EmHeader
 
 
 /**
- * Inherit properties from base ImageIO::Impl and add information
+ * Inherit properties from base ImageFile::Impl and add information
  * specific for EM format (e.g, the EmHeader struct)
  */
-class ImageIOEm: public em::ImageIO::Impl
+class ImageIOEm: public em::ImageFile::Impl
 {
 public:
     EmHeader header;

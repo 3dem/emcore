@@ -80,7 +80,7 @@ struct SpiderHeader
 }; // struct SpiderHeader
 
 
-class ImageIOSpider: public em::ImageIO::Impl
+class ImageIOSpider: public em::ImageFile::Impl
 {
 private:
     SpiderHeader header;

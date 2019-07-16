@@ -154,10 +154,10 @@ struct ImagicHeader
 
 
 /**
- * Inherit properties from base ImageIO::Impl and add information
+ * Inherit properties from base ImageFile::Impl and add information
  * specific for IMAGIC format (e.g, the ImagicHeader struct)
  */
-class ImageIOImagic: public em::ImageIO::Impl
+class ImageIOImagic: public em::ImageFile::Impl
 {
 public:
     ImagicHeader header; // main header
@@ -296,7 +296,7 @@ public:
 
     void closeFile() override
     {
-        em::ImageIO::Impl::closeFile();
+        em::ImageFile::Impl::closeFile();
         if (headerFile != nullptr)
         {
             fclose(headerFile);

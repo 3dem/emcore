@@ -34,10 +34,10 @@ struct TiffHeader
 
 
 /**
- * Inherit properties from base ImageIO::Impl and add information
+ * Inherit properties from base ImageFile::Impl and add information
  * specific for TIFF format (e.g, the TiffHeader struct)
  */
-class ImageIOTiff: public ImageIO::Impl
+class ImageIOTiff: public ImageFile::Impl
 {
 public:
     std::vector<TiffHeader> vHeader;
