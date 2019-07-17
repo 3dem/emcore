@@ -30,50 +30,85 @@ TEST(ImageLocation, Basic)
 } // TEST(ImageLocation, Basic)
 
 
-TEST(ImageFile, Impl)
+// ===================== ImageFile TESTS =======================
+
+TEST(ImageFile, Static)
 {
     ASSERT_TRUE(ImageFile::hasImpl("spi"));
     ASSERT_TRUE(ImageFile::hasImpl("spider"));
-    ImageFile spiderIO = ImageFile("spi");
 
     ASSERT_TRUE(ImageFile::hasImpl("mrc"));
     ASSERT_TRUE(ImageFile::hasImpl("mrcs"));
-    ImageFile mrcIO = ImageFile("mrc");
 
     ASSERT_TRUE(ImageFile::hasImpl("img"));
     ASSERT_TRUE(ImageFile::hasImpl("hed"));
-    ImageFile imagicIO = ImageFile("img");
 
     auto formatTypes = ImageFile::getFormatTypes();
     ASSERT_EQ(ImageFile::getImplTypes("spider"), formatTypes["spider"]);
     ASSERT_EQ(ImageFile::getImplTypes("mrc"), formatTypes["mrc"]);
     ASSERT_EQ(ImageFile::getImplTypes("img"), formatTypes["imagic"]);
 
-for (const auto& kv: formatTypes)
-{
-std::cout << kv.first << ": ";
-for (const auto& type: kv.second)
-std::cout << type.getName() << " ";
-std::cout << std::endl;
-}
 } // TEST(ImageFile, Impl)
 
-
-TEST(Image, Constructor)
+TEST(ImageFile, Basic)
 {
-    //Image
-    Image img(ArrayDim(10, 10), typeDouble);
-    ObjectDict &header = img.getHeader();
-    header["x"] = 10;
-    header["y"] = 20.5;
-    header["filename"] = std::string("/path/to/image/");
-    std::cout << img << std::endl;
-} // TEST(Image, Constructor)
+    const size_t DIM = 16; // 128
+    auto adim = ArrayDim(DIM, DIM, 1, 10);
+
+    Image image;
+    // Create an empty ImageFile
+    ImageFile imageFile;
+    // Most methods call should throw an Error in this state
+    EXPECT_THROW(imageFile.getDim(), Error);
+    EXPECT_THROW(imageFile.getType(), Error);
+
+    // Let's open a file for writing
+    imageFile.open("test.mrcs", File::Mode::TRUNCATE);
+    // Now there is an internal implementation (mrc)
+    // but still there is no type and default dimensions
+    ASSERT_TRUE(imageFile.getType().isNull());
+    ASSERT_EQ(imageFile.getDim(), ArrayDim());
+
+    // We can't read from a newly opened file
+    EXPECT_THROW(imageFile.read(1, image), Error);
+    // We can't expand a newly created file without type
+    EXPECT_THROW(imageFile.expand(10), Error);
+    // One option is to use createEmpty, but it will
+    // thrown an Exception if type is not supported
+    EXPECT_THROW(imageFile.createEmpty(adim, typeInt32), Error);
+    // Let's use float, that is supported by MRC
+    EXPECT_NO_THROW(imageFile.createEmpty(adim, typeFloat));
+
+    StringVector exts = {"mrc", "spi", "img"};
+
+    for (auto ext: exts)
+    {
+        ImageFile imageFile;
+        std::cout << "Using IO: " << ext << std::endl;
+        std::string fn;
+        // Write a single image
+        fn = "image-single." + ext;
+        imageFile.open(fn.c_str(), File::Mode::TRUNCATE);
+        imageFile.createEmpty(ArrayDim(DIM, DIM, 1, 1), typeFloat);
+        imageFile.close();
+
+        // Write a stack of images
+        fn = "image-stack." + ext;
+        imageFile.open(fn.c_str(), File::Mode::TRUNCATE);
+        imageFile.createEmpty(ArrayDim(DIM, DIM, 1, 100), typeFloat);
+
+        Image img(ArrayDim(DIM, DIM, 1, 1), typeFloat);
+        auto av = img.getView<float>();
+        av.assign(200);
+        imageFile.write(1, img);
+        imageFile.close();
+    }
+} // TEST(ImageFile, Create)
 
 
-TEST(ImageMrcIO, Read)
+TEST(MrcFile, Read)
 {
-    ImageFile mrcIO = ImageFile("mrc");
+    ImageFile mrcIO = ImageFile();
     // ASSERT_EQ(mrcIO.getName(), "mrc");
 
     ImageLocation loc;
@@ -105,9 +140,9 @@ TEST(ImageMrcIO, Read)
         }
 
         // Use mrcIO2 for writing individual images
-        ImageFile mrcIO2 = ImageFile("mrc");
+        ImageFile mrcIO2 = ImageFile();
         // Use mrcIO3 for write another stack
-        ImageFile mrcIO3 = ImageFile("mrc");
+        ImageFile mrcIO3 = ImageFile();
 
         mrcIO.open(root + stackFn);
         Image img;
@@ -120,7 +155,7 @@ TEST(ImageMrcIO, Read)
         outDim.n = 10;
         std::string outputStackFn = "image_stack.mrcs";
         mrcIO3.open(outputStackFn,  File::Mode::TRUNCATE);
-        mrcIO3.createFile(outDim, mrcIO.getType());
+        mrcIO3.createEmpty(outDim, mrcIO.getType());
 
         for (size_t i = 1; i <= outDim.n; ++i)
         {
@@ -129,7 +164,6 @@ TEST(ImageMrcIO, Read)
             imgFn = std::string("image") + suffix + ".mrc";
             std::cout << ">>> Writing image: " << imgFn << std::endl;
             mrcIO2.open(imgFn,  File::Mode::TRUNCATE);
-            mrcIO2.createFile(imgDim, img.getType());
             mrcIO2.write(1, img);
             mrcIO2.close();
 
@@ -153,10 +187,7 @@ TEST(ImageSpiderIO, Read)
 {
 
     ASSERT_TRUE(ImageFile::hasImpl("spider"));
-    ImageFile spiIO = ImageFile("spi");
-    //ASSERT_EQ(spiIO->getName(), "spider");
-
-
+    ImageFile spiIO = ImageFile();
     ImageLocation loc;
     std::map<std::string, ArrayDim> fileDims;
 
@@ -172,12 +203,11 @@ TEST(ImageSpiderIO, Read)
             fileDims["emx/alignment/testAngles/proj.spi"] = ArrayDim(128, 128, 1, 1);
             fileDims["emx/alignment/testAngles/projections.stk"] = ArrayDim(128, 128, 1, 5);
 
-
             for (auto &pair: fileDims)
             {
                 Image img;
                 loc.index = 1;
-                std::cerr << ">>>>>>>>>>>>>>>>> Reading " << pair.first << std::endl;
+                std::cout << ">>> Reading " << pair.first << std::endl;
                 loc.path = root + pair.first;
                 img.read(loc);
                 std::cout << "Back in test" << std::endl;
@@ -202,7 +232,7 @@ TEST(ImageSpiderIO, Read)
 
 TEST(ImageIOPng, Read)
 {
-    ImageFile pngIO = ImageFile("png");
+    ImageFile pngIO = ImageFile();
     auto testDataPath = getenv("EM_TEST_DATA");
 
     if (testDataPath != nullptr)
@@ -216,12 +246,12 @@ TEST(ImageIOPng, Read)
             img.read(loc);
             std::cout << ">>> Image: " << img;
 
-            auto path = std::string(testDataPath) + "/8bits-copy.png";
+            auto path = "8bits-copy.png";
 
             std::cout << ">>> Writing image: " << path << std::endl;
 
             pngIO.open(path, File::Mode::TRUNCATE);
-            pngIO.createFile(img.getDim(), img.getType());
+            pngIO.createEmpty(img.getDim(), img.getType());
             pngIO.write(1, img);
             pngIO.close();
 
@@ -236,7 +266,7 @@ TEST(ImageIOPng, Read)
 
 TEST(ImageIOJpeg, Read)
 {
-    ImageFile jpegIO = ImageFile("jpg");
+    ImageFile jpegIO = ImageFile();
     auto testDataPath = getenv("EM_TEST_DATA");
 
     if (testDataPath != nullptr)
@@ -250,12 +280,12 @@ TEST(ImageIOJpeg, Read)
             img.read(loc);
             std::cout << ">>> Image: " << img;
 
-            auto path = std::string(testDataPath) + "/1-GRAY-8bits-copy.jpg";
+            auto path = "1-GRAY-8bits-copy.jpg";
 
             std::cout << ">>> Writing image: " << path << std::endl;
 
             jpegIO.open(path, File::Mode::TRUNCATE);
-            jpegIO.createFile(img.getDim(), img.getType());
+            jpegIO.createEmpty(img.getDim(), img.getType());
             jpegIO.write(1, img);
             jpegIO.close();
 
@@ -270,7 +300,7 @@ TEST(ImageIOJpeg, Read)
 
 TEST(ImageIOImagic, Read)
 {
-    ImageFile imagicIO = ImageFile("hed");
+    ImageFile imagicIO = ImageFile();
     // ASSERT_EQ(imagicIO.getName(), "hed");
 
     ImageLocation loc;
@@ -305,7 +335,7 @@ TEST(ImageIOImagic, Read)
                     std::cout << ">>> Writing image: " << imgFn << std::endl;
 
                     imagicIO.open(imgFn, File::Mode::TRUNCATE);
-                    imagicIO.createFile(imgDim, img.getType());
+                    imagicIO.createEmpty(imgDim, img.getType());
                     imagicIO.write(1, img);
                     imagicIO.close();
                 }
@@ -324,39 +354,19 @@ TEST(ImageIOImagic, Read)
 
 } // TEST(ImageMrcIO, Read)
 
-TEST(ImageFile, Create)
+
+// ===================== Image TESTS =======================
+
+TEST(Image, Constructor)
 {
-
-    StringVector exts = {"mrc", "spi", "img"};
-    const size_t DIM = 16; // 128
-
-    for (auto ext: exts)
-    {
-        ImageFile imgio = ImageFile(ext);
-        std::cout << "Using IO: " << ext << std::endl;
-
-        std::string fn;
-        // Write a single image
-        fn = "image-single." + ext;
-        imgio.open(fn.c_str(),  File::Mode::TRUNCATE);
-        imgio.createFile(ArrayDim(DIM, DIM, 1, 1), typeFloat);
-        imgio.close();
-
-        // Write a stack of images
-        fn = "image-stack." + ext;
-        imgio.open(fn.c_str(),  File::Mode::TRUNCATE);
-        imgio.createFile(ArrayDim(DIM, DIM, 1, 100), typeFloat);
-
-        Image img(ArrayDim(DIM, DIM, 1, 1), typeFloat);
-        auto av = img.getView<float>();
-        av.assign(200);
-        imgio.write(1, img);
-        imgio.close();
-    }
-
-
-
-} // TEST(ImageFile, Create)
+    //Image
+    Image img(ArrayDim(10, 10), typeDouble);
+    ObjectDict &header = img.getHeader();
+    header["x"] = 10;
+    header["y"] = 20.5;
+    header["filename"] = std::string("/path/to/image/");
+    std::cout << img << std::endl;
+} // TEST(Image, Constructor)
 
 
 TEST(Image, Performance)

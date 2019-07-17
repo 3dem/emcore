@@ -37,7 +37,7 @@ struct TiffHeader
  * Inherit properties from base ImageFile::Impl and add information
  * specific for TIFF format (e.g, the TiffHeader struct)
  */
-class ImageIOTiff: public ImageFile::Impl
+class TiffImageFile: public ImageFile::Impl
 {
 public:
     std::vector<TiffHeader> vHeader;
@@ -84,14 +84,14 @@ public:
         {
             header.imageSampleFormat = SAMPLEFORMAT_VOID;
             if (TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE,  &header.bitsPerSample) == 0)
-                THROW_SYS_ERROR("ImageIOTiff: Error reading TIFFTAG_BITSPERSAMPLE");
+                THROW_SYS_ERROR("TiffImageFile: Error reading TIFFTAG_BITSPERSAMPLE");
             if (TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL,&header.samplesPerPixel) == 0)
                 header.samplesPerPixel = 1;
 
             if (TIFFGetField(tif, TIFFTAG_IMAGEWIDTH,     &header.imageWidth) == 0)
-                THROW_SYS_ERROR("ImageIOTiff: Error reading TIFFTAG_IMAGEWIDTH");
+                THROW_SYS_ERROR("TiffImageFile: Error reading TIFFTAG_IMAGEWIDTH");
             if (TIFFGetField(tif, TIFFTAG_IMAGELENGTH,    &header.imageLength) == 0)
-                THROW_SYS_ERROR("ImageIOTiff: Error reading TIFFTAG_IMAGELENGTH");
+                THROW_SYS_ERROR("TiffImageFile: Error reading TIFFTAG_IMAGELENGTH");
             if (TIFFGetField(tif, TIFFTAG_SUBFILETYPE,    &header.subFileType) == 0)
                 header.subFileType = 0; // Some scanners does not provide this label. So, we set this to zero
             //            REPORT_ERROR(ERR_IO_NOREAD,"rwTIFF: Error reading TIFFTAG_SUBFILETYPE");
@@ -232,7 +232,7 @@ public:
         if (tif_buf == 0)
         {
             TIFFError(TIFFFileName(tif), "No space for strip buffer");
-            THROW_ERROR("ImageIOTiff: strip buffer allocation failed.");
+            THROW_ERROR("TiffImageFile: strip buffer allocation failed.");
         }
 
         /* Start to convert the TIFF image to type T */
@@ -241,7 +241,7 @@ public:
 
         if (TIFFIsTiled(tif))
         {
-            THROW_ERROR("ImageIOTiff::readData not implemented yet for Tiled files.");
+            THROW_ERROR("TiffImageFile::readData not implemented yet for Tiled files.");
 
             /*           for (y = 0; y < vHeader[0].imageLength; y += tileLength)
                            for (x = 0; x < vHeader[0].imageWidth; x += tileWidth)
@@ -284,7 +284,7 @@ public:
         if (tif_buf == 0)
         {
             TIFFError(TIFFFileName(tif), "No space for strip buffer");
-            THROW_ERROR("ImageIOTiff: strip buffer allocation failed.");
+            THROW_ERROR("TiffImageFile: strip buffer allocation failed.");
         }
 
         char * data;
@@ -333,15 +333,15 @@ public:
         header.imageSampleFormat = (uint16)mode - header.bitsPerSample;
     } // function setHeaderType
 
-    void expandFile() override
+    void expand() override
     {
         /* Expansion of data has to be implemented at the same time with header
          * as image data has to be included in TIFF Directory when created */
     }
-}; // class ImageIOTiff
+}; // class TiffImageFile
 
 StringVector tiffExts = {"tif", "tiff"};
 
-REGISTER_IMAGE_IO(tiffExts, ImageIOTiff);
+REGISTER_IMAGE_IO(tiffExts, TiffImageFile);
 
 //#endif

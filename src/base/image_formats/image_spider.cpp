@@ -80,7 +80,7 @@ struct SpiderHeader
 }; // struct SpiderHeader
 
 
-class ImageIOSpider: public em::ImageFile::Impl
+class SpiderImageFile: public em::ImageFile::Impl
 {
 private:
     SpiderHeader header;
@@ -230,9 +230,9 @@ public:
         return tm;
     } // function getTypeMap
 
-}; // class ImageIOSpider
+}; // class SpiderImageFile
 
 
 StringVector spiExts = {"spider", "spi", "stk", "vol"};
 
-REGISTER_IMAGE_IO(spiExts, ImageIOSpider);
+REGISTER_IMAGE_IO(spiExts, SpiderImageFile);

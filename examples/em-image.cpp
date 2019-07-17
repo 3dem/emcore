@@ -335,7 +335,7 @@ int EmImageProgram::run()
             outputIO.open(outputFn, File::TRUNCATE);
 
             auto adim = inputIO.getDim();
-            outputIO.createFile(adim, outputType);
+            outputIO.createEmpty(adim, outputType);
 
             for (int i = 1; i <= adim.n; ++i)
             {

@@ -80,7 +80,7 @@ namespace em
          * Expand the existing file with unset values.
          * This function should be called after setting dim and type.
          */
-        virtual void expandFile();
+        virtual void expand();
 
         virtual void readImageHeader(const size_t index, Image &image);
         virtual void writeImageHeader(const size_t index, const Image &image);

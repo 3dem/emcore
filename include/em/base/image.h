@@ -119,21 +119,22 @@ namespace em
     std::istream& operator>> (std::istream &istream, em::Image &image);
 
     /** @ingroup image
-     * Class that will take care of read/write images from/to file.
+     * Centralizes functionality to read/write image files from several EM formats.
      *
      * Internally, the ImageFile class holds a pointer to ImageFile::Impl class,
      * that contains the details about how to open files and read the images
-     * data. This class contains some basic functionality that is shared
-     * among some formats. The ImageFile::Impl class should be extended to provide
-     * support for other formats.
+     * data. The ImageFile class implements basic functionality that is common
+     * to some formats. The ImageFile::Impl class is extended to provide support
+     * for each EM format.
      */
     class ImageFile
     {
     public:
-        /** Implementation sub-class, it should be overwritten to support other
-         * formats */
+        /** Implementation sub-class, it should be overwritten to support
+         * other formats */
         class Impl;
 
+        /** Alias for a Type vector */
         using FormatTypes = std::map<std::string, TypeVector>;
 
         /** Used when registering new Impl classes.
@@ -142,8 +143,57 @@ namespace em
          */
         using ImplBuilder = Impl* (*)();
 
-        /**
-         * Empty constructor for ImageFile.
+        /** Register a new ImageFile implementation.
+         *
+         * This function should not be used unless you are developing an
+         * implementation for a new ImageFile format.
+         */
+        static bool registerImpl(const StringVector &extOrNames,
+                                 ImplBuilder builder);
+
+        /** Check if some implementation is registered for a given name
+         * or extension.
+         *
+         * @param extOrName Input string representing either the ImageFile
+         *      name or one of the extensions registered.
+         * @return Return True if there is any implementation registered.
+         */
+        static bool hasImpl(const std::string &extOrName);
+
+        /** Return data types supported by a given format implementation.
+         *
+         * An exception will be raised if the implementation can not be found,
+         * so user needs to check that hasImpl returns true for this input.
+         */
+        static TypeVector getImplTypes(const std::string &extOrName);
+
+        /** Return a map with all formats as key and their supported data types.
+         */
+        static FormatTypes getFormatTypes();
+
+        /** Read from file and swap the data if needed.
+         *
+         * @param file File handler
+         * @param data Pointer to data
+         * @param count Number of data elements
+         * @param typeSize Number of bytes for each element
+         * @param swap Boolean to either swap or not the data array
+         * @return
+         */
+        static size_t fread(FILE *file, void *data, size_t count,
+                            size_t typeSize, bool swap=false);
+
+        /** Read from file to Array and swap the data if needed.
+         *
+         * @param file File handler
+         * @param array object Array to copy data from file
+         * @param swap Boolean to either swap or not the data array
+         * @return
+         */
+        static size_t fread(FILE *file, Array &array, bool swap=false);
+
+        /** Empty constructor, no implementation set or file opened yet.
+         *
          * In this case the newly created instance will have no format
          * implementation associated to read/write formats. Then, when the
          * open() method is called to open a file, the format implementation
@@ -153,52 +203,38 @@ namespace em
          */
         ImageFile();
 
-        /**
-         * Constructor to build a new ImageFile instance given its name or
-         * an extension related to the format implementation. The provided
-         * input string should be the key associated to a know format
-         * implementation. If not, an exception will be thrown. If the format
-         * implementation is associated to the ImageFile instance, it will not
-         * change when calling the open() method. This allow to read/write
-         * images with unknown (or non-standard) file extensions.
+        /** Create a new ImageFile instance from a given path.
          *
-         * @param extOrName Input string representing either the ImageFile name
-         * or one of the extensions registered for it.
-         */
-        ImageFile(const std::string &extOrName);
-
-        /**
-         * Check if some ImageFile implementation is registered for a given name
-         * or extension.
+         *  Equivalent to:
+         *  auto imgFile = ImageFile();
+         *  imgFile.open(path);
          *
-         * @param extOrName Input string representing either the ImageFile name
-         * or one of the extensions registered.
-         * @return Return True if there is any ImageFile registered.
+         *  See ImageFile.open.
          */
-        static bool hasImpl(const std::string &extOrName);
+        ImageFile(const std::string &path,
+                  const File::Mode mode=File::Mode::READ_ONLY,
+                  const std::string &formatName="");
 
-        /**
-         * Register a new ImageFile implementation.
-         * This function should not be used unless you are developing an
-         * implementation for a new ImageFile format.
+        /** Open the image file from a given path.
+         *
+         * Raise an exception if the ImageFile is already opened.
+         *
+         * @param path The input path. If formatName is empty, the format
+         *      will be inferred from the extension of the file path. If there
+         *      is no implemented registered for that extension, an exception
+         *      will be raised.
+         * @param mode File mode to open the file. By default is READ_ONLY and
+         *      the input path should exists. TRUNCATE can also be used to create
+         *      a new file or overwrite an existing one.
+         * @param formatName This parameter can be used to explicitly provide
+         *      the name of the format to retrieve the registered implementation.
+         *      If empty, the format will be inferred from the input path. This
+         *      option can be useful for operation with filename without common
+         *      format extensions.
          */
-         static bool registerImpl(const StringVector &extOrNames,
-                                  ImplBuilder builder);
-
-        /**
-         * Return the types supported by a given format implementation.
-         * An exception will be raised if the implementation can not be found,
-         * so user needs to check that hasImpl returns true for this input.
-         */
-         static TypeVector getImplTypes(const std::string &extOrName);
-
-        /**
-         * Return all the datatype types supported by each of the image formats
-         * registered with IO implementation.
-         * The result is a map where the keys are unique format names
-         * and the value is a list with supported datatypes.
-         */
-        static FormatTypes getFormatTypes();
+        void open(const std::string &path,
+                  const File::Mode mode=File::Mode::READ_ONLY,
+                  const std::string &formatName="");
 
         /** Return the dimensions of the opened file. */
         ArrayDim getDim() const;
@@ -206,67 +242,50 @@ namespace em
         /** Return the type of the opened file */
         Type getType() const;
 
-        // TODO: DOCUMENT
-        void open(const std::string &path,
-                  const File::Mode mode=File::Mode::READ_ONLY);
-        // TODO: DOCUMENT
-        void close();
-
-        /**
-         * Create an empty file with a given dimensions and a given type.
-         * This function should be used once and only when the file was opened
-         * with TRUNCATE mode (also with READ_WRITE when the file does not exist).
-         * @param adim The dimensions of the new file to be created.
-         * @param type The data type of the elements that will be in the file.
+        /** Read an image from an already opened ImageFile.
+         *
+         * @param index Should be greater that 1 and less or equal to the
+         *      number of images stored in the file.
+         * @param image Output image object that will be used read the
+         *      data from file. The type and dimensions of this output
+         *      Image can be modified if needed to fit the data read.
          */
-        void createFile(const ArrayDim &adim, const Type & type);
-
-        /**
-         * Expand the current file for adding more elements.
-         * The file needs to be opened with READ_WRITE mode and it should
-         * exists. The provided number of elements should be greater that
-         * the current ndim of the file.
-         * @param ndim The new number of desired elements in the file.
-         */
-        void expandFile(const size_t ndim);
-
-        // TODO: DOCUMENT
         void read(size_t index, Image &image);
 
         // TODO: DOCUMENT
         void write(size_t index, const Image &image);
 
-        /**
-         * Print information about the image file.
+        /** Create an empty file with a given dimensions and type.
+         *
+         * This function should be used once and only when the file was opened
+         * with TRUNCATE mode (also with READ_WRITE when the file does not exist).
+         * @param adim The dimensions of the new file to be created.
+         * @param type The data type of the elements that will be in the file.
+         */
+        void createEmpty(const ArrayDim &adim, const Type & type);
+
+        /** Expand the current file to add more elements.
+         *
+         * The file needs to be opened with READ_WRITE mode and it should
+         * exists. The provided number of elements should be greater that
+         * the current ndim of the file.
+         * @param ndim The new number of desired elements in the file.
+         */
+        void expand(const size_t ndim);
+
+        /** Print information about the image file.
+         *
          * @param verbosity 0 means silent, so nothing will be printed
          * if it is 1, only the basic information will be shown. If > 1,
          * some extra information will be provided.
          */
         void toStream(std::ostream &ostream, int verbosity=1) const;
 
+        /** Closed opened file and release internal data. */
+        void close();
+
+        /** Destructor */
         ~ImageFile();
-
-        /**
-         * Read from file and swap the data if needed
-         * @param file File handler
-         * @param data Pointer to data
-         * @param count Number of data elements
-         * @param typeSize Number of bytes for each element
-         * @param swap Boolean to either swap or not the data array
-         * @return
-         */
-        static size_t fread(FILE *file, void *data, size_t count,
-                            size_t typeSize, bool swap = false);
-
-        /**
-         * Read from file to Array and swap the data if needed
-         * @param file File handler
-         * @param array object Array to copy data from file
-         * @param swap Boolean to either swap or not the data array
-         * @return
-         */
-        static size_t fread(FILE *file, Array &array, bool swap = false);
-
 
     private:
         // Pointer to implementation class, PIMPL idiom

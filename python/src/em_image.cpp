@@ -47,8 +47,8 @@ void init_submodule_image(py::module &m) {
         .def("getType", &ImageFile::getType)
         .def("open", &ImageFile::open)
         .def("close", &ImageFile::close)
-        .def("createFile", &ImageFile::createFile)
-        .def("expandFile", &ImageFile::expandFile)
+        .def("createEmpty", &ImageFile::createEmpty)
+        .def("expand", &ImageFile::expand)
         .def("read", &ImageFile::read)
         .def("write", &ImageFile::write);
 

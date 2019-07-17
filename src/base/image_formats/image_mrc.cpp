@@ -88,7 +88,7 @@ struct MrcHeader
  * Inherit properties from base ImageFile::Impl and add information
  * specific for MRC format (e.g, the MrcHeader struct)
  */
-class ImageIOMrc: public em::ImageFile::Impl
+class MrcImageFile: public em::ImageFile::Impl
 {
 public:
     MrcHeader header;
@@ -291,9 +291,9 @@ public:
         }
     } // function toStream
 
-}; // class ImageIOMrc
+}; // class MrcImageFile
 
 StringVector mrcExts = {"mrc", "mrcs", "map"};
 
-REGISTER_IMAGE_IO(mrcExts, ImageIOMrc);
+REGISTER_IMAGE_IO(mrcExts, MrcImageFile);
 

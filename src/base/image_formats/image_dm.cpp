@@ -125,7 +125,7 @@ std::function< size_t(size_t*, size_t, FILE*, bool) > freadSwapLong;
  * Inherit properties from base ImageIOImpl and add information
  * specific for DM3/4 formats
  */
-class ImageIODm: public em::ImageFile::Impl
+class DmImageFile: public em::ImageFile::Impl
 {
 public:
     // File information attributes
@@ -328,7 +328,7 @@ public:
                     });
         }
         else
-            THROW_ERROR(std::string("ImageIODm::freadSwapLong: unsupported "
+            THROW_ERROR(std::string("DmImageFile::freadSwapLong: unsupported "
                                             "Digital micrograph version ") +
                         Object(version).toString());
 
@@ -387,7 +387,7 @@ public:
 
     virtual void writeHeader() override
     {
-        THROW_SYS_ERROR("ImageIODm::writeHeader: Writing in Digital Micrograph "
+        THROW_SYS_ERROR("DmImageFile::writeHeader: Writing in Digital Micrograph "
                                 "format is not supported. If your life depends "
                                 "on it, good luck!!");
     } // function writeHeader
@@ -426,7 +426,7 @@ public:
         }
     } // function toStream
 
-    virtual ~ImageIODm()
+    virtual ~DmImageFile()
     {
         delete rootTag;
     }
@@ -435,5 +435,5 @@ public:
 
 StringVector dmExts = {"dm3", "dm4"};
 
-REGISTER_IMAGE_IO(dmExts, ImageIODm);
+REGISTER_IMAGE_IO(dmExts, DmImageFile);
 

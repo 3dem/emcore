@@ -11,14 +11,11 @@
 using namespace em;
 
 
-
-
-
 /**
  * Inherit properties from base ImageFile::Impl and add information
  * specific for JPEG format
  */
-class ImageIOJpeg: public em::ImageFile::Impl
+class JpegImageFile: public em::ImageFile::Impl
 {
 public:
     jpeg_decompress_struct dInfo;
@@ -137,7 +134,7 @@ public:
 
     } // function toStream
 
-    virtual void expandFile() override
+    virtual void expand() override
     {
         //FIXME [hv]: Consider expand file(may be imposible).
     }
@@ -150,7 +147,7 @@ public:
         jpeg_destroy_compress(&cInfo);
     }
 
-    ~ImageIOJpeg()
+    ~JpegImageFile()
     {
 
     }
@@ -159,5 +156,5 @@ public:
 
 StringVector jpegExts = {"jpg", "jpeg"};
 
-REGISTER_IMAGE_IO(jpegExts, ImageIOJpeg);
+REGISTER_IMAGE_IO(jpegExts, JpegImageFile);
 

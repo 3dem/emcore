@@ -154,12 +154,13 @@ void Image::write(const ImageLocation &location) const
     else
     {
         imgio.open(location.path,  File::Mode::TRUNCATE);
-        imgio.createFile(getDim(), getType());
+        imgio.createEmpty(getDim(), getType());
     }
 
     imgio.write(location.index, *this);
     imgio.close();
 } // function Image::write
+
 
 // ===================== ImageFile Implementation =======================
 
@@ -221,48 +222,46 @@ ImageFile::FormatTypes ImageFile::getFormatTypes()
     return dict;
 } // ImageFile::getFormatTypes
 
+size_t ImageFile::fread(FILE *file, void *data, size_t count,
+                        size_t typeSize, bool swap)
+{
+    size_t  out = ::fread(data, count, typeSize, file);
+
+    if (swap)
+        Type::swapBytes(data, count, typeSize);
+    return out;
+} // function ImageFile::fread
+
+size_t ImageFile::fread(FILE *file, Array &array, bool swap)
+{
+    return fread(file, array.getData(), array.getDim().getSize(),
+                 array.getType().getSize(), swap);
+} // function ImageFile::fread
+
+
 ImageFile::ImageFile()
 {
     impl = nullptr;
+} // Empty Ctor ImageFile
+
+ImageFile::ImageFile(const std::string &path, const em::File::Mode mode,
+                     const std::string &formatName):ImageFile()
+{
+    open(path, mode, formatName);
 } // Ctor ImageFile
 
-ImageFile::ImageFile(const std::string &extOrName)
+void ImageFile::open(const std::string &path, const em::File::Mode mode,
+                     const std::string &formatName)
 {
-    impl = getImageIORegistry()->buildImpl(extOrName);
-} // Ctor ImageFile
+    // Users should call ImageFile.close method before a new call to open
+    ASSERT_ERROR(impl != nullptr, std::string("Already opened file: ") + path);
 
-ImageFile::~ImageFile()
-{
-    close();
-    delete impl;
-}// ImageFile ctor
-
-
-ImageFile::Impl::~Impl()
-{
-}
-
-
-TypeVector ImageFile::Impl::getTypes() const
-{
-    TypeVector types;
-
-    for (const auto& kv2: getTypeMap())
-        types.push_back(kv2.second);
-
-    sortTypeVector(types);
-
-    return types;
-} // function ImageFile::Impl.getTypes
-
-void ImageFile::open(const std::string &path, const File::Mode mode)
-{
-    delete impl;  // Does it make sense to reuse impl?
-    impl = getImageIORegistry()->buildImpl(Path::getExtension(path));
+    auto ext = formatName.empty() ? Path::getExtension(path) : formatName;
+    impl = getImageIORegistry()->buildImpl(ext);
     impl->path = path;
     impl->fileMode = mode;
 
-    // If the file does not exists and mode is  File::Mode::READ_WRITE
+    // If the file does not exists and mode is File::Mode::READ_WRITE
     // switch automatically to TRUNCATE mode
     if (mode ==  File::Mode::READ_WRITE and !Path::exists(path))
         impl->fileMode =  File::Mode::TRUNCATE;
@@ -273,113 +272,121 @@ void ImageFile::open(const std::string &path, const File::Mode mode)
         impl->readHeader();
 } // function ImageFile.open
 
-void ImageFile::close()
-{
-    if (impl != nullptr)
-    {
-        impl->closeFile();
-    }
-} // function ImageFile.close
-
-void ImageFile::createFile(const ArrayDim &adim, const Type & type)
-{
-    ASSERT_ERROR(type.isNull(), "Input type can not be null. ");
-    ASSERT_ERROR(impl->fileMode !=  File::Mode::TRUNCATE,
-                 "ImageFile::createFile can only be used with TRUNCATE mode.");
-    // TODO: Check that the format supports this Type
-    impl->dim = adim;
-    impl->type = type;
-    impl->writeHeader(); // write the main header of the file
-    impl->expandFile();
-} // function ImageFile.createFile
-
-
-void ImageFile::expandFile(const size_t ndim)
-{
-    // TODO: IMPLEMENT
-} // function expandFile
-
 ArrayDim ImageFile::getDim() const
 {
-    // TODO: Check also that if the impl is not null, still the file is opened
     ASSERT_ERROR(impl == nullptr, "File has not been opened. ");
-
     return impl->dim;
 } // function ImageFile.getDim
 
 Type ImageFile::getType() const
 {
-    // TODO: Check also that if the impl is not null, still the file is opened
     ASSERT_ERROR(impl == nullptr, "File has not been opened. ");
-
     return impl->type;
 } // function ImageFile.getType
 
+// TODO: Allow to read more than one image
+// TODO: Allow to read only a slice of a volume
 void ImageFile::read(size_t index, Image &image)
 {
+    // Get first the type of the file, this will check
+    // if the file has already been opened
+    auto fileType = getType();
+
+    // If type is null, it means that the file was opened
+    // in TRUNCATE mode and no image has been written so far,
+    // so there is no type and we can't read
+    ASSERT_ERROR(fileType.isNull(), "Can not read without a valid type.");
+
+    // Check that the index to be ready is within the file number of images
     ArrayDim adim = getDim(); // This will check that the file was open
     ASSERT_ERROR(index > adim.n, "Invalid index");
 
-    // TODO: Allow to read more than one image
     if (index == ImageLocation::ALL)
         index = ImageLocation::FIRST;
-    adim.n = 1; // Allocate for just one element
 
-    auto imageType = image.getType();
-    auto fileType = impl->type;
-
-    // If the image already has a defined Type, we should respect that
-    // one and then convert from the data read from disk.
-    // If the image
-    if (imageType.isNull())
-    {
-        image.resize(adim, fileType);
-        imageType = fileType;
-    }
-    else
-        image.resize(adim);
-
-    bool sameType = (imageType == fileType);
-    void * data = nullptr;
-
-    // If the image has the same Type as the file
-    // we do not need an intermediate buffer, we can read data
-    // directly into the image memory
-    // TODO: Check how this plays with Images in GPU memory
-
-    auto& readImage = (sameType) ? image : impl->image;
-    readImage.resize(adim, fileType);
-
-    impl->readImageData(index, readImage);
+    adim.n = 1; // Allocate for just one element for now
+    image.resize(adim, fileType);
+    impl->readImageData(index, image);
 
     if (impl->swap)
-        Type::swapBytes(readImage.getData(), adim.getItemSize(),
+        Type::swapBytes(image.getData(), adim.getItemSize(),
                         fileType.getSize());
-
-    // If we have read the image into the internal buffer image due to
-    // a different datatype, we need to cast now to the output image
-    if (!sameType)
-        image.copy(impl->image);
 } // function ImageFile::read
 
 void ImageFile::write(size_t index, const Image &image)
 {
-    auto& type = impl->type;
+    // Get first the type of the file, this will check
+    // if the file has already been opened
+    auto fileType = getType();
+    auto imageType = image.getType();
+
+    // If the file has been opened with TRUNCATE, it will
+    // not have any type and we will use the one from the image
+    // Otherwise, the image and file type should be the same
+    if (fileType.isNull())
+    {
+        auto adim = image.getDim();
+        adim.n = index;
+        createEmpty(adim, imageType);
+    }
+    else
+        ASSERT_ERROR(imageType != fileType,
+                 "Image should have the same type of the file.");
 
     // FIXME: Check what to do with ALL as index
     if (index == ImageLocation::ALL)
         index = ImageLocation::FIRST;
 
-    if (type.isNull())
-        // FIXME: I think we don't need to always create the file, check it!!!
-        createFile(image.getDim(), image.getType());
-
-    ASSERT_ERROR(image.getType() != type,
-                 "Type cast not implemented. Now image should have the same "
-                 "type.")
+    // If the file is not big enough to write in this position,
+    // let's expand it to enable the write operation
+    expand(index);
 
     impl->writeImageData(index, image);
 } // function ImageFile::write
+
+void ImageFile::createEmpty(const ArrayDim &adim, const Type & type)
+{
+    // Input type can not be null to create a file
+    ASSERT_ERROR(type.isNull(), "Input type can not be null. ");
+
+    // Create empty file only for TRUNCATE mode
+    ASSERT_ERROR(impl->fileMode !=  File::Mode::TRUNCATE,
+                 "ImageFile::createEmpty can only be used with TRUNCATE mode.");
+
+    // Check that requested type is supported for the format implementation
+    auto types = impl->getTypes();
+    ASSERT_ERROR(std::find(types.begin(), types.end(), type) == types.end(),
+                 std::string("Unsupported type '") + type.getName() +
+                 std::string("' for this file format: ") + impl->path);
+
+    // Set new type and dimensions
+    impl->dim = adim;
+    impl->type = type;
+    impl->writeHeader(); // write the main header of the file
+    impl->expand();
+} // function ImageFile.createEmpty
+
+void ImageFile::expand(const size_t ndim)
+{
+    // Get first the type of the file, this will check
+    // if the file has already been opened
+    auto fileType = getType();
+
+    ASSERT_ERROR(impl->fileMode == File::READ_ONLY,
+                 std::string("Can expand a file opened as READ_ONLY: ")
+                 + impl->path);
+
+    // Check the type has been set before calling expand
+    // we can arrive here via createEmpty file, where type should be set
+    // or from write, where also the type can be inferred from image
+    ASSERT_ERROR(fileType.isNull(),
+                 "Can not expand file without a valid type.");
+
+    // After all validations, call the implementation expand method
+    if (ndim > impl->dim.n)
+        impl->expand();
+} // function expand
+
 
 void ImageFile::toStream(std::ostream &ostream, int verbosity) const
 {
@@ -401,6 +408,42 @@ std::ostream& em::operator<< (std::ostream &ostream, const em::ImageFile &imageI
     imageIO.toStream(ostream);
     return ostream;
 }
+
+void ImageFile::close()
+{
+    if (impl != nullptr)
+    {
+        impl->closeFile();
+        delete impl;
+        impl = nullptr;
+    }
+} // function ImageFile.close
+
+ImageFile::~ImageFile()
+{
+    close();
+}// ImageFile ctor
+
+
+// ===================== ImageFile::Impl Implementation =======================
+ImageFile::Impl::~Impl()
+{
+}
+
+TypeVector ImageFile::Impl::getTypes() const
+{
+    TypeVector types;
+
+    for (const auto& kv2: getTypeMap())
+        types.push_back(kv2.second);
+
+    sortTypeVector(types);
+
+    return types;
+} // function ImageFile::Impl.getTypes
+
+
+
 
 size_t ImageFile::Impl::getHeaderSize() const
 {
@@ -439,7 +482,7 @@ void ImageFile::Impl::closeFile()
     }
 } // function ImageFile::Impl::closeFile
 
-void ImageFile::Impl::expandFile()
+void ImageFile::Impl::expand()
 {
     // Compute the size of one item, taking into account its x, y, z dimensions
     // and the size of the type that will be used
@@ -451,7 +494,7 @@ void ImageFile::Impl::expandFile()
 
     File::resize(file, fileSize);
     fflush(file);
-} // function ImageFile::Impl::expandFile
+} // function ImageFile::Impl::expand
 
 void ImageFile::Impl::readImageHeader(const size_t index, Image &image) {}
 
@@ -466,13 +509,13 @@ void ImageFile::Impl::readImageData(const size_t index, Image &image)
     size_t itemPos = getHeaderSize() + itemSize * (index - 1) + padSize;
 
     if (fseek(file, itemPos, SEEK_SET) != 0)
-        THROW_SYS_ERROR("Could not 'fseek' in file. ");
+        THROW_SYS_ERROR(std::string("Could not 'fseek' in file. ") + path);
 
     // FIXME: change this to read by chunks when we change this
     // approach, right now only read a big chunk of one item size
 
     if (::fread(image.getData(), readSize, 1, file) != 1)
-        THROW_SYS_ERROR("Could not 'fread' data from file. ");
+        THROW_SYS_ERROR(std::string("Could not 'fread' data from file: ") + path);
 }
 
 void ImageFile::Impl::writeImageData(const size_t index, const Image &image)
@@ -486,7 +529,7 @@ void ImageFile::Impl::writeImageData(const size_t index, const Image &image)
     std::cerr << "ImageFile::Impl::write: itemSize: " << itemSize << std::endl;
 
     if (fseek(file, itemPos, SEEK_SET) != 0)
-        THROW_SYS_ERROR("Could not 'fseek' in file. ");
+        THROW_SYS_ERROR(std::string("Could not 'fseek' in file: ") + path);
 
     fwrite(image.getData(), writeSize, 1, file);
 
@@ -514,21 +557,7 @@ void ImageFile::Impl::toStream(std::ostream &ostream, int verbosity) const
 
 }
 
-size_t ImageFile::fread(FILE *file, void *data, size_t count,
-                      size_t typeSize, bool swap)
-{
-    size_t  out = ::fread(data, count, typeSize, file);
 
-    if (swap)
-        Type::swapBytes(data, count, typeSize);
-    return out;
-} // function ImageFile::fread
-
-size_t ImageFile::fread(FILE *file, Array &array, bool swap)
-{
-    return fread(file, array.getData(), array.getDim().getSize(),
-                 array.getType().getSize(), swap);
-} // function ImageFile::fread
 
 #include "image_formats/image_mrc.cpp"
 #include "image_formats/image_spider.cpp"
