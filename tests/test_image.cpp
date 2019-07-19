@@ -12,6 +12,31 @@
 
 using namespace em;
 
+class TestData
+{
+private:
+    std::string root;
+
+public:
+    TestData()
+    {
+        auto value = getenv("EM_TEST_DATA");
+
+        if (value == nullptr)
+            THROW_ERROR("EM_TEST_DATA variable is not defined.");
+
+        root = value;
+        if (!Path::exists(root))
+            THROW_ERROR("EM_TEST_DATA path does not exist.");
+    }
+
+    /** Return the path prefixed with test data root */
+    std::string get(const std::string &path)
+    {
+        return root + "/" + path;
+    }
+}; // class TestData
+
 TEST(ImageLocation, Basic)
 {
     // Image Location can be constructed from string and index is ALL
@@ -114,71 +139,60 @@ TEST(MrcFile, Read)
     ImageLocation loc;
     std::map<std::string, ArrayDim> fileDims;
 
-    auto testDataPath = getenv("EM_TEST_DATA");
+    auto td = TestData();
 
-    if (testDataPath != nullptr)
+    fileDims["xmipp_tutorial/micrographs/BPV_1386.mrc"] = ArrayDim(9216, 9441, 1, 1);
+    std::string stackFn = "emx/alignment/Test2/stack2D.mrc";
+    ArrayDim stackDim(128, 128, 1, 100);
+    // fileDims[stackFn] = stackDim;
+
+    for (auto &pair: fileDims)
     {
-        std::string root(testDataPath);
-
-        fileDims["xmipp_tutorial/micrographs/BPV_1386.mrc"] = ArrayDim(9216, 9441, 1, 1);
-        std::string stackFn = "emx/alignment/Test2/stack2D.mrc";
-        ArrayDim stackDim(128, 128, 1, 100);
-        // fileDims[stackFn] = stackDim;
-
-        for (auto &pair: fileDims)
-        {
-            Image img;
-            loc.index = 1;
-            loc.path = root + pair.first;
-            std::cout << ">>> Reading image: " << loc << std::endl;
-
-            img.read(loc);
-            std::cout << img << std::endl;
-            ArrayDim imgDim(pair.second);
-            imgDim.n = 1;
-            ASSERT_EQ(img.getDim(), imgDim);
-        }
-
-        // Use mrcIO2 for writing individual images
-        ImageFile mrcIO2 = ImageFile();
-        // Use mrcIO3 for write another stack
-        ImageFile mrcIO3 = ImageFile();
-
-        mrcIO.open(root + stackFn);
         Image img;
-        char suffix[4];
-        std::string imgFn;
-        ArrayDim imgDim(stackDim);
+        loc.index = 1;
+        loc.path = td.get(pair.first);
+        std::cout << ">>> Reading image: " << loc << std::endl;
+
+        img.read(loc);
+        std::cout << img << std::endl;
+        ArrayDim imgDim(pair.second);
         imgDim.n = 1;
-
-        ArrayDim outDim(stackDim);
-        outDim.n = 10;
-        std::string outputStackFn = "image_stack.mrcs";
-        mrcIO3.open(outputStackFn,  File::Mode::TRUNCATE);
-        mrcIO3.createEmpty(outDim, mrcIO.getType());
-
-        for (size_t i = 1; i <= outDim.n; ++i)
-        {
-            mrcIO.read(i, img);
-            snprintf (suffix, 4, "%03d", (int)i);
-            imgFn = std::string("image") + suffix + ".mrc";
-            std::cout << ">>> Writing image: " << imgFn << std::endl;
-            mrcIO2.open(imgFn,  File::Mode::TRUNCATE);
-            mrcIO2.write(1, img);
-            mrcIO2.close();
-
-            // Write to stack
-            mrcIO3.write(i, img);
-        }
-        mrcIO.close();
-        mrcIO3.close();
-
+        ASSERT_EQ(img.getDim(), imgDim);
     }
-    else
+
+    // Use mrcIO2 for writing individual images
+    ImageFile mrcIO2 = ImageFile();
+    // Use mrcIO3 for write another stack
+    ImageFile mrcIO3 = ImageFile();
+
+    mrcIO.open(td.get(stackFn));
+    Image img;
+    char suffix[4];
+    std::string imgFn;
+    ArrayDim imgDim(stackDim);
+    imgDim.n = 1;
+
+    ArrayDim outDim(stackDim);
+    outDim.n = 10;
+    std::string outputStackFn = "image_stack.mrcs";
+    mrcIO3.open(outputStackFn,  File::Mode::TRUNCATE);
+    mrcIO3.createEmpty(outDim, mrcIO.getType());
+
+    for (size_t i = 1; i <= outDim.n; ++i)
     {
-        std::cout << "Skipping image format tests, EM_TEST_DATA not defined in "
-                     "environment. " << std::endl;
+        mrcIO.read(i, img);
+        snprintf (suffix, 4, "%03d", (int)i);
+        imgFn = std::string("image") + suffix + ".mrc";
+        std::cout << ">>> Writing image: " << imgFn << std::endl;
+        mrcIO2.open(imgFn,  File::Mode::TRUNCATE);
+        mrcIO2.write(1, img);
+        mrcIO2.close();
+
+        // Write to stack
+        mrcIO3.write(i, img);
     }
+    mrcIO.close();
+    mrcIO3.close();
 
 } // TEST(ImageMrcIO, Read)
 
@@ -191,167 +205,110 @@ TEST(ImageSpiderIO, Read)
     ImageLocation loc;
     std::map<std::string, ArrayDim> fileDims;
 
-    auto testDataPath = getenv("EM_TEST_DATA");
+    auto td = TestData();
 
-    if (testDataPath != nullptr)
+    fileDims["emx/alignment/testAngles/sphere_128.vol"] = ArrayDim(128, 128, 128, 1);
+    fileDims["emx/alignment/testAngles/proj.spi"] = ArrayDim(128, 128, 1, 1);
+    fileDims["emx/alignment/testAngles/projections.stk"] = ArrayDim(128, 128, 1, 5);
+
+    for (auto &pair: fileDims)
     {
-        try
-        {
-            std::string root(testDataPath);
-
-            fileDims["emx/alignment/testAngles/sphere_128.vol"] = ArrayDim(128, 128, 128, 1);
-            fileDims["emx/alignment/testAngles/proj.spi"] = ArrayDim(128, 128, 1, 1);
-            fileDims["emx/alignment/testAngles/projections.stk"] = ArrayDim(128, 128, 1, 5);
-
-            for (auto &pair: fileDims)
-            {
-                Image img;
-                loc.index = 1;
-                std::cout << ">>> Reading " << pair.first << std::endl;
-                loc.path = root + pair.first;
-                img.read(loc);
-                std::cout << "Back in test" << std::endl;
-                std::cout << img << std::endl;
-                ArrayDim imgDim(pair.second);
-                imgDim.n = 1;
-                ASSERT_EQ(img.getDim(), imgDim);
-            }
-        }
-        catch (Error &err)
-        {
-            std::cout << err << std::endl;
-        }
+        Image img;
+        loc.index = 1;
+        std::cout << ">>> Reading " << pair.first << std::endl;
+        loc.path = td.get(pair.first);
+        img.read(loc);
+        std::cout << "Back in test" << std::endl;
+        std::cout << img << std::endl;
+        ArrayDim imgDim(pair.second);
+        imgDim.n = 1;
+        ASSERT_EQ(img.getDim(), imgDim);
     }
-    else
-    {
-        std::cout << "Skipping image format tests, EM_TEST_DATA not defined "
-                     "in environment. " << std::endl;
-    }
+
 
 } // TEST(ImageSpiderIO, Read)
 
-TEST(ImageIOPng, Read)
-{
-    ImageFile pngIO = ImageFile();
-    auto testDataPath = getenv("EM_TEST_DATA");
-
-    if (testDataPath != nullptr)
-    {
-        try
-        {
-            ImageLocation loc;
-            loc.path = std::string(testDataPath) + "/8bits.png";
-            loc.index = 1;
-            Image img;
-            img.read(loc);
-            std::cout << ">>> Image: " << img;
-
-            auto path = "8bits-copy.png";
-
-            std::cout << ">>> Writing image: " << path << std::endl;
-
-            pngIO.open(path, File::Mode::TRUNCATE);
-            pngIO.createEmpty(img.getDim(), img.getType());
-            pngIO.write(1, img);
-            pngIO.close();
-
-            std::cout << ">>> Write image done." << std::endl;
-        }
-        catch(Error &error)
-        {
-            std::cout << error<< std::endl;
-        }
-    }
-}
-
-TEST(ImageIOJpeg, Read)
-{
-    ImageFile jpegIO = ImageFile();
-    auto testDataPath = getenv("EM_TEST_DATA");
-
-    if (testDataPath != nullptr)
-    {
-        try
-        {
-            ImageLocation loc;
-            loc.path = std::string(testDataPath) + "/1-GRAY-8bits.jpg";
-            loc.index = 1;
-            Image img;
-            img.read(loc);
-            std::cout << ">>> Image: " << img;
-
-            auto path = "1-GRAY-8bits-copy.jpg";
-
-            std::cout << ">>> Writing image: " << path << std::endl;
-
-            jpegIO.open(path, File::Mode::TRUNCATE);
-            jpegIO.createEmpty(img.getDim(), img.getType());
-            jpegIO.write(1, img);
-            jpegIO.close();
-
-            std::cout << ">>> Write image done." << std::endl;
-        }
-        catch(Error &error)
-        {
-            std::cout << error<< std::endl;
-        }
-    }
-}
+//TEST(ImageIOPng, Read)
+//{
+//    ImageFile pngIO = ImageFile();
+//    auto td = TestData();
+//    ImageLocation loc;
+//    loc.path = td.get("8bits.png");
+//    loc.index = 1;
+//    Image img;
+//    img.read(loc);
+//    std::cout << ">>> Image: " << img;
+//
+//    auto path = "8bits-copy.png";
+//
+//    std::cout << ">>> Writing image: " << path << std::endl;
+//
+//    pngIO.open(path, File::Mode::TRUNCATE);
+//    pngIO.createEmpty(img.getDim(), img.getType());
+//    pngIO.write(1, img);
+//    pngIO.close();
+//
+//    std::cout << ">>> Write image done." << std::endl;
+//}
+//
+//TEST(ImageIOJpeg, Read)
+//{
+//    ImageFile jpegIO = ImageFile();
+//    auto td = TestData();
+//
+//    ImageLocation loc;
+//    loc.path = td.get("1-GRAY-8bits.jpg");
+//    loc.index = 1;
+//    Image img;
+//    img.read(loc);
+//    std::cout << ">>> Image: " << img;
+//
+//    auto path = "1-GRAY-8bits-copy.jpg";
+//
+//    std::cout << ">>> Writing image: " << path << std::endl;
+//
+//    jpegIO.open(path, File::Mode::TRUNCATE);
+//    jpegIO.createEmpty(img.getDim(), img.getType());
+//    jpegIO.write(1, img);
+//    jpegIO.close();
+//
+//    std::cout << ">>> Write image done." << std::endl;
+//}
 
 TEST(ImageIOImagic, Read)
 {
     ImageFile imagicIO = ImageFile();
-    // ASSERT_EQ(imagicIO.getName(), "hed");
-
+    auto td = TestData();
     ImageLocation loc;
     std::map<std::string, ArrayDim> fileDims;
 
-    auto testDataPath = getenv("EM_TEST_DATA");
+    fileDims["xmipp_tutorial/particles/BPV_1386_ptcls.img"] = ArrayDim(500, 500, 1, 29);
 
-    if (testDataPath != nullptr)
+    char suffix[4];
+    std::string imgFn;
+    ArrayDim imgDim(500, 500, 1, 1);
+
+    for (auto &pair: fileDims)
     {
-        try {
-            std::string root(testDataPath);
-
-            fileDims["xmipp_tutorial/particles/BPV_1386_ptcls.img"] = ArrayDim(500, 500, 1, 29);
-
-            char suffix[4];
-            std::string imgFn;
-            ArrayDim imgDim(500, 500, 1, 1);
-
-            for (auto &pair: fileDims)
-            {
-                for (size_t index = 1; index <= pair.second.n; index++)
-                {
-                    Image img;
-                    loc.index = index;
-                    loc.path = root + pair.first;
-                    std::cout << ">>> Reading image: " << loc << std::endl;
-                    img.read(loc);
-                    std::cout << ">>> Image: " << img;
-                    //write
-                    snprintf (suffix, 4, "%03d", (int)index);
-                    imgFn = std::string("image") + suffix + ".hed";
-                    std::cout << ">>> Writing image: " << imgFn << std::endl;
-
-                    imagicIO.open(imgFn, File::Mode::TRUNCATE);
-                    imagicIO.createEmpty(imgDim, img.getType());
-                    imagicIO.write(1, img);
-                    imagicIO.close();
-                }
-            }
-        }
-        catch (Error &err)
+        for (size_t index = 1; index <= pair.second.n; index++)
         {
-            std::cout << err << std::endl;
+            Image img;
+            loc.index = index;
+            loc.path = td.get(pair.first);
+            std::cout << ">>> Reading image: " << loc << std::endl;
+            img.read(loc);
+            std::cout << ">>> Image: " << img;
+            //write
+            snprintf (suffix, 4, "%03d", (int)index);
+            imgFn = std::string("image") + suffix + ".hed";
+            std::cout << ">>> Writing image: " << imgFn << std::endl;
+
+            imagicIO.open(imgFn, File::Mode::TRUNCATE);
+            imagicIO.createEmpty(imgDim, img.getType());
+            imagicIO.write(1, img);
+            imagicIO.close();
         }
     }
-    else
-    {
-        std::cout << "Skipping image format tests, EM_TEST_DATA not defined in "
-                     "environment. " << std::endl;
-    }
-
 } // TEST(ImageMrcIO, Read)
 
 
@@ -371,118 +328,101 @@ TEST(Image, Constructor)
 
 TEST(Image, Performance)
 {
-    auto testDataPath = getenv("EM_TEST_DATA");
+    auto td = TestData();
 
-    if (testDataPath != nullptr)
-    {
-        try
-        {
-            // Load a big ~ 10k x 10k to check the performance of some
-            // operations
-            std::string micFn(testDataPath);
-            micFn += "xmipp_tutorial/micrographs/BPV_1386.mrc";
+    // Load a big ~ 10k x 10k to check the performance of some
+    // operations
+    std::string micFn = td.get("xmipp_tutorial/micrographs/BPV_1386.mrc");
 
-            ImageLocation loc(micFn, 1);
-            Image img, img2, img3;
+    ImageLocation loc(micFn, 1);
+    Image img, img2, img3;
 
-            img.read(loc);
-            ArrayDim adim = img.getDim();
-            Type type = img.getType();
-            size_t n = adim.getSize();
-            std::cout << std::endl << "Image memory: " << n * type.getSize()
-                                   << " bytes. " << std::endl;
-            uint8_t * imgData = static_cast<uint8_t*>(img.getData());
-            uint8_t * iter = nullptr, *iter2 = nullptr;
+    img.read(loc);
+    ArrayDim adim = img.getDim();
+    Type type = img.getType();
+    size_t n = adim.getSize();
+    std::cout << std::endl << "Image memory: " << n * type.getSize()
+                           << " bytes. " << std::endl;
+    uint8_t * imgData = static_cast<uint8_t*>(img.getData());
+    uint8_t * iter = nullptr, *iter2 = nullptr;
 
-            Timer t;
+    Timer t;
 
-            // Resize before comparing times
-            t.tic();
-            img2.resize(img);
-            t.toc("One image ALLOCATION");
-            img3.resize(img);
-            std::cout << std::endl;
+    // Resize before comparing times
+    t.tic();
+    img2.resize(img);
+    t.toc("One image ALLOCATION");
+    img3.resize(img);
+    std::cout << std::endl;
 
-            //------------------ Check Assignment to ARRAY --------------------
-            t.tic();
-            iter = imgData;
-            iter2 = static_cast<uint8_t*>(img2.getData());
-            for (size_t i = 0; i < n; ++i, ++iter, ++iter2)
-                *iter2 = *iter;
-            t.toc("LOOP assign array");
+    //------------------ Check Assignment to ARRAY --------------------
+    t.tic();
+    iter = imgData;
+    iter2 = static_cast<uint8_t*>(img2.getData());
+    for (size_t i = 0; i < n; ++i, ++iter, ++iter2)
+        *iter2 = *iter;
+    t.toc("LOOP assign array");
 
-            t.tic();
-            iter = imgData;
-            iter2 = static_cast<uint8_t*>(img2.getData());
-            memcpy(iter2, iter, n * type.getSize());
-            t.toc("MEMCPY assign array");
+    t.tic();
+    iter = imgData;
+    iter2 = static_cast<uint8_t*>(img2.getData());
+    memcpy(iter2, iter, n * type.getSize());
+    t.toc("MEMCPY assign array");
 
-            t.tic();
-            img3 = img;
-            t.toc("IMAGE assign array");
-            ASSERT_EQ(img2, img3);
+    t.tic();
+    img3 = img;
+    t.toc("IMAGE assign array");
+    ASSERT_EQ(img2, img3);
 
-            std::cout << std::endl;
+    std::cout << std::endl;
 
-            //------------------ Check Assignment to VALUE --------------------
-            t.tic();
-            iter2 = static_cast<uint8_t*>(img2.getData());
-            for (size_t i = 0; i < n; ++i, ++iter2)
-                *iter2 = 100;
-            t.toc("LOOP assign value");
+    //------------------ Check Assignment to VALUE --------------------
+    t.tic();
+    iter2 = static_cast<uint8_t*>(img2.getData());
+    for (size_t i = 0; i < n; ++i, ++iter2)
+        *iter2 = 100;
+    t.toc("LOOP assign value");
 
-            t.tic();
-            // FIXME: Why the following line does not work
-            //img3 = Object(100);
-            Array * array = &img3;
-            array->set(100);
-            t.toc("IMAGE assign value");
-            ASSERT_EQ(img2, img3);
+    t.tic();
+    // FIXME: Why the following line does not work
+    //img3 = Object(100);
+    Array * array = &img3;
+    array->set(100);
+    t.toc("IMAGE assign value");
+    ASSERT_EQ(img2, img3);
 
-            std::cout << std::endl;
+    std::cout << std::endl;
 
-            //------------------ Check Multiplication by ARRAY ---------------
-            img3 = img2 = img;
+    //------------------ Check Multiplication by ARRAY ---------------
+    img3 = img2 = img;
 
-            t.tic();
-            iter2 = static_cast<uint8_t*>(img2.getData());
-            for (size_t i = 0; i < n; ++i, ++iter, ++iter2)
-                *iter2 *= *iter;
-            t.toc("LOOP mult by array");
+    t.tic();
+    iter2 = static_cast<uint8_t*>(img2.getData());
+    for (size_t i = 0; i < n; ++i, ++iter, ++iter2)
+        *iter2 *= *iter;
+    t.toc("LOOP mult by array");
 
-            t.tic();
-            img3 *= img;
-            t.toc("IMAGE mult by array");
-            ASSERT_EQ(img2, img3);
+    t.tic();
+    img3 *= img;
+    t.toc("IMAGE mult by array");
+    ASSERT_EQ(img2, img3);
 
-            std::cout << std::endl;
+    std::cout << std::endl;
 
-            //------------------ Check Multiplication by VALUE ---------------
-            img3 = img2 = img;
+    //------------------ Check Multiplication by VALUE ---------------
+    img3 = img2 = img;
 
-            t.tic();
-            iter2 = static_cast<uint8_t*>(img2.getData());
-            for (size_t i = 0; i < n; ++i, ++iter, ++iter2)
-            *iter2 *= 100;
-            t.toc("LOOP mult by value");
+    t.tic();
+    iter2 = static_cast<uint8_t*>(img2.getData());
+    for (size_t i = 0; i < n; ++i, ++iter, ++iter2)
+    *iter2 *= 100;
+    t.toc("LOOP mult by value");
 
-            t.tic();
-            img3 *= 100;
-            t.toc("IMAGE mult by value");
+    t.tic();
+    img3 *= 100;
+    t.toc("IMAGE mult by value");
 
-            ASSERT_EQ(img2, img3);
+    ASSERT_EQ(img2, img3);
 
-            std::cout << std::endl;
-
-        }
-        catch (Error &err)
-        {
-            std::cout << err << std::endl;
-        }
-    }
-    else
-    {
-        std::cout << "Skipping image processing tests, EM_TEST_DATA not "
-                     "defined in environment. " << std::endl;
-    }
+    std::cout << std::endl;
 } // TEST Image.Performance
