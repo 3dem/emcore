@@ -38,18 +38,24 @@ void init_submodule_image(py::module &m) {
         .def("write", &Image::write);
 
     py::class_<ImageFile>(m, "ImageFile")
-        .def(py::init<>())
-        .def(py::init<const std::string&>())
         .def_static("hasImpl", &ImageFile::hasImpl)
         .def_static("getImplTypes", &ImageFile::getImplTypes)
         .def_static("getFormatTypes", &ImageFile::getFormatTypes)
+        .def(py::init<>())
+        .def(py::init<const std::string&, const File::Mode, const std::string&>(),
+                 py::arg("path"),
+                 py::arg("mode")=File::Mode::READ_ONLY,
+                 py::arg("formatName")="")
+        .def("open", &ImageFile::open, 
+                 py::arg("path"),
+                 py::arg("mode")=File::Mode::READ_ONLY,
+                 py::arg("formatName")="")
         .def("getDim", &ImageFile::getDim)
         .def("getType", &ImageFile::getType)
-        .def("open", &ImageFile::open)
-        .def("close", &ImageFile::close)
+        .def("read", &ImageFile::read)
+        .def("write", &ImageFile::write)
         .def("createEmpty", &ImageFile::createEmpty)
         .def("expand", &ImageFile::expand)
-        .def("read", &ImageFile::read)
-        .def("write", &ImageFile::write);
+        .def("close", &ImageFile::close);
 
 } // em/image sub-module definition
