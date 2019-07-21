@@ -10,14 +10,11 @@
 using namespace em;
 
 
-
-
-
 /**
- * Inherit properties from base ImageIO::Impl and add information
+ * Inherit properties from base ImageFile::Impl and add information
  * specific for PNG format
  */
-class ImageIOPng: public em::ImageIO::Impl
+class PngImageFile: public em::ImageFile::Impl
 {
 public:
     png_infop readInfoPtr = nullptr;
@@ -180,12 +177,12 @@ public:
 
     } // function toStream
 
-    virtual void expandFile() override
+    virtual void expand() override
     {
         //FIXME [hv]: Consider expand file(may be imposible).
     }
 
-    ~ImageIOPng()
+    ~PngImageFile()
     {
        if (pngReadPtr != nullptr && readInfoPtr !=nullptr)
             png_destroy_read_struct(&pngReadPtr, &readInfoPtr, nullptr);
@@ -194,9 +191,9 @@ public:
             png_destroy_write_struct(&pngWritePtr, &writeInfoPtr);
     }
 
-}; // class ImageIOPng
+}; // class PngImageFile
 
 StringVector pngExts = {"png"};
 
-REGISTER_IMAGE_IO(pngExts, ImageIOPng);
+REGISTER_IMAGE_IO(pngExts, PngImageFile);
 

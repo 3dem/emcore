@@ -21,22 +21,18 @@ class TestImageLocation(BaseTest):
         self.assertEqual(loc2, loc3)
 
 
-class TestImageIO(BaseTest):
+class TestImageFile(BaseTest):
 
-    def test_impl(self):
+    def test_static(self):
         for ext in ['mrc', 'mrcs', 'spi', 'spider']:
-            self.assertTrue(em.ImageIO.hasImpl(ext))
-        spiderIO = em.ImageIO('spi')
-        mrcIO = em.ImageIO('mrc')
-
-        formatTypes = em.ImageIO.getFormatTypes()
-        print("formatTypes: %s" % formatTypes)
-        self.assertEqual(em.ImageIO.getImplTypes("spider"), formatTypes["spider"])
-        self.assertEqual(em.ImageIO.getImplTypes("mrc"), formatTypes["mrc"])
-        self.assertEqual(em.ImageIO.getImplTypes("img"), formatTypes["imagic"])
+            self.assertTrue(em.ImageFile.hasImpl(ext))
+        formatTypes = em.ImageFile.getFormatTypes()
+        self.assertEqual(em.ImageFile.getImplTypes("spider"), formatTypes["spider"])
+        self.assertEqual(em.ImageFile.getImplTypes("mrc"), formatTypes["mrc"])
+        self.assertEqual(em.ImageFile.getImplTypes("img"), formatTypes["imagic"])
 
     def test_readMrc(self):
-        mrcIO = em.ImageIO('mrc')
+        mrcIO = em.ImageFile()
 
         testDataPath = os.environ.get("EM_TEST_DATA", None)
 
@@ -77,7 +73,6 @@ class TestImageIO(BaseTest):
                 raise ex
 
             self.assertEqual(img.getDim(), micDim)
-
 
 
 class TestImage(BaseTest):

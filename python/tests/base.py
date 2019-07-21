@@ -1,5 +1,6 @@
 
 import sys
+import os
 from datetime import datetime
 from os.path import dirname, join
 import unittest
@@ -7,6 +8,16 @@ from unittest import main
 
 # Add the root folder to the path
 sys.path.append(join(dirname(dirname(dirname(__file__))), 'build'))
+
+
+class TestData:
+    _root = None
+
+    def __init__(self):
+        self._root = os.environ["EM_TEST_DATA"]
+
+    def get(self, path):
+        return os.path.join(self._root, path)
 
 
 class BaseTest(unittest.TestCase):

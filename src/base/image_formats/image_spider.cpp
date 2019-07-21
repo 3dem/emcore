@@ -80,7 +80,7 @@ struct SpiderHeader
 }; // struct SpiderHeader
 
 
-class ImageIOSpider: public em::ImageIO::Impl
+class SpiderImageFile: public ImageFile::Impl
 {
 private:
     SpiderHeader header;
@@ -98,7 +98,7 @@ public:
         // Determine byte order and swap bytes if from different-endian machine
         if ( (swap = (( fabs(header.nslice) > SWAPTRIG ) ||
                       ( fabs(header.iform) > 1000 )     ||
-                      ( fabs(header.nslice) < 1 ))) )
+                      ( fabs(header.nslice) < 1 ))) );
             //    swapPage((char *) header, SPIDERSIZE - 180, DT_Float); //
             // TODO: Determine swap order (little vs big endian)
 
@@ -115,8 +115,6 @@ public:
         dim.z = header.nslice;
         dim.n = (isStack)? (size_t)(header.maxim) : 1;
 
-        std::cout << "DEBUG: Spider Dimensions: " << dim << std::endl;
-
         type = typeFloat;
         pad = (size_t) header.labbyt;
 
@@ -128,12 +126,12 @@ public:
         size_t datasize = dim.getItemSize() * type.getSize();
 
         // Filling the main header
-        float  lenbyt = type.getSize()*dim.x;  // Record length (in bytes)
-        float  labrec = floor(SPIDER_HEADER_SIZE/lenbyt); // # header records
+        float  lenbyt = type.getSize() * dim.x;  // Record length (in bytes)
+        float  labrec = floor(SPIDER_HEADER_SIZE / lenbyt); // # header records
         if ( fmod(SPIDER_HEADER_SIZE,lenbyt) != 0 )
             labrec++;
-        float  labbyt = labrec*lenbyt;   // Size of header in bytes
-        size_t offset = (size_t) labbyt;
+        float  labbyt = labrec * lenbyt;  // Size of header in bytes
+        pad = (size_t) labbyt;
 
         // Map the parameters
         header.lenbyt = lenbyt;     // Record length (in bytes)
@@ -144,6 +142,16 @@ public:
         header.nsam   = dim.x;
         header.nrow   = dim.y;
         header.nslice = dim.z;
+        isStack = dim.n > 1;
+
+        header.imami = 0; //never trust max/min
+
+        if (isStack)
+        {
+            header.istack = 2;
+            header.inuse =  1;
+            header.maxim = dim.n;
+        }
 
 //    // If a transform, then the physical storage in x is only half+1
 //    size_t xstore  = dim.x;
@@ -169,59 +177,20 @@ public:
 //    header.imami = 0;//never trust max/min
 //
 //
-//    if (!MDMainHeader.empty())
-//    {
-//#define SET_MAIN_HEADER_VALUE(field, label, aux)  MDMainHeader.getValueOrDefault(label, aux, 0.); header.field = (float)aux
-//        SET_MAIN_HEADER_VALUE(fmin, MDL_MIN, aux);
-//        SET_MAIN_HEADER_VALUE(fmax, MDL_MAX, aux);
-//        SET_MAIN_HEADER_VALUE(av, MDL_AVG, aux);
-//        SET_MAIN_HEADER_VALUE(sig, MDL_STDDEV, aux);
-//    }
-//
-//
-//    if (Ndim == 1 && mode != WRITE_APPEND && !isStack && !MD.empty())
-//    {
-//        if ((dataMode == _HEADER_ALL || dataMode == _DATA_ALL))
-//        {
-//#define SET_HEADER_VALUE(field, label, aux)  MD[0].getValueOrDefault((label), (aux), 0.); header.field = (float)(aux)
-//            SET_HEADER_VALUE(xoff, MDL_SHIFT_X, aux);
-//            SET_HEADER_VALUE(yoff, MDL_SHIFT_Y, aux);
-//            SET_HEADER_VALUE(zoff, MDL_SHIFT_Z, aux);
-//            SET_HEADER_VALUE(phi, MDL_ANGLE_ROT, aux);
-//            SET_HEADER_VALUE(theta, MDL_ANGLE_TILT, aux);
-//            SET_HEADER_VALUE(gamma, MDL_ANGLE_PSI, aux);
-//            SET_HEADER_VALUE(weight, MDL_WEIGHT, aux);
-//            SET_HEADER_VALUE(flip, MDL_FLIP, baux);
-//            SET_HEADER_VALUE(scale, MDL_SCALE, aux);
-//        }
-//        else
-//        {
-//            header.xoff = header.yoff = header.zoff =\
-//                                          header.phi = header.theta = header.gamma = header.weight = 0.;
-//            header.scale = 1.;
-//        }
-//    }
 
-
-        if (dim.n > 1 )
-        {
-            header.istack = 2;
-            header.inuse =  1;
-            header.maxim = dim.n;
-        }
-
-        fwrite(&header, offset, 1, file);
+        fwrite(&header, pad, 1, file);
 
     } // function writeHeader
 
     virtual size_t getHeaderSize() const override
     {
-        return SPIDER_HEADER_SIZE;
+        //return SPIDER_HEADER_SIZE;
+        return pad;
     }
 
     virtual size_t getPadSize() const override
     {
-        return dim.n > 1 ? SPIDER_HEADER_SIZE : 0;
+        return dim.n > 1 ? pad : 0;
     }
 
     virtual const IntTypeMap & getTypeMap() const override
@@ -230,9 +199,51 @@ public:
         return tm;
     } // function getTypeMap
 
-}; // class ImageIOSpider
+    virtual void toStream(std::ostream &ostream, int verbosity) const override
+    {
+        if (verbosity > 1)
+        {
+            ostream << "--- SPIDER File Header ---" << std::endl;
+            std::cout << std::setw(7) << "istack: " << header.istack << std::endl;
+            std::cout << std::setw(7) << "nsam (x): " << header.nsam << std::endl;
+            std::cout << std::setw(7) << "nrow (y): " << header.nrow << std::endl;
+            std::cout << std::setw(7) << "maxim (n): " << header.maxim << std::endl;
+            std::cout << std::setw(7) << "labrec (header records): " << header.labrec << std::endl;
+            std::cout << std::setw(7) << "lenbyt (record bytes): " << header.lenbyt << std::endl;
+            std::cout << std::setw(7) << "labbyt (header bytes): " << header.labbyt << std::endl;
+        }
+    } // function toStream
+
+    // Re-implmente this function to update the header record maxim
+    // when the file is expanded with more images
+    virtual void expand() override
+    {
+        if (isStack)
+        {
+            // Now update the number of images in a set and the header
+            header.maxim = dim.n;
+
+            if (fseek(file, 0, SEEK_SET) != 0)
+                THROW_SYS_ERROR(std::string("Could not 'fseek' in file: ") + path);
+
+            // Write header again
+            fwrite(&header, pad, 1, file);
+        }
+        ImageFile::Impl::expand();
+    } // function expand
+
+    // Overwrite this function to validate that index > 1 can
+    // only be written when the opened file is an stack
+    virtual void writeImageData(const size_t index, const Image &image)
+    {
+        ASSERT_ERROR(index > 1 && !isStack,
+                     "More than one image can only be written in stack files.");
+        ImageFile::Impl::writeImageData(index, image);
+    } // function writeImageData
+
+}; // class SpiderImageFile
 
 
 StringVector spiExts = {"spider", "spi", "stk", "vol"};
 
-REGISTER_IMAGE_IO(spiExts, ImageIOSpider);
+REGISTER_IMAGE_IO(spiExts, SpiderImageFile);

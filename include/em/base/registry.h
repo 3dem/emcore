@@ -24,12 +24,12 @@ namespace em
         using BuilderMap = std::map<std::string, BuilderFuncPtr>;
 
         /**
-         * Register an ImageIO class to be available for reading/writing images.
-         * The class will be accessible via the ImageIO name and the extensions
+         * Register an ImageFile class to be available for reading/writing images.
+         * The class will be accessible via the ImageFile name and the extensions
          * defined by the class.
-         * @param imgio Input pointer to the ImageIO subclass that will be
+         * @param imgio Input pointer to the ImageFile subclass that will be
          * registred.
-         * @return Return True if the new ImageIO was successfully registered.
+         * @return Return True if the new ImageFile was successfully registered.
          */
         bool registerImpl(const StringVector &extOrNames,
                           BuilderFuncPtr newImplBuilder)
@@ -42,11 +42,11 @@ namespace em
         }
 
         /**
-         * Check if some ImageIO is registered for a given name or extension.
+         * Check if some ImageFile is registered for a given name or extension.
          *
-         * @param extOrName Input string representing either the ImageIO name
+         * @param extOrName Input string representing either the ImageFile name
          * or one of the extensions registered.
-         * @return Return True if there is any ImageIO registered.
+         * @return Return True if there is any ImageFile registered.
          */
         bool hasImpl(const std::string &extOrName)
         {
@@ -54,11 +54,11 @@ namespace em
         }
 
         /**
-         * Check if some ImageIO is registered for a given name or extension.
+         * Check if some ImageFile is registered for a given name or extension.
          *
-         * @param extOrName Input string representing either the ImageIO name
+         * @param extOrName Input string representing either the ImageFile name
          * or one of the extensions registered.
-         * @return Return True if there is any ImageIO registered.
+         * @return Return True if there is any ImageFile registered.
          */
         BuilderFuncPtr getImplBuilder(const std::string &extOrName)
         {

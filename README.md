@@ -30,7 +30,9 @@ cmake .. -DBUILD_DOCS=ON
 ### Common development cmake options:
 While developing the library, we usually want also to build the tests and use cmake Debug mode:
 ```
-cmake .. -DBUILD_TESTS=ON -DBUILD_DOCS=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Debug
+cmake .. -DBUILD_TIFF=ON -DBUILD_PNG=ON -DBUILD_JPEG=ON \
+   -DBUILD_TESTS=ON -DBUILD_DOCS=ON -DBUILD_EXAMPLES=ON \
+   -DCMAKE_BUILD_TYPE=Debug -DBUILD_DOCOPT=ON -DBUILD_PYBIND=ON
 ```
 
 ## Building Relion with em-core

@@ -9,7 +9,7 @@ import em
 
 
 if __name__ == '__main__':
-    mrcIO = em.ImageIO('mrc')
+    mrcIO = em.ImageFile('mrc')
 
     dataPath = os.environ.get("EM_TEST_DATA", None)
 

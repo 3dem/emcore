@@ -154,10 +154,10 @@ struct ImagicHeader
 
 
 /**
- * Inherit properties from base ImageIO::Impl and add information
+ * Inherit properties from base ImageFile::Impl and add information
  * specific for IMAGIC format (e.g, the ImagicHeader struct)
  */
-class ImageIOImagic: public em::ImageIO::Impl
+class ImagicImageFile: public em::ImageFile::Impl
 {
 public:
     ImagicHeader header; // main header
@@ -296,7 +296,7 @@ public:
 
     void closeFile() override
     {
-        em::ImageIO::Impl::closeFile();
+        em::ImageFile::Impl::closeFile();
         if (headerFile != nullptr)
         {
             fclose(headerFile);
@@ -304,7 +304,7 @@ public:
         }
     }
 
-    void expandFile() override
+    void expand() override
     {
         // Compute the size of one item, taking into account its x, y, z dimensions
         // and the size of the type that will be used
@@ -320,10 +320,10 @@ public:
         fileSize = IMAGIC_HEADER_SIZE * dim.n;
         File::resize(headerFile, fileSize);
         fflush(headerFile);
-    } // function expandFile
-}; // class ImageIOImagic
+    } // function expand
+}; // class ImagicImageFile
 
 StringVector imagicExts = {"imagic", "hed", "img"};
 
-REGISTER_IMAGE_IO(imagicExts, ImageIOImagic);
+REGISTER_IMAGE_IO(imagicExts, ImagicImageFile);
 

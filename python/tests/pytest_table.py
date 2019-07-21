@@ -4,7 +4,7 @@ from __future__ import print_function
 import os
 import random
 
-from base import BaseTest, main, Timer
+from base import BaseTest, main, Timer, TestData
 import em
 
 Column = em.Table.Column
@@ -250,14 +250,11 @@ class TestTable(BaseTest):
         table10.removeColumn("col2")
         self.checkColumns(table10, [0, 2])
 
-
     def test_Read(self):
-        testDataPath = os.environ.get("EM_TEST_DATA", None)
+        td = TestData()
         self.assertTrue(em.TableIO.hasImpl('star'))
-        if testDataPath is None:
-            return
 
-        root = testDataPath + "relion_tutorial/import/"
+        root = td.get("relion_tutorial/import/")
         fn1 = root + "case1/classify3d_small_it038_data.star"
         print("Reading star: ", fn1)
 
@@ -322,60 +319,58 @@ class TestTable(BaseTest):
                 self.assertEqual(v2, v1)
 
     def test_ReadSingleRow(self):
-        testDataPath = os.environ.get("EM_TEST_DATA", None)
-
         self.assertTrue(em.TableIO.hasImpl('star'))
 
-        if testDataPath is not None:
-            root = testDataPath + "relion_tutorial/import/"
-            fn1 = root + "case1/classify3d_small_it038_optimiser.star"
-            print("Reading star: ", fn1)
+        td = TestData()
+        root = td.get("relion_tutorial/import/")
 
-            t = em.Table()
-            t.read("optimiser_general", fn1)
-            self.assertEqual(t.getColumnsSize(), 52)
-            self.assertEqual(t.getSize(), 1)
+        fn1 = root + "case1/classify3d_small_it038_optimiser.star"
+        print("Reading star: ", fn1)
+
+        t = em.Table()
+        t.read("optimiser_general", fn1)
+        self.assertEqual(t.getColumnsSize(), 52)
+        self.assertEqual(t.getSize(), 1)
 
     def test_ReadXmd(self):
-        testDataPath = os.environ.get("EM_TEST_DATA", None)
-
         self.assertTrue(em.TableIO.hasImpl('star'))
 
-        if testDataPath is not None:
-            fn1 = testDataPath + "xmipp_tutorial/gold/images200k.xmd"
-            print("Reading xmd: ", fn1)
+        td = TestData()
 
-            tio = em.TableIO()
-            table = em.Table()
+        fn1 = td.get("xmipp_tutorial/gold/images200k.xmd")
+        print("Reading xmd: ", fn1)
 
-            t = Timer()
-            t.tic()
+        tio = em.TableIO()
+        table = em.Table()
 
-            tio.open(fn1)
-            tio.read("noname", table)
+        t = Timer()
+        t.tic()
 
-            t.toc()
+        tio.open(fn1)
+        tio.read("noname", table)
 
-            print("Size: ", table.getSize())
-            tio.close()
+        t.toc()
 
-            refColNames = ['itemId', 'xcoor', 'ycoor', 'image', 'micrograph',
-                           'enabled', 'ctfDefocusU', 'ctfDefocusV',
-                           'ctfDefocusAngle', 'ctfQ0', 'ctfSphericalAberration',
-                           'ctfVoltage', 'zScore', 'zScoreShape1', 'zScoreShape2',
-                           'zScoreSNR1', 'zScoreSNR2', 'zScoreHistogram']
-            
-            # Get column by index
-            for i in range(table.getColumnsSize()):
-                col = table.getColumnByIndex(i)
-                self.assertEqual(refColNames[i], col.getName())
+        print("Size: ", table.getSize())
+        tio.close()
 
-            # Iterate through the columns
-            for i, col1 in enumerate(table.iterColumns()):
-                col2 = table.getColumnByIndex(i)
-                self.assertEqual(refColNames[i], col1.getName())
-                self.assertEqual(refColNames[i], col2.getName())
-                self.assertEqual(col1, col2)
+        refColNames = ['itemId', 'xcoor', 'ycoor', 'image', 'micrograph',
+                       'enabled', 'ctfDefocusU', 'ctfDefocusV',
+                       'ctfDefocusAngle', 'ctfQ0', 'ctfSphericalAberration',
+                       'ctfVoltage', 'zScore', 'zScoreShape1', 'zScoreShape2',
+                       'zScoreSNR1', 'zScoreSNR2', 'zScoreHistogram']
+
+        # Get column by index
+        for i in range(table.getColumnsSize()):
+            col = table.getColumnByIndex(i)
+            self.assertEqual(refColNames[i], col.getName())
+
+        # Iterate through the columns
+        for i, col1 in enumerate(table.iterColumns()):
+            col2 = table.getColumnByIndex(i)
+            self.assertEqual(refColNames[i], col1.getName())
+            self.assertEqual(refColNames[i], col2.getName())
+            self.assertEqual(col1, col2)
 
 
     def test_Sort(self):

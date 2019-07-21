@@ -46,8 +46,8 @@ namespace em {
 // This other macro throws an Error using the errno macro from the system
 #define THROW_SYS_ERROR(msg) throw Error(msg, __FILE__, __LINE__, errno, __func__)
 
-// Similar to THROW_ERROR but taking a condition as input and if True
-// then throws the Error
+// Similar to THROW_ERROR but taking a condition as input and
+// if the condition is evaluated to False, then an error is thrown
 #define ASSERT_ERROR(cond, msg) if ((cond)) THROW_ERROR(msg);
 
 #endif //EM_CORE_ERROR_H

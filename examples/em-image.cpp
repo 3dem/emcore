@@ -151,7 +151,7 @@ void EmImageProgram::readArgs()
 //        // Handle the case when the output is not defined
 //        ASSERT_ERROR(pipeProc.getSize() > 0,
 //                     "Output should be specified if performing any operation.")
-//        ImageIO imgIO;
+//        ImageFile imgIO;
 //
 //        for (auto& path: inputList)
 //        {
@@ -217,7 +217,7 @@ void throwFormatError(StringVector msgParts)
 
 void EmImageProgram::parseOutputString()
 {
-    auto formatTypes = ImageIO::getFormatTypes();
+    auto formatTypes = ImageFile::getFormatTypes();
     StringTypeMap typeNames = {{"int8", typeInt8},
                                {"uint8", typeUInt8},
                                {"int16", typeInt16},
@@ -276,7 +276,7 @@ void EmImageProgram::parseOutputString()
 
     if (parts[2].empty())
     {
-        ImageIO imgio;
+        ImageFile imgio;
         imgio.open(inputList[0]);
         outputType = imgio.getType();
         imgio.close();
@@ -293,7 +293,7 @@ void EmImageProgram::parseOutputString()
 
 int EmImageProgram::run()
 {
-    auto formatTypes = ImageIO::getFormatTypes();
+    auto formatTypes = ImageFile::getFormatTypes();
 
     if (hasArg("--formats"))
     {
@@ -310,7 +310,7 @@ int EmImageProgram::run()
     }
 
     Image inputImage, outputImage;
-    ImageIO inputIO;
+    ImageFile inputIO;
 
     auto doProcess = pipeProc.getSize() > 0;
     auto hasOutput = hasArg("<output>");
@@ -327,21 +327,31 @@ int EmImageProgram::run()
                   << "   format: " << outputFormat << std::endl
                   << "     type: " << outputType.getName() << std::endl;
 
-        ImageIO outputIO(outputFormat);
+        ImageFile outputIO(outputFormat);
 
         for (auto& path: inputList)
         {
             inputIO.open(path);
-            inputIO.read(1, inputImage);
-
-            if (doProcess)
-                pipeProc.process(inputImage, outputImage);
-
             outputIO.open(outputFn, File::TRUNCATE);
-            inputImage.copy(outputImage, outputType);
-            outputIO.write(1, inputImage);
+
+            auto adim = inputIO.getDim();
+            outputIO.createEmpty(adim, outputType);
+
+            for (int i = 1; i <= adim.n; ++i)
+            {
+                std::cout << "Reading " << i << " from " << path << std::endl;
+                inputIO.read(i, inputImage);
+
+                if (doProcess)
+                    pipeProc.process(inputImage, outputImage);
+
+                outputImage.copy(inputImage, outputType);
+                std::cout << "Writing " << i << " to " << outputFn << std::endl;
+                outputIO.write(i, outputImage);
+            }
+            inputIO.close();
             outputIO.close();
-        }
+        } // Loop over all input files
     }
     else  // Just print information about the input images
     {

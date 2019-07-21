@@ -153,10 +153,10 @@ void copyData(Array *big, Array *small, int x, int y, int z, bool smallToBig)
 
     ASSERT_ERROR(x + inDim.x > outDim.x || y + inDim.y > outDim.y,
                  "Input image dimensions should fit inside the output image "
-                         "from the starting position for the copy.")
+                         "from the starting position for the copy.");
 
     ASSERT_ERROR(inType.isNull() || outType.isNull(),
-                 "Both images should have non null type.")
+                 "Both images should have non null type.");
 
     auto n = inDim.x;
     auto inJump = n * inTypeSize;
@@ -204,7 +204,7 @@ Array& Array::operator+=(const Array &other)
 {
     auto& dim = impl->adim;
     ASSERT_ERROR(dim != other.getDim(),
-                 "Arrays should have the same dimensions.")
+                 "Arrays should have the same dimensions.");
     getType().operate(Type::ADD, other.getData(), other.getType(), getData(),
                       dim.getSize());
     return *this;
@@ -221,7 +221,7 @@ Array& Array::operator-=(const Array &other)
 {
     auto& dim = impl->adim;
     ASSERT_ERROR(dim != other.getDim(),
-                 "Arrays should have the same dimensions.")
+                 "Arrays should have the same dimensions.");
     getType().operate(Type::SUB, other.getData(), other.getType(), getData(),
                       dim.getSize());
     return *this;
@@ -238,7 +238,7 @@ Array& Array::operator*=(const Array &other)
 {
     auto& dim = impl->adim;
     ASSERT_ERROR(dim != other.getDim(),
-                 "Arrays should have the same dimensions.")
+                 "Arrays should have the same dimensions.");
     getType().operate(Type::MUL, other.getData(), other.getType(), getData(),
                       dim.getSize());
     return *this;
@@ -255,7 +255,7 @@ Array& Array::operator/=(const Array &other)
 {
     auto& dim = impl->adim;
     ASSERT_ERROR(dim != other.getDim(),
-                 "Arrays should have the same dimensions.")
+                 "Arrays should have the same dimensions.");
     getType().operate(Type::DIV, other.getData(), other.getType(), getData(),
                       dim.getSize());
     return *this;

@@ -88,17 +88,17 @@ struct EmHeader
 
 
 /**
- * Inherit properties from base ImageIO::Impl and add information
+ * Inherit properties from base ImageFile::Impl and add information
  * specific for EM format (e.g, the EmHeader struct)
  */
-class ImageIOEm: public em::ImageIO::Impl
+class EmImageFile: public em::ImageFile::Impl
 {
 public:
     EmHeader header;
 
     virtual void readHeader() override
     {
-        std::cout << "DEBUG:ImageIOEm:readHeader: file " << path << std::endl;
+        std::cout << "DEBUG:EmImageFile:readHeader: file " << path << std::endl;
 
         // Try to read the main header from the (already opened) file stream
         if (fread(&header, EM_HEADER_SIZE, 1, file) < 1)
@@ -115,7 +115,7 @@ public:
                  header.machine == 4 || header.machine == 6)
             swap = !isLE;
         else
-            THROW_SYS_ERROR("ImageIOEm::readHEader: Unknown source machine to "
+            THROW_SYS_ERROR("EmImageFile::readHEader: Unknown source machine to "
                                     "determine Endianness");
 
         if (swap)
@@ -171,8 +171,8 @@ public:
         return tm;
     } // function getTypeMap
 
-}; // class ImageIOEm
+}; // class EmImageFile
 
 StringVector emExts = {"em"};
 
-REGISTER_IMAGE_IO(emExts, ImageIOEm);
+REGISTER_IMAGE_IO(emExts, EmImageFile);
