@@ -9,33 +9,10 @@
 #include "em/base/image.h"
 #include "em/base/timer.h"
 
+#include "test_common.h"
 
 using namespace em;
 
-class TestData
-{
-private:
-    std::string root;
-
-public:
-    TestData()
-    {
-        auto value = getenv("EM_TEST_DATA");
-
-        if (value == nullptr)
-            THROW_ERROR("EM_TEST_DATA variable is not defined.");
-
-        root = value;
-        if (!Path::exists(root))
-            THROW_ERROR("EM_TEST_DATA path does not exist.");
-    }
-
-    /** Return the path prefixed with test data root */
-    std::string get(const std::string &path)
-    {
-        return root + "/" + path;
-    }
-}; // class TestData
 
 TEST(ImageLocation, Basic)
 {
@@ -197,9 +174,8 @@ TEST(MrcFile, Read)
 } // TEST(ImageMrcIO, Read)
 
 
-TEST(ImageSpiderIO, Read)
+TEST(SpiderImageFile, Read)
 {
-
     ASSERT_TRUE(ImageFile::hasImpl("spider"));
     ImageFile spiIO = ImageFile();
     ImageLocation loc;
@@ -224,9 +200,67 @@ TEST(ImageSpiderIO, Read)
         imgDim.n = 1;
         ASSERT_EQ(img.getDim(), imgDim);
     }
-
-
 } // TEST(ImageSpiderIO, Read)
+
+TEST(SpiderImageFile, Write)
+{
+    ASSERT_TRUE(ImageFile::hasImpl("spider"));
+
+    auto td = TestData();
+    ImageFile imageFile;
+    auto stkFn = td.get("groel/classes/level_classes.stk");
+    ImageLocation loc(stkFn, 1);
+    auto imgDim = ArrayDim(140, 140, 1, 1);
+
+    // Let's read the first image from the stack and write as single image
+    Image image;
+    image.read(loc);
+    ASSERT_EQ(image.getDim(), imgDim);
+    loc.path = "class-1.spi";
+    image.write(loc);
+
+    // Let's now open the single image and try to write to it more images
+    imageFile.open(loc.path, File::Mode::READ_WRITE);
+    ASSERT_EQ(imageFile.getDim(), imgDim);
+    EXPECT_THROW(imageFile.write(2, image), Error);
+    imageFile.close();
+
+    // Let's now open a new file to write the entire stack
+    imageFile.open(stkFn);
+    auto stkDim = imageFile.getDim();
+    std::string stkFnOut("classes.stk");
+    ImageFile imageFileOut(stkFnOut, File::Mode::TRUNCATE);
+
+    // Spider does not support any type other than float
+    EXPECT_THROW(imageFileOut.createEmpty(stkDim, typeDouble), Error);
+    // The previous call should succeed with typeFloat
+    imageFileOut.createEmpty(stkDim, typeFloat);
+
+    for (size_t i = 1; i <= stkDim.n; ++i)
+    {
+        imageFile.read(i, image);
+        imageFileOut.write(i, image);
+    }
+    imageFileOut.close();
+
+    // Let's try to expand the stack to double the size
+    imageFileOut.open(stkFnOut, File::Mode::READ_WRITE);
+    imageFileOut.expand(stkDim.n * 2);
+
+//    for (size_t i = 1; i <= stkDim.n; ++i)
+//    {
+//        imageFile.read(i, image);
+//        imageFileOut.write(i+stkDim.n, image);
+//    }
+    imageFileOut.close();
+
+    imageFileOut.open(stkFnOut);
+    ASSERT_EQ(imageFileOut.getDim().n, stkDim.n*2);
+    imageFileOut.close();
+
+    imageFile.close();
+
+} // TEST(ImageSpiderIO, Write)
 
 //TEST(ImageIOPng, Read)
 //{

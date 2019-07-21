@@ -21,9 +21,9 @@ class TestImageLocation(BaseTest):
         self.assertEqual(loc2, loc3)
 
 
-class TestImageIO(BaseTest):
+class TestImageFile(BaseTest):
 
-    def test_impl(self):
+    def test_static(self):
         for ext in ['mrc', 'mrcs', 'spi', 'spider']:
             self.assertTrue(em.ImageFile.hasImpl(ext))
         formatTypes = em.ImageFile.getFormatTypes()
@@ -73,7 +73,6 @@ class TestImageIO(BaseTest):
                 raise ex
 
             self.assertEqual(img.getDim(), micDim)
-
 
 
 class TestImage(BaseTest):
