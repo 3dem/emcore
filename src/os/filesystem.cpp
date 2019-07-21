@@ -41,7 +41,7 @@ const char* File::modeToString(Mode mode)
 } // function File::modeToString
 
 
-// ===================== File methods Implementation =======================
+// ===================== Path methods Implementation =======================
 
 bool Path::exists(const std::string &path)
 {

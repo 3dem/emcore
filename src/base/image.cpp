@@ -373,7 +373,7 @@ void ImageFile::expand(const size_t ndim)
     auto fileType = getType();
 
     ASSERT_ERROR(impl->fileMode == File::READ_ONLY,
-                 std::string("Can expand a file opened as READ_ONLY: ")
+                 std::string("Can not expand a file opened as READ_ONLY: ")
                  + impl->path);
 
     // Check the type has been set before calling expand
@@ -384,7 +384,10 @@ void ImageFile::expand(const size_t ndim)
 
     // After all validations, call the implementation expand method
     if (ndim > impl->dim.n)
+    {
+        impl->dim.n = ndim;
         impl->expand();
+    }
 } // function expand
 
 
@@ -441,9 +444,6 @@ TypeVector ImageFile::Impl::getTypes() const
 
     return types;
 } // function ImageFile::Impl.getTypes
-
-
-
 
 size_t ImageFile::Impl::getHeaderSize() const
 {
@@ -525,8 +525,8 @@ void ImageFile::Impl::writeImageData(const size_t index, const Image &image)
     size_t writeSize = itemSize - padSize;
     size_t itemPos = getHeaderSize() + itemSize * (index - 1) + padSize;
 
-    std::cerr << "ImageFile::Impl::write: itemPos: " << itemPos << std::endl;
-    std::cerr << "ImageFile::Impl::write: itemSize: " << itemSize << std::endl;
+    //std::cerr << "ImageFile::Impl::write: itemPos: " << itemPos << std::endl;
+    //std::cerr << "ImageFile::Impl::write: itemSize: " << itemSize << std::endl;
 
     if (fseek(file, itemPos, SEEK_SET) != 0)
         THROW_SYS_ERROR(std::string("Could not 'fseek' in file: ") + path);

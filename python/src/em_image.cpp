@@ -46,7 +46,7 @@ void init_submodule_image(py::module &m) {
                  py::arg("path"),
                  py::arg("mode")=File::Mode::READ_ONLY,
                  py::arg("formatName")="")
-        .def("open", &ImageFile::open, 
+        .def("open", &ImageFile::open,
                  py::arg("path"),
                  py::arg("mode")=File::Mode::READ_ONLY,
                  py::arg("formatName")="")
