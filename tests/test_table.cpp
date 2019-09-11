@@ -213,6 +213,54 @@ TEST(Table, RemoveColumns)
 } // TEST Row.RemoveColumns
 
 
+// check the expected number of rows and some values
+void checkColumnsAndRows(Table &t, int startingColIndex=0)
+{
+    StringVector refColNames = {"rlnVoltage", "rlnDefocusU",
+                                "rlnSphericalAberration", "rlnAmplitudeContrast",
+                                "rlnImageName", "rlnNormCorrection",
+                                "rlnMicrographName", "rlnGroupNumber",
+                                "rlnOriginX", "rlnOriginY", "rlnAngleRot",
+                                "rlnAngleTilt", "rlnAnglePsi",
+                                "rlnClassNumber", "rlnLogLikeliContribution",
+                                "rlnNrOfSignificantSamples",
+                                "rlnMaxValueProbDistribution"};
+
+    // Check that columns are properly parsed and match the expected ones
+    int i = startingColIndex;
+    for (auto it = t.cbegin_cols(); it < t.cend_cols(); ++it)
+    {
+        auto &col = *it;
+        ASSERT_EQ(refColNames[i++], col.getName());
+    }
+
+    // Check the number of rows is correct
+    ASSERT_EQ(79, t.getSize());
+    // Check that certain rows have the expected values
+    std::vector<int> refIndexes = {0, 19, 39, 59};
+    StringVector refImageName = {
+            "000080@cluster/wind2/win_05677.dat",
+            "000021@cluster/wind2/win_00846.dat",
+            "000025@cluster/wind2/win_00165.dat",
+            "000006@cluster/wind2/win_03167.dat"
+    };
+
+    StringVector  refMicrographName = {
+            "cluster/wind2/win_00849.dat",
+            "cluster/wind2/win_04600.dat",
+            "cluster/wind2/win_03146.dat",
+            "cluster/wind2/win_04772.dat"
+    };
+
+    for (i=0; i < refIndexes.size(); ++i)
+    {
+        auto &row = t[refIndexes[i]];
+        ASSERT_EQ(refImageName[i], row["rlnImageName"].toString());
+        ASSERT_EQ(refMicrographName[i], row["rlnMicrographName"].toString());
+    }
+}
+
+
 TEST(Table, ReadStar)
 {
     ASSERT_TRUE(TableIO::hasImpl("star"));
@@ -237,23 +285,8 @@ TEST(Table, ReadStar)
     table0.read(fn1);  // Test default read of first table
 
     table.read("images", fn1);
+    checkColumnsAndRows(table);
 
-    StringVector refColNames = {"rlnVoltage", "rlnDefocusU",
-                                "rlnSphericalAberration", "rlnAmplitudeContrast",
-                                "rlnImageName", "rlnNormCorrection",
-                                "rlnMicrographName", "rlnGroupNumber",
-                                "rlnOriginX", "rlnOriginY", "rlnAngleRot",
-                                "rlnAngleTilt", "rlnAnglePsi",
-                                "rlnClassNumber", "rlnLogLikeliContribution",
-                                "rlnNrOfSignificantSamples",
-                                "rlnMaxValueProbDistribution"};
-
-    int i = 0;
-    for (auto it = table.cbegin_cols(); it < table.cend_cols(); ++it)
-    {
-        auto &col = *it;
-        ASSERT_EQ(refColNames[i++], col.getName());
-    }
 /*
  * relion_tutorial/import/case1/classify3d_small_it038_data.star
    xmipp_tutorial/gold/images200k.xmd
@@ -307,32 +340,19 @@ TEST(Table, WriteStar)
 
     Table t;
     t.read("images", fn1);
-
-    StringVector refColNames = {"rlnVoltage", "rlnDefocusU",
-                                "rlnSphericalAberration", "rlnAmplitudeContrast",
-                                "rlnImageName", "rlnNormCorrection",
-                                "rlnMicrographName", "rlnGroupNumber",
-                                "rlnOriginX", "rlnOriginY", "rlnAngleRot",
-                                "rlnAngleTilt", "rlnAnglePsi",
-                                "rlnClassNumber", "rlnLogLikeliContribution",
-                                "rlnNrOfSignificantSamples",
-                                "rlnMaxValueProbDistribution"};
-
-    int i = 0;
-    for (auto it = t.cbegin_cols(); it < t.cend_cols(); ++it)
-    {
-        auto &col = *it;
-        ASSERT_EQ(refColNames[i++], col.getName());
-    }
-
     t.removeColumn("rlnVoltage");
     t.removeColumn("rlnDefocusU");
     t.removeColumn("rlnSphericalAberration");
     t.removeColumn("rlnAmplitudeContrast");
 
-    tio.open("images-less-cols.star", File::Mode::TRUNCATE);
+    string outFn = "images-less-cols.star";
+    tio.open(outFn, File::Mode::TRUNCATE);
     tio.write("images", t);
     tio.close();
+
+    t.read("images", outFn);
+    checkColumnsAndRows(t, 4);
+
 } // TEST Table.WriteStar
 
 
@@ -348,6 +368,7 @@ TEST(Table, ReadStarMultipleTables)
     Table t;
     tio.open(fn1);
     int c = 0;
+
     StringVector goldNames = {"sampling_general", "sampling_directions"};
     for (auto &name: tio.getTableNames())
     {
