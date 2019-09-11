@@ -15,17 +15,16 @@
 using namespace em;
 
 static const char USAGE[] =
-        R"(em-image.
+        R"(em-table.
 
     Usage:
-      em-image <input> [<output>]
+      em-table <input> [<output>]
 
     Options:
       <input>       An input file of a metadata file.
-      <output>      An output file or a suffix when many files are produced.
+      <output>      The output file
       -h --help     Show this screen.
       --version     Show version.
-      --otype       Output file type
 )";
 
 
@@ -108,6 +107,7 @@ void EmTableProgram::readArgs()
     else
     {
         std::cout << "  count: " << t.getSize() << std::endl;
+        std::cout << "DEBUG: " << std::endl << t << std::endl;
     }
 
 } // function EmTableProgram.readArgs
