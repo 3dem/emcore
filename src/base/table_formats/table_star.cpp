@@ -68,13 +68,12 @@ protected:
 
             while (!line.empty() && moreRows)
             {
-                //parseLine()
-                moreRows = bool(getline(ifs, line)); // FIXME
-                line = String::trim(line);
                 std::stringstream ss(line);
                 for (auto& obj: row)
                     obj.fromStream(ss);
                 table.addRow(row);
+                moreRows = bool(getline(ifs, line)); // FIXME
+                line = String::trim(line);
             }
         }
         else
