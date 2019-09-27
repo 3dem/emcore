@@ -5,7 +5,7 @@
 #ifndef EM_CORE_FUNCTIONS_H
 #define EM_CORE_FUNCTIONS_H
 
-namespace em
+namespace emcore
 {
     /** Class representing a 1D or 2D gaussian function at a given point.
      *
@@ -37,6 +37,6 @@ namespace em
         T ca, sa, ps; // Values to pre-compute some operations
     }; // class GaussianFunc
 
-} // namespace em
+} // namespace emcore
 
 #endif //EM_CORE_FUNCTIONS_H

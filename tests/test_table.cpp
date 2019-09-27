@@ -12,7 +12,7 @@
 #include "test_common.h"
 
 
-using namespace em;
+using namespace emcore;
 using Column = Table::Column;
 
 

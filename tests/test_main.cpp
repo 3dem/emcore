@@ -9,14 +9,14 @@
 #include "em/base/array.h"
 #include "em/base/timer.h"
 
-using namespace em;
+using namespace emcore;
 
 
 // IndependentMethod is a test case - here, we have 2 tests for this 1 test case
 TEST(Main, ObjectLoop) {
     std::cout << std::endl << "Hello, World!" << std::endl;
 
-    em::Timer t;
+    Timer t;
 
     float d = 1;
     Object o2(d);
@@ -69,7 +69,7 @@ TEST(Main, ObjectLoop) {
 
     //std::cout << Av.toString() << std::endl;
 
-    em::Array A2 = A;
+    Array A2 = A;
 //
 //    ArrayT<int> Av2 = A2.getView<int>();
 //

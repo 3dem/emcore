@@ -7,7 +7,7 @@
 
 #include "em/base/error.h"
 
-using namespace em;
+using namespace emcore;
 
 
 class TestData

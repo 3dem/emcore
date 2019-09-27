@@ -14,7 +14,7 @@
 #include "em/os/filesystem.h"
 
 
-namespace em {
+namespace emcore {
 
     /**
      * Class to store several rows of data values.
@@ -371,11 +371,10 @@ namespace em {
         Impl* impl = nullptr;
     }; // class TableIO
 
+    std::ostream& operator<< (std::ostream &ostream, const Table::Column &col);
+    std::ostream& operator<< (std::ostream &ostream, const Table::Row &row);
+    std::ostream& operator<< (std::ostream &ostream, const Table &table);
+} // namespace emcore
 
-} // namespace em
-
-std::ostream& operator<< (std::ostream &ostream, const em::Table::Column &col);
-std::ostream& operator<< (std::ostream &ostream, const em::Table::Row &row);
-std::ostream& operator<< (std::ostream &ostream, const em::Table &table);
 
 #endif //EM_CORE_METADATA_H

@@ -5,7 +5,9 @@
 #include "em/base/type.h"
 
 
-using namespace em;
+using namespace emcore;
+namespace emc = emcore;
+
 
 Type::Type()
 {
@@ -146,7 +148,7 @@ int Type::compare(const void *inputMem1, const void *inputMem2) const
     return impl->compare(inputMem1, inputMem2);
 } // function Type.comnpare
 
-std::ostream& em::operator<< (std::ostream &ostrm, const Type &t)
+std::ostream& emc::operator<< (std::ostream &ostrm, const Type &t)
 {
     ostrm << "<type: " << t.getName() << ", " << t.getSize() << " bytes>";
     return ostrm;

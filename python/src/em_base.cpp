@@ -15,7 +15,7 @@
 
 namespace py = pybind11;
 
-using namespace em;
+using namespace emcore;
 
 //using std::map<std::string, std::string> TypeFormatMap;
 //

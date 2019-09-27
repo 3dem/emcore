@@ -8,7 +8,7 @@
 #include <string>
 
 
-namespace em
+namespace emcore
 {
     /**
      * Class to contain some static functions for File utility.
@@ -73,6 +73,6 @@ namespace em
      };
 
 
-} // namespace em
+} // namespace emcore
 
 #endif //EM_CORE_FILE_H

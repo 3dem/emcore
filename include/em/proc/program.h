@@ -9,7 +9,7 @@
 #include "em/base/string.h"
 
 
-namespace em
+namespace emcore
 {
     /**
      * Base class for all programs. It contains functionality for parsing
@@ -105,6 +105,6 @@ namespace em
 
     }; // class ImageProcessor
 
-} // namespace em
+} // namespace emcore
 
 #endif //EM_CORE_PROGRAM_H

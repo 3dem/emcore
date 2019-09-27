@@ -9,7 +9,7 @@
 #include "em/base/legacy.h"
 
 
-using namespace em;
+using namespace emcore;
 
 
 /** Base underlying implementation for wrapping FFTW functions.

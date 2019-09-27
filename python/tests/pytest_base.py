@@ -1,16 +1,16 @@
 
 from base import BaseTest, main
 
-import em
+import emcore as emc
 
 
 class TestType(BaseTest):
     def test_basic(self):
-        t1 = em.Type()
+        t1 = emc.Type()
         self.assertTrue(t1.isNull())
         self.assertEqual(t1.getSize(), 0)
 
-        t2 = em.typeInt8
+        t2 = emc.typeInt8
         self.assertFalse(t2.isNull())
         self.assertEqual(t2.getSize(), 1)
         self.assertEqual(t2.getName(), "int8")
@@ -19,18 +19,18 @@ class TestType(BaseTest):
 class TestArrayDim(BaseTest):
 
     def test_init(self):
-        adim = em.ArrayDim()
-        self.assertEqual(adim, em.ArrayDim(0, 1, 1, 1))
+        adim = emc.ArrayDim()
+        self.assertEqual(adim, emc.ArrayDim(0, 1, 1, 1))
 
-        adim = em.ArrayDim(100)
-        self.assertEqual(adim, em.ArrayDim(100, 1, 1, 1))
+        adim = emc.ArrayDim(100)
+        self.assertEqual(adim, emc.ArrayDim(100, 1, 1, 1))
 
-        adim = em.ArrayDim(100, 100, 1, 100)
+        adim = emc.ArrayDim(100, 100, 1, 100)
         self.assertEqual(adim.getSize(), 100**3)
         self.assertEqual(adim.getItemSize(), 100 ** 2)
 
         # Test copy of ArrayDim and its post-conditions
-        adim2 = em.ArrayDim(adim)
+        adim2 = emc.ArrayDim(adim)
         self.assertEqual(adim, adim2)
         self.assertEqual(adim2.getSize(), 100 ** 3)
         self.assertEqual(adim2.getItemSize(), 100 ** 2)
@@ -48,10 +48,10 @@ class TestArrayDim(BaseTest):
 
 class TestArray(BaseTest):
     def test_init(self):
-        a1 = em.Array()
+        a1 = emc.Array()
 
-        adim = em.ArrayDim(10, 10)
-        A = em.Array(adim, em.typeFloat)
+        adim = emc.ArrayDim(10, 10)
+        A = emc.Array(adim, emc.typeFloat)
 
         import numpy as np
         a = np.array(A, copy=False)

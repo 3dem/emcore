@@ -7,6 +7,8 @@
 
 #include "image.h"
 
+namespace emc = emcore;
+
 //======================= From macros.h ====================================
 /** Starting point for Xmipp volume/image
  *
@@ -463,7 +465,7 @@ public:
     // X init
     long int xinit;
 
-    LegacyArray(const em::ArrayDim &adim, void * rawMemory):
+    LegacyArray(const emc::ArrayDim &adim, void * rawMemory):
             ndim(adim.n), zdim(adim.z), ydim(adim.y), xdim(adim.x),
             yxdim(adim.y * adim.x), zyxdim(yxdim * zdim), nzyxdim(zyxdim * ndim),
             zinit(0), yinit(0), xinit(0)
@@ -471,7 +473,7 @@ public:
         data = static_cast<T*>(rawMemory);
     }
 
-    LegacyArray(em::Image &image): LegacyArray(image.getDim(), image.getData())
+    LegacyArray(emc::Image &image): LegacyArray(image.getDim(), image.getData())
     {}
 
     /** Set logical origin in Xmipp fashion.

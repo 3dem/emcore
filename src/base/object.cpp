@@ -6,7 +6,8 @@
 #include "em/base/object.h"
 
 
-using namespace em;
+using namespace emcore;
+namespace emc = emcore;
 
 
 Object::Object(const Object &other)
@@ -100,7 +101,7 @@ bool Object::operator<(const Object &other) const
     return type.compare(getData(), other.getData()) < 0;
 } // function Object.operator<
 
-std::ostream& em::operator<< (std::ostream &ostream, const em::Object &object)
+std::ostream& emc::operator<< (std::ostream &ostream, const Object &object)
 {
     object.toStream(ostream);
     return ostream;

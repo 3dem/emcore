@@ -9,7 +9,7 @@
 
 namespace py = pybind11;
 
-using namespace em;
+using namespace emcore;
 
 
 void init_submodule_image(py::module &m) {

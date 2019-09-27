@@ -7,14 +7,14 @@
 
 #include "png.h"
 
-using namespace em;
+using namespace emcore;
 
 
 /**
  * Inherit properties from base ImageFile::Impl and add information
  * specific for PNG format
  */
-class PngImageFile: public em::ImageFile::Impl
+class PngImageFile: public ImageFile::Impl
 {
 public:
     png_infop readInfoPtr = nullptr;

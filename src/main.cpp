@@ -7,23 +7,25 @@
 #include "em/base/array.h"
 #include "em/base/timer.h"
 
+using namespace emcore;
+
 
 int main()
 {
     std::cout << "Hello, World!" << std::endl;
 
-    em::Timer t;
+    Timer t;
 
     t.tic();
 
-    em::Object o = 1;
+    Object o = 1;
     o = 2;
 
     int x = o;
 
     std::cout << "x = " << x << std::endl;
 
-    em::Object o2 = 3.5;
+    Object o2 = 3.5;
 
     o2 = 1.3f;
 
@@ -38,14 +40,14 @@ int main()
 
     std::cout << "d2 = " << d2 << std::endl;
 
-    std::cout << "T0: " << *em::Type::get<em::Object>() << std::endl;
+    std::cout << "T0: " << *Type::get<Object>() << std::endl;
 
-    em::Type * type1 = em::Type::get<double>();
+    Type * type1 = Type::get<double>();
     o2 = 1.1; // o2 should be float
     assert(o2.type() == type1);
     std::cout << "T1: " << *type1 << std::endl;
 
-    em::Type * type2 = em::Type::get<float>();
+    Type * type2 = Type::get<float>();
     std::cout << "T2: " << *type2 << std::endl;
 
     t.toc("Nothing");
@@ -79,8 +81,8 @@ int main()
 
     std::cout << "Creating an Array: " << std::endl;
 
-    em::ArrayDim adim(10, 10);
-    em::Array<int> A(adim);
+    ArrayDim adim(10, 10);
+    Array<int> A(adim);
     A.assign(11);
     A(3, 3) = 20;
     A(4, 4) = 20;
@@ -90,7 +92,7 @@ int main()
 
     std::cout << A.toString() << std::endl;
 
-    em::Array<float> A2(adim);
+    Array<float> A2(adim);
 
     return 0;
 

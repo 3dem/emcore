@@ -12,7 +12,7 @@
 #include "em/proc/processor.h"
 
 
-using namespace em;
+using namespace emcore;
 
 static const char USAGE[] =
         R"(em-table.

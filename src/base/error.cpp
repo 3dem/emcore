@@ -6,8 +6,8 @@
 #include <cstring>
 #include <sstream>
 
-using namespace em;
-
+using namespace emcore;
+namespace emc = emcore;
 
 Error::Error(const std::string &msg, const std::string &filename, const long line, const int errorCode,
              const std::string &func)
@@ -32,7 +32,7 @@ const char* Error::what() const throw()
     //return toString().c_str();
 }
 
-std::ostream& em::operator<< (std::ostream &ostream, const Error &err)
+std::ostream& emc::operator<< (std::ostream &ostream, const Error &err)
 {
     ostream << "ERROR: " << err.msg << std::endl;
 

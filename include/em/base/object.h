@@ -14,7 +14,7 @@
 #include "em/base/container_priv.h"
 
 
-namespace em
+namespace emcore
 {
     /** @ingroup base
      *
@@ -114,7 +114,7 @@ namespace em
 
     }; // class Object
 
-    std::ostream& operator<< (std::ostream &ostream, const em::Object &object);
+    std::ostream& operator<< (std::ostream &ostream, const Object &object);
 
     // Some class name definitions for ease of use
     using ObjectDict = std::map<std::string, Object>;
@@ -123,7 +123,7 @@ namespace em
 
 #include "object_priv.h"
 
-} // namespace em
+} // namespace emcore
 
 
 #endif //EM_CORE_OBJECT_H

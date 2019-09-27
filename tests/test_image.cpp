@@ -11,7 +11,7 @@
 
 #include "test_common.h"
 
-using namespace em;
+using namespace emcore;
 
 
 TEST(ImageLocation, Basic)

@@ -12,7 +12,7 @@
 #include "em/proc/program.h"
 #include "../../include/em/proc/program.h"
 
-using namespace em;
+using namespace emcore;
 
 using DocoptArgs = std::map<std::string, docopt::value>;
 

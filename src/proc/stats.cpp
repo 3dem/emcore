@@ -4,7 +4,8 @@
 
 #include "em/proc/stats.h"
 
-using namespace em;
+using namespace emcore;
+namespace emc = emcore;
 
 // -------------- Stats Implementation ---------------------------
 
@@ -81,7 +82,7 @@ Stats Stats::compute(const Array &array, Operation op)
     return compute(array.getType(), array.getData(), array.getDim().getSize(), op);
 } // Stats::compute
 
-std::ostream& em::operator<< (std::ostream &ostrm, const Stats &s)
+std::ostream& emc::operator<< (std::ostream &ostrm, const Stats &s)
 {
     ostrm << "min: " << s.min << " max: " << s.max
           << " avg: " << s.mean << " std: " << s.std << " ";

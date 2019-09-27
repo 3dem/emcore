@@ -4,7 +4,7 @@
 
 namespace py = pybind11;
 
-using namespace em;
+using namespace emcore;
 
 
 // Define each submodule separately
@@ -12,12 +12,12 @@ void init_submodule_base(py::module &);
 void init_submodule_image(py::module &);
 
 
-PYBIND11_MODULE(em, m) {
+PYBIND11_MODULE(emcore, m) {
     m.doc() = R"pbdoc(
         Pybind11 example plugin
         -----------------------
 
-        .. currentmodule:: em
+        .. currentmodule:: emcore
 
         .. autosummary::
            :toctree: _generate

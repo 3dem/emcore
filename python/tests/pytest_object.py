@@ -1,62 +1,62 @@
 
 from base import BaseTest, main
 
-import em
+import emcore as emc
 
 
 class TestObject(BaseTest):
     def test_basic(self):
         # Empty object constructor
-        eo = em.Object()
+        eo = emc.Object()
         # After this, the object type should be Null
-        self.assertEqual(eo.getType(), em.typeNull)
+        self.assertEqual(eo.getType(), emc.typeNull)
         self.assertTrue(eo.getType().isNull())
 
         eo.set(1) # Now this object should change its type to typeInt32
-        self.assertEqual(eo.getType(), em.typeInt32)
+        self.assertEqual(eo.getType(), emc.typeInt32)
         # When the object type is not null, it should not
         # change its type and just try to convert to the underlying type.
         eo.set(2.2)
-        self.assertEqual(eo.getType(), em.typeInt32)
+        self.assertEqual(eo.getType(), emc.typeInt32)
         self.assertEqual(int(eo), int(2.2))
 
         # Copy constructor
-        o = em.Object(1)
-        self.assertEqual(o.getType(), em.typeInt32)
+        o = emc.Object(1)
+        self.assertEqual(o.getType(), emc.typeInt32)
         x = int(o)
         self.assertEqual(x, 1)
         o = 2
         self.assertEqual(int(o), 2)
 
-        o2 = em.Object(3.5) # Type should be double
-        self.assertEqual(o2.getType(), em.typeFloat)
+        o2 = emc.Object(3.5) # Type should be double
+        self.assertEqual(o2.getType(), emc.typeFloat)
         # We can explicitly change the type of a given object
-        o2.setType(em.typeDouble)
+        o2.setType(emc.typeDouble)
         o2.set(1.3)
-        self.assertEqual(o2.getType(), em.typeDouble)
+        self.assertEqual(o2.getType(), emc.typeDouble)
         f = float(o2)
         self.assertAlmostEqual(f, 1.3)
 
-        o2 = em.Object(5.6);
+        o2 = emc.Object(5.6);
         d2 = 5.6 + float(o2)
         N = 100
         values = [1.5, 2.3, 5.7, 3.2, 10., 56.]
         vobj = []
 
         for i in range(N):
-            vobj.append(em.Object(values[i % 6]))
+            vobj.append(emc.Object(values[i % 6]))
 
         for i, obj in enumerate(vobj):
             self.assertAlmostEqual(values[i % 6], float(obj), 5)
 
         s1 = "This is a test string";
-        o3 = em.Object(s1)
+        o3 = emc.Object(s1)
 
         s2 = str(o3)
         self.assertEqual(s1, s2)
 
-        # img = em.Image(em.ArrayDim(10, 10), em.typeFloat)
-        # o3 = em.Object(img)
+        # img = emc.Image(emc.ArrayDim(10, 10), emc.typeFloat)
+        # o3 = emc.Object(img)
 
     #
     # Image img(ArrayDim(10, 10), typeFloat)

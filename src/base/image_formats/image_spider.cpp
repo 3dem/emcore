@@ -4,7 +4,7 @@
 #include "em/base/image.h"
 #include "em/base/image_priv.h"
 
-using namespace em;
+using namespace emcore;
 
 
 #define SPIDER_HEADER_SIZE 1024 // Minimum size of the SPIDER header (variable)
@@ -95,12 +95,12 @@ public:
         if ( fread(&header, SPIDER_HEADER_SIZE, 1, file) < 1 )
             THROW_SYS_ERROR(std::string("Error reading SPIDER header in file: ") + path);
 
+        // TODO: Determine swap order (little vs big endian)
         // Determine byte order and swap bytes if from different-endian machine
-        if ( (swap = (( fabs(header.nslice) > SWAPTRIG ) ||
-                      ( fabs(header.iform) > 1000 )     ||
-                      ( fabs(header.nslice) < 1 ))) );
-            //    swapPage((char *) header, SPIDERSIZE - 180, DT_Float); //
-            // TODO: Determine swap order (little vs big endian)
+//        if ( (swap = (( fabs(header.nslice) > SWAPTRIG ) ||
+//                      ( fabs(header.iform) > 1000 )     ||
+//                      ( fabs(header.nslice) < 1 ))) )
+        //    swapPage((char *) header, SPIDERSIZE - 180, DT_Float); //
 
 
         //"Invalid Spider file:  %s", filename.c_str()));
@@ -234,7 +234,7 @@ public:
 
     // Overwrite this function to validate that index > 1 can
     // only be written when the opened file is an stack
-    virtual void writeImageData(const size_t index, const Image &image)
+    virtual void writeImageData(const size_t index, const Image &image) override 
     {
         ASSERT_ERROR(index > 1 && !isStack,
                      "More than one image can only be written in stack files.");

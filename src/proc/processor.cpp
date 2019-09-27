@@ -6,7 +6,7 @@
 #include "em/proc/processor.h"
 #include "../../include/em/proc/fft.h"
 
-using namespace em;
+using namespace emcore;
 
 ImageProcessor::ImageProcessor(const ObjectDict &params)
 {

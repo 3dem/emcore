@@ -267,9 +267,9 @@ if(BUILD_PYBIND)
     target_link_libraries(em PRIVATE em-core)
 
     if (BUILD_STATIC)
-        set_property(TARGET em PROPERTY OUTPUT_NAME "em.a")
+        set_property(TARGET em PROPERTY OUTPUT_NAME "emcore.a")
     else()
-        set_property(TARGET em PROPERTY OUTPUT_NAME "em.so")
+        set_property(TARGET em PROPERTY OUTPUT_NAME "emcore.so")
     endif()
 
     set_property(TARGET em PROPERTY PREFIX "")

@@ -11,7 +11,7 @@
 #include "em/math/functions.h"
 
 
-using namespace em;
+using namespace emcore;
 
 
 TEST(FourierTransformer, Basic)

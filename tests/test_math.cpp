@@ -11,7 +11,7 @@
 #include "em/base/legacy.h"
 
 
-using namespace em;
+using namespace emcore;
 
 
 TEST(GaussianFun, Basic)
