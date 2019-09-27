@@ -13,7 +13,7 @@
 
 
 
-using namespace em;
+using namespace emcore;
 
 
 TEST(ImageOperator, Basic)

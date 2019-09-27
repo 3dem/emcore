@@ -3,7 +3,7 @@
 #include "em/base/image.h"
 #include "em/base/image_priv.h"
 
-using namespace em;
+using namespace emcore;
 
 #define EM_HEADER_SIZE    512 // Minimum size of the EM header (when nsymbt = 0)
 
@@ -91,7 +91,7 @@ struct EmHeader
  * Inherit properties from base ImageFile::Impl and add information
  * specific for EM format (e.g, the EmHeader struct)
  */
-class EmImageFile: public em::ImageFile::Impl
+class EmImageFile: public ImageFile::Impl
 {
 public:
     EmHeader header;

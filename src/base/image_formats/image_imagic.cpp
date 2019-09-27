@@ -6,7 +6,7 @@
 #include "em/base/image_priv.h"
 
 
-using namespace em;
+using namespace emcore;
 
 
 #define IMAGIC_HEADER_SIZE 1024 // Size of the IMAGIC header for each image
@@ -157,7 +157,7 @@ struct ImagicHeader
  * Inherit properties from base ImageFile::Impl and add information
  * specific for IMAGIC format (e.g, the ImagicHeader struct)
  */
-class ImagicImageFile: public em::ImageFile::Impl
+class ImagicImageFile: public ImageFile::Impl
 {
 public:
     ImagicHeader header; // main header
@@ -296,7 +296,7 @@ public:
 
     void closeFile() override
     {
-        em::ImageFile::Impl::closeFile();
+        ImageFile::Impl::closeFile();
         if (headerFile != nullptr)
         {
             fclose(headerFile);

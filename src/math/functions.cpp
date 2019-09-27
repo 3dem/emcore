@@ -7,7 +7,8 @@
 #include "em/math/functions.h"
 
 
-using namespace em;
+using namespace emcore;
+namespace emc = emcore;
 
 
 template <class T>
@@ -53,5 +54,5 @@ T GaussianFunc<T>::operator()(T x, T y)
     return ps * exp(-0.5 * (xp * xp + yp * yp));
 } // GaussianFunc<T>.operator(x)
 
-template class em::GaussianFunc<float>;
-template class em::GaussianFunc<double>;
+template class emc::GaussianFunc<float>;
+template class emc::GaussianFunc<double>;

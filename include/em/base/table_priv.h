@@ -5,7 +5,7 @@
 #ifndef EM_CORE_METADATA_PRIV_H
 #define EM_CORE_METADATA_PRIV_H
 
-namespace em
+namespace emcore
 {
 
     class TableIO::Impl
@@ -35,12 +35,13 @@ namespace em
         friend class TableIO;
     }; // class TableIO::Impl
 
-} // namespace em
+} // namespace emcore
 
+namespace emc = emcore;
 
 // The following macro can be used as a shortcut to register new ImageFile subclasses
 #define REGISTER_TABLE_IO(extensions, ioClassName) \
     TableIO::Impl * new___##ioClassName(){ return new ioClassName(); } \
-    bool reg___##ioClassName = em::TableIO::registerImpl(extensions, new___##ioClassName)
+    bool reg___##ioClassName = emc::TableIO::registerImpl(extensions, new___##ioClassName)
 
 #endif //EM_CORE_METADATA_PRIV_H

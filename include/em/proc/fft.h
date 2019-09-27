@@ -8,7 +8,7 @@
 #include "em/base/image.h"
 
 
-namespace em
+namespace emcore
 {
 
     /** Enum class to hold the direction of the Fourier Transform */
@@ -93,7 +93,7 @@ namespace em
         Impl * impl;
     }; // class FourierTransformer
 
-} // namespace em
+} // namespace emcore
 
 
 #endif //EM_CORE_FFT_H

@@ -5,23 +5,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from base import BaseTest # only used to put em in the path now
-import em
+import emcore as emc
 
 
 if __name__ == '__main__':
-    mrcIO = em.ImageFile('mrc')
+    mrcIO = emc.ImageFile('mrc')
 
     dataPath = os.environ.get("EM_TEST_DATA", None)
 
     if dataPath:
         vol1Name = "resmap/t20s_proteasome_full.map"
-        vol1Dim = em.ArrayDim(300, 300, 300, 1)
+        vol1Dim = emc.ArrayDim(300, 300, 300, 1)
 
         n = 5
         m = 5
-        img = em.Image()
+        img = emc.Image()
         try:
-            loc = em.ImageLocation(os.path.join(dataPath, vol1Name), 1)
+            loc = emc.ImageLocation(os.path.join(dataPath, vol1Name), 1)
             img.read(loc)
             a = np.array(img, copy=False)
             dim = img.getDim()

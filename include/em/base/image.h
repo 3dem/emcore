@@ -15,7 +15,7 @@
 #include "em/os/filesystem.h"
 
 
-namespace em
+namespace emcore
 {
     /** @ingroup image
      * This class represent the location of one or several images in disk.
@@ -115,8 +115,8 @@ namespace em
         Impl * impl;
     }; // class Image
 
-    std::ostream& operator<< (std::ostream &ostream, const em::Image &image);
-    std::istream& operator>> (std::istream &istream, em::Image &image);
+    std::ostream& operator<< (std::ostream &ostream, const Image &image);
+    std::istream& operator>> (std::istream &istream, Image &image);
 
     /** @ingroup image
      * Centralizes functionality to read/write image files from several EM formats.
@@ -293,7 +293,7 @@ namespace em
 
     }; // class ImageFile
 
-    std::ostream& operator<< (std::ostream &ostream, const em::ImageFile &t);
+    std::ostream& operator<< (std::ostream &ostream, const ImageFile &t);
 
 } // em namespace
 

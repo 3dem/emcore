@@ -5,26 +5,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from base import BaseTest # only used to put em in the path now
-import em
+import emcore as emc
 
 
 if __name__ == '__main__':
-    mrcIO = em.ImageFile('mrc')
+    mrcIO = emc.ImageFile('mrc')
 
     dataPath = os.environ.get("EM_TEST_DATA", None)
 
     if dataPath:
         micName = "xmipp_tutorial/micrographs/BPV_1386.mrc"
-        micDim = em.ArrayDim(9216, 9441, 1, 1)
+        micDim = emc.ArrayDim(9216, 9441, 1, 1)
         stackName = "emx/alignment/Test2/stack2D.mrc"
-        stackDim = em.ArrayDim(128, 128, 1, 100)
+        stackDim = emc.ArrayDim(128, 128, 1, 100)
         fileDims = {micName: micDim, stackName: stackDim}
 
         n = 5
         m = 5
-        img = em.Image()
+        img = emc.Image()
         try:
-            loc = em.ImageLocation(os.path.join(dataPath, stackName))
+            loc = emc.ImageLocation(os.path.join(dataPath, stackName))
 
             # Read many images from the particles stack and put them
             # together using a numpy array and showing in matplotlib

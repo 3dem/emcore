@@ -10,7 +10,7 @@
 #include "em/base/error.h"
 
 
-namespace em
+namespace emcore
 {
     // TODO: Document this class and its rationale
 
@@ -91,6 +91,6 @@ namespace em
 
     }; // class ImplRegistry
 
-} // namespace em
+} // namespace emcore
 
 #endif //EM_CORE_REGISTRY_H_H

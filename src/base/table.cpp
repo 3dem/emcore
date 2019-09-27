@@ -12,7 +12,9 @@
 #include "em/base/table_priv.h"
 
 
-using namespace em;
+using namespace emcore;
+namespace emc = emcore;
+
 using Column = Table::Column;
 using Row = Table::Row;
 
@@ -372,19 +374,19 @@ bool Table::isEmpty() const
 } // function Table.isEmpty
 
 
-std::ostream& operator<< (std::ostream &ostream, const Table::Column &col)
+std::ostream& emc::operator<< (std::ostream &ostream, const Table::Column &col)
 {
     col.toStream(ostream);
     return ostream;
 } // operator << (Table::Column)
 
-std::ostream& operator<< (std::ostream &ostream, const Table::Row &row)
+std::ostream& emc::operator<< (std::ostream &ostream, const Table::Row &row)
 {
     row.toStream(ostream);
     return ostream;
 } // operator << (Table::Row)
 
-std::ostream& operator<< (std::ostream &ostream, const Table &table)
+std::ostream& emc::operator<< (std::ostream &ostream, const Table &table)
 {
     table.toStream(ostream);
     return ostream;
@@ -601,7 +603,7 @@ TableIOImplRegistry * getTableIORegistry()
     return &registry;
 } // function getTableIORegistry
 
-bool em::TableIO::registerImpl(const StringVector &extOrNames,
+bool TableIO::registerImpl(const StringVector &extOrNames,
                                TableIO::ImplBuilder builder)
 {
     return getTableIORegistry()->registerImpl(extOrNames, builder);

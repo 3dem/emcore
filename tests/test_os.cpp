@@ -13,7 +13,7 @@
 #include "em/os/filesystem.h"
 
 
-using namespace em;
+using namespace emcore;
 
 
 TEST(File, Basic) {

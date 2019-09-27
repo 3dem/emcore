@@ -10,7 +10,7 @@
 #include "em/base/legacy.h"
 
 
-using namespace em;
+using namespace emcore;
 
 TEST(ArrayDim, Defaults) {
 
@@ -151,13 +151,13 @@ TEST(Array, Basic) {
     ASSERT_EQ(tmp.getData(), nullptr);
 
     // Create a new array with same dimensions as A, but with typeFloat
-    Array A5(A.getDim(), em::typeFloat);
+    Array A5(A.getDim(), typeFloat);
     A5 = A;
     // After assignment, then A5 type should be the same of A
     ASSERT_EQ(A5.getType(), A.getType());
     // We can make a copy of A elements but using float
-    A5.copy(A, em::typeFloat);
-    ASSERT_EQ(A5.getType(), em::typeFloat);
+    A5.copy(A, typeFloat);
+    ASSERT_EQ(A5.getType(), typeFloat);
 
 } // TEST(ArrayTest, Constructor)
 

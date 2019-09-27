@@ -8,7 +8,7 @@
 #include "em/base/type.h"
 
 
-namespace em
+namespace emcore
 {
 /** @ingroup base
  *
@@ -134,6 +134,6 @@ namespace em
         bool view = false;
     }; // class TypedContainer
 
-} // namespace em
+} // namespace emcore
 
 #endif //EM_CORE_CONTAINER_PRIV_H

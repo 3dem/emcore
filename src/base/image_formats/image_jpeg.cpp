@@ -8,14 +8,14 @@
 
 #include "jpeglib.h"
 
-using namespace em;
+using namespace emcore;
 
 
 /**
  * Inherit properties from base ImageFile::Impl and add information
  * specific for JPEG format
  */
-class JpegImageFile: public em::ImageFile::Impl
+class JpegImageFile: public ImageFile::Impl
 {
 public:
     jpeg_decompress_struct dInfo;
@@ -141,7 +141,7 @@ public:
 
     virtual void closeFile() override
     {
-        em::ImageFile::Impl::closeFile();
+        ImageFile::Impl::closeFile();
 
         jpeg_destroy_decompress(&dInfo);
         jpeg_destroy_compress(&cInfo);

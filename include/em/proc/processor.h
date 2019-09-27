@@ -8,7 +8,7 @@
 #include "em/base/image.h"
 
 
-namespace em
+namespace emcore
 {
 
     /** Base class for all operations that receive an Image as input and produce
@@ -119,6 +119,6 @@ namespace em
         virtual void validateParams() const override ;
     }; // class ImageScaleProc
 
-} // namespace em
+} // namespace emcore
 
 #endif //EM_CORE_PROCESSOR_H

@@ -10,7 +10,7 @@
 #include <iostream>
 
 
-namespace em {
+namespace emcore {
 
     /** Class type for the errors thrown by the exceptions.
      */
@@ -37,7 +37,7 @@ namespace em {
      */
     std::ostream& operator<< (std::ostream &ostream, const Error &err);
 
-} // namespace em
+} // namespace emcore
 
 // The following macro throws an Exception with a given error message
 // and provides the file name and the line number

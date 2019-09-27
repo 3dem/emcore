@@ -8,7 +8,7 @@
 #include "em/base/image.h"
 #include "em/base/image_priv.h"
 
-using namespace em;
+using namespace emcore;
 
 
 struct TiffHeader

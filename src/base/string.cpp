@@ -8,7 +8,7 @@
 #include "em/base/error.h"
 #include "em/base/string.h"
 
-using namespace em;
+using namespace emcore;
 
 const std::string String::SPACES = " \t\n\r";
 

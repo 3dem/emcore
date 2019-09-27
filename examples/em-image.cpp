@@ -13,7 +13,7 @@
 #include "em/proc/processor.h"
 #include "em/proc/stats.h"
 
-using namespace em;
+using namespace emcore;
 
 static const char USAGE[] =
         R"(em-image.

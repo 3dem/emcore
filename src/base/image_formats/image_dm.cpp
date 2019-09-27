@@ -5,7 +5,7 @@
 #include "em/base/image.h"
 #include "em/base/image_priv.h"
 
-using namespace em;
+using namespace emcore;
 
 
 struct DmTag
@@ -125,7 +125,7 @@ std::function< size_t(size_t*, size_t, FILE*, bool) > freadSwapLong;
  * Inherit properties from base ImageIOImpl and add information
  * specific for DM3/4 formats
  */
-class DmImageFile: public em::ImageFile::Impl
+class DmImageFile: public ImageFile::Impl
 {
 public:
     // File information attributes

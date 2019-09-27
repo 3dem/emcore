@@ -19,6 +19,6 @@ system('cmake .. -DCMAKE_PREFIX_PATH=%(prefix)s -DCMAKE_INSTALL_PREFIX=%(prefix)
        '-DCMAKE_FIND_ROOT_PATH=%(prefix)s' % locals())
 system('make -j 5')
 system('make install')
-system('mv %(prefix)s/lib/em.so %(sitePackages)s/' % locals())
+system('mv %(prefix)s/lib/emcore.so %(sitePackages)s/' % locals())
 
 

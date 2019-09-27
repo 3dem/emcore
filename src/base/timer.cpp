@@ -7,7 +7,7 @@
 #include "em/base/timer.h"
 #include "em/base/error.h"
 
-using namespace em;
+using namespace emcore;
 
 
 class Timer::Impl

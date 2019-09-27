@@ -8,7 +8,7 @@
 #include "em/base/image.h"
 
 
-namespace em
+namespace emcore
 {
     /** Computing min, max, avg and std on a given Array. */
     struct Stats
@@ -31,6 +31,6 @@ namespace em
 
     std::ostream& operator<< (std::ostream &ostrm, const Stats &s);
 
-} // namespace em
+} // namespace emcore
 
 #endif //EM_CORE_STATS_H

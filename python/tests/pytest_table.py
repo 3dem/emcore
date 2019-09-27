@@ -5,19 +5,19 @@ import os
 import random
 
 from base import BaseTest, main, Timer, TestData
-import em
+import emcore as emc
 
-Column = em.Table.Column
-Row = em.Table.Row
+Column = emc.Table.Column
+Row = emc.Table.Row
 
 
 class TestTable(BaseTest):
 
     def createTable(self, nRows):
-        table = em.Table([
-            Column(1, "col1", em.typeSizeT),
-            Column(2, "col2", em.typeFloat),
-            Column(3, "col3", em.typeString)
+        table = emc.Table([
+            Column(1, "col1", emc.typeSizeT),
+            Column(2, "col2", emc.typeFloat),
+            Column(3, "col3", emc.typeString)
         ])
 
         row = table.createRow()
@@ -40,18 +40,18 @@ class TestTable(BaseTest):
 
     def test_ColumnsBasic(self):
         c1Name = "firstCol"
-        c1 = Column(c1Name, em.typeFloat)
+        c1 = Column(c1Name, emc.typeFloat)
         self.assertEqual(c1.getId(), Column.NO_ID)
         self.assertEqual(c1.getName(), c1Name)
-        self.assertEqual(c1.getType(), em.typeFloat)
+        self.assertEqual(c1.getType(), emc.typeFloat)
 
         c2Name = "secondCol"
-        c2 = Column(c2Name, em.typeInt16)
+        c2 = Column(c2Name, emc.typeInt16)
         self.assertEqual(c2.getId(), Column.NO_ID)
         self.assertEqual(c2.getName(), c2Name)
-        self.assertEqual(c2.getType(), em.typeInt16)
+        self.assertEqual(c2.getType(), emc.typeInt16)
 
-        colMap = em.Table()
+        colMap = emc.Table()
         self.assertEqual(0, colMap.addColumn(c1));
         self.assertEqual(1, colMap.addColumn(c2));
 
@@ -67,24 +67,24 @@ class TestTable(BaseTest):
         self.assertEqual(0, colMap.getIndex(rc1.getId()))
         self.assertEqual(1, colMap.getIndex(rc2.getId()))
 
-        #self.assertRaises(em.Error, lambda: colMap.getIndex(100))
-        #self.assertRaises(em.Error, lambda: colMap.getIndex("noColumn"))
+        #self.assertRaises(emc.Error, lambda: colMap.getIndex(100))
+        #self.assertRaises(emc.Error, lambda: colMap.getIndex("noColumn"))
 
         # Add more columns with and without IDs
         bigId = 100
-        c3index = colMap.addColumn(Column(bigId, "thirdCol", em.typeFloat))
+        c3index = colMap.addColumn(Column(bigId, "thirdCol", emc.typeFloat))
         rc3 = colMap.getColumnByIndex(c3index)
         self.assertEqual(bigId, rc3.getId())
         self.assertEqual("thirdCol", rc3.getName())
 
-        colMap.addColumn(Column("forthCol", em.typeFloat))
+        colMap.addColumn(Column("forthCol", emc.typeFloat))
         rc4 = colMap.getColumnByIndex(c3index + 1)
         self.assertEqual(bigId + 1, rc4.getId());
         self.assertEqual("forthCol", rc4.getName())
 
         # Let's insert a new column, all indexes before should not be
         # changed, but the ones after the position should be increased by 1
-        c3bindex = colMap.insertColumn(Column("thirdBCol", em.typeFloat),
+        c3bindex = colMap.insertColumn(Column("thirdBCol", emc.typeFloat),
                                        c3index + 1)
         self.assertEqual(c3bindex, c3index + 1)
 
@@ -94,15 +94,15 @@ class TestTable(BaseTest):
         self.assertEqual(colMap.getIndex("forthCol"), c3bindex + 1)
 
     def test_TableRowSetValue(self):
-        table = em.Table([
-            Column(1, "col1", em.typeFloat),
-            Column(2, "col2", em.typeInt16),
-            Column(3, "col3", em.typeString)
+        table = emc.Table([
+            Column(1, "col1", emc.typeFloat),
+            Column(2, "col2", emc.typeInt16),
+            Column(3, "col3", emc.typeString)
         ])
 
-        for i, t in enumerate([(1, "col1", em.typeFloat),
-                               (2, "col2", em.typeInt16),
-                               (3, "col3", em.typeString)]):
+        for i, t in enumerate([(1, "col1", emc.typeFloat),
+                               (2, "col2", emc.typeInt16),
+                               (3, "col3", emc.typeString)]):
             col = table.getColumnByIndex(i)
             self.assertEqual(t[0], col.getId())
             self.assertEqual(t[1], col.getName())
@@ -129,15 +129,15 @@ class TestTable(BaseTest):
 
 
     def test_TableBasic(self):
-        table = em.Table([
-            Column(1, "col1", em.typeFloat),
-            Column(2, "col2", em.typeInt16),
-            Column(3, "col3", em.typeString)
+        table = emc.Table([
+            Column(1, "col1", emc.typeFloat),
+            Column(2, "col2", emc.typeInt16),
+            Column(3, "col3", emc.typeString)
         ])
 
-        for i, t in enumerate([(1, "col1", em.typeFloat),
-                               (2, "col2", em.typeInt16),
-                               (3, "col3", em.typeString)]):
+        for i, t in enumerate([(1, "col1", emc.typeFloat),
+                               (2, "col2", emc.typeInt16),
+                               (3, "col3", emc.typeString)]):
             col = table.getColumnByIndex(i)
             self.assertEqual(t[0], col.getId())
             self.assertEqual(t[1], col.getName())
@@ -220,7 +220,7 @@ class TestTable(BaseTest):
     def test_Copy(self):
         n = 10
         table10 = self.createTable(n)
-        table10copy = em.Table(table10)
+        table10copy = emc.Table(table10)
         self.checkColumns(table10copy)
         self.assertEqual(table10copy.getSize(), table10.getSize());
         self.assertEqual(table10copy.getSize(), n);
@@ -252,24 +252,24 @@ class TestTable(BaseTest):
 
     def test_Read(self):
         td = TestData()
-        self.assertTrue(em.TableIO.hasImpl('star'))
+        self.assertTrue(emc.TableIO.hasImpl('star'))
 
         root = td.get("relion_tutorial/import/")
         fn1 = root + "case1/classify3d_small_it038_data.star"
         print("Reading star: ", fn1)
 
-        tio = em.TableIO()
+        tio = emc.TableIO()
         tio.open(fn1)
         tableNames = tio.getTableNames()
         print("Tables: ", tableNames)
         tio.close()
-        t = em.Table()
+        t = emc.Table()
         t.read(fn1)  # should read first table by default
 
-        t = em.Table([
-            Column(1, "col1", em.typeFloat),
-            Column(2, "col2", em.typeInt16),
-            Column(3, "col3", em.typeString)
+        t = emc.Table([
+            Column(1, "col1", emc.typeFloat),
+            Column(2, "col2", emc.typeInt16),
+            Column(3, "col3", emc.typeString)
         ])
 
         self.assertEqual(t.getColumnsSize(), 3);
@@ -287,17 +287,40 @@ class TestTable(BaseTest):
             "rlnClassNumber", "rlnLogLikeliContribution",
             "rlnNrOfSignificantSamples", "rlnMaxValueProbDistribution"
         ]
-
+        """
+        loop_
+_rlnVoltage #1
+_rlnDefocusU #2
+_rlnSphericalAberration #3
+_rlnAmplitudeContrast #4
+_rlnImageName #5
+_rlnNormCorrection #6
+_rlnMicrographName #7
+_rlnGroupNumber #8
+_rlnOriginX #9
+_rlnOriginY #10
+_rlnAngleRot #11
+_rlnAngleTilt #12
+_rlnAnglePsi #13
+_rlnClassNumber #14
+_rlnLogLikeliContribution #15
+_rlnNrOfSignificantSamples #16
+_rlnMaxValueProbDistribution #17
+  300.000000 15060.500000     2.260000     0.100000 000080@cluster/wind2/win_05677.dat
+  0.771391 cluster/wind2/win_00849.dat            1    -2.968653   -22.218653   -20.283924
+  175.359562   126.884867            5 24711.149348            1     0.962371
+        """
         goldValues = [
             ('rlnGroupNumber',
-            [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
              17, 18, 19, 20, 21]),
             ('rlnDefocusU',
-             [16009.5, 18642.2, 24642.4, 24772.8, 25580.8, 26833.9, 27164.9,
+             [15060.5, 16009.5, 18642.2, 24642.4, 24772.8, 25580.8, 26833.9, 27164.9,
               30135.1, 33744.2, 35465.5, 13923.4, 17895.1, 19206.2, 24165.1,
               24650.4, 25866.7, 26527.1, 27915.1, 29939.5, 30062.1]),
             ('rlnImageName',
-             ['000023@cluster/wind2/win_05883.dat', '000042@cluster/wind2/win_04377.dat',
+             ['000080@cluster/wind2/win_05677.dat',
+              '000023@cluster/wind2/win_05883.dat', '000042@cluster/wind2/win_04377.dat',
               '000065@cluster/wind2/win_00139.dat', '000038@cluster/wind2/win_04884.dat',
               '000046@cluster/wind2/win_02565.dat', '000023@cluster/wind2/win_00161.dat',
               '000026@cluster/wind2/win_03758.dat', '000058@cluster/wind2/win_03862.dat',
@@ -319,7 +342,7 @@ class TestTable(BaseTest):
                 self.assertEqual(v2, v1)
 
     def test_ReadSingleRow(self):
-        self.assertTrue(em.TableIO.hasImpl('star'))
+        self.assertTrue(emc.TableIO.hasImpl('star'))
 
         td = TestData()
         root = td.get("relion_tutorial/import/")
@@ -327,21 +350,21 @@ class TestTable(BaseTest):
         fn1 = root + "case1/classify3d_small_it038_optimiser.star"
         print("Reading star: ", fn1)
 
-        t = em.Table()
+        t = emc.Table()
         t.read("optimiser_general", fn1)
         self.assertEqual(t.getColumnsSize(), 52)
         self.assertEqual(t.getSize(), 1)
 
     def test_ReadXmd(self):
-        self.assertTrue(em.TableIO.hasImpl('star'))
+        self.assertTrue(emc.TableIO.hasImpl('star'))
 
         td = TestData()
 
         fn1 = td.get("xmipp_tutorial/gold/images200k.xmd")
         print("Reading xmd: ", fn1)
 
-        tio = em.TableIO()
-        table = em.Table()
+        tio = emc.TableIO()
+        table = emc.Table()
 
         t = Timer()
         t.tic()

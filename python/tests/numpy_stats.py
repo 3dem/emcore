@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-import em
+import emcore as emc
 import numpy as np
 import sys
 
@@ -10,12 +10,12 @@ if __name__ == '__main__':
         print("Provide input file(s). ")
         sys.exit(1)
 
-    img = em.Image()
+    img = emc.Image()
 
     print("Computing stats with numpy: ")
 
     for fn in sys.argv[1:]:
-        loc = em.ImageLocation(fn)
+        loc = emc.ImageLocation(fn)
         img.read(loc)
         data = np.array(img, copy=False)
         print("\nFile: ", fn,

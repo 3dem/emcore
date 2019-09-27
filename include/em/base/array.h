@@ -12,7 +12,7 @@
 #include "em/base/container_priv.h"
 
 
-namespace em
+namespace emcore
 {
     class Type;
     template <class T> class ArrayT;
@@ -253,7 +253,7 @@ namespace em
     friend class Array;
     }; // class ArrayT<T>
 
-} // namespace em
+} // namespace emcore
 
 
 #endif //EM_CORE_ARRAY_H

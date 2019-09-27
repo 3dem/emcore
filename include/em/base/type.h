@@ -12,7 +12,7 @@
 #include "em/base/error.h"
 
 
-namespace em
+namespace emcore
 {
     template <class T> class TypeImplT;
 
@@ -203,7 +203,7 @@ namespace em
         Impl * impl;
     };// class Type
 
-    std::ostream& operator<< (std::ostream &ostrm, const em::Type &t);
+    std::ostream& operator<< (std::ostream &ostrm, const Type &t);
 
     using cfloat = std::complex<float>;
     using cdouble = std::complex<double>;
@@ -236,6 +236,6 @@ namespace em
 
 #include "type_priv.h"
 
-} // namespace em
+} // namespace emcore
 
 #endif //EM_CORE_TYPE_H

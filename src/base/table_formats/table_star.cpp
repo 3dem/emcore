@@ -5,7 +5,7 @@
 #include "em/base/table_priv.h"
 
 
-using namespace em;
+using namespace emcore;
 
 
 class TableIOStar: public TableIO::Impl

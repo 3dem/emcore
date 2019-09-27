@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace em
+namespace emcore
 {
     using StringVector = std::vector<std::string>;
 
@@ -57,6 +57,6 @@ namespace em
 
 
 
-} // namespace em
+} // namespace emcore
 
 #endif //EM_CORE_STRING_H

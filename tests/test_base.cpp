@@ -12,7 +12,7 @@
 #include "em/base/timer.h"
 
 
-using namespace em;
+using namespace emcore;
 
 
 TEST(Error, Basics) {

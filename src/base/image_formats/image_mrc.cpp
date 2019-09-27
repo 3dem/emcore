@@ -4,7 +4,7 @@
 #include "em/base/image.h"
 #include "em/base/image_priv.h"
 
-using namespace em;
+using namespace emcore;
 
 
 #define MRC_HEADER_SIZE    1024 // Minimum size of the MRC header (when nsymbt = 0)
@@ -88,7 +88,7 @@ struct MrcHeader
  * Inherit properties from base ImageFile::Impl and add information
  * specific for MRC format (e.g, the MrcHeader struct)
  */
-class MrcImageFile: public em::ImageFile::Impl
+class MrcImageFile: public ImageFile::Impl
 {
 public:
     MrcHeader header;

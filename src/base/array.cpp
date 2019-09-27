@@ -8,7 +8,9 @@
 
 #include "em/base/array.h"
 
-using namespace em;
+using namespace emcore;
+
+namespace emc = emcore;
 
 
 // ===================== ArrayDim Implementation =======================
@@ -65,7 +67,7 @@ int ArrayDim::getRank() const
     return (z > 1) ? 3 : (y > 1) ? 2 : 1;
 } // function ArrayDim.getRank
 
-std::ostream& em::operator<< (std::ostream &ostream, const ArrayDim &adim)
+std::ostream& emc::operator<< (std::ostream &ostream, const ArrayDim &adim)
 {
     ostream << "(" << adim.x << " x " << adim.y << " x "
             << adim.z << " x " << adim.n << ")";
@@ -368,7 +370,7 @@ ArrayT<T> Array::getView()
     return ArrayT<T>(impl->adim, getData());
 } // function Array.getView
 
-std::ostream& em::operator<< (std::ostream &ostream, const Array &array)
+std::ostream& emc::operator<< (std::ostream &ostream, const Array &array)
 {
     array.toStream(ostream);
     return ostream;
@@ -472,30 +474,30 @@ ArrayDim ArrayT<T>::getDim() const
 // ================ Explicit instantiations of Templates =======================
 // This allows to implement template code in the .cpp
 
-template em::ArrayT<int8_t > em::Array::getView();
-template em::ArrayT<uint8_t > em::Array::getView();
-template em::ArrayT<int16_t > em::Array::getView();
-template em::ArrayT<uint16_t > em::Array::getView();
-template em::ArrayT<int32_t > em::Array::getView();
-template em::ArrayT<uint32_t > em::Array::getView();
-template em::ArrayT<int64_t > em::Array::getView();
-template em::ArrayT<uint64_t > em::Array::getView();
+template emc::ArrayT<int8_t > Array::getView();
+template emc::ArrayT<uint8_t > Array::getView();
+template emc::ArrayT<int16_t > Array::getView();
+template emc::ArrayT<uint16_t > Array::getView();
+template emc::ArrayT<int32_t > Array::getView();
+template emc::ArrayT<uint32_t > Array::getView();
+template emc::ArrayT<int64_t > Array::getView();
+template emc::ArrayT<uint64_t > Array::getView();
 
-template em::ArrayT<float> em::Array::getView();
-template em::ArrayT<double> em::Array::getView();
-template em::ArrayT<cfloat> em::Array::getView();
-template em::ArrayT<cdouble> em::Array::getView();
+template emc::ArrayT<float> Array::getView();
+template emc::ArrayT<double> Array::getView();
+template emc::ArrayT<cfloat> Array::getView();
+template emc::ArrayT<cdouble> Array::getView();
 
-template class em::ArrayT<int8_t>;
-template class em::ArrayT<uint8_t>;
-template class em::ArrayT<int16_t>;
-template class em::ArrayT<uint16_t>;
-template class em::ArrayT<int32_t>;
-template class em::ArrayT<uint32_t>;
-template class em::ArrayT<int64_t>;
-template class em::ArrayT<uint64_t>;
+template class emc::ArrayT<int8_t>;
+template class emc::ArrayT<uint8_t>;
+template class emc::ArrayT<int16_t>;
+template class emc::ArrayT<uint16_t>;
+template class emc::ArrayT<int32_t>;
+template class emc::ArrayT<uint32_t>;
+template class emc::ArrayT<int64_t>;
+template class emc::ArrayT<uint64_t>;
 
-template class em::ArrayT<float>;
-template class em::ArrayT<double>;
-template class em::ArrayT<cfloat>;
-template class em::ArrayT<cdouble>;
+template class emc::ArrayT<float>;
+template class emc::ArrayT<double>;
+template class emc::ArrayT<cfloat>;
+template class emc::ArrayT<cdouble>;

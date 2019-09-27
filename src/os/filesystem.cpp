@@ -15,7 +15,7 @@
 
 
 
-using namespace em;
+using namespace emcore;
 
 
 // ===================== File methods Implementation =======================

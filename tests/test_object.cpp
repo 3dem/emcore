@@ -12,7 +12,7 @@
 #include "em/base/timer.h"
 
 
-using namespace em;
+using namespace emcore;
 
 
 TEST(Object, Basic)
@@ -42,7 +42,7 @@ TEST(Object, Basic)
     ASSERT_EQ(eo.get<int>(), (int)2.2f);
 
     // Copy constructor
-    em::Object o(1);
+    Object o(1);
     int x = o.get<int>();
     ASSERT_EQ(o.getType(), typeInt32);
     ASSERT_EQ(x, 1);
@@ -54,7 +54,7 @@ TEST(Object, Basic)
     o = 10;
     ASSERT_TRUE(o > eo);
 
-    em::Object o2(3.5); // Type should be double
+    Object o2(3.5); // Type should be double
     ASSERT_EQ(o2.getType(), typeDouble);
     // We can explicitly change the type of a given object
     o2.setType(typeFloat);

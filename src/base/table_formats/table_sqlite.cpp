@@ -6,7 +6,7 @@
 #include "em/base/table_priv.h"
 
 
-using namespace em;
+using namespace emcore;
 
 
 #define SQLITE3_STR(text) reinterpret_cast<const char*>(text)
@@ -147,24 +147,24 @@ protected:
     /** Return the em::Type from a given SQLite type.
      * Each call to this function will also store the function that
      * will be used to retrieve the object */
-    virtual em::Type getTypeFromSqlite(sqlite3_stmt* stmt, int typeCol)
+    virtual Type getTypeFromSqlite(sqlite3_stmt* stmt, int typeCol)
     {
         auto typeStr = std::string(SQLITE3_STR(sqlite3_column_text(stmt, typeCol)));
 
         if (typeStr == "TEXT" || typeStr == "DATE")
         {
             funcs.push_back(setObjectFromText);
-            return em::typeString;
+            return typeString;
         }
         else if (typeStr == "INTEGER")
         {
             funcs.push_back(setObjectFromInt);
-            return em::typeInt32;
+            return typeInt32;
         }
         else if (typeStr == "FLOAT" || typeStr == "REAL")
         {
             funcs.push_back(setObjectFromFloat);
-            return em::typeFloat;
+            return typeFloat;
         }
 
         THROW_ERROR(String::join({"Unsupported SQLite type", typeStr}));

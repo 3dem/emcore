@@ -10,7 +10,7 @@
 
 
 
-using namespace em;
+using namespace emcore;
 
 
 TEST(String, trim)

@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace em
+namespace emcore
 {
     /** @ingroup base
      * This class will encapsulate the logic for time printing.
@@ -34,7 +34,7 @@ namespace em
         Impl * impl;
     };
 
-} // namespace em
+} // namespace emcore
 
 
 #endif //EM_CORE_TIMER_H

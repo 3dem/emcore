@@ -17,8 +17,8 @@
 #include "em/base/image_priv.h"
 
 
-using namespace em;
-
+using namespace emcore;
+namespace emc = emcore;
 
 // ===================== ImageImpl Implementation =======================
 
@@ -62,7 +62,7 @@ std::string ImageLocation::toString() const
     return ss.str();
 } // function ArrayDim.toString
 
-std::ostream& em::operator<< (std::ostream &ostream, const ImageLocation &loc)
+std::ostream& emc::operator<< (std::ostream &ostream, const ImageLocation &loc)
 {
     ostream << "(" << loc.path << ", ";
 
@@ -125,13 +125,13 @@ void Image::toStream(std::ostream &ostream) const
     // Array::toStream(ostream);
 }
 
-std::ostream& em::operator<< (std::ostream &ostream, const em::Image &image)
+std::ostream& emc::operator<< (std::ostream &ostream, const Image &image)
 {
     image.toStream(ostream);
     return ostream;
 }
 
-std::istream& em::operator>>(std::istream &istream, em::Image &image)
+std::istream& emc::operator>>(std::istream &istream, Image &image)
 {
     THROW_ERROR("Reading Image from std::istream is NOT IMPLEMENTED.");
 }
@@ -187,7 +187,7 @@ ImageIOImplRegistry * getImageIORegistry()
     return &registry;
 } // function getImageIORegistry
 
-bool em::ImageFile::registerImpl(const StringVector &extOrNames,
+bool ImageFile::registerImpl(const StringVector &extOrNames,
                              ImageFile::ImplBuilder builder)
 {
     return getImageIORegistry()->registerImpl(extOrNames, builder);
@@ -244,13 +244,13 @@ ImageFile::ImageFile()
     impl = nullptr;
 } // Empty Ctor ImageFile
 
-ImageFile::ImageFile(const std::string &path, const em::File::Mode mode,
+ImageFile::ImageFile(const std::string &path, const File::Mode mode,
                      const std::string &formatName):ImageFile()
 {
     open(path, mode, formatName);
 } // Ctor ImageFile
 
-void ImageFile::open(const std::string &path, const em::File::Mode mode,
+void ImageFile::open(const std::string &path, const File::Mode mode,
                      const std::string &formatName)
 {
     // Users should call ImageFile.close method before a new call to open
@@ -406,7 +406,7 @@ void ImageFile::toStream(std::ostream &ostream, int verbosity) const
     }
 }
 
-std::ostream& em::operator<< (std::ostream &ostream, const em::ImageFile &imageIO)
+std::ostream& operator<< (std::ostream &ostream, const ImageFile &imageIO)
 {
     imageIO.toStream(ostream);
     return ostream;
