@@ -1,0 +1,49 @@
+{% set version = "0.0.1" %}
+
+package:
+  name: emcore
+  version: {{ version }}
+
+source:
+  #git_url: git@github.com:3dem/em-core.git
+  path: /home/josem/work/development/em-core
+  #path: ../../
+  
+build:
+  number: 0
+
+requirements:
+  build:
+    - cmake >=3.0
+    - {{ compiler('cxx') }}
+    - make
+  host:
+    - python {{ python }}
+    - libpng
+    - libtiff
+    - jpeg
+    - freetype
+    - fftw >3.0
+    - sqlite >3.0
+  run:
+    - python
+    - jpeg
+    - libpng
+    - freetype
+    - libtiff
+    - fftw >3.0
+    - sqlite >3.0   
+    
+test:
+   imports:
+     - emcore
+
+about:
+  home: https://github.com/3dem/emcore
+  license: GPLv3
+  summary: Basic image processing library for Electron Microscopy
+
+extra:
+  recipe-maintainers:
+    - delarosatrevin
+
