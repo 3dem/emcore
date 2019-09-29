@@ -5,9 +5,9 @@ package:
   version: {{ version }}
 
 source:
-  #git_url: git@github.com:3dem/em-core.git
-  path: /home/josem/work/development/em-core
-  #path: ../../
+  #git_url: git@github.com:3dem/emcore.git
+  #path: /home/josem/work/development/emcore
+  path: ../../../emcore
   
 build:
   number: 0
