@@ -19,7 +19,7 @@ Building the library
 
 
 Building and installing in a given conda environment
-----------------------------------------------------
+....................................................
 
 .. code-block:: bash
 
