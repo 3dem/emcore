@@ -292,4 +292,4 @@ if(BUILD_PYBIND)
 endif(BUILD_PYBIND)
 
 install(TARGETS em-core DESTINATION lib)
-install(DIRECTORY ${INCLUDE_PATH}/em DESTINATION include)
+install(DIRECTORY ${INCLUDE_PATH}/emc DESTINATION include)
