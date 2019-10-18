@@ -6,7 +6,7 @@
 #include <sstream>
 #include <cassert>
 
-#include "em/base/array.h"
+#include "emc/base/array.h"
 
 using namespace emcore;
 

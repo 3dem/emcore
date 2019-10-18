@@ -2,10 +2,10 @@
 #include <complex>
 #include <cassert>
 
-#include "em/base/type.h"
-#include "em/base/object.h"
-#include "em/base/array.h"
-#include "em/base/timer.h"
+#include "emc/base/type.h"
+#include "emc/base/object.h"
+#include "emc/base/array.h"
+#include "emc/base/timer.h"
 
 using namespace emcore;
 

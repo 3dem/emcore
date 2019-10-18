@@ -8,8 +8,8 @@
 #include <cstddef>
 #include <string>
 
-#include "em/base/object.h"
-#include "em/base/container_priv.h"
+#include "emc/base/object.h"
+#include "emc/base/container_priv.h"
 
 
 namespace emcore

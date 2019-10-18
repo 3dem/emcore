@@ -5,7 +5,7 @@
 #ifndef EM_CORE_FFT_H
 #define EM_CORE_FFT_H
 
-#include "em/base/image.h"
+#include "emc/base/image.h"
 
 
 namespace emcore

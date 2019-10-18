@@ -8,13 +8,13 @@
 #include <vector>
 #include <algorithm>
 
-#include "em/base/error.h"
-#include "em/base/log.h"
-#include "em/base/type.h"
-#include "em/base/array.h"
-#include "em/base/registry.h"
-#include "em/os/filesystem.h"
-#include "em/base/image_priv.h"
+#include "emc/base/error.h"
+#include "emc/base/log.h"
+#include "emc/base/type.h"
+#include "emc/base/array.h"
+#include "emc/base/registry.h"
+#include "emc/os/filesystem.h"
+#include "emc/base/image_priv.h"
 
 
 using namespace emcore;

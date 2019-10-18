@@ -5,8 +5,8 @@
 #include <iostream>
 #include <algorithm>
 
-#include "em/base/error.h"
-#include "em/base/string.h"
+#include "emc/base/error.h"
+#include "emc/base/string.h"
 
 using namespace emcore;
 

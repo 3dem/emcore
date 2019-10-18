@@ -9,7 +9,7 @@
 #include <vector>
 #include <complex>
 
-#include "em/base/error.h"
+#include "emc/base/error.h"
 
 
 namespace emcore

@@ -4,8 +4,8 @@
 
 #include <iostream>
 
-#include "em/base/timer.h"
-#include "em/base/error.h"
+#include "emc/base/timer.h"
+#include "emc/base/error.h"
 
 using namespace emcore;
 

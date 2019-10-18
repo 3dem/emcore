@@ -10,8 +10,8 @@
 #include <vector>
 #include <cassert>
 
-#include "em/base/type.h"
-#include "em/base/container_priv.h"
+#include "emc/base/type.h"
+#include "emc/base/container_priv.h"
 
 
 namespace emcore

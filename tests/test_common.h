@@ -5,7 +5,7 @@
 #ifndef EM_CORE_TEST_COMMON_H
 #define EM_CORE_TEST_COMMON_H
 
-#include "em/base/error.h"
+#include "emc/base/error.h"
 
 using namespace emcore;
 

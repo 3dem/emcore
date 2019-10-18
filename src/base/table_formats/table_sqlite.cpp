@@ -3,7 +3,7 @@
 //
 
 #include <sqlite3.h>
-#include "em/base/table_priv.h"
+#include "emc/base/table_priv.h"
 
 
 using namespace emcore;
@@ -37,7 +37,7 @@ void setObjectFromNull(Object& obj, sqlite3_stmt* stmt, int col)
     // Do nothing for Null type values.
 }
 
-class TableIOSqlite: public TableIO::Impl
+class TableIOSqlite: public TableFile::Impl
 {
 private:
 

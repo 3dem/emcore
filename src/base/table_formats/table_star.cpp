@@ -2,13 +2,13 @@
 // Created by josem on 4/24/18.
 //
 
-#include "em/base/table_priv.h"
+#include "emc/base/table_priv.h"
 
 
 using namespace emcore;
 
 
-class TableIOStar: public TableIO::Impl
+class TableIOStar: public TableFile::Impl
 {
 protected:
     std::string line; // Used for parsing the star file lines

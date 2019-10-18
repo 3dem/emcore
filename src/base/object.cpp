@@ -3,7 +3,7 @@
 //
 
 #include <sstream>
-#include "em/base/object.h"
+#include "emc/base/object.h"
 
 
 using namespace emcore;

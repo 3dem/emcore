@@ -5,7 +5,7 @@
 #ifndef EM_CORE_CONTAINER_PRIV_H
 #define EM_CORE_CONTAINER_PRIV_H
 
-#include "em/base/type.h"
+#include "emc/base/type.h"
 
 
 namespace emcore

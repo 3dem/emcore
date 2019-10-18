@@ -6,7 +6,7 @@
 #define EM_CORE_PROGRAM_H
 
 #include <string>
-#include "em/base/string.h"
+#include "emc/base/string.h"
 
 
 namespace emcore

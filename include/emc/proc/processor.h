@@ -5,7 +5,7 @@
 #ifndef EM_CORE_PROCESSOR_H
 #define EM_CORE_PROCESSOR_H
 
-#include "em/base/image.h"
+#include "emc/base/image.h"
 
 
 namespace emcore

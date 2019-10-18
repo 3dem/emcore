@@ -8,9 +8,9 @@
 
 #include "docopt.h"
 
-#include <em/base/type.h>
-#include "em/proc/program.h"
-#include "../../include/em/proc/program.h"
+#include "emc/base/type.h"
+#include "emc/proc/program.h"
+
 
 using namespace emcore;
 

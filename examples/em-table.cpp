@@ -4,12 +4,12 @@
 #include <iomanip>
 #include <math.h>
 
-#include "em/base/error.h"
-#include "em/os/filesystem.h"
-#include "em/base/image.h"
-#include "em/base/table.h"
-#include "em/proc/program.h"
-#include "em/proc/processor.h"
+#include "emc/base/error.h"
+#include "emc/os/filesystem.h"
+#include "emc/base/image.h"
+#include "emc/base/table.h"
+#include "emc/proc/program.h"
+#include "emc/proc/processor.h"
 
 
 using namespace emcore;
@@ -80,7 +80,7 @@ void EmTableProgram::readArgs()
     ASSERT_ERROR(!Path::exists(inputFn),
                  String::join({"Input path '", inputFn, "' does not exists!!!"}));
 
-    TableIO tio;
+    TableFile tio;
     tio.open(inputFn);
     std::cout << std::setw(10) << std::right << "Tables: " << std::endl;
 
@@ -100,7 +100,7 @@ void EmTableProgram::readArgs()
         outputFn = getValue("<output>");
         std::cout << " Writing table: " << inputTable << " to: "
                   << outputFn << std::endl;
-        auto tio2 = TableIO();
+        auto tio2 = TableFile();
         tio2.open(outputFn, File::TRUNCATE);
         tio2.write(inputTable, t);
     }

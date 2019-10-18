@@ -6,8 +6,8 @@
 #include <random>
 #include "gtest/gtest.h"
 
-#include "em/base/table.h"
-#include "em/base/timer.h"
+#include "emc/base/table.h"
+#include "emc/base/timer.h"
 
 #include "test_common.h"
 
@@ -263,7 +263,7 @@ void checkColumnsAndRows(Table &t, int startingColIndex=0)
 
 TEST(Table, ReadStar)
 {
-    ASSERT_TRUE(TableIO::hasImpl("star"));
+    ASSERT_TRUE(TableFile::hasImpl("star"));
 
     Table table(
         {Column(1, "col1", typeFloat),
@@ -302,7 +302,7 @@ TEST(Table, ReadWriteStarSingleRow)
     std::cout << "Reading star: " << fn1 <<
     std::endl;
 
-    TableIO tio;
+    TableFile tio;
     Table t;
     tio.open(fn1);
     tio.read("optimiser_general", t);
@@ -318,7 +318,7 @@ TEST(Table, ReadWriteStarSingleRow)
 TEST(Table, WriteStar)
 {
     auto table10 = createTable(10);
-    TableIO tio;
+    TableFile tio;
     tio.open("test-write.star", File::Mode::TRUNCATE);
     tio.write("Particles1", table10);
     std::string str;
@@ -364,7 +364,7 @@ TEST(Table, ReadStarMultipleTables)
     std::string fn1 = root + "case1/classify3d_small_it038_sampling.star";
     std::cout << "Reading star: " << fn1 << std::endl;
 
-    TableIO tio;
+    TableFile tio;
     Table t;
     tio.open(fn1);
     int c = 0;
@@ -383,14 +383,14 @@ TEST(Table, ReadXmd)
 {
     auto td = TestData();
 
-    ASSERT_TRUE(TableIO::hasImpl("xmd"));
+    ASSERT_TRUE(TableFile::hasImpl("xmd"));
 
     std::string fn1 = td.get("xmipp_tutorial/gold/images200k.xmd");
 
     std::cout << "Reading xmd: " << fn1 << std::endl;
 
     Table t;
-    TableIO tio;
+    TableFile tio;
 
     tio.open(fn1);
 
@@ -419,7 +419,7 @@ TEST(Table, ReadSqlite)
 
     std::cout << "Reading sqlite: " << fn1 << std::endl;
 
-    TableIO tio;
+    TableFile tio;
     Table t;
     tio.open(fn1);
     int c = 0;

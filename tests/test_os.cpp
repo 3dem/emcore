@@ -9,8 +9,8 @@
 #include <iostream>
 #include "gtest/gtest.h"
 
-#include "em/base/string.h"
-#include "em/os/filesystem.h"
+#include "emc/base/string.h"
+#include "emc/os/filesystem.h"
 
 
 using namespace emcore;

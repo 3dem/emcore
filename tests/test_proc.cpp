@@ -5,10 +5,10 @@
 #include <random>
 #include "gtest/gtest.h"
 
-#include "em/proc/processor.h"
-#include "em/proc/stats.h"
-#include "em/math/functions.h"
-#include "em/base/timer.h"
+#include "emc/proc/processor.h"
+#include "emc/proc/stats.h"
+#include "emc/math/functions.h"
+#include "emc/base/timer.h"
 
 
 

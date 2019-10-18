@@ -6,8 +6,8 @@
 #define EM_CORE_REGISTRY_H_H
 
 #include <map>
-#include "em/base/string.h"
-#include "em/base/error.h"
+#include "emc/base/string.h"
+#include "emc/base/error.h"
 
 
 namespace emcore

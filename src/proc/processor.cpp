@@ -2,9 +2,9 @@
 // Created by josem on 11/7/17.
 //
 
-#include "em/base/string.h"
-#include "em/proc/processor.h"
-#include "../../include/em/proc/fft.h"
+#include "emc/base/string.h"
+#include "emc/proc/processor.h"
+#include "../../include/emc/proc/fft.h"
 
 using namespace emcore;
 

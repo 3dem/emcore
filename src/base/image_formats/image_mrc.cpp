@@ -1,8 +1,8 @@
 #include <iomanip>
 
-#include "em/base/error.h"
-#include "em/base/image.h"
-#include "em/base/image_priv.h"
+#include "emc/base/error.h"
+#include "emc/base/image.h"
+#include "emc/base/image_priv.h"
 
 using namespace emcore;
 
