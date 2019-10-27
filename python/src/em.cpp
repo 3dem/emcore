@@ -1,6 +1,6 @@
 #include <string>
 #include <pybind11/pybind11.h>
-#include "em/base/array.h"
+#include "emc/base/array.h"
 
 namespace py = pybind11;
 

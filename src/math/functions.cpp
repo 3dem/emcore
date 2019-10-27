@@ -4,7 +4,7 @@
 
 #include <cmath>
 
-#include "em/math/functions.h"
+#include "emc/math/functions.h"
 
 
 using namespace emcore;

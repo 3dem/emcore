@@ -5,10 +5,10 @@
 
 #include "gtest/gtest.h"
 
-#include "em/os/filesystem.h"
-#include "em/math/functions.h"
-#include "em/base/image.h"
-#include "em/base/legacy.h"
+#include "emc/os/filesystem.h"
+#include "emc/math/functions.h"
+#include "emc/base/image.h"
+#include "emc/base/legacy.h"
 
 
 using namespace emcore;

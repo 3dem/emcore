@@ -7,9 +7,9 @@
 #include <sstream>
 #include <algorithm> // sorting the table
 
-#include "em/base/registry.h"
-#include "em/base/table.h"
-#include "em/base/table_priv.h"
+#include "emc/base/registry.h"
+#include "emc/base/table.h"
+#include "emc/base/table_priv.h"
 
 
 using namespace emcore;
@@ -343,7 +343,7 @@ void Table::sort(const StringVector &columnName)
 
 void Table::read(const std::string &tableName, const std::string &path)
 {
-    auto tio = TableIO();
+    auto tio = TableFile();
     tio.open(path);
     tio.read(tableName, *this);
     tio.close();
@@ -351,8 +351,8 @@ void Table::read(const std::string &tableName, const std::string &path)
 
 void Table::read(const std::string &path)
 {
-    auto tio = TableIO();
-    // FIXME: Implement a way to read first table by default in TableIO
+    auto tio = TableFile();
+    // FIXME: Implement a way to read first table by default in TableFile
     // FIXME: it can be more efficient since the whole file will not be parsed
     tio.open(path);
     auto tableName = tio.getTableNames()[0];
@@ -593,9 +593,9 @@ Table::const_col_iterator Table::cend_cols() const
     return impl->columns.cend();
 }
 
-// ========================== TableIO Implementation ===========================
+// ========================== TableFile Implementation ===========================
 
-using TableIOImplRegistry = ImplRegistry<TableIO::Impl>;
+using TableIOImplRegistry = ImplRegistry<TableFile::Impl>;
 
 TableIOImplRegistry * getTableIORegistry()
 {
@@ -603,34 +603,34 @@ TableIOImplRegistry * getTableIORegistry()
     return &registry;
 } // function getTableIORegistry
 
-bool TableIO::registerImpl(const StringVector &extOrNames,
-                               TableIO::ImplBuilder builder)
+bool TableFile::registerImpl(const StringVector &extOrNames,
+                               TableFile::ImplBuilder builder)
 {
     return getTableIORegistry()->registerImpl(extOrNames, builder);
 } // function registerImageIOImpl
 
-bool TableIO::hasImpl(const std::string &extension)
+bool TableFile::hasImpl(const std::string &extension)
 {
     return getTableIORegistry()->hasImpl(extension);
 
 } // function hasIO
 
-TableIO::TableIO()
+TableFile::TableFile()
 {
     impl = nullptr;
 } // Default Ctor
 
-TableIO::TableIO(const std::string &extOrName): TableIO()
+TableFile::TableFile(const std::string &extOrName): TableFile()
 {
     impl = getTableIORegistry()->buildImpl(extOrName);
-} // ctor TableIO(std::string)
+} // ctor TableFile(std::string)
 
-TableIO::~TableIO()
+TableFile::~TableFile()
 {
     delete impl;
 }
 
-void TableIO::open(const std::string &path, File::Mode mode)
+void TableFile::open(const std::string &path, File::Mode mode)
 {
 
     delete impl;  // Does it make sense to reuse impl?
@@ -649,43 +649,43 @@ void TableIO::open(const std::string &path, File::Mode mode)
                  String::join({"Filename does not exists: ", path}));
 
     impl->openFile();
-} // function TableIO.open
+} // function TableFile.open
 
-StringVector TableIO::getTableNames() const
+StringVector TableFile::getTableNames() const
 {
     ASSERT_ERROR(impl == nullptr, "Invalid operation, implementation is null.");
     return impl->getTableNames();
-} // function TableIO.getColumnNames
+} // function TableFile.getColumnNames
 
-void TableIO::close()
+void TableFile::close()
 {
     ASSERT_ERROR(impl == nullptr, "Invalid operation, implementation is null.");
     impl->closeFile();
-} // function TableIO.close
+} // function TableFile.close
 
-void TableIO::read(const std::string &tableName, Table &table)
+void TableFile::read(const std::string &tableName, Table &table)
 {
     ASSERT_ERROR(impl == nullptr, "Invalid operation, implementation is null.");
     table.clear();
     impl->read(tableName, table);
-} // TableIO.read
+} // TableFile.read
 
-void TableIO::write(const std::string &tableName, const Table &table)
+void TableFile::write(const std::string &tableName, const Table &table)
 {
     ASSERT_ERROR(impl == nullptr, "Invalid operation, implementation is null.");
     impl->write(tableName, table);
-} // TableIO.write
+} // TableFile.write
 
 
-void TableIO::Impl::openFile()
+void TableFile::Impl::openFile()
 {
     file = fopen(path.c_str(), File::modeToString(fileMode));
-} // function TableIO::Impl.openFile
+} // function TableFile::Impl.openFile
 
-void TableIO::Impl::closeFile()
+void TableFile::Impl::closeFile()
 {
     fclose(file);
-} // function TableIO::Impl.closeFile
+} // function TableFile::Impl.closeFile
 
 #include "table_formats/table_star.cpp"
 #include "table_formats/table_sqlite.cpp"

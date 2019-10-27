@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "em/base/error.h"
-#include "em/base/image.h"
-#include "em/base/type.h"
+#include "emc/base/error.h"
+#include "emc/base/image.h"
+#include "emc/base/type.h"
 #include  <map>
 
 

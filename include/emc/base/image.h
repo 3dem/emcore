@@ -9,10 +9,10 @@
 #include <cstdio>
 #include <string>
 
-#include "em/base/string.h"
-#include "em/base/object.h"
-#include "em/base/array.h"
-#include "em/os/filesystem.h"
+#include "emc/base/string.h"
+#include "emc/base/object.h"
+#include "emc/base/array.h"
+#include "emc/os/filesystem.h"
 
 
 namespace emcore

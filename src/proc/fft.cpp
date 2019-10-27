@@ -4,9 +4,9 @@
 
 #include <fftw3.h>
 
-#include "em/proc/fft.h"
-#include "em/base/array.h"
-#include "em/base/legacy.h"
+#include "emc/proc/fft.h"
+#include "emc/base/array.h"
+#include "emc/base/legacy.h"
 
 
 using namespace emcore;

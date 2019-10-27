@@ -8,10 +8,10 @@
 
 #include <string>
 
-#include "em/base/type.h"
-#include "em/base/object.h"
-#include "em/base/string.h"
-#include "em/os/filesystem.h"
+#include "emc/base/type.h"
+#include "emc/base/object.h"
+#include "emc/base/string.h"
+#include "emc/os/filesystem.h"
 
 
 namespace emcore {
@@ -252,7 +252,7 @@ namespace emcore {
          void sort(const StringVector &columnName);
 
         /** Shortcut function to read a table from file without the need
-         * to explicitly instantiating a TableIO object. After calling
+         * to explicitly instantiating a TableFile object. After calling
          * this function, the current table will be populated.
          * @param tableName Name of the table that will be read
          * @param path Path to the table file, the type of reader will
@@ -262,7 +262,7 @@ namespace emcore {
 
         /**
          * Shortcut function to read a table from file without the need
-         * to explicitly instantiating a TableIO object. After calling
+         * to explicitly instantiating a TableFile object. After calling
          * this function, the current table will be populated.
          * @param path Path to the table file, the type of reader will
          *  be inferred from the filename extension
@@ -286,12 +286,12 @@ namespace emcore {
     /** @ingroup image
      * Read and write metadata (as table) from/to files.
      *
-     * Internally, the TableIO class holds a pointer to TableIOImpl class,
+     * Internally, the TableFile class holds a pointer to TableIOImpl class,
      * that contains the details about how to open files and read the metadata.
      * The TableIOImpl class should be extended to provide support for other
      * formats.
      */
-    class TableIO
+    class TableFile
     {
     public:
         class Impl;
@@ -303,7 +303,7 @@ namespace emcore {
         using ImplBuilder = Impl* (*)();
 
         /**
-         * Empty constructor for TableIO.
+         * Empty constructor for TableFile.
          * In this case the newly created instance will have no format
          * implementation associated to read/write formats. Then, when the
          * open() method is called to open a file, the format implementation
@@ -311,38 +311,38 @@ namespace emcore {
          * raise an exception if called without having opened a file and,
          * therefore, without having an underlying format implementation.
          */
-        TableIO();
+        TableFile();
 
         /**
-         * Constructor to build a new TableIO instance given its name or
+         * Constructor to build a new TableFile instance given its name or
          * an extension related to the format implementation. The provided
          * input string should be the key associated to a know format
          * implementation. If not, an exception will be thrown. If the format
-         * implementation is associated to the TableIO instance, it will not
+         * implementation is associated to the TableFile instance, it will not
          * change when calling the open() method. This allow to read/write
          * metadata with unknown (or non-standard) file extensions.
          *
-         * @param extOrName Input string representing either the TableIO name
+         * @param extOrName Input string representing either the TableFile name
          * or one of the extensions registered for it.
          */
-        TableIO(const std::string &extOrName);
+        TableFile(const std::string &extOrName);
 
-        ~TableIO();
+        ~TableFile();
 
         /**
-         * Check if some TableIO implementation is registered for a given name
+         * Check if some TableFile implementation is registered for a given name
          * or extension.
          *
-         * @param extOrName Input string representing either the TableIO name
+         * @param extOrName Input string representing either the TableFile name
          * or one of the extensions registered.
-         * @return Return True if there is any TableIO registered.
+         * @return Return True if there is any TableFile registered.
          */
         static bool hasImpl(const std::string &extOrName);
 
         /**
-         * Register a new TableIO implementation.
+         * Register a new TableFile implementation.
          * This function should not be used unless you are developing an
-         * implementation for a new TableIO format.
+         * implementation for a new TableFile format.
          */
         static bool registerImpl(const StringVector &extOrNames,
                                  ImplBuilder builder);
@@ -369,7 +369,7 @@ namespace emcore {
     private:
         // Pointer to implementation class, PIMPL idiom
         Impl* impl = nullptr;
-    }; // class TableIO
+    }; // class TableFile
 
     std::ostream& operator<< (std::ostream &ostream, const Table::Column &col);
     std::ostream& operator<< (std::ostream &ostream, const Table::Row &row);

@@ -2,7 +2,7 @@
 // Created by josem on 11/7/17.
 //
 
-#include "em/proc/stats.h"
+#include "emc/proc/stats.h"
 
 using namespace emcore;
 namespace emc = emcore;

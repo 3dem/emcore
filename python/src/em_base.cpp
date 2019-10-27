@@ -8,10 +8,10 @@
 #include <pybind11/stl.h>
 #include <pybind11/complex.h>
 
-#include "em/base/type.h"
-#include "em/base/array.h"
-#include "em/base/table.h"
-#include "em/base/object.h"
+#include "emc/base/type.h"
+#include "emc/base/array.h"
+#include "emc/base/table.h"
+#include "emc/base/object.h"
 
 namespace py = pybind11;
 
@@ -299,15 +299,15 @@ void init_submodule_base(py::module &m) {
 //            .def("updateRow", &Table::updateRow)
 //            .def("updateRows", &Table::updateRows);
 
-    py::class_<TableIO>(m, "TableIO")
+    py::class_<TableFile>(m, "TableFile")
             .def(py::init<>())
             .def(py::init<const std::string&>())
-            .def_static("hasImpl", &TableIO::hasImpl)
-            .def_static("registerImpl", &TableIO::registerImpl)
-            .def("open", &TableIO::open,
+            .def_static("hasImpl", &TableFile::hasImpl)
+            .def_static("registerImpl", &TableFile::registerImpl)
+            .def("open", &TableFile::open,
                  py::arg("filename"), py::arg("mode")=File::Mode::READ_ONLY)
-            .def("close", &TableIO::close)
-            .def("getTableNames", &TableIO::getTableNames)
-            .def("read", &TableIO::read);
-            //.def("write", &TableIO::write);
-} // em/base sub-module definition
+            .def("close", &TableFile::close)
+            .def("getTableNames", &TableFile::getTableNames)
+            .def("read", &TableFile::read);
+            //.def("write", &TableFile::write);
+} // emc/base sub-module definition

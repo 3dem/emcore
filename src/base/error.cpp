@@ -2,7 +2,7 @@
 // Created by josem on 7/13/17.
 //
 
-#include "em/base/error.h"
+#include "emc/base/error.h"
 #include <cstring>
 #include <sstream>
 

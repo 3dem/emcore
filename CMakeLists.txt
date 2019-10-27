@@ -6,7 +6,7 @@ add_compile_options(-std=c++11)
 
 message(STATUS "Setting CXX supported standard '${CMAKE_CXX_STANDARD}'")
 
-project(em-core VERSION 0.0.1)
+project(em-core VERSION 0.0.2)
 
 # Add option to build examples, turn on with 'cmake -DBUILD_TESTS=ON'
 option(BUILD_EXAMPLES "Build all examples." OFF)
@@ -292,4 +292,4 @@ if(BUILD_PYBIND)
 endif(BUILD_PYBIND)
 
 install(TARGETS em-core DESTINATION lib)
-install(DIRECTORY ${INCLUDE_PATH}/em DESTINATION include)
+install(DIRECTORY ${INCLUDE_PATH}/emc DESTINATION include)

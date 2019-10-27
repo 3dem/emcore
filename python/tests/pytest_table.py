@@ -252,13 +252,13 @@ class TestTable(BaseTest):
 
     def test_Read(self):
         td = TestData()
-        self.assertTrue(emc.TableIO.hasImpl('star'))
+        self.assertTrue(emc.TableFile.hasImpl('star'))
 
         root = td.get("relion_tutorial/import/")
         fn1 = root + "case1/classify3d_small_it038_data.star"
         print("Reading star: ", fn1)
 
-        tio = emc.TableIO()
+        tio = emc.TableFile()
         tio.open(fn1)
         tableNames = tio.getTableNames()
         print("Tables: ", tableNames)
@@ -342,7 +342,7 @@ _rlnMaxValueProbDistribution #17
                 self.assertEqual(v2, v1)
 
     def test_ReadSingleRow(self):
-        self.assertTrue(emc.TableIO.hasImpl('star'))
+        self.assertTrue(emc.TableFile.hasImpl('star'))
 
         td = TestData()
         root = td.get("relion_tutorial/import/")
@@ -356,14 +356,14 @@ _rlnMaxValueProbDistribution #17
         self.assertEqual(t.getSize(), 1)
 
     def test_ReadXmd(self):
-        self.assertTrue(emc.TableIO.hasImpl('star'))
+        self.assertTrue(emc.TableFile.hasImpl('star'))
 
         td = TestData()
 
         fn1 = td.get("xmipp_tutorial/gold/images200k.xmd")
         print("Reading xmd: ", fn1)
 
-        tio = emc.TableIO()
+        tio = emc.TableFile()
         table = emc.Table()
 
         t = Timer()

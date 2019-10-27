@@ -2,7 +2,7 @@
 // Created by josem on 12/2/16.
 //
 #include <sstream>
-#include "em/base/type.h"
+#include "emc/base/type.h"
 
 
 using namespace emcore;

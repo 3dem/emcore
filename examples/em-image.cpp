@@ -6,12 +6,12 @@
 #include <utility>
 #include <math.h>
 
-#include "em/base/error.h"
-#include "em/os/filesystem.h"
-#include "em/base/image.h"
-#include "em/proc/program.h"
-#include "em/proc/processor.h"
-#include "em/proc/stats.h"
+#include "emc/base/error.h"
+#include "emc/os/filesystem.h"
+#include "emc/base/image.h"
+#include "emc/proc/program.h"
+#include "emc/proc/processor.h"
+#include "emc/proc/stats.h"
 
 using namespace emcore;
 

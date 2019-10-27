@@ -5,7 +5,7 @@
 #include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
 
-#include "em/base/image.h"
+#include "emc/base/image.h"
 
 namespace py = pybind11;
 
@@ -58,4 +58,4 @@ void init_submodule_image(py::module &m) {
         .def("expand", &ImageFile::expand)
         .def("close", &ImageFile::close);
 
-} // em/image sub-module definition
+} // emc/image sub-module definition

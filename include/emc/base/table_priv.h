@@ -8,7 +8,7 @@
 namespace emcore
 {
 
-    class TableIO::Impl
+    class TableFile::Impl
     {
     public:
         // Store the name of the file that was read/written
@@ -32,8 +32,8 @@ namespace emcore
         // TODO: Document
         virtual void write(const std::string &tableName, const Table &table) = 0;
 
-        friend class TableIO;
-    }; // class TableIO::Impl
+        friend class TableFile;
+    }; // class TableFile::Impl
 
 } // namespace emcore
 
@@ -41,7 +41,7 @@ namespace emc = emcore;
 
 // The following macro can be used as a shortcut to register new ImageFile subclasses
 #define REGISTER_TABLE_IO(extensions, ioClassName) \
-    TableIO::Impl * new___##ioClassName(){ return new ioClassName(); } \
-    bool reg___##ioClassName = emc::TableIO::registerImpl(extensions, new___##ioClassName)
+    TableFile::Impl * new___##ioClassName(){ return new ioClassName(); } \
+    bool reg___##ioClassName = emc::TableFile::registerImpl(extensions, new___##ioClassName)
 
 #endif //EM_CORE_METADATA_PRIV_H
