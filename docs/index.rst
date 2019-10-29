@@ -2,21 +2,29 @@
 Welcome to emcore documentation!
 ================================
 
-Here you will find the documentation for ``datavis`` and ``emvis``, which are two
-Python libraries for scientific data analysis and visualization. There are designed
-mainly for CryoEM, but can be useful for any domain that deals with images and tables.
+``emcore`` is a basic library for cryo Electron Microscopy (CryoEM) image processing.
+It is designed around three main components: images, tables and processors.
+The library provides a well structured way to read and write the most used
+file formats in CryoEM programs. It also provides basic operations for data
+manipulation and analysis.
+
 
 .. toctree::
     :maxdepth: 2
     :caption: Guide
 
     guide/overview
+    guide/type_object
+    guide/array_image
 
 
 .. toctree::
     :maxdepth: 2
     :caption: Reference
 
+    api/type
+    api/object
+    api/array
     api/image
     api/table
 

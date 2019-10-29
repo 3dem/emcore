@@ -1,48 +1,54 @@
 Overview
 ========
 
-What are datavis and emvis?
----------------------------
+Architecture
+------------
 
-``datavis`` is a Python library that provides basic components for implementing graphical applications
-to visualize and analyze scientific data. It has been designed to deal with images data and tabular
-information. The library is built around two key concepts:
+``emcore`` is a basic scientific library for data processing in CryoEM written in C++11 and with Python bindings.
+The library contains submodules for basic mathematical operations and operating system specific functions.
+Another submodule provides the bread and butter for basic CryoEM data handling: Images and Tables.
+Based on these submodules, there is a processing submodule that implements
+basic operations such as filters, alignment, Fourier transforms,
 
-* **Models**: classes in this category are responsible of reading the different type of data
-  (images, volumes, tables) in different formats (xml, SQL, text files, etc). Models will provide
-  an uniform interface for Views to display the underlying data.
+``emcore`` is implemented in C++11, exploiting some of new features of this version of the language
+for more efficient memory manipulation and more functions already built in the standard library.
+Additionally, we use `pybind11`_ to generate a binding layer to the existing classes and methods,
+that expose most of the available functionality to Python.
 
-* **Views**: graphical components that will display the data, fetched from one or more models.
+The general architecture, as well as many elements on the design and implementation of the main components,
+has been somehow inspired and influenced by existing code in established packages such as
+Xmipp \cite{Sorzano2004, Scheres2008, DeLaRosa2013}, Eman2 \cite{Tang2007}, Bsoft \cite{Heymann2007} and
+Relion \cite{Scheres2012a, Kimanius2016, Zivanov2018}, among others.
 
-``emvis`` is an extension of ``datavis`` that implements models specific to CryoEM using the ``emcore``
-library. It also provides some extended views and many utility functions to handle CryoEM data.
+The ``emvis`` library extends ``datavis`` by using ``emcore`` to implement specific data models and views.
+The general architecture is shown in the following figure:
+
+.. image:: /images/architecture.png
+    :width: 600px
+    :align: center
+
 
 Installation
 ------------
-The preferred way to install these libraries is via conda::
+The preferred way to install the libraries is via conda::
 
-    conda install -c emforge emcore datavis emvis
-
-
-Another way is to use `Python package index`_::
-
-    pip install emcore datavis emvis  # Currently emcore is not available via PyPI
+    conda install -c emforge emcore
 
 
-The source code (including the tests and examples) can be found on GitHub:
+Source code and instructions about how to build the library from sources
+can be found at the GitHub repository:
 
-* https://github.com/3dem/datavis.git
 * https://github.com/3dem/emcore.git
-* https://github.com/3dem/emvis.git
+
 
 Citing
 ------
 
 If you find ``emcore``, ``datavis`` or ``emvis`` useful in your work, please cite:
 
-De la Rosa-Trevin, J.M., Hernandez Viga, P., ... (2019) Developing basic building blocks...
-. *Acta Cryst.* D\ **73**:469--477.
-`doi: 10.1107/S2059798317007859`_
+De la Rosa-Trevin, J.M., Hernandez Viga, P.A., Oton, J. and Lindalh, E.
+*Development of basic building blocks for Cryo-EM :emcore and emvis software libraries*.
+*Acta Cryst.* D\ **73**:469--477. 2019
 
 
 Contributing
@@ -61,7 +67,6 @@ Licence
 The project is released under the `GPLv3`_ licence.
 
 
-.. _Python package index: https://pypi.org/project/mrcfile
 .. _email CCP-EM: ccpem@stfc.ac.uk
-.. _`doi: 10.1107/S2059798317007859`: https://doi.org/10.1107/S2059798317007859
+.. _pybind11: https://github.com/pybind/pybind11
 .. _GPLv3: https://www.gnu.org/licenses/gpl-3.0.en.html

@@ -2,3 +2,5 @@
 cmake*
 build
 *.pyc
+images
+
