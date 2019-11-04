@@ -1,0 +1,38 @@
+
+@import 'theme.css';       /* for the Read the Docs theme */
+
+
+/*.wy-nav-content {*/
+/*   max-width: 1050px*/
+/*}*/
+
+.wy-side-nav-search {
+    display: block;
+    width: 300px;
+    padding: .809em;
+    margin-bottom: .809em;
+    z-index: 200;
+    background-color: #95C11E;  /* override color */
+    text-align: center;
+    padding: .809em;
+    display: block;
+    color: #fcfcfc;
+    margin-bottom: .809em;
+}
+
+
+
+
+.wy-menu-vertical header, .wy-menu-vertical p.caption {
+    color: #95c11e;
+    /*height: 32px;*/
+    /*display: inline-block;*/
+    /*line-height: 32px;*/
+    /*padding: 0 1.618em;*/
+    /*margin: 12px 0 0 0;*/
+    /*display: block;*/
+    /*font-weight: bold;*/
+    /*text-transform: uppercase;*/
+    /*font-size: 85%;*/
+    /*white-space: nowrap;*/
+}
