@@ -143,7 +143,7 @@ void ImageScaleProc::process(const Image &input, Image &output)
     auto scaleMaxdim = maxdim * scaleFactor;
     // Create a float and square image to perform the FT
     output.resize(ArrayDim(maxdim, maxdim), typeFloat);
-    output.patch(input);  // Copy/convert input into the squared image
+    output.patch(input);  // Copy input into the squared image
 
     Image tmp;
     ft.scale(output, tmp, scaleMaxdim);

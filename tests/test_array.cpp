@@ -350,7 +350,7 @@ TEST(Array, copyFromTo)
         ASSERT_EQ(data[i], (int)data2[j]);
     }
 
-// Test the other way around extract
+    // Test the other way around extract
     Array b1(a1);
     Array b2 = b1;
     b1.set(0);

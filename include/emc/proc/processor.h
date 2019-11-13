@@ -119,6 +119,33 @@ namespace emcore
         virtual void validateParams() const override ;
     }; // class ImageScaleProc
 
+
+    /** Processor to select a window from an image.
+     * The window can be partially overlapping with the image, in which
+     * case the 'fill' parameter should be provided.
+     * An special case of 'crop' mode allows to easily crop
+     * a given amount of pixels from the sides of the image
+     * (left, top, right, bottom).
+     */
+    class ImageWindowProc: public ImageProcessor
+    {
+        using ImageProcessor::ImageProcessor;
+
+    public:
+
+        /** Scale input image and store the new one in output.
+         * The output image will have the dimension defined by param "newdim"
+         */
+        virtual void process(const Image &input, Image &output) override ;
+
+        /** Apply the scale and store the output in the same input image.
+         */
+        virtual void process(Image &inputOutput) override ;
+
+    protected:
+        virtual void validateParams() const override ;
+    }; // class ImageScaleProc
+
 } // namespace emcore
 
 #endif //EM_CORE_PROCESSOR_H
