@@ -103,7 +103,7 @@ void ImageMathProc::process(Image &image)
 } // function ImageMathProc.process
 
 
-// -------------- ImageMathProc Implementation ---------------------------
+// -------------- ImageScaleProc Implementation ---------------------------
 void ImageScaleProc::validateParams() const
 {
     int count = 0;
@@ -159,3 +159,36 @@ void ImageScaleProc::process(Image &image)
     std::swap(image, tmp);  // Move the result to image
 } // function ImageScaleProc.process
 
+
+// -------------- ImageWindowProc Implementation ---------------------------
+void ImageWindowProc::validateParams() const
+{
+    int count = 0;
+
+//    for (auto& param: {"newdim_x", "newdim_y", "factor", "angpix_old"})
+//        if (hasParam(param))
+//            count++;
+//
+//    ASSERT_ERROR(count == 0, "Please provide at least one of the valid parameter.");
+//    ASSERT_ERROR(count > 1, "Please provide only non-exclusive parameters. ");
+//    if (hasParam("angpix_old"))
+//        ASSERT_ERROR(!hasParam("angpix_new"),
+//                     "Please provide angpix_new when using angpix_old. ");
+}
+
+void ImageWindowProc::process(const Image &input, Image &output)
+{
+    FourierTransformer ft;
+    // TODO: Check if we need to convert always
+    auto inputDim = input.getDim();
+
+    std::cout << "Croping image with dims: " << inputDim << std::endl;
+    output = input;
+} // function ImageWindowProc.process
+
+void ImageWindowProc::process(Image &image)
+{
+    Image tmp;
+    process(image, tmp);
+    std::swap(image, tmp);  // Move the result to image
+} // function ImageWindowProc.processIm

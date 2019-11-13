@@ -86,6 +86,11 @@ const char* Program::Argument::get(size_t pos) const
     return argv[pos];
 }
 
+int Program::Argument::getInt(size_t pos) const
+{
+    return String::toInt(get(pos));
+}
+
 float Program::Argument::getFloat(size_t pos) const
 {
     return String::toFloat(get(pos));
@@ -156,10 +161,10 @@ int Program::main(int argc, const char **argv)
                                           {argv + 1, argv + argc},
                                           true, getName());
 
-//    for(auto const& arg : impl->docoptArgs)
-//    {
-//        std::cout << arg.first << ": " << arg.second << std::endl;
-//    }
+    for(auto const& arg : impl->docoptArgs)
+    {
+        std::cout << arg.first << ": " << arg.second << std::endl;
+    }
         readArgs();
         return run();
     }

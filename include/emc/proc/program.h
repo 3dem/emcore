@@ -37,6 +37,9 @@ namespace emcore
             /** Return the value of the argument in a given position */
             const char * get(size_t pos = 1) const;
 
+            /** Return the value of the argument as an int */
+            int  getInt(size_t pos = -1) const;
+
             /** Return the value of the argument as a float */
             float getFloat(size_t pos = 1) const;
 

@@ -32,7 +32,8 @@ static const char USAGE[] =
                          scale (x|y|z) <new_dim>                  |
                         (lowpass|highpass) <freq>                 |
                         (bandpass <low_freq> <high_freq>)
-                       ]... [<output>]
+                       ]...
+                       [-o <output>]
                        [--oformat <oformat>]
                        [--stats]
 
@@ -62,7 +63,7 @@ public:
     virtual StringVector getCommands() const override
     {
         return {"create", "add", "sub", "mul", "div", "shift", "rotate",
-                "flip", "scale"};
+                "flip", "scale", "crop", "window"};
     }
 
 protected:
@@ -178,19 +179,21 @@ ImageProcessor* EmImageProgram::getProcessorFromArg(const Program::Argument& arg
     else if (cmdName == "div")
         op = Type::DIV;
 
-        std::cout << ">>> Cmd: " << cmdName << ", op: " << (char)op << std::endl;
+
 
     if (op != Type::NO_OP)  // Case of an arithmetic operation
     {
+        std::cout << ">>> Cmd: " << cmdName << ", op: " << (char)op << std::endl;
         imgProc = new ImageMathProc({{ImageMathProc::OPERATION, op},
                                      {ImageMathProc::OPERAND, arg.getFloat(1)}});
     }
     else
     {
+        ObjectDict params;
+
         if (cmdName == "scale")
         {
             auto arg1 = arg.getString(1);
-            ObjectDict params;
 
             if (arg1 == "angpix")
                 params = {{"angpix_old", arg.getFloat(2)},
@@ -203,6 +206,23 @@ ImageProcessor* EmImageProgram::getProcessorFromArg(const Program::Argument& arg
                 params = {{"factor", arg.getFloat(1)}};
 
             imgProc = new ImageScaleProc(params);
+        }
+        else if (cmdName == "crop")
+        {
+            auto n = arg.getSize();
+//            params["operation"] = "crop";
+//            params["left"] = arg.getInt(1);
+//            if (n > 1)
+//                params["top"] = arg.getInt(2);
+//            if (n > 2)
+//                params["right"] = arg.getInt(3);
+//            if (n > 3)
+//                params["bottom"] = arg.getInt(4);
+            imgProc = new ImageWindowProc(params);
+        }
+        else if (cmdName == "window")
+        {
+            imgProc = new ImageWindowProc(params);
         }
     }
     return imgProc;
@@ -327,7 +347,7 @@ int EmImageProgram::run()
                   << "   format: " << outputFormat << std::endl
                   << "     type: " << outputType.getName() << std::endl;
 
-        ImageFile outputIO(outputFormat);
+        ImageFile outputIO;
 
         for (auto& path: inputList)
         {

@@ -211,7 +211,7 @@ ImageFile::FormatTypes ImageFile::getFormatTypes()
 {
     FormatTypes dict;
 
-    for (const auto& kv: getImageIORegistry()->getUniqueMap())
+    for (const auto& kv: getImageIORegistry()->getMap()) // getUniqueMap())
     {
         auto& vector = dict[kv.first] = {};  // empty vector
         auto impl = kv.second();
