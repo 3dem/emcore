@@ -161,10 +161,10 @@ int Program::main(int argc, const char **argv)
                                           {argv + 1, argv + argc},
                                           true, getName());
 
-    for(auto const& arg : impl->docoptArgs)
-    {
-        std::cout << arg.first << ": " << arg.second << std::endl;
-    }
+//    for(auto const& arg : impl->docoptArgs)
+//    {
+//        std::cout << arg.first << ": " << arg.second << std::endl;
+//    }
         readArgs();
         return run();
     }

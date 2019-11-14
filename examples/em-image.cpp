@@ -38,12 +38,12 @@ static const char USAGE[] =
                        [--stats]
 
     Options:
-      <input>     An input file or a pattern matching many files.
-      <output>    An output file or a suffix when many files are produced.
-      -h --help   Show this screen.
-      --version   Show version.
-      --formats   Print the list of available image formats
-      --oformat <oformat>  Specify the output format (e.g 'mrc' or 'mrc:int8')
+      <input>                           An input file or a pattern matching many files.
+      -o <output>, --output <output>    An output file or a suffix when many files are produced.
+      -h --help                         Show this screen.
+      --version                         Show version.
+      --formats                         Print the list of available image formats
+      --oformat <oformat>               Specify the output format (e.g 'mrc' or 'mrc:int8')
 )";
 
 
@@ -249,7 +249,9 @@ void EmImageProgram::parseOutputString()
                                {"float", typeFloat},
                                {"double", typeDouble}};
 
-    auto parts = String::split(getValue("<output>"), ':');
+    auto output = getValue("--output");
+
+    auto parts = String::split(output, ':');
     auto n = parts.size();
 
     if (n == 3)
@@ -333,7 +335,7 @@ int EmImageProgram::run()
     ImageFile inputIO;
 
     auto doProcess = pipeProc.getSize() > 0;
-    auto hasOutput = hasArg("<output>");
+    auto hasOutput = hasArg("--output");
 
     ASSERT_ERROR(doProcess && !hasOutput,
                  "Please provide output value.");
