@@ -67,7 +67,7 @@ void ImagePipeProc::process(Image &inputOutput)
 
 // -------------- ImageMathProc Implementation ---------------------------
 
-const std::string ImageMathProc::OPERATION = "operation";
+const std::string ImageProcessor::OPERATION = "operation";
 const std::string ImageMathProc::OPERAND = "operand";
 
 

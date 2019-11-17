@@ -19,18 +19,18 @@ static const char USAGE[] =
         R"(em-image.
 
     Usage:
-      em-image (<input> | create <xdim> [<ydim> [<zdim>]] | [--formats])
-                       [(add|sub|mul|div) <file_or_value>         |
-                         flip (x|y|z)                             |
-                         crop <left> [<top> [<right> [<bottom>]]] |
-                         window <point1> <point2>                 |
-                         shift (x|y|z) <value>                    |
-                         rotate <value>                           |
-                         rotate (x|y|z) <value>                   |
-                         scale  <scale_factor>                    |
-                         scale angpix <old> <new>                 |
-                         scale (x|y|z) <new_dim>                  |
-                        (lowpass|highpass) <freq>                 |
+      em-image (<input> | --create <xdim> [<ydim> [<zdim>]] | [--formats])
+                       [(--add|--sub|--mul|--div) <file_or_value>   |
+                         --flip (x|y|z)                             |
+                         --crop <left> [<top> [<right> [<bottom>]]] |
+                         --window <point1> <point2>                 |
+                         --shift (x|y|z) <value>                    |
+                         --rotate <value>                           |
+                         --rotate (x|y|z) <value>                   |
+                         --scale  <scale_factor>                    |
+                         --scale angpix <old> <new>                 |
+                         --scale (x|y|z) <new_dim>                  |
+                        (lowpass|highpass) <freq>                   |
                         (bandpass <low_freq> <high_freq>)
                        ]...
                        [-o <output>]
@@ -209,15 +209,17 @@ ImageProcessor* EmImageProgram::getProcessorFromArg(const Program::Argument& arg
         }
         else if (cmdName == "crop")
         {
+            params["operation"] = ImageWindowProc::OP_CROP;
+            params["left"] = arg.getInt(1);
+
             auto n = arg.getSize();
-//            params["operation"] = "crop";
-//            params["left"] = arg.getInt(1);
-//            if (n > 1)
-//                params["top"] = arg.getInt(2);
-//            if (n > 2)
-//                params["right"] = arg.getInt(3);
-//            if (n > 3)
-//                params["bottom"] = arg.getInt(4);
+            if (n > 1)
+                params["top"] = arg.getInt(2);
+            if (n > 2)
+                params["right"] = arg.getInt(3);
+            if (n > 3)
+                params["bottom"] = arg.getInt(4);
+
             imgProc = new ImageWindowProc(params);
         }
         else if (cmdName == "window")

@@ -17,6 +17,11 @@ namespace emcore
     class ImageProcessor
     {
     public:
+        /** String constant defintion that can be used if the Processor has
+         * more than one operation.
+         */
+        static const std::string OPERATION;
+
         /** Default empty constructor. None of the parameters are set. */
         ImageProcessor() = default;
         ImageProcessor(const ObjectDict &params);
@@ -79,7 +84,7 @@ namespace emcore
     class ImageMathProc: public ImageProcessor
     {
     public:
-        static const std::string OPERATION;
+
         static const std::string OPERAND;
 
         using ImageProcessor::ImageProcessor;
@@ -132,6 +137,7 @@ namespace emcore
         using ImageProcessor::ImageProcessor;
 
     public:
+        enum OP {OP_CROP, OP_WINDOW};
 
         /** Scale input image and store the new one in output.
          * The output image will have the dimension defined by param "newdim"
