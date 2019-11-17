@@ -70,13 +70,6 @@ namespace emcore
          */
         virtual std::string getUsage() const = 0;
 
-        /** Return which are the command that this program recognizes.
-         * NOTE: In the future this function could be removed and the
-         * command can be inferred from the usage if we use a proper
-         * language definition for the arguments.
-         */
-        virtual StringVector getCommands() const = 0;
-
         /** Public function used to start a program. */
         int main(int argc, const char ** argv);
 

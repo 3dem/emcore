@@ -41,11 +41,6 @@ public:
         return USAGE;
     }
 
-    virtual StringVector getCommands() const override
-    {
-        return {};
-    }
-
 protected:
     virtual int run() override ;
     virtual void readArgs() override ;

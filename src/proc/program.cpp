@@ -129,7 +129,14 @@ bool Program::hasArg(const std::string &arg) const
     if (impl->docoptArgs.find(arg) == impl->docoptArgs.end())
         return false;
     const auto &darg = impl->docoptArgs[arg];
-    return darg.isBool() ? darg.asBool() : (bool) darg;
+    if (darg.isBool())
+        return darg.asBool();
+    if (darg.isString())
+        return  !darg.asString().empty();
+    if (darg.isStringList())
+        return !darg.asStringList().empty();
+
+    THROW_ERROR("ARG type not supported. ");
 } //function Program.hasArg
 
 const Program::Argument& Program::getArg(const std::string &arg) const
@@ -156,15 +163,15 @@ int Program::main(int argc, const char **argv)
                   << " (" << EM_CORE_TIMESTAMP << ")"
                   << std::endl << std::endl;
 
-        impl->readArgs(argc, argv, getCommands());
+        // impl->readArgs(argc, argv, getCommands());
         impl->docoptArgs = docopt::docopt(getUsage(),
                                           {argv + 1, argv + argc},
                                           true, getName());
 
-    for(auto const& arg : impl->docoptArgs)
-    {
-        std::cout << arg.first << ": " << arg.second << std::endl;
-    }
+        for(auto const& arg : impl->docoptArgs)
+        {
+            std::cout << arg.first << ": " << arg.second << std::endl;
+        }
         readArgs();
         return run();
     }

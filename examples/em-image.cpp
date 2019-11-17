@@ -19,34 +19,41 @@ static const char USAGE[] =
         R"(em-image.
 
     Usage:
-      em-image (<input> | --create <xdim> [<ydim> [<zdim>]] | [--formats])
-                       [(--add|--sub|--mul|--div) <file_or_value>   |
-                         --flip (x|y|z)                             |
-                         --crop <left> [<top> [<right> [<bottom>]]] |
-                         --window <point1> <point2>                 |
-                         --shift (x|y|z) <value>                    |
-                         --rotate <value>                           |
-                         --rotate (x|y|z) <value>                   |
-                         --scale  <scale_factor>                    |
-                         --scale angpix <old> <new>                 |
-                         --scale (x|y|z) <new_dim>                  |
-                        (lowpass|highpass) <freq>                   |
-                        (bandpass <low_freq> <high_freq>)
-                       ]...
-                       [-o <output>]
-                       [--oformat <oformat>]
-                       [--stats]
+      em-image --formats
+      em-image create <create_dims> <output>
+      em-image <input> [--stats]
+      em-image <input> <output>
+      em-image <input> ((add|sub|mul|div) <file_or_value>   |
+                         flip <flip_axis>                   |
+                         crop <crop_values>                 |
+                         window <window_p1> <window_p2>     |
+                         shift <shift_arg>                  |
+                         rotate <rotate_arg>                |
+                         scale  <scale_arg>                 |
+                       )... <output>
 
     Options:
-      <input>                           An input file or a pattern matching many files.
-      -o <output>, --output <output>    An output file or a suffix when many files are produced.
-      -h --help                         Show this screen.
-      --version                         Show version.
-      --formats                         Print the list of available image formats
-      --oformat <oformat>               Specify the output format (e.g 'mrc' or 'mrc:int8')
+      <input>               An input file or a pattern matching many files.
+      -h --help             Show this screen.
+      --version             Show version.
+      --formats             Print the list of available image formats
+      flip <flip_axis>      Flip the images in this axis.
+                            <flip_axis> should be: x, y, or z
 )";
 
 
+
+/*
+ * |
+                         [(add|sub|mul|div) <file_or_value>]
+                         flip <flip_axis>                   |
+                         crop <crop_values>                 |
+                         window <window_p1> <window_p2>     |
+                         shift <shift_arg>                  |
+                         rotate <rotate_arg>                |
+                         scale  <scale_arg>                 |
+                         filter <filter_arg>
+ */
 class EmImageProgram: public Program
 {
 public:
@@ -58,12 +65,6 @@ public:
     virtual std::string getUsage() const override
     {
         return USAGE;
-    }
-
-    virtual StringVector getCommands() const override
-    {
-        return {"create", "add", "sub", "mul", "div", "shift", "rotate",
-                "flip", "scale", "crop", "window"};
     }
 
 protected:
@@ -81,7 +82,7 @@ private:
     void processCommand(const StringVector& args,
                         size_t startIndex, size_t endIndex);
 
-    ImageProcessor* getProcessorFromArg(const Program::Argument& arg);
+    void addProcessors();
 
     /**
      * Parse the output string (path:format:type) where the values can be separated by :
@@ -101,12 +102,15 @@ private:
 
 void EmImageProgram::readArgs()
 {
+    return ;
+
     inputFn = "";
     outputFn = "";
 
+    std::cerr << "DEBUG: Start of readARgs..." << std::endl;
     if (hasArg("<input>"))
     {
-
+        std::cerr << "DEBUG:   after hasArg(<input>) ..." << std::endl;
         inputFn = getValue("<input>");
         std::cout << std::setw(10) << std::right << "Input: "
                   << inputFn << std::endl;
@@ -129,17 +133,7 @@ void EmImageProgram::readArgs()
         }
     }
 
-    auto& args = getArgList();
-
-    std::string cmdName;
-
-    for (auto& a: args)
-    {
-        auto pproc = getProcessorFromArg(a);
-        if (pproc != nullptr)
-            pipeProc.addProcessor(pproc);
-        //else TODO: handle when the processor can not be constructed.
-    }
+    addProcessors();
 
 //    if ()
 //    {
@@ -160,12 +154,15 @@ void EmImageProgram::readArgs()
 //            imgIO.toStream(std::cout, 2);
 //        }
 //    }
+    std::cerr << "DEBUG: End of readARgs..." << std::endl;
 
 } // function EmImageProgram.readArgs
 
-ImageProcessor* EmImageProgram::getProcessorFromArg(const Program::Argument& arg)
+void EmImageProgram::addProcessors()
 {
-    std::string cmdName = arg.toString();
+    auto arg = Argument(0, nullptr);
+    std::string cmdName = "";
+
     Type::Operation op = Type::NO_OP;
     ImageProcessor *imgProc = nullptr;
 
@@ -227,7 +224,7 @@ ImageProcessor* EmImageProgram::getProcessorFromArg(const Program::Argument& arg
             imgProc = new ImageWindowProc(params);
         }
     }
-    return imgProc;
+    //return imgProc;
 }
 
 /** Helper function to throw errors related to formats */
@@ -317,6 +314,8 @@ void EmImageProgram::parseOutputString()
 
 int EmImageProgram::run()
 {
+    return 0;
+
     auto formatTypes = ImageFile::getFormatTypes();
 
     if (hasArg("--formats"))
