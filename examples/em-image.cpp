@@ -42,18 +42,6 @@ static const char USAGE[] =
 )";
 
 
-
-/*
- * |
-                         [(add|sub|mul|div) <file_or_value>]
-                         flip <flip_axis>                   |
-                         crop <crop_values>                 |
-                         window <window_p1> <window_p2>     |
-                         shift <shift_arg>                  |
-                         rotate <rotate_arg>                |
-                         scale  <scale_arg>                 |
-                         filter <filter_arg>
- */
 class EmImageProgram: public Program
 {
 public:
@@ -125,7 +113,6 @@ void EmImageProgram::readArgs()
         else
         {
             inputList.push_back(inputFn);
-
             ASSERT_ERROR(!Path::exists(inputFn), "Input path does not exists!!!");
         }
     }
@@ -161,8 +148,6 @@ ImageProcessor* EmImageProgram::createProcessorFromCommand(const Command &cmd)
 
     if (op != Type::NO_OP)  // Case of an arithmetic operation
     {
-        std::cout << "DEBUG: >>> Cmd: " << cmdName << ", op: " << (char)op << std::endl;
-        std::cout << "DEBUG:     Value: " << cmd.getArg("<file_or_value>") << std::endl;
         imgProc = new ImageMathProc(
                 {{ImageMathProc::OPERATION, op},
                 {ImageMathProc::OPERAND, cmd.getArgAsFloat("<file_or_value>")}});
@@ -173,8 +158,6 @@ ImageProcessor* EmImageProgram::createProcessorFromCommand(const Command &cmd)
 
         if (cmdName == "scale")
         {
-//            auto arg1 = arg.getString(1);
-
             //TODO: Correctly parse now scale parameters
 //            if (arg1 == "angpix")
 //                params = {{"angpix_old", arg.getFloat(2)},
@@ -186,7 +169,7 @@ ImageProcessor* EmImageProgram::createProcessorFromCommand(const Command &cmd)
 //            else
 //                params = {{"factor", arg.getFloat(1)}};
 
-            imgProc = new ImageScaleProc(params);
+            imgProc = new ImageScaleProc({{"scale_arg", cmd.getArg("<scale_arg>")}});
         }
         else if (cmdName == "crop")
         {

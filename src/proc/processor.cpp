@@ -104,11 +104,12 @@ void ImageMathProc::process(Image &image)
 
 
 // -------------- ImageScaleProc Implementation ---------------------------
-void ImageScaleProc::validateParams() const
+void ImageScaleProc::validateParams()
 {
     int count = 0;
 
-    for (auto& param: {"newdim_x", "newdim_y", "factor", "angpix_old"})
+    for (auto& param: {"newdim_x", "newdim_y", "factor", "angpix_old",
+                       "scale_arg"})
         if (hasParam(param))
             count++;
 
@@ -117,6 +118,11 @@ void ImageScaleProc::validateParams() const
     if (hasParam("angpix_old"))
         ASSERT_ERROR(!hasParam("angpix_new"),
                      "Please provide angpix_new when using angpix_old. ");
+
+    if (hasParam("angpix_old"))
+        params["factor"] = params["angpix_old"].get<float>() / params["angpix_new"].get<float>();
+    else if (hasParam("scale_arg"))
+        params["factor"] = String::toFloat(params["scale_arg"].toString().c_str());
 }
 
 
@@ -134,8 +140,6 @@ void ImageScaleProc::process(const Image &input, Image &output)
         scaleFactor = params["newdim_x"].get<float>() / inputDim.x;
     else if (hasParam("newdim_y"))
         scaleFactor = params["newdim_y"].get<float>() / inputDim.y;
-    else if (hasParam("angpix_old"))
-        scaleFactor = params["angpix_old"].get<float>() / params["angpix_new"].get<float>();
     else
         THROW_ERROR("Invalid parameters.");
 
@@ -161,7 +165,7 @@ void ImageScaleProc::process(Image &image)
 
 
 // -------------- ImageWindowProc Implementation ---------------------------
-void ImageWindowProc::validateParams() const
+void ImageWindowProc::validateParams()
 {
     int count = 0;
 

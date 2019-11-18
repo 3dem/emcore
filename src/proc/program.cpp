@@ -46,8 +46,6 @@ public:
             if (docoptArgs.find(argName) == docoptArgs.end())
                 continue;
 
-            std::cout << argName << ": " << docoptArgs[argName] << std::endl;
-
             // Check if it is command (i.e not starting with < or -)
             char c = argName[0];
 

@@ -52,7 +52,7 @@ namespace emcore
         /** This method should be overriden to make some validations after
          * the setParams is called.
          */
-        virtual void validateParams() const {}
+        virtual void validateParams() {}
 
     }; // class ImageProcessor
 
@@ -121,7 +121,7 @@ namespace emcore
         virtual void process(Image &inputOutput) override ;
 
     protected:
-        virtual void validateParams() const override ;
+        virtual void validateParams() override ;
     }; // class ImageScaleProc
 
 
@@ -149,7 +149,7 @@ namespace emcore
         virtual void process(Image &inputOutput) override ;
 
     protected:
-        virtual void validateParams() const override ;
+        virtual void validateParams() override ;
     }; // class ImageScaleProc
 
 } // namespace emcore
