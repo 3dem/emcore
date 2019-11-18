@@ -184,7 +184,7 @@ void ImageWindowProc::process(const Image &input, Image &output)
 
     std::cout << "Croping image with dims: " << inputDim << std::endl;
     output = input;
-} // function ImageWindowProc.process
+} // function Command.process
 
 void ImageWindowProc::process(Image &image)
 {

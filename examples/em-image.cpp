@@ -82,7 +82,7 @@ private:
     void processCommand(const StringVector& args,
                         size_t startIndex, size_t endIndex);
 
-    void addProcessors();
+    ImageProcessor* createProcessorFromCommand(const Command &command);
 
     /**
      * Parse the output string (path:format:type) where the values can be separated by :
@@ -102,16 +102,13 @@ private:
 
 void EmImageProgram::readArgs()
 {
-    return ;
-
     inputFn = "";
     outputFn = "";
 
-    std::cerr << "DEBUG: Start of readARgs..." << std::endl;
     if (hasArg("<input>"))
     {
         std::cerr << "DEBUG:   after hasArg(<input>) ..." << std::endl;
-        inputFn = getValue("<input>");
+        inputFn = getArg("<input>");
         std::cout << std::setw(10) << std::right << "Input: "
                   << inputFn << std::endl;
 
@@ -133,35 +130,21 @@ void EmImageProgram::readArgs()
         }
     }
 
-    addProcessors();
+    auto const &commandList = getCommandList();
 
-//    if ()
-//    {
-//        outputFn = getValue("<output>");
-//        std::cout << std::setw(10) << std::right << "Output: "
-//                  << outputFn << std::endl;
-//    }
-//    else
-//    {
-//        // Handle the case when the output is not defined
-//        ASSERT_ERROR(pipeProc.getSize() > 0,
-//                     "Output should be specified if performing any operation.")
-//        ImageFile imgIO;
-//
-//        for (auto& path: inputList)
-//        {
-//            imgIO.open(path);
-//            imgIO.toStream(std::cout, 2);
-//        }
-//    }
-    std::cerr << "DEBUG: End of readARgs..." << std::endl;
+    for (auto &cmd : getCommandList())
+    {
+        auto proc = createProcessorFromCommand(cmd);
+        if (proc != nullptr)
+            pipeProc.addProcessor(proc);
+        //else TODO: handle when the processor can not be constructed.
+    }
 
 } // function EmImageProgram.readArgs
 
-void EmImageProgram::addProcessors()
+ImageProcessor* EmImageProgram::createProcessorFromCommand(const Command &cmd)
 {
-    auto arg = Argument(0, nullptr);
-    std::string cmdName = "";
+    std::string cmdName = cmd.getName();
 
     Type::Operation op = Type::NO_OP;
     ImageProcessor *imgProc = nullptr;
@@ -176,13 +159,13 @@ void EmImageProgram::addProcessors()
     else if (cmdName == "div")
         op = Type::DIV;
 
-
-
     if (op != Type::NO_OP)  // Case of an arithmetic operation
     {
-        std::cout << ">>> Cmd: " << cmdName << ", op: " << (char)op << std::endl;
-        imgProc = new ImageMathProc({{ImageMathProc::OPERATION, op},
-                                     {ImageMathProc::OPERAND, arg.getFloat(1)}});
+        std::cout << "DEBUG: >>> Cmd: " << cmdName << ", op: " << (char)op << std::endl;
+        std::cout << "DEBUG:     Value: " << cmd.getArg("<file_or_value>") << std::endl;
+        imgProc = new ImageMathProc(
+                {{ImageMathProc::OPERATION, op},
+                {ImageMathProc::OPERAND, cmd.getArgAsFloat("<file_or_value>")}});
     }
     else
     {
@@ -190,32 +173,35 @@ void EmImageProgram::addProcessors()
 
         if (cmdName == "scale")
         {
-            auto arg1 = arg.getString(1);
+//            auto arg1 = arg.getString(1);
 
-            if (arg1 == "angpix")
-                params = {{"angpix_old", arg.getFloat(2)},
-                          {"angpix_new", arg.getFloat(3)}};
-            else if (arg1 == "x")
-                params = {{"newdim_x", arg.getFloat(2)}};
-            else if (arg1 == "y")
-                params = {{"newdim_y", arg.getFloat(2)}};
-            else
-                params = {{"factor", arg.getFloat(1)}};
+            //TODO: Correctly parse now scale parameters
+//            if (arg1 == "angpix")
+//                params = {{"angpix_old", arg.getFloat(2)},
+//                          {"angpix_new", arg.getFloat(3)}};
+//            else if (arg1 == "x")
+//                params = {{"newdim_x", arg.getFloat(2)}};
+//            else if (arg1 == "y")
+//                params = {{"newdim_y", arg.getFloat(2)}};
+//            else
+//                params = {{"factor", arg.getFloat(1)}};
 
             imgProc = new ImageScaleProc(params);
         }
         else if (cmdName == "crop")
         {
-            params["operation"] = ImageWindowProc::OP_CROP;
-            params["left"] = arg.getInt(1);
+            params[ImageProcessor::OPERATION] = ImageWindowProc::OP_CROP;
 
-            auto n = arg.getSize();
-            if (n > 1)
-                params["top"] = arg.getInt(2);
-            if (n > 2)
-                params["right"] = arg.getInt(3);
-            if (n > 3)
-                params["bottom"] = arg.getInt(4);
+            //TODO: Correctly parse crop parameters
+//            params["left"] = arg.getInt(1);
+//
+//            auto n = arg.getSize();
+//            if (n > 1)
+//                params["top"] = arg.getInt(2);
+//            if (n > 2)
+//                params["right"] = arg.getInt(3);
+//            if (n > 3)
+//                params["bottom"] = arg.getInt(4);
 
             imgProc = new ImageWindowProc(params);
         }
@@ -224,7 +210,7 @@ void EmImageProgram::addProcessors()
             imgProc = new ImageWindowProc(params);
         }
     }
-    //return imgProc;
+    return imgProc;
 }
 
 /** Helper function to throw errors related to formats */
@@ -248,7 +234,7 @@ void EmImageProgram::parseOutputString()
                                {"float", typeFloat},
                                {"double", typeDouble}};
 
-    auto output = getValue("--output");
+    auto output = getArg("<output>");
 
     auto parts = String::split(output, ':');
     auto n = parts.size();
@@ -314,8 +300,6 @@ void EmImageProgram::parseOutputString()
 
 int EmImageProgram::run()
 {
-    return 0;
-
     auto formatTypes = ImageFile::getFormatTypes();
 
     if (hasArg("--formats"))
@@ -336,7 +320,7 @@ int EmImageProgram::run()
     ImageFile inputIO;
 
     auto doProcess = pipeProc.getSize() > 0;
-    auto hasOutput = hasArg("--output");
+    auto hasOutput = hasArg("<output>");
 
     ASSERT_ERROR(doProcess && !hasOutput,
                  "Please provide output value.");
@@ -365,12 +349,18 @@ int EmImageProgram::run()
                 std::cout << "Reading " << i << " from " << path << std::endl;
                 inputIO.read(i, inputImage);
 
-                if (doProcess)
-                    pipeProc.process(inputImage, outputImage);
-
-                outputImage.copy(inputImage, outputType);
                 std::cout << "Writing " << i << " to " << outputFn << std::endl;
-                outputIO.write(i, outputImage);
+                if (doProcess)
+                {
+                    pipeProc.process(inputImage, outputImage);
+                    outputIO.write(i, outputImage);
+                }
+                else
+                {
+                    // Just convert if necessary
+                    outputIO.write(i, inputImage);
+                }
+                //outputImage.copy(inputImage, outputType);
             }
             inputIO.close();
             outputIO.close();

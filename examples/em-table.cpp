@@ -62,7 +62,7 @@ void EmTableProgram::readArgs()
     std::string inputTable = "";
     outputFn = "";
 
-    inputFn = getValue("<input>");
+    inputFn = getArg("<input>");
     std::cout << std::setw(10) << std::right << "Input: "
               << inputFn << std::endl;
 
@@ -92,7 +92,7 @@ void EmTableProgram::readArgs()
 
     if (hasArg("<output>"))
     {
-        outputFn = getValue("<output>");
+        outputFn = getArg("<output>");
         std::cout << " Writing table: " << inputTable << " to: "
                   << outputFn << std::endl;
         auto tio2 = TableFile();
