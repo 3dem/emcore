@@ -95,7 +95,6 @@ void EmImageProgram::readArgs()
 
     if (hasArg("<input>"))
     {
-        std::cerr << "DEBUG:   after hasArg(<input>) ..." << std::endl;
         inputFn = getArg("<input>");
         std::cout << std::setw(10) << std::right << "Input: "
                   << inputFn << std::endl;
@@ -146,15 +145,17 @@ ImageProcessor* EmImageProgram::createProcessorFromCommand(const Command &cmd)
     else if (cmdName == "div")
         op = Type::DIV;
 
+    ObjectDict params;
+
     if (op != Type::NO_OP)  // Case of an arithmetic operation
     {
-        imgProc = new ImageMathProc(
-                {{ImageMathProc::OPERATION, op},
-                {ImageMathProc::OPERAND, cmd.getArgAsFloat("<file_or_value>")}});
+        imgProc = new ImageMathProc();
+        params = {{ImageMathProc::OPERATION, op},
+                {ImageMathProc::OPERAND, cmd.getArgAsFloat("<file_or_value>")}};
     }
     else
     {
-        ObjectDict params;
+
 
         if (cmdName == "scale")
         {
@@ -169,7 +170,8 @@ ImageProcessor* EmImageProgram::createProcessorFromCommand(const Command &cmd)
 //            else
 //                params = {{"factor", arg.getFloat(1)}};
 
-            imgProc = new ImageScaleProc({{"scale_arg", cmd.getArg("<scale_arg>")}});
+            imgProc = new ImageScaleProc();
+            params = {{"scale_arg", cmd.getArg("<scale_arg>")}};
         }
         else if (cmdName == "crop")
         {
@@ -186,13 +188,15 @@ ImageProcessor* EmImageProgram::createProcessorFromCommand(const Command &cmd)
 //            if (n > 3)
 //                params["bottom"] = arg.getInt(4);
 
-            imgProc = new ImageWindowProc(params);
+            imgProc = new ImageWindowProc();
         }
         else if (cmdName == "window")
         {
-            imgProc = new ImageWindowProc(params);
+            imgProc = new ImageWindowProc();
         }
     }
+
+    imgProc->setParams(params);
     return imgProc;
 }
 

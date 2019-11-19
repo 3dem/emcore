@@ -174,6 +174,37 @@ TEST(MrcFile, Read)
 } // TEST(ImageMrcIO, Read)
 
 
+TEST(ImageFile, WriteStack)
+{
+    auto td = TestData();
+    std::string inputFn = td.get("relion_tutorial/micrographs/*.mrc");
+    Glob glob(inputFn);
+
+    std::cout << "DEBUG: input pattern: " << inputFn << std::endl
+              << "         input files: " << glob.getSize() << std::endl;
+
+    Image imageIn, imageOut;
+    ImageFile input, output;
+    output.open("mics.mrcs", File::TRUNCATE);
+
+    for (size_t i = 0; i<glob.getSize(); ++i)
+    {
+        input.open(glob.getResult(i));
+        input.read(1, imageIn);
+        if (i == 0)
+        {
+            auto adim = imageIn.getDim();
+            imageOut.resize(adim, typeInt8);
+            adim.n = 2; // glob.getSize();
+            output.createEmpty(adim, typeInt8);
+        }
+        imageOut.copy(imageIn);
+        output.write(i+1, imageOut);
+        input.close();
+    }
+    output.close();
+}
+
 TEST(SpiderImageFile, Read)
 {
     ASSERT_TRUE(ImageFile::hasImpl("spider"));
@@ -221,8 +252,10 @@ TEST(SpiderImageFile, Write)
 
     // Let's now open the single image and try to write to it more images
     imageFile.open(loc.path, File::Mode::READ_WRITE);
+    // After the open, the dims should be the same as the image, but with n=2
+    imgDim.n = 2;
     ASSERT_EQ(imageFile.getDim(), imgDim);
-    EXPECT_THROW(imageFile.write(2, image), Error);
+    //EXPECT_THROW(imageFile.write(2, image), Error);
     imageFile.close();
 
     // Let's now open a new file to write the entire stack
