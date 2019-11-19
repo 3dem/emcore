@@ -362,7 +362,6 @@ void ImageFile::createEmpty(const ArrayDim &adim, const Type & type)
     // Set new type and dimensions
     impl->dim = adim;
     impl->type = type;
-    impl->writeHeader(); // write the main header of the file
     impl->expand();
 } // function ImageFile.createEmpty
 
@@ -484,6 +483,10 @@ void ImageFile::Impl::closeFile()
 
 void ImageFile::Impl::expand()
 {
+    // When exanding the file, always writeHeader, since the number of
+    // items has probably changed
+    writeHeader();
+
     // Compute the size of one item, taking into account its x, y, z dimensions
     // and the size of the type that will be used
     size_t itemSize = getImageSize();

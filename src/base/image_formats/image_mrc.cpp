@@ -137,6 +137,9 @@ public:
 
     virtual void writeHeader() override
     {
+        std::cout << "DEBUG: MrcFile::writeHeader" << std::endl;
+
+
         memset(&header, 0, MRC_HEADER_SIZE);
 
         // FIXME: Implement more general mechanism of Type matching
@@ -202,6 +205,7 @@ public:
 
         header.nversion = 20140;  // Let's write in 2014 specification
 
+        fseek(file, 0, SEEK_SET);
         fwrite(&header, MRC_HEADER_SIZE, 1, file);
 
         // FIXME: consider swap

@@ -160,8 +160,8 @@ int Program::main(int argc, const char **argv)
 
         impl->createCommands(*this, argc, argv);
 
-        for (auto const &cmd: impl->commands)
-            std::cout << "DEBUG: cmd: " << cmd.getName() << std::endl;
+//        for (auto const &cmd: impl->commands)
+//            std::cout << "DEBUG: cmd: " << cmd.getName() << std::endl;
 
         readArgs();
         return run();
