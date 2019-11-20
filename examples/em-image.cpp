@@ -281,7 +281,6 @@ void EmImageProgram::parseOutputString()
         if (it == typeNames.end())
             throwFormatError({"Invalid output type (", parts[2], ")"});
         outputType = it->second;
-
     }
 } // function EmImageProgram.parseOutputString
 
@@ -314,44 +313,91 @@ int EmImageProgram::run()
 
     if (hasOutput)  // Convert input
     {
-
         parseOutputString();
         std::cout << "Output " << std::endl
                   << "     file: " << outputFn << std::endl
                   << "   format: " << outputFormat << std::endl
-                  << "     type: " << outputType.getName() << std::endl;
+                  << "     type: " << outputType.getName() << std::endl
+                  << "      ext: " << Path::getExtension(outputFn) << std::endl;
 
+        auto ext = Path::getExtension(outputFn);
         ImageFile outputIO;
+        auto N = inputList.size();
+        auto multipleInput = (N > 1);
+        auto singleOutput = !ext.empty();
+        auto Nto1 = multipleInput && singleOutput;
+        auto localOutputFn = outputFn;
+
+        int count = 0;
 
         for (auto& path: inputList)
         {
+            ++count;
             inputIO.open(path);
-            outputIO.open(outputFn, File::TRUNCATE);
-
             auto adim = inputIO.getDim();
-            outputIO.createEmpty(adim, outputType);
 
             for (int i = 1; i <= adim.n; ++i)
             {
-                std::cout << "Reading " << i << " from " << path << std::endl;
+                auto outIndex = Nto1 ? count : i;
+                std::cout << "(" << i << ", " << path << ")  ->  "
+                          << "(" << outIndex << ", " << localOutputFn << ")"
+                          << std::endl;
                 inputIO.read(i, inputImage);
-
-                std::cout << "Writing " << i << " to " << outputFn << std::endl;
-                if (doProcess)
-                {
+                if (doProcess) // apply operations
                     pipeProc.process(inputImage, outputImage);
-                    outputIO.write(i, outputImage);
-                }
                 else
+                    outputImage.copy(inputImage, outputType); // just convert
+
+                // Open output file the first time we need to write an output
+                // image because we need to know output dimensions, in case
+                // it is not the same as input ones
+                auto odim = outputImage.getDim();
+
+                // If just a single output file, only open it once for writing
+                // and create an empty file with, at least, the number of inputs
+                if (Nto1)
                 {
-                    // Just convert if necessary
-                    outputIO.write(i, inputImage);
+                    if (count == 1)
+                    {
+                        outputIO.open(outputFn, File::TRUNCATE);
+                        odim.n = N;
+                        outputIO.createEmpty(odim, outputType);
+                    }
                 }
+                else // If multiple outputs, we open one for each input file
+                {
+                    // Compute the output name for each input file
+                    // we will use outputFn as suffix in the basic case
+                    // or when outputFn ends with '_'.
+                    // if outputFn ends with '_', then it will be prefix
+                    // TODO: Implement more flexible options with BASE and COUNT
+                    if (!singleOutput)
+                    {
+                        auto base = Path::removeExtension(Path::getFileName(path));
+                        auto prefix = std::string();
+                        auto suffix = outputFn;
+                        if (outputFn.back() == '_')
+                        {
+                            prefix = outputFn;
+                            suffix = "";
+                        }
+                        localOutputFn = prefix + base + suffix + "." + outputFormat;
+                    }
+                    odim.n = adim.n;
+                    outputIO.open(localOutputFn, File::TRUNCATE);
+                    outputIO.createEmpty(odim, outputType);
+                }
+
+                outputIO.write(outIndex, outputImage);
                 //outputImage.copy(inputImage, outputType);
             }
             inputIO.close();
-            outputIO.close();
+            if (!singleOutput)  // close every file if not single output
+                outputIO.close();
         } // Loop over all input files
+
+        if (singleOutput)  // close only once at the end when single output
+            outputIO.close();
     }
     else  // Just print information about the input images
     {
