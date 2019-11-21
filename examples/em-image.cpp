@@ -39,6 +39,8 @@ static const char USAGE[] =
       --formats             Print the list of available image formats
       flip <flip_axis>      Flip the images in this axis.
                             <flip_axis> should be: x, y, or z
+      scale <scale_arg>     <scale_arg> should be an scale factor. For example:
+                            scale 0.5 will scale down the image to half size
 )";
 
 
@@ -150,32 +152,22 @@ ImageProcessor* EmImageProgram::createProcessorFromCommand(const Command &cmd)
     if (op != Type::NO_OP)  // Case of an arithmetic operation
     {
         imgProc = new ImageMathProc();
-        params = {{ImageMathProc::OPERATION, op},
-                {ImageMathProc::OPERAND, cmd.getArgAsFloat("<file_or_value>")}};
+        params = {
+            {ImageMathProc::OPERATION, op},
+            {ImageMathProc::OPERAND, cmd.getArgAsFloat("<file_or_value>")}
+        };
     }
     else
     {
-
-
         if (cmdName == "scale")
         {
-            //TODO: Correctly parse now scale parameters
-//            if (arg1 == "angpix")
-//                params = {{"angpix_old", arg.getFloat(2)},
-//                          {"angpix_new", arg.getFloat(3)}};
-//            else if (arg1 == "x")
-//                params = {{"newdim_x", arg.getFloat(2)}};
-//            else if (arg1 == "y")
-//                params = {{"newdim_y", arg.getFloat(2)}};
-//            else
-//                params = {{"factor", arg.getFloat(1)}};
-
             imgProc = new ImageScaleProc();
             params = {{"scale_arg", cmd.getArg("<scale_arg>")}};
         }
         else if (cmdName == "crop")
         {
             params[ImageProcessor::OPERATION] = ImageWindowProc::OP_CROP;
+            params["crop_values"] = cmd.getArg("<crop_values>");
 
             //TODO: Correctly parse crop parameters
 //            params["left"] = arg.getInt(1);

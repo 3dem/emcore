@@ -121,6 +121,7 @@ void ImageScaleProc::validateParams()
 
     if (hasParam("angpix_old"))
         params["factor"] = params["angpix_old"].get<float>() / params["angpix_new"].get<float>();
+    // TODO: Allow more options for scaling, for now only scale factor
     else if (hasParam("scale_arg"))
         params["factor"] = String::toFloat(params["scale_arg"].toString().c_str());
 }
@@ -169,16 +170,28 @@ void ImageWindowProc::validateParams()
 {
     int count = 0;
 
-//    for (auto& param: {"newdim_x", "newdim_y", "factor", "angpix_old"})
-//        if (hasParam(param))
-//            count++;
-//
-//    ASSERT_ERROR(count == 0, "Please provide at least one of the valid parameter.");
-//    ASSERT_ERROR(count > 1, "Please provide only non-exclusive parameters. ");
-//    if (hasParam("angpix_old"))
-//        ASSERT_ERROR(!hasParam("angpix_new"),
-//                     "Please provide angpix_new when using angpix_old. ");
-}
+    ASSERT_ERROR(!hasParam(ImageProcessor::OPERATION),
+                 "Please provide the window operation (crop or window). ");
+
+    if (hasParam("crop_values"))
+    {
+        // TODO: Parse other options of crop values to allow to specify
+        // other options
+        int crop = String::toInt(params["crop_values"].toString().c_str());
+
+        params["_left"] = crop;
+        params["_top"] = params["_left"];
+        params["_right"] = params["_left"];
+        params["_bottom"]  = params["_top"];
+    }
+    else if (hasParam("window_p1") && hasParam("window_p2"))
+    {
+        THROW_ERROR("Window operation not implemented yet.");
+    }
+    else
+        THROW_ERROR("Please provide either 'crop_values' or "
+                    "'window_p1' and 'window_p2'");
+} // function ImageWindowProc.validateParams
 
 void ImageWindowProc::process(const Image &input, Image &output)
 {
@@ -186,8 +199,16 @@ void ImageWindowProc::process(const Image &input, Image &output)
     // TODO: Check if we need to convert always
     auto inputDim = input.getDim();
 
-    std::cout << "Croping image with dims: " << inputDim << std::endl;
-    output = input;
+    ASSERT_ERROR(inputDim.z > 1, "Crop not implemented for volumes yet.")
+
+    auto x1 = params["_left"].get<int>();
+    auto y1 = params["_bottom"].get<int>();
+    auto y2 = inputDim.y - params["_top"].get<int>();
+    auto x2 = inputDim.x - params["_right"].get<int>();
+
+    auto newDim = ArrayDim(x2 - x1, y2 - y1, 1);
+    output.resize(newDim, input.getType());
+    output.extract(input, x1, y1, 0);
 } // function Command.process
 
 void ImageWindowProc::process(Image &image)
@@ -195,4 +216,4 @@ void ImageWindowProc::process(Image &image)
     Image tmp;
     process(image, tmp);
     std::swap(image, tmp);  // Move the result to image
-} // function ImageWindowProc.processIm
+} // function ImageWindowProc.process
