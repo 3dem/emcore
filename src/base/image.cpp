@@ -145,6 +145,11 @@ void Image::read(const ImageLocation &location)
     imgio.close();
 } // function Image::read
 
+void Image::read(const std::string &path)
+{
+    read(ImageLocation(path));
+}
+
 void Image::write(const ImageLocation &location) const
 {
     ImageFile imgio;
@@ -160,6 +165,11 @@ void Image::write(const ImageLocation &location) const
     imgio.write(location.index, *this);
     imgio.close();
 } // function Image::write
+
+void Image::write(const std::string &path) const
+{
+    write(ImageLocation(path));
+}
 
 
 // ===================== ImageFile Implementation =======================

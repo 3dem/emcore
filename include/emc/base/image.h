@@ -100,6 +100,7 @@ namespace emcore
          * @param location Input image location (index range and path) to be read
          */
         void read(const ImageLocation &location);
+        void read(const std::string &path);
 
         /** Write the image data into a file location.
          * This function is a shortcut to easily write an image without
@@ -107,7 +108,7 @@ namespace emcore
          * @param location Input location where the image will be written.
          */
         void write(const ImageLocation &location) const;
-
+        void write(const std::string &path) const;
 
     private:
         // Pointer to implementation class, PIMPL idiom
