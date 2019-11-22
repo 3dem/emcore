@@ -177,12 +177,25 @@ void ImageWindowProc::validateParams()
     {
         // TODO: Parse other options of crop values to allow to specify
         // other options
-        int crop = String::toInt(params["crop_values"].toString().c_str());
+        auto cropValues = params["crop_values"].toString();
 
-        params["_left"] = crop;
-        params["_top"] = params["_left"];
-        params["_right"] = params["_left"];
-        params["_bottom"]  = params["_top"];
+        try
+        {
+            auto parts = String::split(cropValues, ',');
+            auto n = parts.size();
+            int left = String::toInt(parts[0]);
+
+            params["_left"] = left;
+            params["_top"] = n > 1 ? String::toInt(parts[1]) : params["_left"];
+            params["_right"] = n > 2 ? String::toInt(parts[2]) : params["_left"];
+            params["_bottom"] = n > 3 ? String::toInt(parts[3]) : params["_top"];
+        }
+        catch (const Error &e)
+        {
+            THROW_ERROR(std::string("The following error occurred parsing "
+                                    "'crop' arguments: " + cropValues + "\n" +
+                                    e.toString()));
+        }
     }
     else if (hasParam("window_p1") && hasParam("window_p2"))
     {

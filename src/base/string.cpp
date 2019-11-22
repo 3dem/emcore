@@ -94,7 +94,6 @@ THROW_ERROR("Type conversion error")
 
 int String::toInt(const char *str)
 {
-    std::cerr << "input: " << str << std::endl;
     SCAN_NUMBER(int, "%d%c");
 } // function String::toInt
 
