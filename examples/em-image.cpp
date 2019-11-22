@@ -41,6 +41,9 @@ static const char USAGE[] =
                             <flip_axis> should be: x, y, or z
       scale <scale_arg>     <scale_arg> should be an scale factor. For example:
                             scale 0.5 will scale down the image to half size
+      crop <crop_values>    Crop a given amount of pixels from the image borders
+                            <crop_values> can specify one or multiple values:
+                            crop left,[top,[right,[bottom]]] # without spaces
 )";
 
 
