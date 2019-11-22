@@ -60,9 +60,6 @@ public:
         if (dim != inputDim || rImg.getData() != inputData ||
             fImg.getData() != outputData)
         {
-            std::cout << "DEBUG_JM: Something has changed, r"
-                         "e-calculating the plans..." << std::endl;
-
             // Remote the const-ness to store the input pointer to data
             // Believe me, we are not going to modify it (for now)
             inputData = const_cast<void*>(rImg.getData());
@@ -79,7 +76,6 @@ public:
 template <class T>
 void _normalize(void * rawData, size_t n)
 {
-    std::cout << "Normalizing by: " << n << std::endl;
     auto data = static_cast<float*>(rawData);
     for (size_t i = 0; i < n; ++i, ++data)
         *data /= n;
@@ -202,10 +198,9 @@ FourierTransformer::~FourierTransformer()
 
 void FourierTransformer::forward(const Image &rImg, Image &fImg)
 {
-    std::cout << "FourierTransformer::forward" << std::endl
-              << "     rMem: " << rImg.getData() << std::endl
-              << "     fMem: " << fImg.getData() << std::endl;
-
+//    std::cout << "FourierTransformer::forward" << std::endl
+//              << "     rMem: " << rImg.getData() << std::endl
+//              << "     fMem: " << fImg.getData() << std::endl;
     if (impl == nullptr)
         impl = new FtFloatImpl();
 
@@ -217,10 +212,10 @@ void FourierTransformer::backward(Image &fImg, Image &rImg)
 {
     if (impl == nullptr)
         impl = new FtFloatImpl();
-
-    std::cout << "FourierTransformer::backward" << std::endl
-              << "     rMem: " << rImg.getData() << std::endl
-              << "     fMem: " << fImg.getData() << std::endl;
+//
+//    std::cout << "FourierTransformer::backward" << std::endl
+//              << "     rMem: " << rImg.getData() << std::endl
+//              << "     fMem: " << fImg.getData() << std::endl;
     impl->setImages(rImg, fImg);
     impl->transform(FT::BACKWARD);
     impl->normalize();
@@ -240,8 +235,6 @@ void FourierTransformer::shift(Image &inOutImg, FT direction)
     auto rank = adim.getRank();
     auto type = inOutImg.getType();
     auto size = type.getSize();
-
-    std::cout << "adim: " << adim << " rank: " << rank << " type: " << type << " size: " << size << std::endl;
 
     bool isForward = direction == FT::FORWARD;
     size_t n = adim.x; // assuming all dimensions are the same
