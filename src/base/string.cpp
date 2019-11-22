@@ -98,9 +98,19 @@ int String::toInt(const char *str)
     SCAN_NUMBER(int, "%d%c");
 } // function String::toInt
 
+int String::toInt(const std::string &str)
+{
+    return String::toInt(str.c_str());
+} // function String::toInt
+
 float String::toFloat(const char *str)
 {
     SCAN_NUMBER(float, "%f%c");
+} // function String::toFloat
+
+float String::toFloat(const std::string &str)
+{
+    return String::toFloat(str.c_str());
 } // function String::toFloat
 
 double String::toDouble(const char *str)
@@ -108,9 +118,19 @@ double String::toDouble(const char *str)
     SCAN_NUMBER(double, "%lf%c");
 } // function String::toDouble
 
+double String::toDouble(const std::string &str)
+{
+    return String::toDouble(str.c_str());
+} // function String::toDouble
+
 long long int String::toLongInt(const char *str)
 {
     SCAN_NUMBER(long long int, "%lld%c");
+} // function String::toLongInt
+
+long long int String::toLongInt(const std::string &str)
+{
+    return String::toLongInt(str.c_str());
 } // function String::toLongInt
 
 // According to:
