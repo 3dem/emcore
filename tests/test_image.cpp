@@ -205,6 +205,21 @@ TEST(ImageFile, WriteStack)
     output.close();
 }
 
+TEST(Image, CreatePhantom)
+{
+    Image phantomMic = Image(ArrayDim(1000, 1000), typeInt8);
+    phantomMic.set(10);
+    Image square = Image(ArrayDim(10, 10), typeInt8);
+    square.set(50);
+    for (int i = 0; i < 20; ++i)
+        phantomMic.patch(square, i*10, 0);
+    for (int i = 0; i < 10; ++i)
+        phantomMic.patch(square, 0, i*10);
+    phantomMic.patch(square, 500, 500);
+    phantomMic.write("phatom_mic.mrc");
+} // TEST Image.CreatePhantom
+
+
 TEST(SpiderImageFile, Read)
 {
     ASSERT_TRUE(ImageFile::hasImpl("spider"));
@@ -247,13 +262,11 @@ TEST(SpiderImageFile, Write)
     Image image;
     image.read(loc);
     ASSERT_EQ(image.getDim(), imgDim);
-    loc.path = "class-1.spi";
-    image.write(loc);
+    std::string path("class-1.spi");
+    image.write(path);
 
     // Let's now open the single image and try to write to it more images
-    imageFile.open(loc.path, File::Mode::READ_WRITE);
-    // After the open, the dims should be the same as the image, but with n=2
-    imgDim.n = 2;
+    imageFile.open(path, File::Mode::READ_WRITE);
     ASSERT_EQ(imageFile.getDim(), imgDim);
     //EXPECT_THROW(imageFile.write(2, image), Error);
     imageFile.close();
