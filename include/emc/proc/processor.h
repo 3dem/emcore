@@ -30,6 +30,10 @@ namespace emcore
          */
         void setParams(const ObjectDict &params);
 
+        /** Print input params (more for debuggin)
+         */
+         void printParams() const;
+
         bool hasParam(const std::string &paramName) const;
 
         /** Apply the operation defined by this Processor to the input

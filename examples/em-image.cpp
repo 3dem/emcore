@@ -171,22 +171,12 @@ ImageProcessor* EmImageProgram::createProcessorFromCommand(const Command &cmd)
         {
             params[ImageProcessor::OPERATION] = ImageWindowProc::OP_CROP;
             params["crop_values"] = cmd.getArg("<crop_values>");
-
-            //TODO: Correctly parse crop parameters
-//            params["left"] = arg.getInt(1);
-//
-//            auto n = arg.getSize();
-//            if (n > 1)
-//                params["top"] = arg.getInt(2);
-//            if (n > 2)
-//                params["right"] = arg.getInt(3);
-//            if (n > 3)
-//                params["bottom"] = arg.getInt(4);
-
             imgProc = new ImageWindowProc();
         }
         else if (cmdName == "window")
         {
+            params["window_p1"] = cmd.getArg("<window_p1>");
+            params["window_p2"] = cmd.getArg("<window_p2>");
             imgProc = new ImageWindowProc();
         }
     }

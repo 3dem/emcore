@@ -19,6 +19,15 @@ void ImageProcessor::setParams(const ObjectDict &params)
     validateParams();
 } // ImageProcessor ctor
 
+void ImageProcessor::printParams() const
+{
+    std::cout << "Params: " << std::endl ;
+    for (const auto& kv : this->params)
+    {
+        std::cout << "   " << kv.first << ": " << kv.second << std::endl;
+    }
+}
+
 bool ImageProcessor::hasParam(const std::string &paramName) const
 {
     return params.find(paramName) != params.end();
@@ -170,9 +179,6 @@ void ImageWindowProc::validateParams()
 {
     int count = 0;
 
-    ASSERT_ERROR(!hasParam(ImageProcessor::OPERATION),
-                 "Please provide the window operation (crop or window). ");
-
     if (hasParam("crop_values"))
     {
         // TODO: Parse other options of crop values to allow to specify
@@ -199,12 +205,25 @@ void ImageWindowProc::validateParams()
     }
     else if (hasParam("window_p1") && hasParam("window_p2"))
     {
-        THROW_ERROR("Window operation not implemented yet.");
+        printParams();
     }
     else
         THROW_ERROR("Please provide either 'crop_values' or "
                     "'window_p1' and 'window_p2'");
 } // function ImageWindowProc.validateParams
+
+std::vector<int> parsePointString(const std::string &pointStr)
+{
+    auto parts = String::split(pointStr, ',');
+    ASSERT_ERROR(parts.size() > 2,
+                 "Only 2D points are implemented so far.")
+
+    std::vector<int> result;
+    for (auto const &p: parts)
+        result.push_back(String::toInt(p));
+
+    return result;
+}
 
 void ImageWindowProc::process(const Image &input, Image &output)
 {
@@ -212,16 +231,28 @@ void ImageWindowProc::process(const Image &input, Image &output)
     // TODO: Check if we need to convert always
     auto inputDim = input.getDim();
 
-    ASSERT_ERROR(inputDim.z > 1, "Crop not implemented for volumes yet.")
+    ASSERT_ERROR(inputDim.z > 1, "Crop/Window not implemented for volumes yet.")
 
-    auto x1 = params["_left"].get<int>();
-    auto y1 = params["_bottom"].get<int>();
-    auto y2 = inputDim.y - params["_top"].get<int>();
-    auto x2 = inputDim.x - params["_right"].get<int>();
+    if (hasParam("crop_values"))
+    {
+        auto x1 = params["_left"].get<int>();
+        auto y1 = params["_bottom"].get<int>();
+        auto y2 = inputDim.y - params["_top"].get<int>();
+        auto x2 = inputDim.x - params["_right"].get<int>();
 
-    auto newDim = ArrayDim(x2 - x1, y2 - y1, 1);
-    output.resize(newDim, input.getType());
-    output.extract(input, x1, y1, 0);
+        auto newDim = ArrayDim(x2 - x1, y2 - y1, 1);
+        output.resize(newDim, input.getType());
+        output.extract(input, x1, y1, 0);
+    }
+    else  // window operation
+    {
+        auto p1 = parsePointString(params["window_p1"].toString());
+        auto p2 = parsePointString(params["window_p2"].toString());
+        std::cout << "Point 1: " << p1[0] << ", " << p1[1] << std::endl
+                  << "Point 2: " << p2[0] << ", " << p2[1] << std::endl;
+
+        std::cout << "Not doing anything for now" << std::endl;
+    }
 } // function Command.process
 
 void ImageWindowProc::process(Image &image)
