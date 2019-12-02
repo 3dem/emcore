@@ -14,7 +14,7 @@ using namespace emcore;
 
 int main(int argc, char *argv[])
 {
-    std::string inputFn = "006.em";
+    std::string inputFn = "mics/006.mrc";
     std::string outputFn = "006p.em";
 
     Image img, imgOut;
@@ -27,6 +27,10 @@ int main(int argc, char *argv[])
     pipeProc.process(img, imgOut);
     imgOut.write(outputFn);
 
+    imgOut.resize(ArrayDim(512, 1024, 1), img.getType());
+    imgOut.set(0);
+    imgOut.extract(img, 0, 0, 0);
+    imgOut.write("006w.mrc");
 
     return 0;
 }
