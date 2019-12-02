@@ -51,8 +51,46 @@ Generating documentation
 FIXME: Update this section to use Doxygen+Sphinx docs generation
 
 
+Release protocol:
+-----------------
+
+Releasing to conda:
+...................
+
+**Step 1:** Create a Pull-Request from devel to master
+
+**Step 2:** Make sure that the version has been properly updated (find and replace old version by new one)
+
+**Step 3:** Build the recipe and upload binaries to conda. 
+
+Make sure that you have conda-build (to build the recipe) and anaconda-client (to upload binaries)
+installed in the current conda environment. Then build the recipe with conda. 
+
+.. code-block:: bash
+
+    $ conda install conda-build anaconda-client
+    $ cd emcore
+    $ conda build conda/recipe
+    
+If there are no errors during the building process, we can upload the generated binaries to the emcore user:
+
+.. code-block:: bash
+     
+    $ anaconda upload -u emforge /home/josem/installs/miniconda3/envs/pyem37-docs/conda-bld/linux-64/emcore-0.0.4-py37h6bb024c_0.tar.bz2
+    $ anaconda upload -u emforge /home/josem/installs/miniconda3/envs/pyem37-docs/conda-bld/linux-64/emcore-0.0.4-py27h6bb024c_0.tar.bz2
+    $ anaconda upload -u emforge /home/josem/installs/miniconda3/envs/pyem37-docs/conda-bld/linux-64/emcore-0.0.4-py35h6bb024c_0.tar.bz2
+    $ anaconda upload -u emforge /home/josem/installs/miniconda3/envs/pyem37-docs/conda-bld/linux-64/emcore-0.0.4-py36h6bb024c_0.tar.bz2
+
+**Step 4:** Merge the PR to master and create a tag with the version
+
+.. code-block:: bash
+
+    $ git checkout master
+    $ git tag 0.0.4 
+    $ git push -u origin 0.0.4
+
 Extra
----------------
+-----
 
 Specify path of Conda environment to CMAKE:
 ...........................................
