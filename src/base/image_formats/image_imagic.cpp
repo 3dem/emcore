@@ -246,6 +246,7 @@ public:
 
         //header.imavers = ????
         //FIXME[pedrohv]: Implements all headers data
+        fseek(file, 0, SEEK_SET);
         fwrite(&header, IMAGIC_HEADER_SIZE, 1, headerFile);
     } // function writeHeader
 

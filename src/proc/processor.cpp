@@ -19,6 +19,15 @@ void ImageProcessor::setParams(const ObjectDict &params)
     validateParams();
 } // ImageProcessor ctor
 
+void ImageProcessor::printParams() const
+{
+    std::cout << "Params: " << std::endl ;
+    for (const auto& kv : this->params)
+    {
+        std::cout << "   " << kv.first << ": " << kv.second << std::endl;
+    }
+}
+
 bool ImageProcessor::hasParam(const std::string &paramName) const
 {
     return params.find(paramName) != params.end();
@@ -67,7 +76,7 @@ void ImagePipeProc::process(Image &inputOutput)
 
 // -------------- ImageMathProc Implementation ---------------------------
 
-const std::string ImageMathProc::OPERATION = "operation";
+const std::string ImageProcessor::OPERATION = "operation";
 const std::string ImageMathProc::OPERAND = "operand";
 
 
@@ -103,12 +112,13 @@ void ImageMathProc::process(Image &image)
 } // function ImageMathProc.process
 
 
-// -------------- ImageMathProc Implementation ---------------------------
-void ImageScaleProc::validateParams() const
+// -------------- ImageScaleProc Implementation ---------------------------
+void ImageScaleProc::validateParams()
 {
     int count = 0;
 
-    for (auto& param: {"newdim_x", "newdim_y", "factor", "angpix_old"})
+    for (auto& param: {"newdim_x", "newdim_y", "factor", "angpix_old",
+                       "scale_arg"})
         if (hasParam(param))
             count++;
 
@@ -117,6 +127,12 @@ void ImageScaleProc::validateParams() const
     if (hasParam("angpix_old"))
         ASSERT_ERROR(!hasParam("angpix_new"),
                      "Please provide angpix_new when using angpix_old. ");
+
+    if (hasParam("angpix_old"))
+        params["factor"] = params["angpix_old"].get<float>() / params["angpix_new"].get<float>();
+    // TODO: Allow more options for scaling, for now only scale factor
+    else if (hasParam("scale_arg"))
+        params["factor"] = String::toFloat(params["scale_arg"].toString().c_str());
 }
 
 
@@ -134,8 +150,6 @@ void ImageScaleProc::process(const Image &input, Image &output)
         scaleFactor = params["newdim_x"].get<float>() / inputDim.x;
     else if (hasParam("newdim_y"))
         scaleFactor = params["newdim_y"].get<float>() / inputDim.y;
-    else if (hasParam("angpix_old"))
-        scaleFactor = params["angpix_old"].get<float>() / params["angpix_new"].get<float>();
     else
         THROW_ERROR("Invalid parameters.");
 
@@ -143,7 +157,7 @@ void ImageScaleProc::process(const Image &input, Image &output)
     auto scaleMaxdim = maxdim * scaleFactor;
     // Create a float and square image to perform the FT
     output.resize(ArrayDim(maxdim, maxdim), typeFloat);
-    output.patch(input);  // Copy/convert input into the squared image
+    output.patch(input);  // Copy input into the squared image
 
     Image tmp;
     ft.scale(output, tmp, scaleMaxdim);
@@ -159,3 +173,91 @@ void ImageScaleProc::process(Image &image)
     std::swap(image, tmp);  // Move the result to image
 } // function ImageScaleProc.process
 
+
+// -------------- ImageWindowProc Implementation ---------------------------
+void ImageWindowProc::validateParams()
+{
+    int count = 0;
+
+    if (hasParam("crop_values"))
+    {
+        // TODO: Parse other options of crop values to allow to specify
+        // other options
+        auto cropValues = params["crop_values"].toString();
+
+        try
+        {
+            auto parts = String::split(cropValues, ',');
+            auto n = parts.size();
+            int left = String::toInt(parts[0]);
+
+            params["_left"] = left;
+            params["_top"] = n > 1 ? String::toInt(parts[1]) : params["_left"];
+            params["_right"] = n > 2 ? String::toInt(parts[2]) : params["_left"];
+            params["_bottom"] = n > 3 ? String::toInt(parts[3]) : params["_top"];
+        }
+        catch (const Error &e)
+        {
+            THROW_ERROR(std::string("The following error occurred parsing "
+                                    "'crop' arguments: " + cropValues + "\n" +
+                                    e.toString()));
+        }
+    }
+    else if (hasParam("window_p1") && hasParam("window_p2"))
+    {
+        printParams();
+    }
+    else
+        THROW_ERROR("Please provide either 'crop_values' or "
+                    "'window_p1' and 'window_p2'");
+} // function ImageWindowProc.validateParams
+
+std::vector<int> parsePointString(const std::string &pointStr)
+{
+    auto parts = String::split(pointStr, ',');
+    ASSERT_ERROR(parts.size() > 2,
+                 "Only 2D points are implemented so far.")
+
+    std::vector<int> result;
+    for (auto const &p: parts)
+        result.push_back(String::toInt(p));
+
+    return result;
+}
+
+void ImageWindowProc::process(const Image &input, Image &output)
+{
+    FourierTransformer ft;
+    // TODO: Check if we need to convert always
+    auto inputDim = input.getDim();
+
+    ASSERT_ERROR(inputDim.z > 1, "Crop/Window not implemented for volumes yet.")
+
+    if (hasParam("crop_values"))
+    {
+        auto x1 = params["_left"].get<int>();
+        auto y1 = params["_bottom"].get<int>();
+        auto y2 = inputDim.y - params["_top"].get<int>();
+        auto x2 = inputDim.x - params["_right"].get<int>();
+
+        auto newDim = ArrayDim(x2 - x1, y2 - y1, 1);
+        output.resize(newDim, input.getType());
+        output.extract(input, x1, y1, 0);
+    }
+    else  // window operation
+    {
+        auto p1 = parsePointString(params["window_p1"].toString());
+        auto p2 = parsePointString(params["window_p2"].toString());
+        std::cout << "Point 1: " << p1[0] << ", " << p1[1] << std::endl
+                  << "Point 2: " << p2[0] << ", " << p2[1] << std::endl;
+
+        std::cout << "Not doing anything for now" << std::endl;
+    }
+} // function Command.process
+
+void ImageWindowProc::process(Image &image)
+{
+    Image tmp;
+    process(image, tmp);
+    std::swap(image, tmp);  // Move the result to image
+} // function ImageWindowProc.process

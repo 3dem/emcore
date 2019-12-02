@@ -39,15 +39,19 @@ namespace emcore
 
         /** Convert a string to integer */
         static int toInt(const char *str);
+        static int toInt(const std::string& str);
 
         /** Convert a string to float */
         static float toFloat(const char *str);
+        static float toFloat(const std::string& str);
 
         /** Convert a string to double */
         static double toDouble(const char *str);
+        static double toDouble(const std::string& str);
 
         /** Convert a string to a long int */
         static long long int toLongInt(const char *str);
+        static long long int toLongInt(const std::string& str);
 
         /** Convert a string to upper and lower case */
         static std::string toUpper(const std::string &input);

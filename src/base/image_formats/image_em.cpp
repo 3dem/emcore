@@ -150,6 +150,7 @@ public:
         //FIXME: Use proper machine code, now hard-coded PC
         header.machine = (char) 6;
 
+        fseek(file, 0, SEEK_SET);
         fwrite(&header, EM_HEADER_SIZE, 1, file);
 
     } // function writeHeader

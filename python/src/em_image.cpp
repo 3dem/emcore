@@ -34,8 +34,10 @@ void init_submodule_image(py::module &m) {
         .def(py::init<>())
         .def(py::init<const ArrayDim&, const Type &>())
         .def(py::init<const Image&>())
-        .def("read", &Image::read)
-        .def("write", &Image::write);
+        .def("read", (void (Image::*)(const ImageLocation&)) &Image::read)
+        .def("read", (void (Image::*)(const std::string &)) &Image::read)
+        .def("write", (void (Image::*)(const ImageLocation&) const) &Image::write)
+        .def("write", (void (Image::*)(const std::string &) const) &Image::write);
 
     py::class_<ImageFile>(m, "ImageFile")
         .def_static("hasImpl", &ImageFile::hasImpl)

@@ -75,10 +75,14 @@ namespace emcore
          */
         T* buildImpl(const std::string &extOrName)
         {
+            ASSERT_ERROR(extOrName.empty(),
+                         std::string("Input implementation key can not be empty."));
+
             auto implBuilder = getImplBuilder(extOrName);
+
             ASSERT_ERROR(implBuilder == nullptr,
-                         std::string("Can not find implementation for ")
-                         + extOrName);
+                         std::string("Can not find implementation for '")
+                         + extOrName + std::string("' entry."));
             return implBuilder();
         }
 

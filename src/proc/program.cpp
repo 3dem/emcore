@@ -23,89 +23,78 @@ class Program::Impl
 {
 public:
     std::map<std::string, docopt::value> docoptArgs;
-    int argc;
-    const char ** argv;
     // Store commands and options recognized by this program
-    std::vector<Argument> arguments;
+    std::vector<Program::Command> commands;
 
-    void readArgs(int argc, const char ** argv, const StringVector& commands)
+    /** Create the command list from the input args */
+    void createCommands(Program &program, int argc, const char **argv)
     {
-        this->argc = argc;
-        this->argv = argv;
+        // Will store the word and count.
+        std::map<std::string, int> cmdCount;
 
-        // FIXME: This is a quick and dirty parsing of the commands
-        // I don't want to spend more time right now to a proper parsing
-        // We are assuming now that the program will receive a list of
-        // commands or options and in between there are the arguments
-        // of each command/option
         const char ** iter = argv + 1;
-        int prevPos = -1;
         int n = argc - 1;  // remove the program name
 
+        //for(auto const& arg : docoptArgs)
         for (int i = 0; i < n; ++i)
         {
-            // Check if the command is present
-            const char * str = *iter;
-
-            bool hasCmd = false;
-            for (auto& cmd: commands)
-                if (strcmp(*iter, cmd.c_str()) == 0)
-                {
-                    hasCmd = true;
-                    break;
-                }
-
-            if (hasCmd)
-            {
-                if (prevPos > 0)
-                    arguments.emplace_back(Argument(i - prevPos,
-                                                    argv + 1 + prevPos));
-                prevPos = i;
-            }
+            // Uncomment the following line for debugging
+            //auto &argName = arg.first;
+            const char * argName = *iter;
             ++iter;
+
+            if (docoptArgs.find(argName) == docoptArgs.end())
+                continue;
+
+            // Check if it is command (i.e not starting with < or -)
+            char c = argName[0];
+
+            if (c == '<' or c == '-' or !program.hasArg(argName))
+                continue;
+
+            //Look if it's already there.
+            if (cmdCount.find(argName) == cmdCount.end())
+                cmdCount[argName] = 0;
+            else // Then we've already seen it before..
+                cmdCount[argName]++; // Just increment it.
+
+            commands.push_back(Command(program, argName, cmdCount[argName]));
         }
-        // Add the last command
-        // FIXME: This now will also take the <output> or last positional
-        // arguments as part of the last command...but it will not hurt for now
-        if (prevPos > 0)
-            arguments.emplace_back(Argument(n - prevPos, argv + 1 + prevPos));
     }
 
 }; // class ProgramImpl
 
 
-// ----------------------Program::Argument  Implementation --------------------
+// ----------------------Program::Command  Implementation --------------------
 
-Program::Argument::Argument(int argc, const char **argv):argc(argc), argv(argv)
+Program::Command::Command(Program& program, const std::string name, int index):
+        program(program), name(name), index(index)
 {}
 
-const char* Program::Argument::get(size_t pos) const
+std::string Program::Command::getName() const
 {
-    ASSERT_ERROR(pos > argc,
-                 "Position is greater than the number of argument values");
-    return argv[pos];
+    return name;
 }
 
-float Program::Argument::getFloat(size_t pos) const
+std::string Program::Command::getArg(const std::string &argName) const
 {
-    return String::toFloat(get(pos));
-} // function Program::Argument::getFloat
+    auto &args = program.impl->docoptArgs;
 
-std::string Program::Argument::getString(size_t pos) const
-{
-    return std::string(get(pos));
+    ASSERT_ERROR((args.find(argName) == args.end()),
+                 std::string("Argument ") + argName + std::string("not found.\n"))
+
+    return program.impl->docoptArgs[argName].asStringList()[index];
 }
 
-std::string Program::Argument::toString() const
+int Program::Command::getArgAsInt(const std::string &argName) const
 {
-    return argv[0];
-} // function Program::Argument.toString
+    return String::toInt(getArg(argName).c_str());
+}
 
-size_t Program::Argument::getSize() const
+float Program::Command::getArgAsFloat(const std::string &argName) const
 {
-    return argc;
-} // function Program::Argument.getSize
-
+    return String::toFloat(getArg(argName).c_str());
+}
 
 // ----------------------Program Implementation -------------------------------
 
@@ -119,47 +108,61 @@ Program::~Program()
     delete impl;
 } // Dtor
 
-bool Program::hasArg(const std::string &arg) const
+bool Program::hasArg(const std::string &argName) const
 {
-    if (impl->docoptArgs.find(arg) == impl->docoptArgs.end())
+    if (impl->docoptArgs.find(argName) == impl->docoptArgs.end())
         return false;
-    const auto &darg = impl->docoptArgs[arg];
-    return darg.isBool() ? darg.asBool() : (bool) darg;
+    const auto &darg = impl->docoptArgs[argName];
+    if (darg.isBool())
+        return darg.asBool();
+    if (darg.isString())
+        return  !darg.asString().empty();
+    if (darg.isStringList())
+        return !darg.asStringList().empty();
+    if (darg.isLong())
+        return darg.asLong() > 0;
+
+    return bool(darg);
 } //function Program.hasArg
 
-const Program::Argument& Program::getArg(const std::string &arg) const
+const std::vector<Program::Command>& Program::getCommandList() const
 {
-    THROW_ERROR("NOT IMPLEMENTED. ");
-} // function Program.getArg
+    return impl->commands;
+}
 
-const std::vector<Program::Argument>& Program::getArgList() const
+std::string Program::getArg(const std::string &argName) const
 {
-    return impl->arguments;
-} // function Program.getArgList
+    return impl->docoptArgs[argName].asString();
+}
 
-const std::string Program::getValue(const char *arg) const
+int Program::getArgAsInt(const std::string &argName) const
 {
-    return impl->docoptArgs[arg].asString();
+    return String::toInt(getArg(argName).c_str());
+}
+
+float Program::getArgAsFloat(const std::string &argName) const
+{
+    return String::toFloat(getArg(argName).c_str());
 }
 
 int Program::main(int argc, const char **argv)
 {
     try
     {
-
         std::cout << EM_CORE_VERSION
                   << " (" << EM_CORE_TIMESTAMP << ")"
                   << std::endl << std::endl;
 
-        impl->readArgs(argc, argv, getCommands());
+        // impl->readArgs(argc, argv, getCommands());
         impl->docoptArgs = docopt::docopt(getUsage(),
                                           {argv + 1, argv + argc},
                                           true, getName());
 
-//    for(auto const& arg : impl->docoptArgs)
-//    {
-//        std::cout << arg.first << ": " << arg.second << std::endl;
-//    }
+        impl->createCommands(*this, argc, argv);
+
+//        for (auto const &cmd: impl->commands)
+//            std::cout << "DEBUG: cmd: " << cmd.getName() << std::endl;
+
         readArgs();
         return run();
     }

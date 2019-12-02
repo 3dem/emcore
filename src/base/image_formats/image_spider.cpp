@@ -177,7 +177,7 @@ public:
 //    header.imami = 0;//never trust max/min
 //
 //
-
+        fseek(file, 0, SEEK_SET);
         fwrite(&header, pad, 1, file);
 
     } // function writeHeader

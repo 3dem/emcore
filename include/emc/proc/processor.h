@@ -17,6 +17,11 @@ namespace emcore
     class ImageProcessor
     {
     public:
+        /** String constant defintion that can be used if the Processor has
+         * more than one operation.
+         */
+        static const std::string OPERATION;
+
         /** Default empty constructor. None of the parameters are set. */
         ImageProcessor() = default;
         ImageProcessor(const ObjectDict &params);
@@ -24,6 +29,10 @@ namespace emcore
         /** Set processor parameters.
          */
         void setParams(const ObjectDict &params);
+
+        /** Print input params (more for debuggin)
+         */
+         void printParams() const;
 
         bool hasParam(const std::string &paramName) const;
 
@@ -47,7 +56,7 @@ namespace emcore
         /** This method should be overriden to make some validations after
          * the setParams is called.
          */
-        virtual void validateParams() const {}
+        virtual void validateParams() {}
 
     }; // class ImageProcessor
 
@@ -79,7 +88,7 @@ namespace emcore
     class ImageMathProc: public ImageProcessor
     {
     public:
-        static const std::string OPERATION;
+
         static const std::string OPERAND;
 
         using ImageProcessor::ImageProcessor;
@@ -116,7 +125,35 @@ namespace emcore
         virtual void process(Image &inputOutput) override ;
 
     protected:
-        virtual void validateParams() const override ;
+        virtual void validateParams() override ;
+    }; // class ImageScaleProc
+
+
+    /** Processor to select a window from an image.
+     * The window can be partially overlapping with the image, in which
+     * case the 'fill' parameter should be provided.
+     * An special case of 'crop' mode allows to easily crop
+     * a given amount of pixels from the sides of the image
+     * (left, top, right, bottom).
+     */
+    class ImageWindowProc: public ImageProcessor
+    {
+        using ImageProcessor::ImageProcessor;
+
+    public:
+        enum OP {OP_CROP, OP_WINDOW};
+
+        /** Scale input image and store the new one in output.
+         * The output image will have the dimension defined by param "newdim"
+         */
+        virtual void process(const Image &input, Image &output) override ;
+
+        /** Apply the scale and store the output in the same input image.
+         */
+        virtual void process(Image &inputOutput) override ;
+
+    protected:
+        virtual void validateParams() override ;
     }; // class ImageScaleProc
 
 } // namespace emcore

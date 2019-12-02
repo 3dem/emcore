@@ -145,6 +145,11 @@ void Image::read(const ImageLocation &location)
     imgio.close();
 } // function Image::read
 
+void Image::read(const std::string &path)
+{
+    read(ImageLocation(path));
+}
+
 void Image::write(const ImageLocation &location) const
 {
     ImageFile imgio;
@@ -160,6 +165,11 @@ void Image::write(const ImageLocation &location) const
     imgio.write(location.index, *this);
     imgio.close();
 } // function Image::write
+
+void Image::write(const std::string &path) const
+{
+    write(ImageLocation(path));
+}
 
 
 // ===================== ImageFile Implementation =======================
@@ -211,7 +221,7 @@ ImageFile::FormatTypes ImageFile::getFormatTypes()
 {
     FormatTypes dict;
 
-    for (const auto& kv: getImageIORegistry()->getUniqueMap())
+    for (const auto& kv: getImageIORegistry()->getMap()) // getUniqueMap())
     {
         auto& vector = dict[kv.first] = {};  // empty vector
         auto impl = kv.second();
@@ -362,7 +372,6 @@ void ImageFile::createEmpty(const ArrayDim &adim, const Type & type)
     // Set new type and dimensions
     impl->dim = adim;
     impl->type = type;
-    impl->writeHeader(); // write the main header of the file
     impl->expand();
 } // function ImageFile.createEmpty
 
@@ -484,6 +493,10 @@ void ImageFile::Impl::closeFile()
 
 void ImageFile::Impl::expand()
 {
+    // When exanding the file, always writeHeader, since the number of
+    // items has probably changed
+    writeHeader();
+
     // Compute the size of one item, taking into account its x, y, z dimensions
     // and the size of the type that will be used
     size_t itemSize = getImageSize();

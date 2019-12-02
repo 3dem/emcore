@@ -20,38 +20,34 @@ namespace emcore
     class Program
     {
     public:
-        /** Argument class to manage the arguments values passed to the
+        /** Class to facilitate the access to commands passed as input
+         * and their respective arguments.
          */
-        class Argument
+        class Command
         {
         public:
-            Argument(int argc, const char **argv);
-            /** Return the name of the argument */
-            std::string toString() const;
+            /** Private constructor, Only programs can create Command instances */
+            Command(Program& program, const std::string name, int index);
 
-            /** Return the number of values of this argument (including 0,
-             * the name of the argument.
-             */
-             size_t getSize() const;
+            /** Return the name of the Command */
+            std::string getName() const;
 
-            /** Return the value of the argument in a given position */
-            const char * get(size_t pos = 1) const;
+            /** Return the value of the argument with that name */
+            std::string getArg(const std::string &argName) const;
 
-            /** Return the value of the argument as a float */
-            float getFloat(size_t pos = 1) const;
+            /** Return the value of the argument with that name as integer */
+            int getArgAsInt(const std::string &argName) const;
 
-            /** Return the value of the argument as a String */
-            std::string getString(size_t pos=1) const;
+            /** Return the value of the argument with that name as float */
+            float getArgAsFloat(const std::string &argName) const;
 
-            /** Return the value of the argument in a given position
-             * but casted to a given type.
-             */
-            template <class T>
-            T get(size_t pos = 1) const;
         private:
-            int argc;
-            const char ** argv;
-        }; // class Argument
+            Program &program;
+            std::string name;
+            int index;  // the index of this command
+
+        friend class Program;
+        }; // class Command
 
         /** Default constructor */
         Program();
@@ -67,27 +63,26 @@ namespace emcore
          */
         virtual std::string getUsage() const = 0;
 
-        /** Return which are the command that this program recognizes.
-         * NOTE: In the future this function could be removed and the
-         * command can be inferred from the usage if we use a proper
-         * language definition for the arguments.
-         */
-        virtual StringVector getCommands() const = 0;
-
         /** Public function used to start a program. */
         int main(int argc, const char ** argv);
+
+        /** Return the value of the provide argument 'arg' */
+        const Command& getCommand(const std::string & arg) const;
+
+        /** Return the list of all arguments */
+        const std::vector<Command>& getCommandList() const;
 
         /** Return True if the argument 'arg' was provided. */
         bool hasArg(const std::string &arg) const;
 
-        /** Return the value of the provide argument 'arg' */
-        const Argument& getArg(const std::string & arg) const;
+        /** Return the value of the argument with that name */
+        std::string getArg(const std::string &argName) const;
 
-        /** Return the list of all arguments */
-        const std::vector<Argument>& getArgList() const;
+        /** Return the value of the argument with that name as integer */
+        int getArgAsInt(const std::string &argName) const;
 
-        /** Directly query values of parameters that are not commands */
-        const std::string getValue(const char * arg) const;
+        /** Return the value of the argument with that name as float */
+        float getArgAsFloat(const std::string &argName) const;
 
     protected:
         /** Implement the job that this program does. */

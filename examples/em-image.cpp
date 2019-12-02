@@ -19,30 +19,31 @@ static const char USAGE[] =
         R"(em-image.
 
     Usage:
-      em-image (<input> | create <xdim> [<ydim> [<zdim>]] | [--formats])
-                       [(add|sub|mul|div) <file_or_value>         |
-                         flip (x|y|z)                             |
-                         crop <left> [<top> [<right> [<bottom>]]] |
-                         window <point1> <point2>                 |
-                         shift (x|y|z) <value>                    |
-                         rotate <value>                           |
-                         rotate (x|y|z) <value>                   |
-                         scale  <scale_factor>                    |
-                         scale angpix <old> <new>                 |
-                         scale (x|y|z) <new_dim>                  |
-                        (lowpass|highpass) <freq>                 |
-                        (bandpass <low_freq> <high_freq>)
-                       ]... [<output>]
-                       [--oformat <oformat>]
-                       [--stats]
+      em-image --formats
+      em-image create <create_dims> <output>
+      em-image <input> [--stats]
+      em-image <input> <output>
+      em-image <input> ((add|sub|mul|div) <file_or_value>   |
+                         flip <flip_axis>                   |
+                         crop <crop_values>                 |
+                         window <window_p1> <window_p2>     |
+                         shift <shift_arg>                  |
+                         rotate <rotate_arg>                |
+                         scale  <scale_arg>                 |
+                       )... <output>
 
     Options:
-      <input>     An input file or a pattern matching many files.
-      <output>    An output file or a suffix when many files are produced.
-      -h --help   Show this screen.
-      --version   Show version.
-      --formats   Print the list of available image formats
-      --oformat <oformat>  Specify the output format (e.g 'mrc' or 'mrc:int8')
+      <input>               An input file or a pattern matching many files.
+      -h --help             Show this screen.
+      --version             Show version.
+      --formats             Print the list of available image formats
+      flip <flip_axis>      Flip the images in this axis.
+                            <flip_axis> should be: x, y, or z
+      scale <scale_arg>     <scale_arg> should be an scale factor. For example:
+                            scale 0.5 will scale down the image to half size
+      crop <crop_values>    Crop a given amount of pixels from the image borders
+                            <crop_values> can specify one or multiple values:
+                            crop left,[top,[right,[bottom]]] # without spaces
 )";
 
 
@@ -57,12 +58,6 @@ public:
     virtual std::string getUsage() const override
     {
         return USAGE;
-    }
-
-    virtual StringVector getCommands() const override
-    {
-        return {"create", "add", "sub", "mul", "div", "shift", "rotate",
-                "flip", "scale"};
     }
 
 protected:
@@ -80,7 +75,7 @@ private:
     void processCommand(const StringVector& args,
                         size_t startIndex, size_t endIndex);
 
-    ImageProcessor* getProcessorFromArg(const Program::Argument& arg);
+    ImageProcessor* createProcessorFromCommand(const Command &command);
 
     /**
      * Parse the output string (path:format:type) where the values can be separated by :
@@ -105,8 +100,7 @@ void EmImageProgram::readArgs()
 
     if (hasArg("<input>"))
     {
-
-        inputFn = getValue("<input>");
+        inputFn = getArg("<input>");
         std::cout << std::setw(10) << std::right << "Input: "
                   << inputFn << std::endl;
 
@@ -123,48 +117,26 @@ void EmImageProgram::readArgs()
         else
         {
             inputList.push_back(inputFn);
-
             ASSERT_ERROR(!Path::exists(inputFn), "Input path does not exists!!!");
         }
     }
 
-    auto& args = getArgList();
+    auto const &commandList = getCommandList();
 
-    std::string cmdName;
-
-    for (auto& a: args)
+    for (auto &cmd : getCommandList())
     {
-        auto pproc = getProcessorFromArg(a);
-        if (pproc != nullptr)
-            pipeProc.addProcessor(pproc);
+        auto proc = createProcessorFromCommand(cmd);
+        if (proc != nullptr)
+            pipeProc.addProcessor(proc);
         //else TODO: handle when the processor can not be constructed.
     }
 
-//    if ()
-//    {
-//        outputFn = getValue("<output>");
-//        std::cout << std::setw(10) << std::right << "Output: "
-//                  << outputFn << std::endl;
-//    }
-//    else
-//    {
-//        // Handle the case when the output is not defined
-//        ASSERT_ERROR(pipeProc.getSize() > 0,
-//                     "Output should be specified if performing any operation.")
-//        ImageFile imgIO;
-//
-//        for (auto& path: inputList)
-//        {
-//            imgIO.open(path);
-//            imgIO.toStream(std::cout, 2);
-//        }
-//    }
-
 } // function EmImageProgram.readArgs
 
-ImageProcessor* EmImageProgram::getProcessorFromArg(const Program::Argument& arg)
+ImageProcessor* EmImageProgram::createProcessorFromCommand(const Command &cmd)
 {
-    std::string cmdName = arg.toString();
+    std::string cmdName = cmd.getName();
+
     Type::Operation op = Type::NO_OP;
     ImageProcessor *imgProc = nullptr;
 
@@ -178,33 +150,38 @@ ImageProcessor* EmImageProgram::getProcessorFromArg(const Program::Argument& arg
     else if (cmdName == "div")
         op = Type::DIV;
 
-        std::cout << ">>> Cmd: " << cmdName << ", op: " << (char)op << std::endl;
+    ObjectDict params;
 
     if (op != Type::NO_OP)  // Case of an arithmetic operation
     {
-        imgProc = new ImageMathProc({{ImageMathProc::OPERATION, op},
-                                     {ImageMathProc::OPERAND, arg.getFloat(1)}});
+        imgProc = new ImageMathProc();
+        params = {
+            {ImageMathProc::OPERATION, op},
+            {ImageMathProc::OPERAND, cmd.getArgAsFloat("<file_or_value>")}
+        };
     }
     else
     {
         if (cmdName == "scale")
         {
-            auto arg1 = arg.getString(1);
-            ObjectDict params;
-
-            if (arg1 == "angpix")
-                params = {{"angpix_old", arg.getFloat(2)},
-                          {"angpix_new", arg.getFloat(3)}};
-            else if (arg1 == "x")
-                params = {{"newdim_x", arg.getFloat(2)}};
-            else if (arg1 == "y")
-                params = {{"newdim_y", arg.getFloat(2)}};
-            else
-                params = {{"factor", arg.getFloat(1)}};
-
-            imgProc = new ImageScaleProc(params);
+            imgProc = new ImageScaleProc();
+            params = {{"scale_arg", cmd.getArg("<scale_arg>")}};
+        }
+        else if (cmdName == "crop")
+        {
+            params[ImageProcessor::OPERATION] = ImageWindowProc::OP_CROP;
+            params["crop_values"] = cmd.getArg("<crop_values>");
+            imgProc = new ImageWindowProc();
+        }
+        else if (cmdName == "window")
+        {
+            params["window_p1"] = cmd.getArg("<window_p1>");
+            params["window_p2"] = cmd.getArg("<window_p2>");
+            imgProc = new ImageWindowProc();
         }
     }
+
+    imgProc->setParams(params);
     return imgProc;
 }
 
@@ -229,7 +206,9 @@ void EmImageProgram::parseOutputString()
                                {"float", typeFloat},
                                {"double", typeDouble}};
 
-    auto parts = String::split(getValue("<output>"), ':');
+    auto output = getArg("<output>");
+
+    auto parts = String::split(output, ':');
     auto n = parts.size();
 
     if (n == 3)
@@ -287,7 +266,6 @@ void EmImageProgram::parseOutputString()
         if (it == typeNames.end())
             throwFormatError({"Invalid output type (", parts[2], ")"});
         outputType = it->second;
-
     }
 } // function EmImageProgram.parseOutputString
 
@@ -320,38 +298,91 @@ int EmImageProgram::run()
 
     if (hasOutput)  // Convert input
     {
-
         parseOutputString();
         std::cout << "Output " << std::endl
                   << "     file: " << outputFn << std::endl
                   << "   format: " << outputFormat << std::endl
-                  << "     type: " << outputType.getName() << std::endl;
+                  << "     type: " << outputType.getName() << std::endl
+                  << "      ext: " << Path::getExtension(outputFn) << std::endl;
 
-        ImageFile outputIO(outputFormat);
+        auto ext = Path::getExtension(outputFn);
+        ImageFile outputIO;
+        auto N = inputList.size();
+        auto multipleInput = (N > 1);
+        auto singleOutput = !ext.empty();
+        auto Nto1 = multipleInput && singleOutput;
+        auto localOutputFn = outputFn;
+
+        int count = 0;
 
         for (auto& path: inputList)
         {
+            ++count;
             inputIO.open(path);
-            outputIO.open(outputFn, File::TRUNCATE);
-
             auto adim = inputIO.getDim();
-            outputIO.createEmpty(adim, outputType);
 
             for (int i = 1; i <= adim.n; ++i)
             {
-                std::cout << "Reading " << i << " from " << path << std::endl;
+                auto outIndex = Nto1 ? count : i;
+                std::cout << "(" << i << ", " << path << ")  ->  "
+                          << "(" << outIndex << ", " << localOutputFn << ")"
+                          << std::endl;
                 inputIO.read(i, inputImage);
-
-                if (doProcess)
+                if (doProcess) // apply operations
                     pipeProc.process(inputImage, outputImage);
+                else
+                    outputImage.copy(inputImage, outputType); // just convert
 
-                outputImage.copy(inputImage, outputType);
-                std::cout << "Writing " << i << " to " << outputFn << std::endl;
-                outputIO.write(i, outputImage);
+                // Open output file the first time we need to write an output
+                // image because we need to know output dimensions, in case
+                // it is not the same as input ones
+                auto odim = outputImage.getDim();
+
+                // If just a single output file, only open it once for writing
+                // and create an empty file with, at least, the number of inputs
+                if (Nto1)
+                {
+                    if (count == 1)
+                    {
+                        outputIO.open(outputFn, File::TRUNCATE);
+                        odim.n = N;
+                        outputIO.createEmpty(odim, outputType);
+                    }
+                }
+                else // If multiple outputs, we open one for each input file
+                {
+                    // Compute the output name for each input file
+                    // we will use outputFn as suffix in the basic case
+                    // or when outputFn ends with '_'.
+                    // if outputFn ends with '_', then it will be prefix
+                    // TODO: Implement more flexible options with BASE and COUNT
+                    if (!singleOutput)
+                    {
+                        auto base = Path::removeExtension(Path::getFileName(path));
+                        auto prefix = std::string();
+                        auto suffix = outputFn;
+                        if (outputFn.back() == '_')
+                        {
+                            prefix = outputFn;
+                            suffix = "";
+                        }
+                        localOutputFn = prefix + base + suffix + "." + outputFormat;
+                    }
+                    odim.n = adim.n;
+                    outputIO.open(localOutputFn, File::TRUNCATE);
+                    outputIO.createEmpty(odim, outputType);
+                }
+
+                outputIO.write(outIndex, outputImage);
+                //outputImage.copy(inputImage, outputType);
             }
             inputIO.close();
-            outputIO.close();
+            if (!singleOutput)  // close every file if not single output
+                outputIO.close();
         } // Loop over all input files
+
+        if (singleOutput)  // close only once at the end when single output
+            outputIO.close();
     }
     else  // Just print information about the input images
     {
