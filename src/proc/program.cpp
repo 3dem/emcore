@@ -35,11 +35,11 @@ public:
         const char ** iter = argv + 1;
         int n = argc - 1;  // remove the program name
 
-        //for(auto const& arg : docoptArgs)
+//        for(auto const& arg : docoptArgs)
+//            std::cout << "DEBUG: arg: " << arg.first << " = " << arg.second << std::endl;
+
         for (int i = 0; i < n; ++i)
         {
-            // Uncomment the following line for debugging
-            //auto &argName = arg.first;
             const char * argName = *iter;
             ++iter;
 
@@ -159,9 +159,6 @@ int Program::main(int argc, const char **argv)
                                           true, getName());
 
         impl->createCommands(*this, argc, argv);
-
-//        for (auto const &cmd: impl->commands)
-//            std::cout << "DEBUG: cmd: " << cmd.getName() << std::endl;
 
         readArgs();
         return run();

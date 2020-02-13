@@ -251,20 +251,17 @@ void ImageWindowProc::process(const Image &input, Image &output)
     {
         auto p1 = parsePointString(params["window_p1"].toString());
         auto p2 = parsePointString(params["window_p2"].toString());
-        std::cout << "Point 1: " << p1[0] << ", " << p1[1] << std::endl
-                  << "Point 2: " << p2[0] << ", " << p2[1] << std::endl;
+
+        float fillValue = 0.0;
+
+        if (hasParam("window_fill"))
+            fillValue = String::toFloat(params["window_fill"].toString());
 
         auto x1 = std::min(p1[0], p2[0]);
         auto y1 = std::min(p1[1], p2[1]);
         auto x2 = std::max(p1[0], p2[0]);
         auto y2 = std::max(p1[1], p2[1]);
 
-        std::cout << "Range: "
-                  << " x1=" << x1 << " y1=" << y1
-                  << " x2=" << x2 << " y2=" << y2
-                  << " x1 > xDim: " << (x1 > xDim ? "true" : "false")
-                  << " x2 < 0: " << (x2 < 0 ? "true" : "false")
-                  << std::endl;
         ASSERT_ERROR(x1 > xDim || x2 < 0,
                      "Non-overlapping X range for windowing.")
 
@@ -273,7 +270,10 @@ void ImageWindowProc::process(const Image &input, Image &output)
 
         auto newDim = ArrayDim(x2 - x1, y2 - y1, 1);
         output.resize(newDim, inputType);
-        output.set(8000);  // FIXME: Use argument for fill value
+
+        //std::cout << "Fill value: " << fillValue << std::endl;
+
+        output.set(fillValue);
 
         auto x1In = x1 >= 0 && x1 <= xDim;
         auto y1In = y1 >= 0 && y1 <= yDim;
@@ -282,7 +282,7 @@ void ImageWindowProc::process(const Image &input, Image &output)
 
         if (!(x1In || y1In || x2In || y2In))  // All outside
         {
-            std::cout << "Patching x=" << 0 - x1 << " y=" << 0 - y1 << std::endl;
+            //std::cout << "Patching x=" << 0 - x1 << " y=" << 0 - y1 << std::endl;
             output.patch(input, 0 - x1, 0 - y1, 0);
         }
         else
@@ -291,16 +291,16 @@ void ImageWindowProc::process(const Image &input, Image &output)
             auto y1o = y1In ? y1 : 0;
             auto x2o = x2In ? x2 : xDim;
             auto y2o = y2In ? y2 : yDim;
-            std::cout << "Patching Overlap: "
-                      << " x1o=" << x1o << " y1o=" << y1o
-                      << " x2o=" << x2o << " y2o=" << y2o
-                      << std::endl;
+//            std::cout << "Patching Overlap: "
+//                      << " x1o=" << x1o << " y1o=" << y1o
+//                      << " x2o=" << x2o << " y2o=" << y2o
+//                      << std::endl;
             auto tmpImage = Image(ArrayDim(x2o - x1o, y2o - y1o, 1), inputType);
             tmpImage.extract(input, x1o, y1o, 0);
-            tmpImage.write("tmp.mrc");
-            std::cout << "Patching coords: "
-                      << " x1o - x1=" << x1o - x1 << " y1o - y1=" << y1o - y1
-                      << std::endl;
+//            tmpImage.write("tmp.mrc");
+//            std::cout << "Patching coords: "
+//                      << " x1o - x1=" << x1o - x1 << " y1o - y1=" << y1o - y1
+//                      << std::endl;
             output.patch(tmpImage, x1o - x1, y1o - y1, 0);
         }
     }

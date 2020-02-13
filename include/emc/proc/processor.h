@@ -30,7 +30,7 @@ namespace emcore
          */
         void setParams(const ObjectDict &params);
 
-        /** Print input params (more for debuggin)
+        /** Print input params (more for debugging)
          */
          void printParams() const;
 
