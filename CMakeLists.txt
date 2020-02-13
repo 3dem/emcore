@@ -9,7 +9,7 @@ message(STATUS "Setting CXX supported standard '${CMAKE_CXX_STANDARD}'")
 project(em-core VERSION 0.0.4)
 
 # Add option to build examples, turn on with 'cmake -DBUILD_TESTS=ON'
-option(BUILD_EXAMPLES "Build all examples." OFF)
+option(BUILD_EXAMPLES "Build all examples." ON)
 # Add option to build tests, turn on with 'cmake -DBUILD_TESTS=ON'
 option(BUILD_TESTS "Build all tests." OFF)
 
@@ -23,13 +23,14 @@ option(BUILD_PNG "Build library with PNG support" ON)
 # Add option to decide if build jpeg or not
 option(BUILD_JPEG "Build library with JPEG support" ON)
 # Build Python binding or not
-option(BUILD_PYBIND "Build library with Python binding support" OFF)
+option(BUILD_PYBIND "Build library with Python binding support" ON)
 # Build static library
 option(BUILD_STATIC "Build static library." OFF)
 
 string(TIMESTAMP EM_CORE_TIMESTAMP "%Y-%m-%d %H:%M:%S")
 
 add_definitions(-DEM_CORE_VERSION="em-core v${PROJECT_VERSION}") # To be used in c++ code
+add_definitions(-DVERSION_INFO="${PROJECT_VERSION}") # To be used in c++ code
 add_definitions(-DEM_CORE_TIMESTAMP="build ${EM_CORE_TIMESTAMP}")
 
 set(PROJECT_PATH  "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -119,15 +120,15 @@ else ()
 endif ()
 
 if (BUILD_STATIC)
-    add_library(em-core STATIC ${SOURCE_FILES} ${HEADER_FILES})
-    set_property(TARGET em-core PROPERTY OUTPUT_NAME "emcore.a")
+    add_library(emcore STATIC ${SOURCE_FILES} ${HEADER_FILES})
+    set_property(TARGET emcore PROPERTY OUTPUT_NAME "emcore.a")
 else()
-    add_library(em-core SHARED ${SOURCE_FILES} ${HEADER_FILES})
-    set_property(TARGET em-core PROPERTY OUTPUT_NAME "emcore.so")
+    add_library(emcore SHARED ${SOURCE_FILES} ${HEADER_FILES})
+    set_property(TARGET emcore PROPERTY OUTPUT_NAME "emcore.so")
 endif()
 
-set_property(TARGET em-core PROPERTY PREFIX "lib")
-set_property(TARGET em-core PROPERTY SUFFIX "")
+set_property(TARGET emcore PROPERTY PREFIX "lib")
+set_property(TARGET emcore PROPERTY SUFFIX "")
 
 
 #############################
@@ -153,7 +154,7 @@ if (SQLITE3_FOUND)
     set(EXT_LIBRARIES ${EXT_LIBRARIES} ${SQLITE3_LIBRARIES})
 endif (SQLITE3_FOUND)
 
-target_link_libraries( em-core ${EXT_LIBRARIES} )
+target_link_libraries( emcore ${EXT_LIBRARIES} )
 
 
 ################################
@@ -170,7 +171,7 @@ if (BUILD_EXAMPLES)
         message(STATUS "    ${_target}...")
 
         add_executable(${_target} ${_file})
-        target_link_libraries(${_target} em-core ${EXT_LIBRARIES})
+        target_link_libraries(${_target} emcore ${EXT_LIBRARIES})
         install(TARGETS ${_target} DESTINATION bin)
     endforeach()
 
@@ -210,7 +211,7 @@ if (BUILD_TESTS)
         message(STATUS "    ${_target}...")
 
         add_executable(${_target} ${_file})
-        target_link_libraries(${_target} em-core gtest gtest_main ${EXT_LIBRARIES})
+        target_link_libraries(${_target} emcore gtest gtest_main ${EXT_LIBRARIES})
         add_test(${_target} ${_target})
 
     endforeach()
@@ -262,20 +263,20 @@ if(BUILD_PYBIND)
 
     file(GLOB PYBIND_SOURCE_FILES "${PYBIND_SRC_PATH}/*.cpp")
 
-    pybind11_add_module(em "${PYBIND_SOURCE_FILES}")
+    pybind11_add_module(emcoreBinding "${PYBIND_SOURCE_FILES}")
 
-    target_link_libraries(em PRIVATE em-core)
+    target_link_libraries(emcoreBinding PRIVATE emcore)
 
     if (BUILD_STATIC)
-        set_property(TARGET em PROPERTY OUTPUT_NAME "emcore.a")
+        set_property(TARGET emcoreBinding PROPERTY OUTPUT_NAME "_emcore.a")
     else()
-        set_property(TARGET em PROPERTY OUTPUT_NAME "emcore.so")
+        set_property(TARGET emcoreBinding PROPERTY OUTPUT_NAME "_emcore.so")
     endif()
 
-    set_property(TARGET em PROPERTY PREFIX "")
-    set_property(TARGET em PROPERTY SUFFIX "")
+    set_property(TARGET emcoreBinding PROPERTY PREFIX "")
+    set_property(TARGET emcoreBinding PROPERTY SUFFIX "")
 
-    install(TARGETS em DESTINATION lib)
+    install(TARGETS emcoreBinding DESTINATION emcore)
 
     # Find all test under /tests folder and add them as test-cases
     enable_testing()
@@ -291,5 +292,5 @@ if(BUILD_PYBIND)
 
 endif(BUILD_PYBIND)
 
-install(TARGETS em-core DESTINATION lib)
+install(TARGETS emcore DESTINATION lib)
 install(DIRECTORY ${INCLUDE_PATH}/emc DESTINATION include)

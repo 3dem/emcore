@@ -12,7 +12,7 @@ void init_submodule_base(py::module &);
 void init_submodule_image(py::module &);
 
 
-PYBIND11_MODULE(emcore, m) {
+PYBIND11_MODULE(_emcore, m) {
     m.doc() = R"pbdoc(
         Pybind11 example plugin
         -----------------------

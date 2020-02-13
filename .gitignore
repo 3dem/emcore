@@ -3,4 +3,5 @@ cmake*
 build
 *.pyc
 images
+dist
 
