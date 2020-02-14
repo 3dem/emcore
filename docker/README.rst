@@ -40,6 +40,7 @@ Running the image to build the wheels
 -------------------------------------
 
 .. code-block:: bash
+
     # Run the docker image mounting the emcore folder as /work in the container
     docker run --rm -it -v $PWD/emcore:/work manylinux2014-emcore bash
 
