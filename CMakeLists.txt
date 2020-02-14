@@ -248,7 +248,7 @@ endif(BUILD_DOCS)
 ################################
 if(BUILD_PYBIND)
 
-    set(PYBIND_PATH        "${PROJECT_PATH}/python")
+    set(PYBIND_PATH        "${PROJECT_PATH}/emcore")
     set(PYBIND_SRC_PATH    "${PYBIND_PATH}/src")
     set(PYBIND_TESTS_PATH  "${PYBIND_PATH}/tests")
     set(PYBIND11_PATH  "${EXT_PATH}/pybind11")
