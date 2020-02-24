@@ -6,7 +6,10 @@ add_compile_options(-std=c++11)
 
 message(STATUS "Setting CXX supported standard '${CMAKE_CXX_STANDARD}'")
 
-project(em-core VERSION 0.0.4)
+# Read the version from a single point (VERSION.txt file)
+file (STRINGS "VERSION.txt" VERSION)
+
+project(em-core VERSION ${VERSION})
 
 # Add option to build examples, turn on with 'cmake -DBUILD_TESTS=ON'
 option(BUILD_EXAMPLES "Build all examples." ON)
@@ -22,8 +25,8 @@ option(BUILD_TIFF "Build library with TIFF support" ON)
 option(BUILD_PNG "Build library with PNG support" ON)
 # Add option to decide if build jpeg or not
 option(BUILD_JPEG "Build library with JPEG support" ON)
-# Build Python binding or not
-option(BUILD_PYBIND "Build library with Python binding support" ON)
+## Build Python binding or not
+#option(BUILD_PYBIND "Build library with Python binding support" ON)
 # Build static library
 option(BUILD_STATIC "Build static library." OFF)
 
@@ -79,15 +82,13 @@ endif()
 ################################
 # External system libraries
 ################################
+
 find_package(TIFF)
 if (TIFF_FOUND AND BUILD_TIFF)
-
     include_directories(${TIFF_INCLUDE_DIRS})
     set(EXT_LIBRARIES ${EXT_LIBRARIES} ${TIFF_LIBRARIES})
-
     MESSAGE( STATUS "TIFF library: " ${TIFF_LIBRARIES} )
     MESSAGE( STATUS "TIFF include: " ${TIFF_INCLUDE_DIRS} )
-
 else ()
     list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_tiff.cpp")
 endif ()
@@ -96,10 +97,8 @@ find_package(JPEG)
 if (JPEG_FOUND AND BUILD_JPEG)
     include_directories(${JPEG_INCLUDE_DIR})
     set(EXT_LIBRARIES ${EXT_LIBRARIES} ${JPEG_LIBRARIES})
-
     MESSAGE( STATUS "JPEG library: " ${JPEG_LIBRARIES} )
     MESSAGE( STATUS "JPEG include: " ${JPEG_INCLUDE_DIR} )
-
 else ()
     MESSAGE( STATUS "JPEG NOT FOUND." )
     list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_jpeg.cpp")
@@ -107,13 +106,10 @@ endif ()
 
 find_package(PNG)
 if (PNG_FOUND AND BUILD_PNG)
-
     include_directories(${PNG_INCLUDE_DIRS})
     set(EXT_LIBRARIES ${EXT_LIBRARIES} ${PNG_LIBRARIES})
-
     MESSAGE( STATUS "PNG library: " ${PNG_LIBRARIES} )
     MESSAGE( STATUS "PNG include: " ${PNG_INCLUDE_DIRS} )
-
 else ()
     MESSAGE( STATUS "PNG NOT FOUND." )
     list(REMOVE_ITEM SOURCE_FILES "${SRC_PATH}/image/image_png.cpp")
@@ -135,7 +131,6 @@ set_property(TARGET emcore PROPERTY SUFFIX "")
 #  FFTW3
 #############################
 find_package(FFTW)
-
 if (FFTW_FOUND)
     message(STATUS "FFTW3 library: " ${FFTW_LIB} ${FFTWF_LIB})
     message(STATUS "FFTW3 include: " ${FFTW_INCLUDES})
@@ -162,9 +157,7 @@ target_link_libraries( emcore ${EXT_LIBRARIES} )
 ################################
 if (BUILD_EXAMPLES)
     #add_subdirectory(examples)
-
     message(STATUS "Found examples:")
-
     foreach (_file ${EXAMPLE_FILES})
         # Specify target name WE=WithoutExtension
         GET_FILENAME_COMPONENT(_target "${_file}" NAME_WE)
@@ -174,7 +167,6 @@ if (BUILD_EXAMPLES)
         target_link_libraries(${_target} emcore ${EXT_LIBRARIES})
         install(TARGETS ${_target} DESTINATION bin)
     endforeach()
-
 endif()
 
 
@@ -243,54 +235,5 @@ if(BUILD_DOCS)
 
 endif(BUILD_DOCS)
 
-################################
-# Python bindings
-################################
-if(BUILD_PYBIND)
-
-    set(PYBIND_PATH        "${PROJECT_PATH}/emcore")
-    set(PYBIND_SRC_PATH    "${PYBIND_PATH}/src")
-    set(PYBIND_TESTS_PATH  "${PYBIND_PATH}/tests")
-    set(PYBIND11_PATH  "${EXT_PATH}/pybind11")
-
-
-    if ( NOT EXISTS ${PYBIND11_PATH}/pybind11 )
-        MESSAGE( STATUS " Update submodule ${PYBIND11_PATH}" )
-        execute_process(COMMAND git submodule update --init ${PYBIND11_PATH} )
-    endif()
-
-    add_subdirectory(${PYBIND11_PATH})
-
-    file(GLOB PYBIND_SOURCE_FILES "${PYBIND_SRC_PATH}/*.cpp")
-
-    pybind11_add_module(emcoreBinding "${PYBIND_SOURCE_FILES}")
-
-    target_link_libraries(emcoreBinding PRIVATE emcore)
-
-    if (BUILD_STATIC)
-        set_property(TARGET emcoreBinding PROPERTY OUTPUT_NAME "_emcore.a")
-    else()
-        set_property(TARGET emcoreBinding PROPERTY OUTPUT_NAME "_emcore.so")
-    endif()
-
-    set_property(TARGET emcoreBinding PROPERTY PREFIX "")
-    set_property(TARGET emcoreBinding PROPERTY SUFFIX "")
-
-    install(TARGETS emcoreBinding DESTINATION emcore)
-
-    # Find all test under /tests folder and add them as test-cases
-    enable_testing()
-    file(GLOB PYBIND_TEST_FILES "${PYBIND_TESTS_PATH}/pytest_*.py")
-    message(STATUS "Found tests:")
-
-    foreach (_file ${PYBIND_TEST_FILES})
-        # Specify target name WE=WithoutExtension
-        GET_FILENAME_COMPONENT(_target "${_file}" NAME_WE)
-        message(STATUS "    ${_target}...")
-        add_test(NAME ${_target} COMMAND ${PYTHON_EXECUTABLE} ${_file})
-    endforeach()
-
-endif(BUILD_PYBIND)
-
-#install(TARGETS emcore DESTINATION lib)
-#install(DIRECTORY ${INCLUDE_PATH}/emc DESTINATION include)
+install(TARGETS emcore DESTINATION lib)
+install(DIRECTORY ${INCLUDE_PATH}/emc DESTINATION include)
