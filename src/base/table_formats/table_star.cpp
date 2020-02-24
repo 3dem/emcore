@@ -22,13 +22,14 @@ protected:
         while (getline(ifs, line))
         {
             ++lineCount;
+            line = String::trim(line);
 
             if (line.find("data_") == 0)
             {
                 if (tableName.empty() || line.substr(5) == tableName)
                 {
-                    std::cout << "Table: " << tableName << " found at line: "
-                              << lineCount << std::endl;
+//                    std::cout << "Table: " << tableName << " found at line: "
+//                              << lineCount << std::endl;
                     return readTable(ifs, table);
                 }
             } // if
@@ -58,10 +59,14 @@ protected:
                          "There are empty lines after columns and before data");
 
             StringVector tokens = String::split(line.c_str());
+
             int i = 0;
 
             for (auto& col: colNames)
-                table.addColumn(Table::Column(col, Type::inferFromString(tokens[i++])));
+            {
+                table.addColumn(
+                        Table::Column(col, Type::inferFromString(tokens[i++])));
+            }
 
             auto row = table.createRow();
             bool moreRows = true;
@@ -82,7 +87,9 @@ protected:
             //readColumns(ifs, line, colMap, true);
             // Parse Loop column Names (all lines starting with '_')
             StringVector values;
-            while (getline(ifs, line))
+            line = String::trim(line);
+
+            while (!line.empty())
             {
                 //FIXME: Check how to optimize this and avoid the trimming
                 line = String::trim(line);
@@ -92,6 +99,8 @@ protected:
                 values.emplace_back(String::trim(line.substr(spacePos)));
                 table.addColumn(Table::Column(line.substr(1, spacePos - 1),
                                               Type::inferFromString(values.back())));
+                getline(ifs, line);
+                line = String::trim(line);
             }
             auto row = table.createRow();
             size_t i = 0;

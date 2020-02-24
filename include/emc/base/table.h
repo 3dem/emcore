@@ -167,6 +167,9 @@ namespace emcore {
         /** Return the index of the column with this NAME. */
         size_t getIndex(const std::string &colName);
 
+        /** Return a vector with the columns of this Table. */
+        const ColumnVector& getColumns() const;
+
         /** Return the column with this column ID. */
         const Column& getColumn(size_t colId);
 

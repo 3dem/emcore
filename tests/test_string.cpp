@@ -39,6 +39,8 @@ TEST(String, split)
     ASSERT_EQ(String::split(""), StringVector());
     ASSERT_EQ(String::split("   "), StringVector());
     ASSERT_EQ(String::split("123  456 789"), StringVector({"123", "456", "789"}));
+    ASSERT_EQ(String::split("0.000000000   1.00"),
+              StringVector({"0.000000000", "1.00"}));
 } // TEST(String, trim)
 
 TEST(String, join)

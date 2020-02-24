@@ -307,7 +307,7 @@ TEST(Table, ReadWriteStarSingleRow)
     tio.open(fn1);
     tio.read("optimiser_general", t);
     tio.close();
-    ASSERT_EQ(t.getColumnsSize(), 52);
+    ASSERT_EQ(t.getColumnsSize(), 53);
     ASSERT_EQ(t.getSize(), 1);
 
     tio.open("test-written-row.star", File::Mode::TRUNCATE);
