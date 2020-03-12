@@ -1,36 +1,27 @@
 // A simple program
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include "emc/base/error.h"
-#include "emc/base/image.h"
-#include "emc/base/type.h"
 #include "emc/proc/processor.h"
-#include  <map>
 
 using namespace emcore;
 
 
 int main(int argc, char *argv[])
 {
-    std::string inputFn = "mics/006.mrc";
-    std::string outputFn = "006p.em";
+    std::string inputFn = "006.mrc";
+    std::string outputFn = "006_inverted_scaled.mrc";
 
     Image img, imgOut;
     img.read(inputFn);
-    ImageMathProc proc;
-    proc[ImageProcessor::OPERATION] = Type::ADD;
-    proc[ImageMathProc::OPERAND] = 1000;
+
+    ImageMathProc invProc;
+
     ImagePipeProc pipeProc;
-    pipeProc.addProcessor(&proc);
+    pipeProc.addProcessor(new ImageMathProc({{"operation", Type::MUL},
+                                             {"operand", -1}}));
+    pipeProc.addProcessor(new ImageScaleProc({{"factor", 0.5}}));
+
     pipeProc.process(img, imgOut);
     imgOut.write(outputFn);
-
-    imgOut.resize(ArrayDim(512, 1024, 1), img.getType());
-    imgOut.set(0);
-    imgOut.extract(img, 0, 0, 0);
-    imgOut.write("006w.mrc");
 
     return 0;
 }
