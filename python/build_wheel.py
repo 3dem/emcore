@@ -42,7 +42,7 @@ def build_wheels(interp_path_list, build_emcore=True):
     os.chdir('python')
     for interp_path in interp_path_list:
         parts = interp_path.strip().split('.')
-        print(parts)
+        print(">>>>> parts: ", parts)
 
         if parts[0] != cpython_prefix:
             print("Error with input %s" % interp_path)
@@ -51,10 +51,12 @@ def build_wheels(interp_path_list, build_emcore=True):
         system('%s/bin/python setup.py bdist_wheel && rm -rf _skbuild'
                % interp_path)
 
+        p1 = parts[1].strip()
+        
         args = {
-            'py': '3' + parts[1],
-            'v': version,
-            'm': 'm' if parts[1] != '8' else ''
+            'py': '3' + p1,
+            'v': version.strip(),
+            'm': 'm' if p1 != '8' else ''
         }
         wheelname = 'emcore-%(v)s-cp%(py)s-cp%(py)s%(m)s-linux_x86_64.whl' % args
         system('auditwheel repair dist/%s -w dist/wheelhouse' % wheelname)
