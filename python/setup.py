@@ -20,6 +20,7 @@ setup(
     author_email='delarosatrevin@scilifelab.se',  # Optional
     keywords='electron-microscopy cryo-em structural-biology image-processing',
     license="GPLv3",
-    packages=['emcore']
-       
+    packages=['emcore',
+              'emcore.tests'],
+    test_suite='emcore.tests'
 )
