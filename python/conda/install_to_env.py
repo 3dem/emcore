@@ -15,11 +15,17 @@ def system(cmd):
 
 system('mkdir -p build && cd build && rm -rf *')
 os.chdir('build')
-system('cmake .. -DCMAKE_PREFIX_PATH=%(prefix)s -DCMAKE_INSTALL_PREFIX=%(prefix)s '
-       '-DCMAKE_FIND_ROOT_PATH=%(prefix)s' % pathDict)
+cmakeConfigOpts = ('-DCMAKE_PREFIX_PATH=%(prefix)s '
+                   '-DCMAKE_INSTALL_PREFIX=%(prefix)s '
+                   '-DCMAKE_FIND_ROOT_PATH=%(prefix)s ' % pathDict)
+
+system('cmake .. %s' % cmakeConfigOpts)
 system('make -j 5')
 system('make install')
-system('cd ../python; python setup.py install ')
+
+cmakeConfigOpts = ('-DCMAKE_PREFIX_PATH=%(prefix)s '
+                   '-DCMAKE_FIND_ROOT_PATH=%(prefix)s ' % pathDict)
+system('cd ../python; python setup.py install -- %s' % cmakeConfigOpts)
 #system('mv %(prefix)s/lib/emcore.so %(sitePackages)s/' % pathDict)
 
 
