@@ -29,8 +29,8 @@ PYBIND11_MODULE(_emcore, m) {
     init_submodule_base(m);
     init_submodule_image(m);
 
-#ifdef VERSION_INFO
-    m.attr("__version__") = VERSION_INFO;
+#ifdef EMCORE_VERSION
+    m.attr("__version__") = EMCORE_VERSION;
 #else
     m.attr("__version__") = "dev";
 #endif

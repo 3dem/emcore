@@ -7,16 +7,21 @@ add_compile_options(-std=c++11)
 message(STATUS "Setting CXX supported standard '${CMAKE_CXX_STANDARD}'")
 
 # Read the version from a single point (VERSION.txt file)
-file (STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/../VERSION.txt" VERSION)
+file (STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/../VERSION.txt" EMCORE_VERSION)
 
 project(em-core VERSION ${VERSION})
 
+
+add_definitions(-DEMCORE_VERSION="${EMCORE_VERSION}") # To be used in c++ code
+add_definitions(-DEMCORE_VERSION_STRING="em-core v${EMCORE_VERSION}") # To be used in c++ code
+add_definitions(-DVERSION_INFO="${PROJECT_VERSION}") # To be used in c++ code
+add_definitions(-DEM_CORE_TIMESTAMP="build ${EM_CORE_TIMESTAMP}")
+
+
 set(PROJECT_PATH  "${CMAKE_CURRENT_SOURCE_DIR}/..")
 set(INCLUDE_PATH  "${PROJECT_PATH}/include")
-
 set(BUILD_PATH    "${PROJECT_BINARY_DIR}")
 set(EXT_PATH      "${PROJECT_PATH}/libs")
-
 # Test the following
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -59,7 +64,7 @@ endif()
 set_property(TARGET emcoreBinding PROPERTY PREFIX "")
 set_property(TARGET emcoreBinding PROPERTY SUFFIX "")
 
-install(TARGETS emcoreBinding DESTINATION emcore)
+install(TARGETS emcoreBinding LIBRARY DESTINATION emcore)
 
 # Install programs as part of the module
 file(GLOB EMCORE_PROGRAMS "${PROJECT_PATH}/build/em-*")

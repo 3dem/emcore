@@ -149,7 +149,7 @@ int Program::main(int argc, const char **argv)
 {
     try
     {
-        std::cout << EM_CORE_VERSION
+        std::cout << EMCORE_VERSION_STRING
                   << " (" << EM_CORE_TIMESTAMP << ")"
                   << std::endl << std::endl;
 
