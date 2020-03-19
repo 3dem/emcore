@@ -1,4 +1,6 @@
-{% set version = "0.0.4" %}
+#{% set data = load_setup_py_data() %}
+{% set version = "0.0.5" %}
+
 
 package:
   name: emcore
@@ -7,7 +9,7 @@ package:
 source:
   #git_url: git@github.com:3dem/emcore.git
   #path: /home/josem/work/development/emcore
-  path: ../../../emcore
+  path: ../../../../emcore
   
 build:
   number: 0
@@ -17,6 +19,7 @@ requirements:
     - cmake >=3.0
     - {{ compiler('cxx') }}
     - make
+    - scikit-build
   host:
     - python {{ python }}
     - libpng
@@ -25,6 +28,8 @@ requirements:
     - freetype
     - fftw >3.0
     - sqlite >3.0
+    - scikit-build
+    - numpy
   run:
     - python
     - jpeg
@@ -32,11 +37,14 @@ requirements:
     - freetype
     - libtiff
     - fftw >3.0
-    - sqlite >3.0   
+    - sqlite >3.0
+    - numpy
     
 test:
    imports:
      - emcore
+   commands:
+     - python -m emcore.tests
 
 about:
   home: https://github.com/3dem/emcore

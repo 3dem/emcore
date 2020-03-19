@@ -352,7 +352,7 @@ _rlnMaxValueProbDistribution #17
 
         t = emc.Table()
         t.read("optimiser_general", fn1)
-        self.assertEqual(t.getColumnsSize(), 52)
+        self.assertEqual(t.getColumnsSize(), 53)
         self.assertEqual(t.getSize(), 1)
 
     def test_ReadXmd(self):

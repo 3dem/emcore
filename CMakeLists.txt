@@ -7,9 +7,9 @@ add_compile_options(-std=c++11)
 message(STATUS "Setting CXX supported standard '${CMAKE_CXX_STANDARD}'")
 
 # Read the version from a single point (VERSION.txt file)
-file (STRINGS "VERSION.txt" VERSION)
+file (STRINGS "VERSION.txt" EMCORE_VERSION)
 
-project(em-core VERSION ${VERSION})
+project(em-core VERSION ${EMCORE_VERSION})
 
 # Add option to build examples, turn on with 'cmake -DBUILD_TESTS=ON'
 option(BUILD_EXAMPLES "Build all examples." ON)
@@ -32,7 +32,8 @@ option(BUILD_STATIC "Build static library." OFF)
 
 string(TIMESTAMP EM_CORE_TIMESTAMP "%Y-%m-%d %H:%M:%S")
 
-add_definitions(-DEM_CORE_VERSION="em-core v${PROJECT_VERSION}") # To be used in c++ code
+add_definitions(-DEMCORE_VERSION="${EMCORE_VERSION}") # To be used in c++ code
+add_definitions(-DEMCORE_VERSION_STRING="em-core v${EMCORE_VERSION}") # To be used in c++ code
 add_definitions(-DVERSION_INFO="${PROJECT_VERSION}") # To be used in c++ code
 add_definitions(-DEM_CORE_TIMESTAMP="build ${EM_CORE_TIMESTAMP}")
 
