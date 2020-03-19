@@ -1,6 +1,4 @@
 import os
-import sys
-from glob import glob
 
 from skbuild import setup
 
@@ -19,6 +17,7 @@ setup(
     author='J.M. De la Rosa Trevin',
     author_email='delarosatrevin@scilifelab.se',  # Optional
     keywords='electron-microscopy cryo-em structural-biology image-processing',
+    python_requires='>=3.5',
     license="GPLv3",
     packages=['emcore',
               'emcore.tests'],
