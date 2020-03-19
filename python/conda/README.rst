@@ -1,22 +1,20 @@
-Notes to build Anaconda binaries
-================================
+Using emcore with Anaconda
+==========================
 
 
-Installing emcore into a given conda environment:
--------------------------------------------------
+Installing into a given environment:
+------------------------------------
 
 .. code-block:: bash
 
-    conda create -y --name emc37 emcore -c emforge
+    conda create -y --name emc37
     conda activate emc37
+    conda install emcore -c conda-forge -c emforge
 
     # Run some tests
 
     python -m emcore.tests
 
-
-Development
-~~~~~~~~~~~
 
 Manual building in a conda environment
 --------------------------------------
