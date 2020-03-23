@@ -23,14 +23,14 @@ static const char USAGE[] =
       em-image create <create_dims> <output>
       em-image <input> [--stats]
       em-image <input> <output>
-      em-image <input> ((add|sub|mul|div) <file_or_value>   |
-                         flip <flip_axis>                   |
-                         crop <crop_values>                 |
-                         window <window_p1> <window_p2>     |
-                         shift <shift_arg>                  |
-                         rotate <rotate_arg>                |
-                         scale  <scale_arg>                 |
-                       )... <output>
+      em-image <input> ((add|sub|mul|div) <file_or_value>                    |
+                         flip <flip_axis>                                    |
+                         crop <crop_values>                                  |
+                         window <window_p1> <window_p2>                      |
+                         shift <shift_arg>                                   |
+                         rotate <rotate_arg>                                 |
+                         scale  <scale_arg>                                  |
+                       )... <output> [--fill <fill_value>]
 
     Options:
       <input>               An input file or a pattern matching many files.
@@ -177,6 +177,8 @@ ImageProcessor* EmImageProgram::createProcessorFromCommand(const Command &cmd)
         {
             params["window_p1"] = cmd.getArg("<window_p1>");
             params["window_p2"] = cmd.getArg("<window_p2>");
+            if (hasArg("--fill"))
+                params["window_fill"] = getArg("<fill_value>");
             imgProc = new ImageWindowProc();
         }
     }

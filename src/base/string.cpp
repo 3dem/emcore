@@ -29,10 +29,8 @@ StringVector String::split(const char *str, const char sep)
     do
     {
         const char *begin = str;
-
-        while(*str != sep && *str)
+        while(*str != sep && *str && !isblank(*str))
             ++str;
-
         if (str > begin)
             result.emplace_back(begin, str);
     } while (0 != *str++);
@@ -43,6 +41,26 @@ StringVector String::split(const char *str, const char sep)
 StringVector String::split(const std::string &input, const char sep)
 {
     return split(input.c_str(), sep);
+} // function String::split (string)
+
+StringVector String::split(const char *str)
+{
+    StringVector result;
+    do
+    {
+        const char *begin = str;
+        while(*str && !isblank(*str))
+            ++str;
+        if (str > begin)
+            result.emplace_back(begin, str);
+    } while (0 != *str++);
+
+    return result;
+} // function String::split (char*)
+
+StringVector String::split(const std::string &input)
+{
+    return split(input.c_str());
 } // function String::split (string)
 
 std::string String::join(StringVector input, const char sep)

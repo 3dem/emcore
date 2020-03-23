@@ -230,6 +230,9 @@ void ImageWindowProc::process(const Image &input, Image &output)
     FourierTransformer ft;
     // TODO: Check if we need to convert always
     auto inputDim = input.getDim();
+    auto inputType = input.getType();
+    auto xDim = (int) inputDim.x;
+    auto yDim = (int) inputDim.y;
 
     ASSERT_ERROR(inputDim.z > 1, "Crop/Window not implemented for volumes yet.")
 
@@ -237,21 +240,69 @@ void ImageWindowProc::process(const Image &input, Image &output)
     {
         auto x1 = params["_left"].get<int>();
         auto y1 = params["_bottom"].get<int>();
-        auto y2 = inputDim.y - params["_top"].get<int>();
-        auto x2 = inputDim.x - params["_right"].get<int>();
+        auto y2 = yDim - params["_top"].get<int>();
+        auto x2 = xDim - params["_right"].get<int>();
 
         auto newDim = ArrayDim(x2 - x1, y2 - y1, 1);
-        output.resize(newDim, input.getType());
+        output.resize(newDim, inputType);
         output.extract(input, x1, y1, 0);
     }
     else  // window operation
     {
         auto p1 = parsePointString(params["window_p1"].toString());
         auto p2 = parsePointString(params["window_p2"].toString());
-        std::cout << "Point 1: " << p1[0] << ", " << p1[1] << std::endl
-                  << "Point 2: " << p2[0] << ", " << p2[1] << std::endl;
 
-        std::cout << "Not doing anything for now" << std::endl;
+        float fillValue = 0.0;
+
+        if (hasParam("window_fill"))
+            fillValue = String::toFloat(params["window_fill"].toString());
+
+        auto x1 = std::min(p1[0], p2[0]);
+        auto y1 = std::min(p1[1], p2[1]);
+        auto x2 = std::max(p1[0], p2[0]);
+        auto y2 = std::max(p1[1], p2[1]);
+
+        ASSERT_ERROR(x1 > xDim || x2 < 0,
+                     "Non-overlapping X range for windowing.")
+
+        ASSERT_ERROR(y1 > yDim || y2 < 0,
+                     "Non-overlapping Y range for windowing.")
+
+        auto newDim = ArrayDim(x2 - x1, y2 - y1, 1);
+        output.resize(newDim, inputType);
+
+        //std::cout << "Fill value: " << fillValue << std::endl;
+
+        output.set(fillValue);
+
+        auto x1In = x1 >= 0 && x1 <= xDim;
+        auto y1In = y1 >= 0 && y1 <= yDim;
+        auto x2In = x2 >= 0 && x2 <= xDim;
+        auto y2In = y2 >= 0 && y2 <= yDim;
+
+        if (!(x1In || y1In || x2In || y2In))  // All outside
+        {
+            //std::cout << "Patching x=" << 0 - x1 << " y=" << 0 - y1 << std::endl;
+            output.patch(input, 0 - x1, 0 - y1, 0);
+        }
+        else
+        {
+            auto x1o = x1In ? x1 : 0;
+            auto y1o = y1In ? y1 : 0;
+            auto x2o = x2In ? x2 : xDim;
+            auto y2o = y2In ? y2 : yDim;
+//            std::cout << "Patching Overlap: "
+//                      << " x1o=" << x1o << " y1o=" << y1o
+//                      << " x2o=" << x2o << " y2o=" << y2o
+//                      << std::endl;
+            auto tmpImage = Image(ArrayDim(x2o - x1o, y2o - y1o, 1), inputType);
+            tmpImage.extract(input, x1o, y1o, 0);
+//            tmpImage.write("tmp.mrc");
+//            std::cout << "Patching coords: "
+//                      << " x1o - x1=" << x1o - x1 << " y1o - y1=" << y1o - y1
+//                      << std::endl;
+            output.patch(tmpImage, x1o - x1, y1o - y1, 0);
+        }
     }
 } // function Command.process
 

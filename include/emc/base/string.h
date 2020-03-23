@@ -26,8 +26,11 @@ namespace emcore
         static std::string trim(const std::string &input);
 
         /** Split the string into tokens */
-        static StringVector split(const char *str, const char sep = ' ');
-        static StringVector split(const std::string &input, const char sep = ' ');
+        static StringVector split(const char *str, const char sep);
+        static StringVector split(const std::string &input, const char sep);
+        /** Split using any blank character */
+        static StringVector split(const char *str);
+        static StringVector split(const std::string &input);
 
         /** Join many input strings into one, using a separator character */
         static std::string join(StringVector input, const char sep = 0);

@@ -441,6 +441,12 @@ const Table::Column & Table::getColumn(size_t colId)
     return impl->getColumnByIndex(impl->getIndex(colId));
 } // function Table.getColumnByIndex
 
+
+const Table::ColumnVector& Table::getColumns() const
+{
+    return impl->columns;
+} // function Table.getColumns
+
 const Table::Column& Table::getColumn(const std::string &colName)
 {
     return impl->getColumnByIndex(impl->getIndex(colName));

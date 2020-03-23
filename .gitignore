@@ -3,4 +3,7 @@ cmake*
 build
 *.pyc
 images
+dist
 
+_skbuild
+emcore.egg-info
